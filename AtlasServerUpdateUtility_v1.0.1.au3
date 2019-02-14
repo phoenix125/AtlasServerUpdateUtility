@@ -114,7 +114,22 @@ Global $aSteamAppFile = $aServerDirLocal & "\steamapps\appmanifest_" & $aSteamAp
 
 FileExistsFunc()
 ExternalScriptExist()
-RemoteRestartUse()
+
+If $aRemoteRestartUse = "yes" Then
+	TCPStartup()
+	Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
+	If $aRemoteRestartSocket = -1 Then
+		MsgBox(0x0, "TCP Error", "Could not bind to [" & $aRemoteRestartIP & "] Check server IP or disable Remote Restart in INI")
+		FileWriteLine($aLogFile, _NowCalc() & " Remote Restart Enabled. Could not bind to " & $aRemoteRestartIP & ":" & $aRemoteRestartPort)
+		Exit
+	Else
+		If $xDebug And ($sObfuscatePass = "no") Then
+			FileWriteLine($aLogFile, _NowCalc() & " Remote Restart enabled. Listening for restart request at http://" & $aRemoteRestartIP & ":" & $aRemoteRestartPort & "/?" & $aRemoteRestartKey & "=" & $aRemoteRestartCode)
+		Else
+			FileWriteLine($aLogFile, _NowCalc() & " Remote Restart enabled. Listening for restart request at http://" & $aRemoteRestartIP & ":" & $aRemoteRestartPort & "/?[key]=[password]")
+		EndIf
+	EndIf
+EndIf
 
 FileWriteLine($aLogFile, _NowCalc() & " Running initial update check . . ")
 Local $bRestart = UpdateCheck()
@@ -128,14 +143,20 @@ EndIf
 While True ;**** Loop Until Closed ****
 	#Region ;**** Listen for Remote Restart Request ****
 	If $aRemoteRestartUse = "yes" Then
-		Local $sRestart = _RemoteRestart($aRemoteRestartPort, $aRemoteRestartCode, $aRemoteRestartKey, $sObfuscatePass, $aRemoteRestartIP, $aServerName, $aDebug)
+		Local $sRestart = _RemoteRestart($aRemoteRestartSocket, $aRemoteRestartCode, $aRemoteRestartKey, $sObfuscatePass, $aRemoteRestartIP, $aServerName, $aDebug)
 		Switch @error
 			Case 0
-
-				If ProcessExists($aServerPID) And ($aBeginDelayedShutdown = 0) Then
+				;				If ProcessExists($aServerPID) And ($aBeginDelayedShutdown = 0) Then
+				If $aBeginDelayedShutdown = 0 Then
 					FileWriteLine($aLogFile, _NowCalc() & " [" & $aServerName & "] " & $sRestart)
-					$aBeginDelayedShutdown = 1
-					$aTimeCheck0 = _NowCalc
+					If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
+						$aRebootReason = "remoterestart"
+						$aBeginDelayedShutdown = 1
+						$aTimeCheck0 = _NowCalc
+					Else
+						RunExternalRemoteRestart()
+						CloseServer($aServerIP, $aTelnetPort, $aTelnetPass)
+					EndIf
 				EndIf
 			Case 1 To 4
 				FileWriteLine($aLogFile, _NowCalc() & " " & $sRestart & @CRLF)
@@ -2028,8 +2049,8 @@ EndFunc   ;==>CheckHTTPReq
 #EndRegion ;**** Function to Check Request from Browser and return restart string if request is valid****
 
 #Region ;**** Function to Check for Multiple Password Failures****
-Local $aPassFailure[1][3] = [[0, 0, 0]]
 Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)
+	Local $aPassFailure[1][3] = [[0, 0, 0]]
 	For $i = 1 To UBound($aPassFailure, 1) - 1
 		If StringCompare($aPassFailure[$i][0], $sRemoteIP) = 0 Then
 			If (_DateDiff('n', $aPassFailure[$i][2], _NowCalc()) >= 10) Or $bSuccess Then
@@ -2184,28 +2205,6 @@ Func _ExtractZip($sZipFile, $sFolderStructure, $sFile, $sDestinationFolder)
 
 EndFunc   ;==>_ExtractZip
 #EndRegion ;**** UnZip Function by trancexx ****
-
-; -----------------------------------------------------------------------------------------------------------------------
-
-#Region ;**** Start Remote Restart if Enabled ****
-Func RemoteRestartUse()
-	If $aRemoteRestartUse = "yes" Then
-		TCPStartup()
-		Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
-		If $aRemoteRestartSocket = -1 Then
-			MsgBox(0x0, "TCP Error", "Could not bind to [" & $aRemoteRestartIP & "] Check server IP or disable Remote Restart in INI")
-			FileWriteLine($aLogFile, _NowCalc() & " Remote Restart Enabled. Could not bind to " & $aRemoteRestartIP & ":" & $aRemoteRestartPort)
-			Exit
-		Else
-			If $xDebug And ($sObfuscatePass = "no") Then
-				FileWriteLine($aLogFile, _NowCalc() & " Remote Restart enabled. Listening for restart request at http://" & $aRemoteRestartIP & ":" & $aRemoteRestartPort & "/?" & $aRemoteRestartKey & "=" & $aRemoteRestartCode)
-			Else
-				FileWriteLine($aLogFile, _NowCalc() & " Remote Restart enabled. Listening for restart request at http://" & $aRemoteRestartIP & ":" & $aRemoteRestartPort & "/?[key]=[password]")
-			EndIf
-		EndIf
-	EndIf
-EndFunc   ;==>RemoteRestartUse
-#EndRegion ;**** Start Remote Restart if Enabled ****
 
 ; -----------------------------------------------------------------------------------------------------------------------
 
