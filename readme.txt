@@ -1,7 +1,7 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.0 (2019-02-13)
+- Latest version: AtlasServerUpdateUtility_v1.0.1 (2019-02-13)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
-- Based on Dateranoth's ConanExilesServerUtility-3.3.0 and 7dServerUtility | https://gamercide.org/
+- Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
 ----------
  FEATURES
@@ -19,7 +19,7 @@ AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated
 More detailed features:
 - Optionally execute external files for six unique conditions, including at updates, scheduled restarts, remote restart, when first restart notice is announced
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
-- Can validate files on first run, then optionally only when buildid (server version) changes. Backs up & erases appmanifest.acf to force update when client-only update is released by The Fun Pimps.
+- Can validate files on first run, then optionally only when buildid (server version) changes. Backs up & erases appmanifest.acf to force update when client-only update is released.
 
 -----------------
  GETTING STARTED (Two sets of instructions: one for existing servers and the other to use the AtlasServerUpdateUtility tool to download and install a new dedicated server)
@@ -34,7 +34,7 @@ More detailed features:
 ------------
  KNOWN BUGS
 ------------
-- None reported at this time
+- Remote Restart not working at this time.
 
 --------------
  INSTRUCTIONS
@@ -109,6 +109,9 @@ In a standard web browser, type in the URL http://192.168.1.30:57520?restart=pas
 -----------------
  VERSION HISTORY
 -----------------
+(2019-02-13) v1.0.1
+- Fixed: Remote Restart was monitoring server IP instead of Remote Restart IP.
+
 (2019-02-13) v1.0 Initial Release
 - Works with 1-4 grids on same computer only.
 - OK to use with most other server managers: Use this tool to install and maintain the server and use your other tools to manage game play features.
