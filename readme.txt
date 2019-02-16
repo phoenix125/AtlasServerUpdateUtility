@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.0.1 (2019-02-13)
+- Latest version: AtlasServerUpdateUtility_v1.0.3 (2019-02-15)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -109,6 +109,14 @@ In a standard web browser, type in the URL http://192.168.1.30:57520?restart=pas
 -----------------
  VERSION HISTORY
 -----------------
+(2019-02-16) v1.0.4
+- Added error message if Atlas Server (ShooterGameServer.exe) fails to start twice within 1 minute.
+(2019-02-15) v1.0.3
+- Fixed: Line 8918 Variable used without being declared (Yep.. another one)
+
+(2019-02-14) v1.0.2
+- Fixed: Line 8918 Variable used without being declared 
+
 (2019-02-13) v1.0.1
 - Fixed: Remote Restart was monitoring server IP instead of Remote Restart IP.
 
