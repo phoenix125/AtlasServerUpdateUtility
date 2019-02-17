@@ -1,12 +1,13 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.0.3 (2019-02-15)
+- Latest version: AtlasServerUpdateUtility_v1.1.0 (2019-02-16)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
 ----------
  FEATURES
 ----------
-- Works with 1-4 grids on same computer only.
+- Works *theoretically* with 100 grids (10x10).  (As of v1.1.0, it is untested whether it will work on multiple system setups)
+- Automatically imports available server data from ServerGrid.json.
 - OK to use with most other server managers: Use this tool to install and maintain the server and use your other tools to manage game play features.
 - Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
 - Automatically keeps server updated.
@@ -109,8 +110,13 @@ In a standard web browser, type in the URL http://192.168.1.30:57520?restart=pas
 -----------------
  VERSION HISTORY
 -----------------
+(2019-02-16) v1.0.5
+- Added *theoretical* support for up to 100 grids (10x10).
+- Automatically imports available server data from ServerGrid.json.
+
 (2019-02-16) v1.0.4
 - Added error message if Atlas Server (ShooterGameServer.exe) fails to start twice within 1 minute.
+
 (2019-02-15) v1.0.3
 - Fixed: Line 8918 Variable used without being declared (Yep.. another one)
 
