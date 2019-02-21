@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.1.0 (2019-02-16)
+- Latest version: AtlasServerUpdateUtility_v1.1.4 (2019-02-18)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -35,7 +35,7 @@ More detailed features:
 ------------
  KNOWN BUGS
 ------------
-- Remote Restart not working at this time.
+- None reported at this time.
 
 --------------
  INSTRUCTIONS
@@ -59,6 +59,8 @@ Tips:
 ---------------------------
  UPCOMING PLANNED FEATURES
 ---------------------------
+- Allow for startup of selected grid servers only
+- Allow for asymmetrical server grids (instead of usual 2x3, 3x3, 2x4.. to support 7 grids, for example)
 - Detailed instructions.
 
 ----------------
@@ -85,7 +87,7 @@ https://gamercide.org/forum/topic/10558-conan-exiles-server-utility/
  DETAILED INSTRUCTIONS
 -----------------------
 ====> Request Restart From Browser <====
-- If enabled on the server, use to remotely restart the server.
+- If enabled on the server, use to remotely restart the server (for multiple system setups).
 - When restarting, an announcement will be made in-game, on Discord, and in Twitch if enabled, with the set duration of delay (warning).
 - Set Password in INI file to save, or type each time.
 - Restart using IP or Domain Name
@@ -110,9 +112,34 @@ In a standard web browser, type in the URL http://192.168.1.30:57520?restart=pas
 -----------------
  VERSION HISTORY
 -----------------
-(2019-02-16) v1.0.5
+(2019-02-21) v1.1.5
+- Added user-defined delay between grid server startups.
+- Added ability to import RCON ports from GameServerUser.ini on existing servers. (Thanks to Minku [Discord] for the suggestion!)
+- Fixed: Error when Steamcmd fails to provide latest server version during update check.
+- Fixed: No longer need to delete RCON ports and AltSaveDir during new installation. 
+- Eliminated: "Failed to start at least twice within 1 minute" warning message. 
+  This was first implemented in my 7DTD util to prevent endless server startup loops when server updates change critical config info, but this feature does not appear necessary for Atlas.
+
+(2019-02-17) v1.1.4
+- Hotfix - Temporarily disabled the "failed to start at least twice within 1 minute" warning message.
+
+(2019-02-17) v1.1.3
+- Added option to disable redis-server.exe autostart & keep-alive.
+- Added error message if number of AltSaveDirectory entries does not match number of grid servers. 
+
+(2019-02-17) v1.1.2
+- Now closes redis-server.exe AFTER shutting down Atlas servers (prevents popups when servers do not shut down properly)
+- Added error message if number of RCON port entries does not match number of grid servers. 
+- Added error message if Atlas servers do not shut down properly AND multi-home IP is NOT blank.
+- When the .ini has changed, the utility will now give a brief description of what changes were added to the .ini.
+
+(2019-02-17) v1.1.1
+- Fixed: CRITICAL ERROR that caused "Assertion Failed: usGamePort != usQueryPort" error. I had reversed the GamePort & Queryport.  (Thanks to Sorori (Discord) for the help!)
+
+(2019-02-16) v1.1.0
 - Added *theoretical* support for up to 100 grids (10x10).
 - Automatically imports available server data from ServerGrid.json.
+- Added more information to log file and popup info screens. 
 
 (2019-02-16) v1.0.4
 - Added error message if Atlas Server (ShooterGameServer.exe) fails to start twice within 1 minute.
