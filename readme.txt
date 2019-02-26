@@ -1,12 +1,13 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.3.0 (2019-02-24)
+- Latest version: AtlasServerUpdateUtility_v1.3.4 (2019-02-26)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
 ----------
  FEATURES
 ----------
-- Works with up to 100 grids (10x10).  (As of v1.1.0, it is untested whether it will work on multiple system setups).
+- Works with up to 100 grids (10x10).
+- Works with multiple server PC systems (See "HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS" below)
 - Optionally automatically check for mod updates, install them, announce the update to in-Game/Discord/Twitch, and restart the server. (Looks for ModIDS in ServerGrid.json only)
 - Automatically imports available server data from ServerGrid.json & GameServerUser.ini files (if enabled).
 - Optionally start selected gri﻿d servers only.
@@ -27,28 +28,23 @@ More detailed features:
 -----------------
  GETTING STARTED
 -----------------
-NEW & EXISTING INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server"
-1) Run AtlasServerUpdateUtility.exe
+INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server")
+1) Place AtlasServerUpdateUtility.exe into any folder and run it.
 - The file "AtlasServerUpdateUtility.ini" will be created and the program will exit.
-2) Modify the default values in "AtlasServerUpdateUtility.ini" settings, such as install folder, and any other desired values.
+2) Modify the default values in "AtlasServerUpdateUtility.ini" settings. PRIORITY SETTINGS ARE: Atlas DIR, SteamCMD DIR, (Existing Servers: AltSaveDirectoryName(s) Folders)
 3) Run AtlasServerUpdateUtility.exe again.
 - The file "AtlasServerUpdateUtilityGridStartSelect.ini" will be created. This file determines which of the grids will be started. 
-4) Copy your existing ServerGrid and save folders (if any) to the new folder.
+4) (New install) Copy your existing ServerGrid and save folders (if any) to the new folder.
 5) Run AtlasServerUpdateUtility.exe yet again.
-- New install: It will download, install, and validate your files, and start the server.
-- Existing install: It will install any updates and start the server.
+- (New install) It will download, install, and validate your files, and start the server.
+- (Existing install) It will install any updates and start the server.
 CONGRATS! Your server should be up-to-date and running! 
-
-------------
- KNOWN BUGS
-------------
-- None reported at this time.
 
 --------------
  INSTRUCTIONS
 -------------- 
 To shut down your server:
-- Right-click on the AtlasServerUpdateUtility icon and select EXIT.
+- Right-click on the AtlasServerUpdateUtility icon in bottom right taskbar and select EXIT.
 To restart your server:
 - Run AtlasServerUpdateUtility.exe
 
@@ -65,9 +61,39 @@ Tips:
 - Use the "Run external script during server updates" feature to run a batch file that disables certain mods during a server update to prevent incompatibilities.
 - External script execution for mod updates Runs the external script when mod update discovered... while server is still running.
 
+------------
+ KNOWN BUGS
+------------
+### ISSUE ###
+- An issue when SteamCMD does not update and validate files properly and therefore performs an update with every update check.
+
+REASON: 
+Short answer: Steamcmd is not properly put the latest "buildid" in the appmanifest.acf file after an update.
+Long Answer:
+- The appmanifest_1006030.acf file is created by steamcmd during updates.
+- It is what my util uses to check for the latest version. It looks at the "buildid" "3594004" within that file.
+- When my util notices an update is available, it renames this file (adds date & time) then runs steamcmd update again.
+- When running steamcmd update, it sets "buildid" to "0" until the update is finished, then it puts the proper latest buildid there.
+- For some reason, steamcmd sometimes does not replace the "0" with "3594004" (or latest number).
+
+WORKAROUND:
+- A temporary quick "fix" is to Rt-Click the AtlasServerupdateUtilkity (Phoenix) icon in bottom right and pause the utility.  It will no longer do anything, but your server(s) will stay running.
+- A better workaround is:
+  - Replace "D:\Game Servers\Atlas Dedicated Server\steamapps\appmanifest.acf" with a backup version that does not have the buildid as "0" in it.
+  
+### ISSUE ###
+- Update problems when running Atlas and/or AtlasServerUpdateUtility in C:\ partition
+
+REASON:
+- It appears that Windows block certain files from being downloaded or created by AtlasServerUpdateUtility.
+
+WORKAROUND:
+- Install on another partition such as D:
+
 ---------------------------
  UPCOMING PLANNED FEATURES
 ---------------------------
+- GUI interface (will take a while to get done)
 - html documentation
 - Ability to send RCON commands via Remote Restart
 - Add AtlasServerUpdateUtility update check
@@ -175,9 +201,33 @@ More ServerUpdateUtilities available: 7 Days To Die and Conan Exiles.  Rust and 
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0
 https://gamercide.org/forum/topic/10558-conan-exiles-server-utility/
 
+---------------------
+ Questions & Answers  Q&A from commonly asked questions
+---------------------
+(WORK IN PROGRESS)
+What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, etc. files?
+- The utility makes no direct changes to any of Atlas' config files
+
 -----------------
  VERSION HISTORY
 -----------------
+(2019-02-25) v1.3.4
+- Fixed: Delay between grid server starts is now working after updates/restarts.
+- Fixed: Redis no longer reboots during server reboots
+- Fixed: Another "Line xxx variable not assigned" error when installing new server.
+- Fixed: Now downloads AtlasModDownloader.exe before checking for mods, if necessary.
+- Changed: "Delay in seconds between grid server starts (0-600)" from (1-60) to (0-600). 
+
+(2019-02-25) v1.3.3
+- Fixed: Update restart delay where it would recognize an update but not perform the update until next update check.
+- Fixed: Line 10202 error. (Occurred when installing a new server... A temporary setting was required for the "Update mods?" option.  (Thanks to Minku [Discord] for reporting)
+
+(2019-02-25) v1.3.2
+- Added: Option to assign RCON IP so that port forwarding of RCON ports is not necessary.
+
+(2019-02-25) v1.3.1
+- Changed 'Ocean' to 'ocean' in the server startup commandline.
+
 (2019-02-24) v1.3.0
 - Added: Mod support!! Optionally automatically check for mod updates, install them, announce the update, and restart the server.
 - Added: External script execution for mod updates (Runs the external script when mod update discovered... while server is still running)
