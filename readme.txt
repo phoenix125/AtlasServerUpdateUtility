@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.3.4 (2019-02-26)
+- Latest version: AtlasServerUpdateUtility_v1.3.5 (2019-02-26)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -17,7 +17,8 @@ AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated
 - Announce server updates and/or restarts in game, on Discord and Twitch.
 - KeepServerAlive: Detects server crashes (checks for AtlasGame.exe and telnet response) and will restart the server.
 - User-defined scheduled reboots.
-- Remote restart (via web browser).
+- Remote restart via web browser, including your phone.
+- Send RCON commands via web browser, including from your phone.
 - Run multiple instances of AtlasServerUpdateUtility to manage multiple servers.
 - Clean shutdown of your server(s).
 More detailed features:
@@ -44,9 +45,12 @@ CONGRATS! Your server should be up-to-date and running!
  INSTRUCTIONS
 -------------- 
 To shut down your server:
-- Right-click on the AtlasServerUpdateUtility icon in bottom right taskbar and select EXIT.
+- Right-click on the AtlasServerUpdateUtility (phoenix) icon in bottom right taskbar and select EXIT.
 To restart your server:
 - Run AtlasServerUpdateUtility.exe
+To send RCON message via web browser:
+- Enter the link into any web browser, http://ip:port/ServerPwd@RCON_Message  ex. http://8.8.8.8:57520/AdMiN_PaSsWoRd@SaveWorld
+- To send [space], use [%] without brackets.  ex. http://12.34.56.78:57520/AdMiN_PaSsWoRd@broadcast%Admin%Says%Hi
 
 -----------------
  TIPS & COMMENTS
@@ -90,15 +94,22 @@ REASON:
 WORKAROUND:
 - Install on another partition such as D:
 
----------------------------
- UPCOMING PLANNED FEATURES
----------------------------
-- GUI interface (will take a while to get done)
-- html documentation
-- Ability to send RCON commands via Remote Restart
-- Add AtlasServerUpdateUtility update check
+-------------------
+ UPCOMING FEATURES
+-------------------
 - Discord announce shutdown and restart (back online)
 - Second Discord webhook for admin use (announce server info into a separate Discord channel)
+- html documentation
+- At startup, check for servers still running from the previous AtlasServerUpdateUtility in case of improper shutdown of utility.
+
+--------------------
+ REQUESTED FEATURES  (Unknown whether they'll get added or not)
+--------------------
+- Cross chat
+- 7zip backups
+- CPU Affinity
+- GUI interface (will take a while to get done)
+- Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
 
 ----------------------------------------------
  HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS
@@ -211,14 +222,18 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 -----------------
  VERSION HISTORY
 -----------------
-(2019-02-25) v1.3.4
+(2019-02-26) v1.3.5
+- Added: AtlasServerUpdateUtility update check and downloader.
+- Added: Ability to send RCON commands via Remote Restart
+
+(2019-02-26) v1.3.4
 - Fixed: Delay between grid server starts is now working after updates/restarts.
 - Fixed: Redis no longer reboots during server reboots
 - Fixed: Another "Line xxx variable not assigned" error when installing new server.
 - Fixed: Now downloads AtlasModDownloader.exe before checking for mods, if necessary.
 - Changed: "Delay in seconds between grid server starts (0-600)" from (1-60) to (0-600). 
 
-(2019-02-25) v1.3.3
+(2019-02-26) v1.3.3
 - Fixed: Update restart delay where it would recognize an update but not perform the update until next update check.
 - Fixed: Line 10202 error. (Occurred when installing a new server... A temporary setting was required for the "Update mods?" option.  (Thanks to Minku [Discord] for reporting)
 
