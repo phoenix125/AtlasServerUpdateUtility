@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.3.5 (2019-02-26)
+- Latest version: AtlasServerUpdateUtility_v1.3.6 (2019-03-05)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -222,6 +222,28 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 -----------------
  VERSION HISTORY
 -----------------
+(2019-03-05) v1.3.6
+- Added: User defined delay between grid server shutdowns on first shutdown attempt. Sends shutdown command to all grids every second afterward if servers fail to shutdown.
+- Added: User defined "redis" folder.
+- Added: User defined "FINAL WARNING! Rebooting server in 10 seconds... " message.
+- Added: Option to add mod number in mod update announcements.
+- Added: Creates "___INI_FAIL_VARIABLES___.txt" file when .INI MISMATCH occurs to indicate which parameter(s) need(s) to be edited.
+- Added: Creates "_SERVER_SUMMARY_.txt" file containing all server summary information.
+- Fixed: Line 10250 Error! [AltSaveDir ($tFilePath[$i] = $zServerDirLocal & "\ShooterGame\Saved\" & $zServerAltSaveDir[$i - 1] & "\Config\WindowsServer\GameUserSettings.ini)]
+- Changed: Now checks for grid servers running when sending the shutdown command for first run.
+- Fixed: Does not send RCON commands to disabled servers anymore.
+- Changed: The .ini now correctly states that RCON Ports are to be in ServerGrid,json order.
+- Changed: debug = yes by default.
+- Removed: "Mods are up to date" log entry unless mods are truly up-to-date.
+- Removed: "[Mod] Something went wrong downloading update..." log entry when "use mods = no".
+- Added: Show AtlasModupdater commands in log.
+- Added: If SteamCMD and/or first grid server fails three times in a row, the utility displays warning message and stops to prevent steamcmd update loops.
+- Fixed: When update check fails to get latest version, a warning message is displayed but the utility continues to function and check for updates. Previously it would run close servers and perform SteamCMD update loops.
+- Fixed: If update needed at utility start, utility immediately begins update. Previously, it would wait until next update check.
+- Fixed: If SteamCMD or SteamDB detected server out of date, it waited until next update check.
+- Changed: Improved wording for SteamDB update check to make the "Must use Internet Explorer" requirement more prominent.
+- Fixed: SteamCMD extra command line parameters were not being used correctly.
+
 (2019-02-26) v1.3.5
 - Added: AtlasServerUpdateUtility update check and downloader.
 - Added: Ability to send RCON commands via Remote Restart
