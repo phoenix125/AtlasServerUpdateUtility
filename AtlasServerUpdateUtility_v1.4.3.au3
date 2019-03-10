@@ -1136,7 +1136,7 @@ Func ReadUini($sIniFile, $sLogFile)
 		$iIniError = $iIniError & "DestroyWildDinosYN, "
 	EndIf
 	If $iniCheck = $aDestroyWildDinosDays Then
-		$aDestroyWildDinosDays = "1,6"
+		$aDestroyWildDinosDays = "2,6"
 		$iIniFail += 1
 		$iIniError = $iIniError & "DestroyWildDinosDays, "
 	EndIf
