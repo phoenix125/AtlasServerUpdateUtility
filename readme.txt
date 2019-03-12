@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.4.3 (2019-03-10)
+- Latest version: AtlasServerUpdateUtility_v1.4.6 (2019-03-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -226,6 +226,18 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 -----------------
  VERSION HISTORY
 -----------------
+(2019-03-12) v1.4.6
+- Fixed: New servers would keep starting even when existing ones were running.
+
+(2019-03-12) v1.4.5
+- Fixed: SteamCMD boot loop which occurred when first grid was disabled.
+- Fixed: Minor log file corrections.
+
+(2019-03-11) v1.4.4
+- Fixed: Instanced where some grid servers wouldn't start after a server restart. (Windows, by chance, could assign the same PID to conhost.exe as a previously existing Shooter.exe during server reboots) (Thanks to GooberGrape [Discord] for reporting)
+- Fixed: Wrong mod name announced after first announcement
+- Fixed: A "Line x error" could occur if number of mod minutes exceeded the number of update minutes.
+
 (2019-03-10) v1.4.3
 - Added: On server shutdown, if server(s) fail to shutdown using "DoExit" command, then CTRL-C is also sent to running server(s) with each countdown.
 - Changed: Changed the default folder naming scheme. Removed the preceding letter "a". [I don't know why I put it there to begin with]. Also added a util to convert existing servers to new naming scheme.
@@ -246,7 +258,7 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 - Added: Tray Icon menu and commands with option to send RCON and broadcast messages, Check for utility updates, and initiate a Remote Restart.
 - Added: Latest mod & util versions do not save to a file... handled internally now.  This may help with mod update errors on some systems.
 - Added: Mod names to mod update announcements.
-- Added: Log file entry for mod update errors: "If running Windows Server, Disable ""IE Enhanced Security Configuration"" for Administrators (via Server Manager > Local Server > IE Enhanced Security Configuration)" (Thanks to @McK1llen Discord)
+- Added: Log file entry for mod update errors: "If running Windows Server, Disable ""IE Enhanced Security Configuration"" for Administrators (via Server Manager > Local Server > IE Enhanced Security Configuration)" (Thanks to @McK1llen [Discord] for providing solution)
 - Removed: "Mods are up to date" log entry unless mods are truly up-to-date (I found another instance).
 - Added: Util will remove "<-NO TRAILING SLASH AND USE FULL URL FROM WEBHOOK URL ON DISCORD" in the Discord webhook if left in there.
 - Added: Remote Restart & Remote RCON links in "_SERVER_SUMMARY_.txt" file.
