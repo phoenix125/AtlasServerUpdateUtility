@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.4.6 (2019-03-12)
+- Latest version: AtlasServerUpdateUtility_v1.4.7 (2019-03-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -115,6 +115,17 @@ WORKAROUND:
 - GUI interface (will take a while to get done)
 - Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
 
+---------------------------------------------
+ To Create Discord Webhook for announcements
+---------------------------------------------
+Discord announcements are handled through Discord webhooks.
+To create a Discord webhook:
+- In Discord, click the Settings gear icon of the desired Discord channel
+- Click webhooks
+- Create webhook.
+- Copy and paste the new URL into the AtlasServerUpdateUtility.ini as "URL ###=" 
+- Then save and restart the AtlasServerUpdateUtility (does NOT require server restart).
+
 ----------------------------------------------
  HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS
 ----------------------------------------------
@@ -127,10 +138,10 @@ WORKAROUND:
     - Edit this file to match your desired server settings. It is recommended to change the following:
         Atlas DIR ###=
         Autostart and keep-alive redis-server.exe? Use NO to manage redis-server.exe yourself (yes/no) ###=no
-        Server AltSaveDirectoryName(s) (comma separated. Leave blank for default a00,a01,a10, etc) ###=	
+        Server AltSaveDirectoryName(s) (comma separated. Leave blank for default 00,01,10, etc) ###=	
             a. Type in the folder names of ALL servers here, including folders for remote servers.
               (This util pairs each folder entry to each server listed in ServerGrid.json, therefore even folders not used on the local server need to be entered) *OR*
-            b. Leave this blank [recommended] and change your existing folders to match this util's default assignment: (a00 a10 a20 a30 a01 a02 a03 etc.)
+            b. Leave this blank [recommended] and change your existing folders to match this util's default assignment: (00 10 20 30 01 02 03 etc.)
 - Run the utility again to create the AtlasServerUpdateUtilityGridStartSelect.ini file.  This file is used to determine which grid servers start on the local server.
     - Edit this file. Type "no" to any of the grids being run on remote servers. The local server will only run the grids marked as "yes".
 
@@ -226,6 +237,9 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 -----------------
  VERSION HISTORY
 -----------------
+(2019-03-12) v1.4.7
+- Fixed: Server updates were identified but SteamCMD never executed.
+
 (2019-03-12) v1.4.6
 - Fixed: New servers would keep starting even when existing ones were running.
 
