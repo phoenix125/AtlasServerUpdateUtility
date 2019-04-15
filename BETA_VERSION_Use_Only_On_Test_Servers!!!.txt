@@ -64,6 +64,43 @@ To Do:
 ------------------------------
  CURRENT BETA VERSION HISTORY
 ------------------------------
+v1.5.0(beta18) (2019-04-15) CRITICAL FIX! Fixed Atlas Auto-Updater (and more!)
+- Fixed: Auto Atlas updater was not updating.
+- Added: New "_start_AtlasServerUpdateUtility.bat" file that updates with each util update. If desired, add a shortcut of this file to your startup folder.
+- Fixed: Log Ticker would stop updating.
+- Fixed: You can now edit files in the File Editor/Viewer window. Colorized version coming soon!
+- Fixed: "Start Servers" and "Stop Servers" buttons working.
+- Added: Small delay after deleting Server_Summary.txt file. This will hopefully fix a lockup.
+- Fixed: Improved the utility's recognition of running servers at startup.
+
+v1.5.0(beta17) (2019-04-12) Hotfix & new file viewer/editor window
+- Fixed: An error that can occur while trying to get online players if server is locked up (white screen of death) 
+- Added: New window for viewing and/or editing log files, config files, ServerGrid.json, DefaultGame.ini, DefaultGameUserSettings.ini, DefaultEngine.ini files.
+  (Notice: editing of most files is functional at this time.)
+
+v1.5.0(beta16) (2019-04-11) Hotfix
+- Fixed: Manual Atlas updates were causing Line 35061 and 35452 errors and failed to update.
+
+v1.5.0(beta15) (2019-04-09) NON-Critical Hotfix
+- Fixed: Send Msg to select servers was displaying wrong message and not allowing for user input. (Thanks to Fosh for reporting!)
+- Fixed: The new Remote Restart shutdown checker wasn't being used when auto-installing updates, which could cause the Remote Restart Ports In Use error.
+
+v1.5.0(beta14) (2019-04-09) NON-Critical Hotfix
+- Fixed: Player name being used instead of player count in main GUI window. (Thanks to Josey Wales for reporting.)
+- Fixed: Remote Restart now checks for proper shutdown and will send shutdown command five times or until closed.
+- Fixed: Removed the popup window during automatic mod update checks.
+
+v1.5.0(beta13) (2019-04-09) NON-Critical Hotfix
+- Fixed: Error in Online Players count when Poll Remote Servers used.
+- Fixed: Total Players should now show correct count. If any server is offline/crashed, Total Players will report as "-- / 40"
+- Added: Log entry when Remote Restart fails due to port conflict with RCON ports of existing grid servers.
+
+v1.5.0(beta12) (2019-04-09) Hotfix
+- Fixed: Removed extra space in commandline. When commandline PER GRID was added, the util added a space if the leading character was not a (?). Now it will only add a space if the leading character is a hyphen (-). Thanks Doublee for reporting!
+- Fixed: Error Line 36367: If a mod update failed, it would crash when trying to display the mod name.
+- Added more details to the status line in the main window and load screen.
+- Changed: Once the GUI loads, the Online Players window is put on top.
+
 v1.5.0(beta11) (2019-04-08)
 - Added: Send custom command line parameters PER GRID during server startup in the GridServerSelect.ini file.
 - Fixed: Cleaned up the notification windows: they don't flicker anymore!
