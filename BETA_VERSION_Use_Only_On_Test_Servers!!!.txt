@@ -64,6 +64,14 @@ To Do:
 ------------------------------
  CURRENT BETA VERSION HISTORY
 ------------------------------
+v1.5.0(beta19) (2019-04-17) Hotfix
+- Changed: Util will now default to 64 bit version (was 32 bit only). The ZIP file includes the 32 bit version for compatibility.
+- Fixed: (Hopefully fixed) Getting Latest Mod Version Error: Added a second method for getting latest mod version.
+- Fixed: When editing config files within the utility, instead of CRLF (carriage return line feed), only the CR was being written.
+- Fixed: Server Names not showing when ServerGrid.json file was edited within the utility (due to error above).
+- Fixed: When stopping select servers, if server fails to shutdown with "DoExit", then util now sends CTRL-C to server (to force a shutdown). If that fails, it task-kills the server(s).
+- Fixed: Config (gear) icon and Tray Show Config links were missing.
+
 v1.5.0(beta18) (2019-04-15) CRITICAL FIX! Fixed Atlas Auto-Updater (and more!)
 - Fixed: Auto Atlas updater was not updating.
 - Added: New "_start_AtlasServerUpdateUtility.bat" file that updates with each util update. If desired, add a shortcut of this file to your startup folder.
