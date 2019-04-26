@@ -39,31 +39,71 @@ New features / fixes:
 Notes:
 - Extreme beta version. It should be stable for managing your servers, but some GUI features are not fully implemented yet.
 
+----------------
+ DOWNLOAD LINKS
+----------------
+Latest Stable Version:    http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
+Previous Stable Versions: http://www.phoenix125.com/share/atlas/atlashistory/
+Latest Beta Version:      http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
+Previous Beta Versions:   http://www.phoenix125.com/share/atlas/atlasbetahistory/
+Source Code (AutoIT):     http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.au3
+GitHub:	                  https://github.com/phoenix125/AtlasServerUpdateUtility
+
+Website: http://www.Phoenix125.com
+Discord: http://discord.gg/EU7pzPs
+Forum:   https://phoenix125.createaforum.com/index.php
+
 --------------------------
  Upcoming Features/ Fixes
 --------------------------
 COMING SOON! (Things I Am Working On and hope to get done in the next few days)
 - A Config GUI window..  I know this is desperately needed!
 - Server editing: When you click on the server name, it will bring up a server config window to make changes to GameUserSettings.ini and Game.ini files.
-- CPU usage reporting (not working yet).
 
 To Do:
 - Custom buttons to send programmable commands
 - Configurable and sortable main window
-- Add: GUS.ini, Game.ini, & ServerGrid.json Editor
 - Add: Redis editor
 - Plug-in support ("unload and load" plugins option)
 
 ---------------------------------
  Bugs / Features Not Working Yet
 ---------------------------------
-- CPU Usage not working yet
 - No GUI config yet.
-- Cannot change Run / Local / Remote options from the GUI yet (still can be changed in the AtlasServerUpdateUtility.ini & AtlasServerUpdateUtilityGridStartSelect.ini files)
 
 ------------------------------
  CURRENT BETA VERSION HISTORY
 ------------------------------
+v1.5.0(beta24) (201-04-25)
+- Added: CPU usage is now operational.
+- Added: Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times. (Thanks to Norlinri for requesting)
+- Added: Util now creates backup Server and Redis PID files to help prevent duplicate servers from being started.
+- Fixed: The util would freeze and eventually crash if SteamCMD locked up during update check. A 20 second shutdown timer was added to task kill SteamCMD if it locks up.
+- Fixed: The util would freeze and eventually crash if errors occurred when checking current installed server version. A new method was implemented to hopefully prevent further lock ups.
+
+v1.5.0(beta23) (2019-04-22)
+- Added: Main GUI window is now resizable!  You should now be able to see most or all your servers!
+- Changed: If managing the redis server, the redis server now only shuts down when the user requests.  It does not shut down for updates, Remote Restart, etc.
+- Added: New Online Players text file written with each update, "AtlasUtilFiles\AtlasServerUpdateUtility_OnlineUsers.txt".
+         This file could be used on a website with some creativity. either directly or import the data for improved website interface.
+         Coming soon! FTP upload of the text file.. maybe even an HTML page version of Online Players.
+
+v1.5.0(beta22) (2019-04-20) Minor Hotfix
+- Fixed: When the util is started, the Discord announcement, "Servers online" was always announcing, instead of skipping when servers were already online prior to starting util. (Thanks Norlinri for reporting)
+         This also fixed the erroneous log entries, "-ERROR- Server PID() NOT found. Server will be restarted. "
+
+v1.5.0(beta21) (2019-04-20) New Setup Wizard!
+- Added: Setup Wizard. It is now MUCH easier now for new users to start using this utility.
+- Added: New default AltSaveDIR naming scheme: A1,A2,A3,B1,B2,B3,C1,etc.
+- Fixed: No more extra servers being started! Fixed a couple instances where Redis and Server PIDs were not saving correctly when utility exited prematurely.
+- Added: Config updates will now update automatically without user input, unless a required parameter is added.
+- Fixed: (Hopefully) Utility updater should restart without errors.
+
+v1.5.0(beta20) (2019-04-19) Hotfix
+- Fixed: Checking for latest Mod Update failure would force a server reboot.
+- Fixed: When Import RCON port=yes, the util would still put ?RCONEnabled=True?RCONPort=12345 in command line.
+- Changed: Total Players indicator on main window no longer shows max players.  Max players is PER GRID; not the total of all grids.
+
 v1.5.0(beta19) (2019-04-17) Hotfix
 - Changed: Util will now default to 64 bit version (was 32 bit only). The ZIP file includes the 32 bit version for compatibility.
 - Fixed: (Hopefully fixed) Getting Latest Mod Version Error: Added a second method for getting latest mod version.
@@ -180,18 +220,3 @@ v1.5.0(beta1)
 - Added: Disable Server Update Check tray menu option.
 - Added: Force Server Update Check tray menu option.
 - Added: Beta version and Stable version selectability.
-
-
-----------------
- DOWNLOAD LINKS
-----------------
-Latest Stable Version:    http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
-Previous Stable Versions: http://www.phoenix125.com/share/atlas/atlashistory/
-Latest Beta Version:      http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
-Previous Beta Versions:   http://www.phoenix125.com/share/atlas/atlasbetahistory/
-Source Code (AutoIT):     http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.au3
-GitHub:	                  https://github.com/phoenix125/AtlasServerUpdateUtility
-
-Website: http://www.Phoenix125.com
-Discord: http://discord.gg/EU7pzPs
-Forum:   https://phoenix125.createaforum.com/index.php
