@@ -74,7 +74,10 @@ To Do:
 ------------------------------
  CURRENT BETA VERSION HISTORY
 ------------------------------
-v1.5.0(beta24) (201-04-25)
+v1.5.0 (2019-04-25) This version is the new STABLE version!
+- Fixed: Total CPU usage fixed.
+
+v1.5.0(beta24) (2019-04-25)
 - Added: CPU usage is now operational.
 - Added: Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times. (Thanks to Norlinri for requesting)
 - Added: Util now creates backup Server and Redis PID files to help prevent duplicate servers from being started.

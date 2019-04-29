@@ -1,21 +1,30 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.4.7 (2019-03-12)
+- Latest version: AtlasServerUpdateUtility_v1.5.0 (2019-04-28)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
+
+Sections: (Use Search CTRL-F to quickly access) 
+- Features | Getting Started | Instructions | Tips & Comments | Known Bugs | Upcoming Features | Requested Features |  To Create Discord Webhook for announcements |
+- How to Use This Util For Multi-Server Setups | Remote Restart Instructions | Download Links | Credits |
+-  Questions & Answers | FYI: Details of How This Util Performs Certain Actions | Current beta Version Notes | Stable Version History |
 
 ----------
  FEATURES
 ----------
-- Works with up to 100 grids (10x10).
+- Works with up to 400 grids (20x20).
 - Works with multiple server PC systems (See "HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS" below)
 - Optionally automatically check for mod updates, install them, announce the update to in-Game/Discord/Twitch, and restart the server. (Looks for ModIDS in ServerGrid.json only)
 - Automatically imports available server data from ServerGrid.json & GameServerUser.ini files (if enabled).
 - Optionally start selected gri﻿d servers only.
+- GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
+- Send RCON commands/messages to select servers only.
+- Send custom command lines PER GRID during server startup.
+- Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times.
 - OK to use with most other server managers: Use this tool to install and maintain the server and use your other tools to manage game play features.
 - Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
 - Automatically keeps server updated.
 - Announce server updates and/or restarts in game, on Discord and Twitch.
-- KeepServerAlive: Detects server crashes (checks for AtlasGame.exe and telnet response) and will restart the server.
+- KeepServerAlive: Detects server crashes (checks for AtlasGame.exe via PID) and will restart the server.
 - User-defined scheduled reboots.
 - Remote restart via web browser, including your phone.
 - Send RCON commands via web browser, including from your phone.
@@ -24,21 +33,37 @@ AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated
 More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
-- Can validate files on first run, then optionally only when buildid (server version) changes. Backs up & erases appmanifest.acf to force update when client-only update is released.
 
 -----------------
  GETTING STARTED
 -----------------
-INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server")
+NEW SERVER INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server")
 1) Place AtlasServerUpdateUtility.exe into any folder and run it.
 - The file "AtlasServerUpdateUtility.ini" will be created and the program will exit.
-2) Modify the default values in "AtlasServerUpdateUtility.ini" settings. PRIORITY SETTINGS ARE: Atlas DIR, SteamCMD DIR, (Existing Servers: AltSaveDirectoryName(s) Folders)
+2) Modify the default values in "AtlasServerUpdateUtility.ini" settings. PRIORITY SETTINGS ARE: Atlas DIR, SteamCMD DIR.
 3) Run AtlasServerUpdateUtility.exe again.
-- The file "AtlasServerUpdateUtilityGridStartSelect.ini" will be created. This file determines which of the grids will be started. 
-4) (New install) Copy your existing ServerGrid and save folders (if any) to the new folder.
-5) Run AtlasServerUpdateUtility.exe yet again.
-- (New install) It will download, install, and validate your files, and start the server.
-- (Existing install) It will install any updates and start the server.
+- The file "AtlasServerUpdateUtilityGridStartSelect.ini" will be created. This file determines which of the grids will be started.
+4) Run AtlasServerUpdateUtility.exe yet again.
+- It will download and install the Atlas server files then start Atlas Dedicated Server.
+- Once the BIG WHITE ERROR SCREENS start showing up, click "Exit: shutdown servers" o=in the tray icon.
+5) Copy your existing ServerGrid files/folders to '.\ShooterGame' folder.
+6) Run AtlasServerUpdateUtility.exe one last time.
+CONGRATS! Your server should be up-to-date and running!
+- If you are still having the BIG WHITE ERROR SCREENS:
+  - Look at the _SERVER_SUMMARY_.txt file created by this util for any possible config errors.
+  - Make sure all QueryPorts, Ports, RCONs, and DIRs are unique.. no duplicates!  These values (except RCON) are all imported from the ServerGrid.json file.
+  - Set the "SeamlessIP" to your WAN (external) IP address.
+  - Make sure all your ports are forwarded by your router.
+  - Look for errors in the ports in the ServerGrid.json file.
+
+EXISTING SERVER INSTALLATION:
+1) Place AtlasServerUpdateUtility.exe into any folder and run it.
+- The file "AtlasServerUpdateUtility.ini" will be created and the program will exit.
+2) Modify the default values in "AtlasServerUpdateUtility.ini" settings. PRIORITY SETTINGS ARE: Atlas DIR, SteamCMD DIR, AltSaveDirectoryName(s) (Leave blank if you used the default 00 01 02 10 11 12 etc folder naming structure).
+3) Run AtlasServerUpdateUtility.exe again.
+- The file "AtlasServerUpdateUtilityGridStartSelect.ini" will be created. This file determines which of the grids will be started. Make changes as needed.
+4) Run AtlasServerUpdateUtility.exe yet again.
+-  It will install any updates and start the server(s).
 CONGRATS! Your server should be up-to-date and running! 
 
 --------------
@@ -101,29 +126,28 @@ WORKAROUND:
 -------------------
  UPCOMING FEATURES
 -------------------
-- Discord announce shutdown and restart (back online)
 - Second Discord webhook for admin use (announce server info into a separate Discord channel)
-- html documentation
-- At startup, check for servers still running from the previous AtlasServerUpdateUtility in case of improper shutdown of utility.
+- html and/or PDF documentation
 
 --------------------
  REQUESTED FEATURES  (Unknown whether they'll get added or not)
 --------------------
-- Cross chat
+- Cross chat (I would probably use an existing cross chat util as a "plug in" to this util)
 - 7zip backups
-- CPU Affinity
+- CPU Affinity (Reports state that Atlas itself does a job with CPU, though, so not likely add this one)
 - GUI interface (will take a while to get done)
 - Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
+   (Not as great as it sounds... when someone logs off of a non-home server, that server would have to remain online. Eventually, all servers would need to remain online).
 
 ---------------------------------------------
  To Create Discord Webhook for announcements
 ---------------------------------------------
 Discord announcements are handled through Discord webhooks.
 To create a Discord webhook:
-- In Discord, click the Settings gear icon of the desired Discord channel
-- Click webhooks
+- In Discord, click the Settings gear icon of the desired Discord channel.
+- Click webhooks.
 - Create webhook.
-- Copy and paste the new URL into the AtlasServerUpdateUtility.ini as "URL ###=" 
+- Copy and paste the new URL into the AtlasServerUpdateUtility.ini as "URL ###=".
 - Then save and restart the AtlasServerUpdateUtility (does NOT require server restart).
 
 ----------------------------------------------
@@ -156,31 +180,6 @@ Below is an example of how to have this utility start your existing redis server
     1-Script directory ###=D:\Game Servers\Atlas Dedicated Server\Scripts
     1-Script filename ###=beforesteamcmd.bat
 
--------------------------------
- INFORMATION ON IMPORTING DATA (Details on what information is imported and how it is used)
--------------------------------
-The following information is imported from the ServerGrid.json:
- (All servers)
-    "totalGridsX" - Used in combination with totalGridsY to calculate total number of servers.
-    "totalGridsY" - Used in combination with totalGridsX to calculate total number of servers.
- (Each server)
-    "ip"          - Used to determine each server's IP address (In command line, sent as 'SeamlessIP=')
-    "port"        - Used to determine each server's port       (In command line, sent as 'QueryPort=')
-    "gamePort"    - Used to determine each server's gameport   (In command line, sent as 'Port=')
- 
-The following information is imported from each grid server's GameUserSettings.ini (when available):
-    "RCONPort"    - Used to determine each server's RCON port  (In command line, sent as 'RCONEnabled=True?RCONPort=')
-
-The grid servers are started in the order they are listed in the ServerGrid.json file.
-
-Here's how the utility imports and assigns folders, ports, grids, etc.:
-- It opens the ServerGrid.json file and uses the "totalGridsX" and "totalGridsY" to calculate the total number of servers.
-- Next, it skips to "servers": [ "
-- Then reads the first "gridX" , "gridY" , "ip" , "port" , "gamePort".
-- It then assigns the first folder listed under "Server AltSaveDirectoryName(s)" in AtlasServerUpdateUtility.ini to that server. The first server's information is now complete.
-It then repeats this process for the remainder of the servers listed in the ServerGrid.json file.
-- The utility continues to import the data for each server listed in ServerGrid.json, even if the server isn't used or is disabled.
- 
 -----------------------------
  REMOTE RESTART INSTRUCTIONS
 -----------------------------
@@ -210,10 +209,12 @@ In a standard web browser, type in the URL http://192.168.1.30:57520?restart=pas
 ----------------
  DOWNLOAD LINKS
 ----------------
-Latest Version:       http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
-Previous Versions:    http://www.phoenix125.com/share/atlas/atlashistory/
-Source Code (AutoIT): http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.au3
-GitHub:	              https://github.com/phoenix125/AtlasServerUpdateUtility
+Latest Stable Version:    http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
+Previous Stable Versions: http://www.phoenix125.com/share/atlas/atlashistory/
+Latest Beta Version:      http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
+Previous Beta Versions:   http://www.phoenix125.com/share/atlas/atlasbetahistory/
+Source Code (AutoIT):     http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.au3
+GitHub:	                  https://github.com/phoenix125/AtlasServerUpdateUtility
 
 Website: http://www.Phoenix125.com
 Discord: http://discord.gg/EU7pzPs
@@ -232,11 +233,95 @@ https://gamercide.org/forum/topic/10558-conan-exiles-server-utility/
 ---------------------
 (WORK IN PROGRESS)
 What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, etc. files?
-- The utility makes no direct changes to any of Atlas' config files
+- The utility makes no direct changes to any of Atlas' config files. Anything added to the "Atlas extra commandline parameters ###=" will get added by Atlas itself.
 
------------------
- VERSION HISTORY
------------------
+How does the utility shut down the servers?
+- I removed the SaveWorld command because it wasn't working last time I checked.  The DoExit and CTRL-X both force a SaveWorld ... I've tested them quite a bit. Even if the RCON ports are wrong, the CTRL-X should safely shutdown servers. 
+
+--------------------------------------------------------
+ FYI: DETAILS OF HOW THIS UTIL PERFORMS CERTAIN ACTIONS
+--------------------------------------------------------
+
+ INFORMATION ON IMPORTING DATA (Details on what information is imported and how it is used)
+-------------------------------
+The following information is imported from the ServerGrid.json:
+ (All servers)
+    "totalGridsX" - Used in combination with totalGridsY to calculate total number of servers.
+    "totalGridsY" - Used in combination with totalGridsX to calculate total number of servers.
+ (Each server)
+    "ip"          - Used to determine each server's IP address (In command line, sent as 'SeamlessIP=')
+    "port"        - Used to determine each server's port       (In command line, sent as 'QueryPort=')
+    "gamePort"    - Used to determine each server's gameport   (In command line, sent as 'Port=')
+ 
+The following information is imported from each grid server's GameUserSettings.ini (when available):
+    "RCONPort"    - Used to determine each server's RCON port  (In command line, sent as 'RCONEnabled=True?RCONPort=')
+
+The grid servers are started in the order they are listed in the ServerGrid.json file.
+
+Here's how the utility imports and assigns folders, ports, grids, etc.:
+- It opens the ServerGrid.json file and uses the "totalGridsX" and "totalGridsY" to calculate the total number of servers.
+- Next, it skips to "servers": [ "
+- Then reads the first "gridX" , "gridY" , "ip" , "port" , "gamePort".
+- It then assigns the first folder listed under "Server AltSaveDirectoryName(s)" in AtlasServerUpdateUtility.ini to that server. The first server's information is now complete.
+It then repeats this process for the remainder of the servers listed in the ServerGrid.json file.
+- The utility continues to import the data for each server listed in ServerGrid.json, even if the server isn't used or is disabled.
+
+ METHOD USED FOR UPDATING MODS (Details on how mods are downloaded and checked for updates)
+-------------------------------
+At very first run of the util, all mods will be downloaded and installed. This is necessary to create temp file(s) used to determine current version of each mod.
+- The util downloads another util I created, AtlasModDownloader.exe, to perform the downloading and updating. (Python was much better at uncompressing the .z files than AutoIT).
+- Each mod is updated one-at-a-time. AtlasModDownloader uses SteamCMD to download new mod content, move the folder content to ../content/mods folder, uncompress the .z files, then delete the SteamCMD cache folder.
+- The app_manifest file created by SteamCMD will then be renamed and moved to the Util folder. This what my util uses to determine current installed version.
+
+For update checks:
+- The util goes to this website: http://steamcommunity.com/sharedfiles/filedetails/changelog/[MODID] to check for latest version.
+- It then reads the mod_[MODID]_appworkshop.tmp (created each time a mod is downloaded) and compares the two. If the same, it skips.
+- If different buildid, it reruns the AtlasModDownloader.exe program again which redownloads and installs the mod.
+- It then makes any announcements (ingame, Discord, Twitch) and will restart all servers when the announcement times are fulfilled.
+
+----------------------------
+ CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above)
+----------------------------
+
+------------------------
+ STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
+------------------------
+(2019-04-28) v1.5.0
+- Added: GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
+- Added: Setup Wizard. It is now MUCH easier now for new users to start using this utility.
+- Added: New default AltSaveDIR naming scheme: A1,A2,A3,B1,B2,B3,C1,etc.
+- Added: Send custom command lines PER GRID during server startup.
+- Added: Separate log files for Basic logging and Full logging (formerly debug).
+- Added: Option to send RCON commands/messages to select servers only.
+- Added: New "_start_AtlasServerUpdateUtility.bat" file that updates with each util update. If desired, add a shortcut of this file to your startup folder.
+- Added: Button and config option to poll Remote Servers for online players and whether online.
+- Added: Upon starting, the util skips the update checks if the time since last server update check is less than the update check interval for a much faster util restart.
+- Added: Displays memory & CPU usage for each server grid.
+- Added: Log entry when a server crashes.
+- Added: New window for viewing and/or editing log files, config files, ServerGrid.json, DefaultGame.ini, DefaultGameUserSettings.ini, DefaultEngine.ini files.
+- Changed: Util will now default to 64 bit version (was 32 bit only). The ZIP file includes the 32 bit version for compatibility.
+- Changed: Added date to log files and moved them to "\_Log\" folder.
+- Changed: All log files are now automatically deleted if older than user specified number of days.
+- Changed: Moved all temp and work files into "\AtlasUtilFiles\" folder.
+- Changed: Moved all log files into "\_Log\" folder.
+- Changed: Removed "Server Name", "Debug", "SteamDIR", "Rotate Log Files", from config.
+- Changed: Hard-coded SteamCMD folder as "\SteamCMD\". to simplify installation and because sharing SteamCMD with other programs can cause issues.
+- Added: Window showing online users. Updates every 60 seconds by default, but is user definable.
+- Fixed: Tray icon is much more responsive.
+- Added: Tray icon turns gray when util is busy. 
+- Added: Discord announcement and display notification when servers online and ready for connection.
+- Added: Logs when users come online or go offline in new log file "AtlasServerUpdateUtility_OnlineUserLog.txt".
+- Added: Pause Utility. Pauses all functions.
+- Added: Disable Server Update Check tray menu option.
+- Added: Force Server Update Check tray menu option.
+- Added: Beta version and Stable version selectability.
+- Added: Util now creates backup Server and Redis PID files to help prevent duplicate servers from being started.
+- Changed: If managing the redis server, the redis server now only shuts down when the user requests.  It does not shut down for updates, Remote Restart, etc.
+- Added: New Online Players text file written with each update, "AtlasUtilFiles\AtlasServerUpdateUtility_OnlineUsers.txt".
+- Added: Config updates will now update automatically without user input, unless a required parameter is added.
+- Added: SteamID to Online Users window and logfile.
+- Added: Restart Server Now tray option.
+
 (2019-03-12) v1.4.7
 - Fixed: Server updates were identified but SteamCMD never executed.
 
