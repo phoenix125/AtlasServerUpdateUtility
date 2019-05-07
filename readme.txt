@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.5.0 (2019-04-28)
+- Latest version: AtlasServerUpdateUtility_v1.5.4 (2019-05-06)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,10 +282,39 @@ For update checks:
 ----------------------------
  CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above)
 ----------------------------
+- The STABLE version and BETA version are the same at this time.
 
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+(2019-05-04) v1.5.5
+- Added: Port duplicate checker: Checks for duplicate ports assigned in ServerGrid.json
+- Fixed: Remove trailing \t in SeamlessIP if present upon import. Does NOT alter the ServerGrid.json file.
+- Added: Programmable utility update check interval (default is every 4 hours)
+- Added: Option to have utility automatically download and install updates with no user input (Default is disabled)
+- Fixed: Auto Config update (when updating util) would still sometimes prompt user to modify config.
+
+(2019-05-04) v1.5.4 (Thanks to Norlinri for reporting both problems)
+- Fixed: "Line 35734 Unbalanced brackets in expression" error fixed.
+- Fixed: Prompt "Utility exited unexpectedly.. Close utility?" If (NO) was selected and you are using your own redis manager, then my util would shut down all servers when it was not supposed to."
+
+(2019-05-04) v1.5.3
+- Fixed? Attempt to fix Discord message error "0x80020009". Also added a lot more detail to error code in case this didn't fix the error.
+- Added: Option to start all servers minimized. Added to config.ini: "Start servers minimized (for a cleaner look)? (yes/no) ###=yes"  (Thanks to Infiniti for requesting)
+- Fixed: SeamlessDataPort now reports correctly in the _Server_Summary_.txt file.
+
+(2019-05-04) v1.5.2
+- Added: Server PID check: When started,  util checks to make sure assigned PIDs are actually Atlas servers.
+- Added: Removes trailing \t in SeamlessIP if present upon import. Does NOT alter the ServerGrid.json file.
+- Added: Adds the SeamlessDataPorts to the _Server_Summary.txt file.
+
+(2019-04-29) v1.5.1
+- Fixed: The Setup Wizard had several bugs that were fixed.
+- Added: The util now creates batch files (in folder "Batch Files (to run Atlas manually)") to manually run and update your Atlas servers in case of SHTF (utility failure!)
+- Fixed: When new mod(s) are added/discovered, the util previously did nothing. It will now restart the servers (with announcements if servers were already running).
+- Changed: 32-bit (x86) version of the utility is once again the default. I received a couple reports of instability possibly related to the 64-bit (x64) version.
+- Fixed: Update Mod button now disables if no mods are used or if "Use this util to install mods and check for mod updates (as listed in ServerGrid.json)? (yes/no) ###=no" (Thanks to funtimes for reporting)
+
 (2019-04-28) v1.5.0
 - Added: GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
 - Added: Setup Wizard. It is now MUCH easier now for new users to start using this utility.
