@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v1.5.4.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v1.5.4_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v1.5.5.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v1.5.5_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=1.5.4.0
+#AutoIt3Wrapper_Res_Fileversion=1.5.5.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v1.5.4
+#AutoIt3Wrapper_Res_ProductVersion=v1.5.5
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_Icon_Add=Resources\phoenixfaded.ico
@@ -44,7 +44,7 @@
 #include <MsgBoxConstants.au3>
 #include <File.au3>
 #include <Inet.au3>
-#include <TrayConstants.au3> ; Required for the $TRAY_ICONSTATE_SHOW constant.
+#include <TrayConstants.au3>; Required For the $TRAY_ICONSTATE_SHOW constant.
 #include <GuiConstants.au3>
 #include <EditConstants.au3>
 #include <WindowsConstants.au3>
@@ -60,7 +60,7 @@
 #include <GDIPlus.au3>
 #include <GuiRichEdit.au3>
 #include <GuiTab.au3>
-#include "GUIListViewEx.au3" ; EXTERNAL: GUIListViewEX
+#include "GUIListViewEx.au3" ; EXTERNAL : GUIListViewEX
 
 $aGameName = "Atlas"
 Global $aFolderTemp = @ScriptDir & "\" & $aGameName & "UtilFiles\"
@@ -76,17 +76,22 @@ FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\Atla
 FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_off_left0.png", $aFolderTemp, 0)
 FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_on_left0.png", $aFolderTemp, 0)
 
-;~ Opt("MustDeclareVars", 1)
-; All Servers
-$aUtilVerStable = "v1.5.4" ; (2019-05-06)
-$aUtilVerBeta = "v1.5.4" ; (2019-05-06)
-Global $aUtilVerNumber = 4 ; 0 = v1.5.0(beta19/20), 1 = v1.5.0(beta21/22/23), 2=v1.5.0(beta24), 3=v1.5.0/1/2, 4=v1.5.3/4
+$aUtilVerStable = "v1.5.5" ; (2019-05-08)
+$aUtilVerBeta = "v1.5.5" ; (2019-05-08)
+Global $aUtilVerNumber = 5 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+; 0 = v1.5.0(beta19/20)
+; 1 = v1.5.0(beta21/22/23)
+; 2 = v1.5.0(beta24)
+; 3 = v1.5.0/1/2
+; 4 = v1.5.3/4
+; 5 = v1.5.5
 
 $aUtilName = "AtlasServerUpdateUtility"
 $aServerEXE = "ShooterGameServer.exe"
 $aConfigFile = "ServerGrid.json"
 $aExperimentalString = "latest_experimental"
 $aServerVer = 0
+Global $aDuplicateErrorFile = @ScriptDir & "\__DUPLICATE_PORTS_IN_" & $aConfigFile & "__.txt"
 
 Global $oErrorHandler = ObjEvent("AutoIt.Error", "_ErrFunc")
 Global $aObjErrFunc = "System" ; Used to list function calling the object in case of object error.
@@ -168,6 +173,9 @@ Global $aGUILogWindowText = ""
 Global $aGUIReady = False
 Global $sGridIniReWrite = False
 Global $LabelUtilReadyStatus = 0
+Global $IconReady = 0 ; To prevent undeclared variable
+Global $aSelectServers = False ; To prevent undeclared variable
+Global $tSelectServersTxt = "" ; To prevent undeclared variable
 Global $aExitGUIW2 = False ; Needed to exit Setup Wizard Existing Server GUI due to OnEventMode = 1
 Global $aExitGUIW1 = False ; Needed to exit Setup Wizard Select GUI due to OnEventMode = 1
 Global $aExitGUIW3 = False ; Needed to exit Setup Wizard New Server GUI due to OnEventMode = 1
@@ -339,6 +347,26 @@ If $aCFGLastVerNumber < 4 Then
 	$aIniForceWrite = True
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", "no")
 EndIf
+If $aCFGLastVerNumber < 5 Then
+	Local $tTmp = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates? (yes/no) ###", "")
+	If $tTmp = "no" Then
+		Local $tTmp1 = 0
+	Else
+		Local $tTmp1 = 4
+	EndIf
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $tTmp1)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", "no")
+	$aIniForceWrite = True
+	Local $tObfuscatePass = IniRead($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", "no")
+	IniWrite($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $tObfuscatePass)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", "1,3")
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", "Servers shutting down in \m minute(s) for maintenance.")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", "Server is shutting down in \m minute(s) for maintenance.")
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", "Server is shutting down in \m minute(s) for maintenance.")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "no")
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", "no")
+
+EndIf
 ; ----------- END Temporary until enough time has passed for most users to have updated
 ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aIniFile & ".")
 Local $tRunConfig = IniRead($aUtilCFGFile, "CFG", "aCFGRCONCustomShowConfig", "no")
@@ -397,8 +425,10 @@ EndIf
 $aUtilityVer = $aUtilName & " " & $aUtilVersion
 
 ;~ If $aUpdateUtil = "yes" And $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) Then
-If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) Then
-	Local $tUtilUpdateAvailableTF = UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, $aSplashStartUp, $aUpdateUtil)
+;~ If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) Then
+If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) And $aUpdateUtil > 0 Then
+;~ 	Local $tUtilUpdateAvailableTF = UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, $aSplashStartUp, $aUpdateUtil)
+	Local $tUtilUpdateAvailableTF = UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, $aSplashStartUp, "show")
 	If $tUtilUpdateAvailableTF Then $aSplashStartUp = SplashTextOn($aUtilName, $aStartText, 475, 110, -1, -1, $DLG_MOVEABLE, "")
 EndIf
 
@@ -481,6 +511,7 @@ If $aServerRedisFolder = "" Then
 Else
 	$xServerRedis = """" & $aServerRedisFolder & "\" & $aServerRedisCmd & """ """ & $aServerRedisFolder & "\" & $aServerRedisConfig & """"
 EndIf
+_CheckForDuplicatePorts()
 
 If $aServerModYN = "yes" Then
 	$aServerModCMD = " -manualmanagedmods"
@@ -683,7 +714,8 @@ Local $tMsg = "Welcome to the new GUI Interface!" & @CRLF & _
 		"- COMING SOON! Adjust server settings by clicking on main window." & @CRLF & @CRLF & _
 		"- Please report any problems to Discord or email: kim@kim125.com"
 MsgBox(0, $aUtilName, $tMsg, 15)
-AdlibRegister("RunUtilUpdate", 28800000)
+If $aUpdateUtil > 0 Then AdlibRegister("RunUtilUpdate", $aUpdateUtil * 3600000)
+;~ If $aUpdateUtil > 0 Then AdlibRegister("RunUtilUpdate", $aUpdateUtil * 60000) ;Kim!!
 Local $aSliderPrev = GUICtrlRead($UpdateIntervalSlider)
 $aServerCheck = TimerInit()
 Global $lLogTabWindow = 0, $lBasicEdit = 0, $lDetailedEdit = 0, $lOnlinePlayersEdit = 0, $lServerSummaryEdit = 0, $lConfigEdit = 0, $lGridSelectEdit = 0, $lServerGridEdit = 0, $lDefaultGameEdit = 0, $lDefaultGUSEdit = 0, $lDefaultEngineEdit = 0
@@ -810,10 +842,7 @@ While True ;**** Loop Until Closed ****
 	EndIf
 
 	If TimerDiff($aServerCheck) > 10000 Then
-		TraySetToolTip("Server process check in progress...")
-		TraySetIcon($aIconFile, 201)
-		GUICtrlSetImage($IconReady, $aIconFile, 203)
-		GUICtrlSetData($LabelUtilReadyStatus, "Updating Server Info")
+		SetStatusBusy("Server process check in progress...", "Updating Server Info")
 		PIDSaveServer($aServerPID, $aPIDServerFile)
 		If GUICtrlRead($gPollOnlinePlayers) = $GUI_CHECKED Then
 			If $aServerOnlinePlayerYN = "yes" Then
@@ -867,7 +896,7 @@ While True ;**** Loop Until Closed ****
 							$aTimeCheck0 = _NowCalc()
 						Else
 							RunExternalRemoteRestart()
-							CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False) ; Do NOT restart redis.
+							CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT restart redis, Do not set servers to disable.
 						EndIf
 					EndIf
 				Case 1 To 4
@@ -915,6 +944,11 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotServersUpYN = "yes" Then
 							Local $aAnnounceCount3 = 0
 							If $aRebootReason = "remoterestart" And $sUseDiscordBotRemoteRestart = "yes" Then
+								SplashTextOn($aUtilName, " All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+								SendDiscordMsg($sDiscordWebHookURLs, $sDiscordServersUpMessage, $sDiscordBotName, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+								$aAnnounceCount3 = $aAnnounceCount3 + 1
+							EndIf
+							If $aRebootReason = "stopservers" And $sUseDiscordBotStopServer = "yes" And ($aAnnounceCount3 = 0) Then
 								SplashTextOn($aUtilName, " All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 								SendDiscordMsg($sDiscordWebHookURLs, $sDiscordServersUpMessage, $sDiscordBotName, $bDiscordBotUseTTS, $sDiscordBotAvatar)
 								$aAnnounceCount3 = $aAnnounceCount3 + 1
@@ -977,7 +1011,7 @@ While True ;**** Loop Until Closed ****
 				$aAnnounceCount1 = $aAnnounceCount1 + 1
 			Else
 				RunExternalScriptDaily()
-				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 			EndIf
 			;		EndIf
 			$aTimeCheck2 = _NowCalc()
@@ -1024,19 +1058,15 @@ While True ;**** Loop Until Closed ****
 
 		#Region ;**** Check for Update every X Minutes ****
 		If $aServerModYN = "yes" And ((_DateDiff('n', $aTimeCheck0, _NowCalc())) >= $aUpdateCheckInterval) And ($aBeginDelayedShutdown = 0) Then
-			GUICtrlSetImage($IconReady, $aIconFile, 203)
-			GUICtrlSetData($LabelUtilReadyStatus, "Check: Mod Update")
+			SetStatusBusy("Check: Mod Update")
 			CheckMod($aServerModList, $aSteamCMDDir, $aServerDirLocal, 0, False)
-			GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-			GUICtrlSetImage($IconReady, $aIconFile, 204)
+			SetStatusIdle()
 		EndIf
 		If ($aCheckForUpdate = "yes") And ((_DateDiff('n', $aTimeCheck0, _NowCalc())) >= $aUpdateCheckInterval) And ($aBeginDelayedShutdown = 0) Then
-			GUICtrlSetImage($IconReady, $aIconFile, 203)
-			GUICtrlSetData($LabelUtilReadyStatus, "Check: Server Update")
+			SetStatusBusy("Check: Server Update")
 ;~ 			Local $bRestart = UpdateCheck(False)
 			UpdateCheck(False, 0, False)
-			GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-			GUICtrlSetImage($IconReady, $aIconFile, 204)
+			SetStatusIdle()
 ;~ 			If $bRestart And (($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes")) Then
 ;~ 				$aBeginDelayedShutdown = 1
 ;~ 				$aRebootReason = "update"
@@ -1094,6 +1124,27 @@ While True ;**** Loop Until Closed ****
 						TwitchMsgLog($aRemoteMsgTwitch[$aAnnounceCount0])
 					EndIf
 				EndIf
+				If $aRebootReason = "stopservers" Then
+					$aAnnounceCount0 = $aStopServerCnt
+					$aAnnounceCount1 = $aAnnounceCount0 - 1
+					$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount0] - $aStopServerTime[$aAnnounceCount1] + 1
+					If $aAnnounceCount1 = 0 Then
+						;					$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount0]
+						$aDelayShutdownTime = 0
+						$aBeginDelayedShutdown = 3
+					Else
+						$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount0] - $aStopServerTime[$aAnnounceCount1]
+					EndIf
+					If $sInGameAnnounce = "yes" Then
+						SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aStopServerMsgInGame[$aAnnounceCount0])
+					EndIf
+					If $sUseDiscordBotStopServer = "yes" Then
+						SendDiscordMsg($sDiscordWebHookURLs, $aStopServerMsgDiscord[$aAnnounceCount0], $sDiscordBotName, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+					EndIf
+					If $sUseTwitchBotStopServer = "yes" Then
+						TwitchMsgLog($aStopServerMsgTwitch[$aAnnounceCount0])
+					EndIf
+				EndIf
 				If $aRebootReason = "update" Then
 					$aAnnounceCount0 = $aUpdateCnt
 					$aAnnounceCount1 = $aAnnounceCount0 - 1
@@ -1142,7 +1193,7 @@ While True ;**** Loop Until Closed ****
 				$aBeginDelayedShutdown = 0
 				$aTimeCheck0 = _NowCalc()
 				If $aRebootReason = "daily" Then
-					SplashTextOn($aUtilName & ": " & $aServerName, "Daily server request. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
+					SplashTextOn($aUtilName & ": " & $aServerName, "Daily server requested. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
 					RunExternalScriptDaily()
 				EndIf
 				If $aRebootReason = "update" Then
@@ -1150,14 +1201,18 @@ While True ;**** Loop Until Closed ****
 					RunExternalScriptUpdate()
 				EndIf
 				If $aRebootReason = "remoterestart" Then
-					SplashTextOn($aUtilName & ": " & $aServerName, "Remote Restart request. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
+					SplashTextOn($aUtilName & ": " & $aServerName, "Remote Restart requested. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
 					RunExternalRemoteRestart()
+				EndIf
+				If $aRebootReason = "stopservers" Then
+					SplashTextOn($aUtilName & ": " & $aServerName, "Stop Servers requested. " & @CRLF & "Shutting down " & $tSelectServersTxt & "servers.", 450, 80, -1, -1, $DLG_MOVEABLE, "")
 				EndIf
 				If $sInGameAnnounce = "yes" Then
 					SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $sInGame10SecondMessage)
 					Sleep(10000)
 				EndIf
-				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+;~ 				If $aRebootReason = "stopservers" Then
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 
 			ElseIf ($aBeginDelayedShutdown = 2) And (_DateDiff('n', $aTimeCheck0, _NowCalc()) >= $aDelayShutdownTime) Then ; **** REPEAT ANNOUNCEMENTS UNTIL LAST COUNT ***
 
@@ -1191,6 +1246,22 @@ While True ;**** Loop Until Closed ****
 					EndIf
 					If $sUseTwitchBotRemoteRestart = "yes" And ($sUseTwitchFirstAnnouncement = "no") Then
 						TwitchMsgLog($aRemoteMsgTwitch[$aAnnounceCount1])
+					EndIf
+				EndIf
+				If $aRebootReason = "stopservers" Then
+					If $aAnnounceCount1 > 1 Then
+						$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount1] - $aStopServerTime[($aAnnounceCount1 - 1)]
+					Else
+						$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount1]
+					EndIf
+					If $sInGameAnnounce = "yes" Then
+						SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aStopServerMsgInGame[$aAnnounceCount1])
+					EndIf
+					If ($sUseDiscordBotStopServer = "yes") And ($sUseDiscordBotFirstAnnouncement = "no") Then
+						SendDiscordMsg($sDiscordWebHookURLs, $aStopServerMsgDiscord[$aAnnounceCount1], $sDiscordBotName, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+					EndIf
+					If $sUseTwitchBotStopServer = "yes" And ($sUseTwitchFirstAnnouncement = "no") Then
+						TwitchMsgLog($aStopServerMsgTwitch[$aAnnounceCount1])
 					EndIf
 				EndIf
 				If $aRebootReason = "update" Then
@@ -1252,10 +1323,7 @@ While True ;**** Loop Until Closed ****
 		;		EndIf
 		;		#EndRegion ;**** Rotate Logs ****
 		$aServerCheck = TimerInit()
-		TraySetToolTip($aIconFile)
-		TraySetIcon($aIconFile, 99)
-		GUICtrlSetImage($IconReady, $aIconFile, 204)
-		GUICtrlSetData($LabelUtilReadyStatus, "Idle")
+		SetStatusIdle()
 	EndIf
 	Sleep(100)
 WEnd
@@ -1320,12 +1388,18 @@ EndFunc   ;==>GUI_Main_B_ModUpdates
 Func GUI_Main_B_UpdateGame()
 	F_UpdateServCheck()
 EndFunc   ;==>GUI_Main_B_UpdateGame
+Func GUI_Main_B_UpdateUtil()
+	F_UpdateUtilCheck()
+EndFunc   ;==>GUI_Main_B_UpdateUtil
 Func GUI_Main_B_AllRmtRestart()
 	F_RemoteRestart()
 EndFunc   ;==>GUI_Main_B_AllRmtRestart
 Func GUI_Main_B_AllRestartNow()
 	F_RestartNow()
 EndFunc   ;==>GUI_Main_B_AllRestartNow
+Func GUI_Main_B_StopServerAll()
+	F_StopServer()
+EndFunc   ;==>GUI_Main_B_StopServerAll
 Func GUI_Main_B_AllSendRCON()
 	F_SendRCON("all")
 EndFunc   ;==>GUI_Main_B_AllSendRCON
@@ -1602,11 +1676,9 @@ Func F_About()
 EndFunc   ;==>F_About
 Func F_ModUpdate()
 ;~ 	$aFirstModCheck = True
-	GUICtrlSetImage($IconReady, $aIconFile, 203)
-	GUICtrlSetData($LabelUtilReadyStatus, "Check: Mod Update")
+	SetStatusBusy("Check: Mod Update")
 	CheckMod($aServerModList, $aSteamCMDDir, $aServerDirLocal, 0, True)
-	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-	GUICtrlSetImage($IconReady, $aIconFile, 204)
+	SetStatusIdle()
 	SplashOff()
 EndFunc   ;==>F_ModUpdate
 
@@ -1695,18 +1767,21 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sAnnounceNotifyDaily = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $iniCheck)
 	Global $sAnnounceNotifyUpdate = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $iniCheck)
 	Global $sAnnounceNotifyRemote = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyStopServer = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $iniCheck)
 	Global $sAnnounceNotifyModUpdate = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $iniCheck)
 	;
 	Global $sInGameAnnounce = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires telnet) (yes/no) ###", $iniCheck)
 	Global $sInGameDailyMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
 	Global $sInGameUpdateMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
 	Global $sInGameRemoteRestartMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sInGameStopServerMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $iniCheck)
 	Global $sInGameModUpdateMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $iniCheck)
 	Global $sInGame10SecondMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $iniCheck)
 	;
 	Global $sUseDiscordBotDaily = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotUpdate = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotRemoteRestart = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotStopServer = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotModUpdate = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotServersUpYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotFirstAnnouncement = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first ANNOUNCEMENT only? (reduces bot spam)(yes/no) ###", $iniCheck)
@@ -1714,6 +1789,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sDiscordDailyMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
 	Global $sDiscordUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
 	Global $sDiscordRemoteRestartMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sDiscordStopServerMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $iniCheck)
 	Global $sDiscordModUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $iniCheck)
 	Global $sDiscordServersUpMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $iniCheck)
 	Global $sDiscordWebHookURLs = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook URL ###", $iniCheck)
@@ -1724,11 +1800,13 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sUseTwitchBotDaily = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $iniCheck)
 	Global $sUseTwitchBotUpdate = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $iniCheck)
 	Global $sUseTwitchBotRemoteRestart = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotStopServer = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $iniCheck)
 	Global $sUseTwitchBotModUpdate = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
 	Global $sUseTwitchFirstAnnouncement = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $iniCheck)
 	Global $sTwitchDailyMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
 	Global $sTwitchUpdateMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
 	Global $sTwitchRemoteRestartMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sTwitchStopServerMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $iniCheck)
 	Global $sTwitchModUpdateMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $iniCheck)
 	Global $sTwitchNick = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $iniCheck)
 	Global $sChatOAuth = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $iniCheck)
@@ -1771,16 +1849,18 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	;
 	;	Global $aLogRotate = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $iniCheck)
 	Global $aLogQuantity = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $iniCheck)
+	Global $sObfuscatePass = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $iniCheck)
 	;	Global $aLogHoursBetweenRotate = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $iniCheck)
 	;
 	Global $aEnableRCON = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable RCON? Required for clean shutdown (yes/no) ###", $iniCheck)
 	;	Global $aRCONSaveDelaySec = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $iniCheck)
 	Global $aValidate = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $iniCheck)
 	Global $aUpdateSource = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $iniCheck)
-	Global $aUpdateUtil = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates? (yes/no) ###", $iniCheck)
+	Global $aUpdateUtil = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $iniCheck)
+	Global $aUpdateAutoUtil = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $iniCheck)
+
 	Global $aUtilBetaYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $iniCheck)
 ;~ 	Global $aUsePuttytel = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no) ###", $iniCheck)
-	Global $sObfuscatePass = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $iniCheck)
 	Global $aExternalScriptHideYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $iniCheck)
 	;	Global $aDebug = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $iniCheck)
 
@@ -2103,10 +2183,9 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomLastCount", $aCustomRCONCount)
 		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomShowConfig", "yes")
 		If FileExists($sIniFile) Then
-			Local $aMyDate, $aMyTime
-			_DateTimeSplit(_NowCalc(), $aMyDate, $aMyTime)
-			Local $iniDate = StringFormat("%04i.%02i.%02i.%02i%02i", $aMyDate[1], $aMyDate[2], $aMyDate[3], $aMyTime[1], $aMyTime[2])
-			FileMove($sIniFile, $sIniFile & "_" & $iniDate & ".bak", 1)
+			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
+			Local $tFile = $sIniFile & "_" & $tTime & ".bak"
+			FileMove($sIniFile, $tFile, 1)
 		EndIf
 		UpdateIni($sIniFile)
 		If FileExists($aIniFailFileBasic) Then
@@ -2186,6 +2265,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "AnnounceNotifyRemote, "
 	EndIf
+	If $iniCheck = $sAnnounceNotifyStopServer Then
+		$sAnnounceNotifyStopServer = "1,3"
+		$iIniFail += 1
+		$iIniError = $iIniError & "AnnounceNotifyStopServer, "
+	EndIf
 	If $iniCheck = $sAnnounceNotifyModUpdate Then
 		$sAnnounceNotifyModUpdate = "1,2,5"
 		$iIniFail += 1
@@ -2205,6 +2289,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$sInGameRemoteRestartMessage = "Admin has requested a server reboot. Server is rebooting in \m minute(s)."
 		$iIniFail += 1
 		$iIniError = $iIniError & "InGameRemoteRestartMessage, "
+	EndIf
+	If $iniCheck = $sInGameStopServerMessage Then
+		$sInGameStopServerMessage = "Servers shutting down in \m minute(s) for maintenance."
+		$iIniFail += 1
+		$iIniError = $iIniError & "InGameStopServerMessage, "
 	EndIf
 	If $iniCheck = $sInGameModUpdateMessage Then
 		$sInGameModUpdateMessage = "Mod \x released an update. Server is rebooting in \m minute(s)."
@@ -2231,6 +2320,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordRemoteRestartMessage, "
 	EndIf
+	If $iniCheck = $sDiscordStopServerMessage Then
+		$sDiscordStopServerMessage = "Servers shutting down in \m minute(s) for maintenance."
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordStopServerMessage, "
+	EndIf
 	If $iniCheck = $sDiscordModUpdateMessage Then
 		$sDiscordModUpdateMessage = "Mod \x released an update. Server is rebooting in \m minute(s)."
 		$iIniFail += 1
@@ -2256,6 +2350,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "TwitchRemoteRestartMessage, "
 	EndIf
+	If $iniCheck = $sTwitchStopServerMessage Then
+		$sTwitchStopServerMessage = "Servers shutting down in \m minute(s) for maintenance."
+		$iIniFail += 1
+		$iIniError = $iIniError & "TwitchStopServerMessage, "
+	EndIf
 	If $iniCheck = $sTwitchModUpdateMessage Then
 		$sTwitchModUpdateMessage = "Mod \x released an update. Server is rebooting in \m minute(s)."
 		$iIniFail += 1
@@ -2280,6 +2379,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$sUseDiscordBotRemoteRestart = "no"
 		$iIniFail += 1
 		$iIniError = $iIniError & "UseDiscordBotRemoteRestart, "
+	EndIf
+	If $iniCheck = $sUseDiscordBotStopServer Then
+		$sUseDiscordBotStopServer = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "UseDiscordBotStopServer, "
 	EndIf
 	If $iniCheck = $sUseDiscordBotModUpdate Then
 		$sUseDiscordBotModUpdate = "no"
@@ -2330,6 +2434,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$sUseTwitchBotRemoteRestart = "no"
 		$iIniFail += 1
 		$iIniError = $iIniError & "UseTwitchBotRemoteRestart, "
+	EndIf
+	If $iniCheck = $sUseTwitchBotStopServer Then
+		$sUseTwitchBotStopServer = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "UseTwitchBotStopServer, "
 	EndIf
 	If $iniCheck = $sUseTwitchBotModUpdate Then
 		$sUseTwitchBotModUpdate = "no"
@@ -2507,9 +2616,13 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniError = $iIniError & "UpdateSource, "
 	EndIf
 	If $iniCheck = $aUpdateUtil Then
-		$aUpdateUtil = "yes"
+		$aUpdateUtil = "4"
 		$iIniFail += 1
 		$iIniError = $iIniError & "UpdateUtil, "
+	ElseIf $aUpdateUtil < 0 Then
+		$aUpdateUtil = 0
+	ElseIf $aUpdateUtil > 24 Then
+		$aUpdateUtil = 24
 	EndIf
 	If $iniCheck = $aUtilBetaYN Then
 		$aUtilBetaYN = "0"
@@ -2522,21 +2635,37 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "NOTICE: SteamDB will ban your IP if you check too often. Update check interval set to 30 minutes, "
 	EndIf
-	If $iIniFail > 0 Then
-		iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
+	If $aIniForceWrite Then
+		If FileExists($sIniFile) Then
+			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
+			Local $tFile = $sIniFile & "_" & $tTime & ".bak"
+			FileMove($sIniFile, $tFile, 1)
+		EndIf
+		UpdateIni($sIniFile)
 		Local $tIniFail = True
 	Else
-		Local $tIniFail = False
-		If $aIniForceWrite Then
-			If FileExists($sIniFile) Then
-				Local $aMyDate, $aMyTime
-				_DateTimeSplit(_NowCalc(), $aMyDate, $aMyTime)
-				Local $iniDate = StringFormat("%04i.%02i.%02i.%02i%02i", $aMyDate[1], $aMyDate[2], $aMyDate[3], $aMyTime[1], $aMyTime[2])
-				FileMove($sIniFile, $sIniFile & "_" & $iniDate & ".bak", 1)
-			EndIf
-			UpdateIni($sIniFile)
+		If $iIniFail > 0 Then
+			iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
+			Local $tIniFail = True
+		Else
+			Local $tIniFail = False
 		EndIf
 	EndIf
+;~ 	If $iIniFail > 0 Then
+;~ 		iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
+;~ 		Local $tIniFail = True
+;~ 	Else
+;~ 		Local $tIniFail = False
+;~ 		If $aIniForceWrite Then
+;~ 			If FileExists($sIniFile) Then
+;~ 				Local $aMyDate, $aMyTime
+;~ 				_DateTimeSplit(_NowCalc(), $aMyDate, $aMyTime)
+;~ 				Local $iniDate = StringFormat("%04i.%02i.%02i.%02i%02i", $aMyDate[1], $aMyDate[2], $aMyDate[3], $aMyTime[1], $aMyTime[2])
+;~ 				FileMove($sIniFile, $sIniFile & "_" & $iniDate & ".bak", 1)
+;~ 			EndIf
+;~ 			UpdateIni($sIniFile)
+;~ 		EndIf
+;~ 	EndIf
 	If $bDiscordBotUseTTS = "yes" Then
 		$bDiscordBotUseTTS = True
 	Else
@@ -2589,26 +2718,36 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		Global $aDailyMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyDaily, $sTwitchDailyMessage)
 		Global $aDailyTime = StringSplit($sAnnounceNotifyDaily, ",")
 		Global $aDailyCnt = Int($aDailyTime[0])
+
 		Global $aUpdateMsgInGame = AnnounceReplaceTime($sAnnounceNotifyUpdate, $sInGameUpdateMessage)
 		Global $aUpdateMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyUpdate, $sDiscordUpdateMessage)
 		Global $aUpdateMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyUpdate, $sTwitchUpdateMessage)
 		Global $aUpdateTime = StringSplit($sAnnounceNotifyUpdate, ",")
 		Global $aUpdateCnt = Int($aUpdateTime[0])
+
 		Global $aRemoteMsgInGame = AnnounceReplaceTime($sAnnounceNotifyRemote, $sInGameRemoteRestartMessage)
 		Global $aRemoteMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyRemote, $sDiscordRemoteRestartMessage)
 		Global $aRemoteMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyRemote, $sTwitchRemoteRestartMessage)
 		Global $aRemoteTime = StringSplit($sAnnounceNotifyRemote, ",")
-		Global $aRemoteCnt = Int($aRemoteTime[0])
+
 		Global $sModMsgInGame = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sInGameModUpdateMessage)
 		Global $sModMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sDiscordModUpdateMessage)
 		Global $sModMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sTwitchModUpdateMessage)
 		Global $aModTime = StringSplit($sAnnounceNotifyModUpdate, ",")
 		Global $aModCnt = Int($aModTime[0])
+
 		Global $aDelayShutdownTime = Int($aDailyTime[$aDailyCnt])
 		DailyRestartOffset($bRestartHours, $bRestartMin, $aDelayShutdownTime)
 	Else
 		Global $aDelayShutdownTime = 0
 	EndIf
+
+	Global $aStopServerMsgInGame = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sInGameStopServerMessage)
+	Global $aStopServerMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sDiscordStopServerMessage)
+	Global $aStopServerMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sTwitchStopServerMessage)
+	Global $aStopServerTime = StringSplit($sAnnounceNotifyStopServer, ",")
+	Global $aStopServerCnt = Int($aStopServerTime[0])
+
 	LogWrite("", " . . . Server Folder = " & $aServerDirLocal)
 	LogWrite("", " . . . SteamCMD Folder = " & $aSteamCMDDir)
 	;	If ($sInGameAnnounce = "yes") Or ($aTelnetCheckYN = "yes") And ($aTelnetRequired = "1") Then
@@ -2619,10 +2758,9 @@ EndFunc   ;==>ReadUini
 
 Func iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
 	If FileExists($sIniFile) Then
-		Local $aMyDate, $aMyTime
-		_DateTimeSplit(_NowCalc(), $aMyDate, $aMyTime)
-		Local $iniDate = StringFormat("%04i.%02i.%02i.%02i%02i", $aMyDate[1], $aMyDate[2], $aMyDate[3], $aMyTime[1], $aMyTime[2])
-		FileMove($sIniFile, $sIniFile & "_" & $iniDate & ".bak", 1)
+		Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
+		Local $tFile = $aIniFile & "_" & $tTime & ".bak"
+		FileMove($sIniFile, $tFile, 1)
 		UpdateIni($sIniFile)
 		;		FileWriteLine($aIniFailFileFull, _NowCalc() & " INI MISMATCH: Found " & $iIniFail & " missing variable(s) in " & $aUtilName & ".ini. Backup created and all existing settings transfered to new INI. Please modify INI and restart.")
 		$iIniErrorCRLF = StringRegExpReplace($iIniError, ", ", @CRLF & @TAB)
@@ -2681,13 +2819,14 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $aServerMultiHomeIP)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
 	FileWriteLine($sIniFile, @CRLF)
 	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $aServerIP)
 	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name", $aServerSaveDir)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $aServerAdminPass)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $aServerMaxPlayers)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $aServerReservedSlots)
+	FileWriteLine($sIniFile, @CRLF)
+	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $aServerRCONIP)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $aServerRCONImport)
@@ -2751,24 +2890,28 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $sAnnounceNotifyDaily)
 	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $sAnnounceNotifyUpdate)
 	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $sAnnounceNotifyRemote)
+	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $sAnnounceNotifyStopServer)
 	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $sAnnounceNotifyModUpdate)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires telnet) (yes/no) ###", $sInGameAnnounce)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sInGameDailyMessage)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sInGameUpdateMessage)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sInGameRemoteRestartMessage)
+	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $sInGameStopServerMessage)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $sInGameModUpdateMessage)
 	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $sInGame10SecondMessage)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $sUseDiscordBotDaily)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $sUseDiscordBotUpdate)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $sUseDiscordBotRemoteRestart)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $sUseDiscordBotStopServer)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $sUseDiscordBotModUpdate)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $sUseDiscordBotServersUpYN)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseDiscordBotFirstAnnouncement)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sDiscordDailyMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sDiscordUpdateMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sDiscordRemoteRestartMessage)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $sDiscordStopServerMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $sDiscordModUpdateMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $sDiscordServersUpMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook URL ###", $sDiscordWebHookURLs)
@@ -2779,11 +2922,13 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $sUseTwitchBotDaily)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $sUseTwitchBotUpdate)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $sUseTwitchBotRemoteRestart)
+	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $sUseTwitchBotStopServer)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $sUseTwitchBotModUpdate)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseTwitchFirstAnnouncement)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sTwitchDailyMessage)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sTwitchUpdateMessage)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sTwitchRemoteRestartMessage)
+	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes) ###", $sTwitchStopServerMessage)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\m - minutes, \x - Mod ID) ###", $sTwitchModUpdateMessage)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $sTwitchNick)
 	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $sChatOAuth)
@@ -2826,6 +2971,7 @@ Func UpdateIni($sIniFile)
 	FileWriteLine($sIniFile, @CRLF)
 	;	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $aLogRotate)
 	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $aLogQuantity)
+	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $sObfuscatePass)
 	;	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $aLogHoursBetweenRotate)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $aValidate)
@@ -2833,10 +2979,11 @@ Func UpdateIni($sIniFile)
 	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $aRCONSaveDelaySec)
 	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $aUpdateSource)
 	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates? (yes/no) ###", $aUpdateUtil)
+	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $aUpdateUtil)
+	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $aUpdateAutoUtil)
 	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $aUtilBetaYN)
+	FileWriteLine($sIniFile, @CRLF)
 	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no)", $aUsePuttytel)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $sObfuscatePass)
 	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $aExternalScriptHideYN)
 	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $aDebug)
 EndFunc   ;==>UpdateIni
@@ -2907,7 +3054,8 @@ Func CFGUtilReboot($i = True)
 EndFunc   ;==>CFGUtilReboot
 
 Func RunUtilUpdate()
-	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, 0, $aUpdateUtil)
+;~ 	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, 0, $aUpdateUtil)
+	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, 0, "Auto")
 	PurgeLogFile()
 EndFunc   ;==>RunUtilUpdate
 
@@ -2967,7 +3115,7 @@ Func Gamercide()
 			; ----------------------------------------------------------
 			If $Shutdown = 6 Then ; YES
 				LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass)
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, True, False)
 				SplashOff()
 				If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
 					LogWrite(" [Redis (PID: " & $aServerPIDRedis & ")] Killing Process")
@@ -2986,7 +3134,7 @@ Func Gamercide()
 			ElseIf $Shutdown = 7 Then ; NO
 				If $aServerUseRedis = "yes" Then
 					LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False) ; Do NOT close redis
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT close redis
 					PIDSaveRedis($aServerPIDRedis, $aPIDRedisFile)
 					MsgBox(4096, $aUtilityVer, $aMsg, 20)
 					LogWrite(" " & $aUtilityVer & " Stopped by User")
@@ -3019,83 +3167,157 @@ EndFunc   ;==>Gamercide
 
 ; -----------------------------------------------------------------------------------------------------------------------
 
-Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True)
+Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True, $tDisableServers = False)
 	If $aFirstBoot Then
 		Global $aSplashCloseServer = 0
 	Else
 		Global $aSplashCloseServer = SplashTextOn($aUtilName & ": " & $aServerName, "Sending shutdown command to server(s) . . .", 550, 100, -1, -1, $DLG_MOVEABLE, "")
 	EndIf
+	If $aRebootReason = "stopservers" Then
+		If $aSelectServers Then
+		Else
+			$tDisableServers = True
+			$aRebootReason = ""
+		EndIf
+	EndIf
 	CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, $aSplashCloseServer)
-	ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server(s) . . .")
+	ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown (DoExit) command to server(s) . . .")
 	$aServerReadyOnce = True
 	$aServerReadyTF = False
 	$aShutdown = 1
 	$aFailCount = 0
 	LogWrite(" --------- Server(s) shutdown sequence beginning ---------")
-	For $i = 0 To ($aServerGridTotal - 1)
-		If ($xStartGrid[$i] = "yes") Then
-			If ProcessExists($aServerPID[$i]) Then
-				$aErrorShutdown = 1
+	If $aSelectServers Then
+		SetStatusBusy("Stopping select server(s).", "Stop Server ")
+		For $i = 0 To ($aServerGridTotal - 1)
+			If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 				ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server: " & $xServergridx[$i] & $xServergridy[$i])
-				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD)
+				GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & $xServergridx[$i] & $xServergridy[$i])
+				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
+				LogWrite(" [Server] Sending shutdown (DoExit) command to select servers. Server " & $xServergridx[$i] & $xServergridy[$i])
 				Sleep(1000 * $aServerShutdownDelay)
 			EndIf
-		EndIf
-	Next
-	$aErrorShutdown = 0
-	LogWrite(" Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . .")
-	For $k = 1 To $aShutDnWait
+		Next
+	Else
 		For $i = 0 To ($aServerGridTotal - 1)
-			If ProcessExists($aServerPID[$i]) Then
-				$aErrorShutdown = 1
-				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD)
-				SendCTRLC($aServerPID[$i])
+			If ($xStartGrid[$i] = "yes") Then
+				If ProcessExists($aServerPID[$i]) Then
+					$aErrorShutdown = 1
+					ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server: " & $xServergridx[$i] & $xServergridy[$i])
+					GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & $xServergridx[$i] & $xServergridy[$i])
+					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD)
+					Sleep(1000 * $aServerShutdownDelay)
+				EndIf
 			EndIf
 		Next
-		If $aErrorShutdown = 1 Then
-			Sleep(950)
-			ControlSetText($aSplashCloseServer, "", "Static1", "Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . ." & @CRLF & @CRLF & "Countdown: " & ($aShutDnWait - $k))
-			$aErrorShutdown = 0
-		Else
-			ExitLoop
-		EndIf
-	Next
-	For $i = 0 To ($aServerGridTotal - 1)
-		If ProcessExists($aServerPID[$i]) And ($xStartGrid[$i] = "yes") Then
-			$aErrorShutdown = 1
-			LogWrite(" [Server (PID: " & $aServerPID[$i] & ")] Warning: Shutdown failed. Killing Process")
-			ProcessClose($aServerPID[$i])
-		EndIf
-	Next
-	If ($aErrorShutdown = 1) And ($aServerMultiHomeIP <> "") Then
-		SplashOff()
-		MsgBox($MB_OK, $aUtilityVer, "[Shutdown Error] The server(s) did not shut down properly." & @CRLF & "- Try removing the IP in: " & @CRLF & _
-				"[Server multi-home IP (Leave blank to disable) ###]" & @CRLF & "in " & $aUtilName & ".ini. " & @CRLF & @CRLF & "(This message will disappear in 20 seconds)", 20)
 	EndIf
-	For $i = 0 To ($aServerGridTotal - 1)
-		$aServerPID[$i] = ""
-	Next
-	If FileExists($aPIDServerFile) Then
-		FileDelete($aPIDServerFile)
-	EndIf
-	If $aServerUseRedis = "yes" Then
-		If $tCloseRedisTF Then
-			If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
-				LogWrite(" [Redis (PID: " & $aServerPIDRedis & ")] Killing Process")
-				ProcessClose($aServerPIDRedis)
+	$aErrorShutdown = 0
+	LogWrite(" Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . .")
+	If $aSelectServers Then
+		For $k = 1 To $aShutDnWait
+			For $i = 0 To ($aServerGridTotal - 1)
+				If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+					If $xStartGrid[$i] = "yes" Then
+						SendCTRLC($aServerPID[$i])
+						$aErrorShutdown = 1
+						SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
+					EndIf
+				EndIf
+			Next
+			If $aErrorShutdown = 1 Then
+				Sleep(950)
+				ControlSetText($aSplashCloseServer, "", "Static1", "Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . ." & @CRLF & @CRLF & "Countdown: " & ($aShutDnWait - $k))
+				$aErrorShutdown = 0
+			Else
+				ExitLoop
 			EndIf
-			If FileExists($aPIDRedisFile) Then
-				FileDelete($aPIDRedisFile)
+		Next
+		For $i = 0 To ($aServerGridTotal - 1)
+			If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+				If $xStartGrid[$i] = "yes" And ProcessExists($aServerPID[$i]) Then
+					$aErrorShutdown = 1
+					ProcessClose($aServerPID[$i])
+					LogWrite(" [Server (PID: " & $aServerPID[$i] & ")] Warning: Shutdown failed. Killing Process")
+					$aServerPID[$i] = ""
+				EndIf
 			EndIf
-		Else
-			PIDSaveRedis($aServerPIDRedis, $aPIDRedisFile)
+		Next
+		For $i = 0 To ($aServerGridTotal - 1)
+			If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+				$xStartGrid[$i] = "no"
+				$aGridSomeDisable = True
+				IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "no")
+			EndIf
+		Next
+		$aSelectServers = False
+		$aStopServerMsgInGame = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sInGameStopServerMessage)
+		$aStopServerMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sDiscordStopServerMessage)
+		$aStopServerMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyStopServer, $sTwitchStopServerMessage)
+	Else
+		For $k = 1 To $aShutDnWait
+			For $i = 0 To ($aServerGridTotal - 1)
+				If ProcessExists($aServerPID[$i]) Then
+					$aErrorShutdown = 1
+					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD)
+					SendCTRLC($aServerPID[$i])
+				EndIf
+			Next
+			If $aErrorShutdown = 1 Then
+				Sleep(950)
+				ControlSetText($aSplashCloseServer, "", "Static1", "Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . ." & @CRLF & @CRLF & "Countdown: " & ($aShutDnWait - $k))
+				$aErrorShutdown = 0
+			Else
+				ExitLoop
+			EndIf
+		Next
+		For $i = 0 To ($aServerGridTotal - 1)
+			If ProcessExists($aServerPID[$i]) And ($xStartGrid[$i] = "yes") Then
+				$aErrorShutdown = 1
+				LogWrite(" [Server (PID: " & $aServerPID[$i] & ")] Warning: Shutdown failed. Killing Process")
+				ProcessClose($aServerPID[$i])
+			EndIf
+		Next
+		If ($aErrorShutdown = 1) And ($aServerMultiHomeIP <> "") Then
+			SplashOff()
+			MsgBox($MB_OK, $aUtilityVer, "[Shutdown Error] The server(s) did not shut down properly." & @CRLF & "- Try removing the IP in: " & @CRLF & _
+					"[Server multi-home IP (Leave blank to disable) ###]" & @CRLF & "in " & $aUtilName & ".ini. " & @CRLF & @CRLF & "(This message will disappear in 20 seconds)", 20)
 		EndIf
+		For $i = 0 To ($aServerGridTotal - 1)
+			$aServerPID[$i] = ""
+		Next
+		If FileExists($aPIDServerFile) Then
+			FileDelete($aPIDServerFile)
+		EndIf
+		If $aServerUseRedis = "yes" Then
+			If $tCloseRedisTF Then
+				If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
+					LogWrite(" [Redis (PID: " & $aServerPIDRedis & ")] Killing Process")
+					ProcessClose($aServerPIDRedis)
+				EndIf
+				If FileExists($aPIDRedisFile) Then
+					FileDelete($aPIDRedisFile)
+				EndIf
+			Else
+				PIDSaveRedis($aServerPIDRedis, $aPIDRedisFile)
+			EndIf
+		EndIf
+		If $aSteamUpdateNow Then
+			SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $aValidate)
+		EndIf
+		$aShutdown = 0
 	EndIf
 	LogWrite(" --------------- Server(s) shutdown sequence completed ----------")
-	If $aSteamUpdateNow Then
-		SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $aValidate)
+	If $tDisableServers Then
+		For $i = 0 To ($aServerGridTotal - 1)
+			If ($xStartGrid[$i] = "yes") Then
+				IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "no")
+				$xStartGrid[$i] = "no"
+				$aGridSomeDisable = True
+			EndIf
+		Next
+		$tDisableServers = False
 	EndIf
-	$aShutdown = 0
+	SplashOff()
 EndFunc   ;==>CloseServer
 
 ; -----------------------------------------------------------------------------------------------------------------------
@@ -3164,6 +3386,9 @@ Func ImportConfig($tServerDirLocal, $tConfigFile)
 		Local $xServerWorldFriendlyName = _StringBetween($sConfigRead, """" & $kServerWorldFriendlyName & """: """, """,")
 		$aServerWorldFriendlyName = _ArrayToString($xServerWorldFriendlyName)
 		$xServerIP = _StringBetween($sConfigReadServer, """" & $kServerip & """: """, """,")
+		For $i = 0 To (UBound($xServerIP) - 1)
+			$xServerIP[$i] = RemoveTrailingSlashT($xServerIP[$i])
+		Next
 		$xServerNames = _StringBetween($sConfigReadServer, @CRLF & "      """ & $kServerNames & """: """, """," & @CRLF & "      ""port")
 
 		;Global $aServerip = _ArrayToString($xServerip)
@@ -3195,6 +3420,106 @@ Func ImportConfig($tServerDirLocal, $tConfigFile)
 	Global $aServerGridTotal = Int($xtotalGridsX) * Int($xtotalGridsY)
 EndFunc   ;==>ImportConfig
 #EndRegion ;****  Get data from ServerGrid.json ****
+
+Func _CheckForDuplicatePorts()
+	FileDelete($aDuplicateErrorFile)
+	Global $aDupError = False
+	;	Local $aTxt = "WARNING!!! The following are duplicate entries in your " & $aConfigFile & " file." & @CRLF & "The following list contains a separate entry [Paramater:Duplicate] for each duplicate." & @CRLF & @CRLF
+	Local $aTxt = "WARNING!!! The following ports are used more than once!" & @CRLF & @CRLF & "Duplicates within the " & $aConfigFile & " file (if any):" & @CRLF
+	$aTxt &= "----- Duplicate Ports in Same Category -----" & @CRLF
+	$aTxt &= _ConfigCheckForDuplicates($xServerport, "Query Port")
+	$aTxt &= _ConfigCheckForDuplicates($xServergameport, "Port")
+	$aTxt &= _ConfigCheckForDuplicates($xServerseamlessDataPort, "SeamlessDataPort")
+	$aTxt &= @CRLF & "----- Duplicate RCON Ports in " & $aUtilName & ".ini File -----" & @CRLF
+	$aTxt &= _ConfigCheckForDuplicates($xServerRCONPort, "RCON Port")
+	$aTxt &= @CRLF & "----- Duplicate Ports in Same & Multiple Categories -----" & @CRLF
+	Local $xAllPortsArray = $xServerport
+	_ArrayConcatenate($xAllPortsArray, $xServerRCONPort)
+	_ArrayConcatenate($xAllPortsArray, $xServergameport)
+	_ArrayConcatenate($xAllPortsArray, $xServerseamlessDataPort)
+	$aTxt &= _ConfigCheckForDuplicates($xAllPortsArray, "(Query/RCON/Port/SeamlessDataPort)")
+	$aTxt &= @CRLF & "Click (OK) to exit util."
+	If $aDupError Then
+		SplashOff()
+		MsgBox($MB_OK, $aUtilName, $aTxt)
+		FileWrite($aDuplicateErrorFile, $aTxt)
+		Run("notepad.exe " & $aDuplicateErrorFile)
+		Run("notepad.exe " & $aConfigFull)
+		Exit
+	EndIf
+
+EndFunc   ;==>_CheckForDuplicatePorts
+
+Func _ConfigCheckForDuplicates($tArray, $tParameter)
+	Local $tTxt = ""
+	Local $aArray = _ArrayDuplicates($tArray)
+	If UBound($aArray) > 0 Then
+		;Local $tTxt = "WARNING!!! There are duplicate entries in your " & $aConfigFile & " file." & @CRLF & "The following list contains a separate entry [Paramater:Duplicate] for each duplicate." & @CRLF & @CRLF
+		For $i = 0 To (UBound($aArray) - 1)
+			$tTxt &= $tParameter & ":" & $aArray[$i] & @CRLF
+		Next
+		;		$tTxt &= @CRLF & "Click (OK) to exit util."
+		;		SplashOff()
+		;		MsgBox($MB_OK, $aUtilName, $tTxt)
+		;		Run("notepad.exe " & $aConfigFull)
+		;		Exit
+		$aDupError = True
+	EndIf
+	Return $tTxt
+EndFunc   ;==>_ConfigCheckForDuplicates
+
+Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False)  ; Modified version of Melba23's script: https://www.autoitscript.com/forum/topic/164666-get-duplicate-from-array/
+	; Create dictionary
+	Local $oDict = ObjCreate("Scripting.Dictionary")
+	Local $vElem
+	; Loop through array
+	For $i = 0 To UBound($aArray) - 1
+		; Extract element
+		$vElem = $aArray[$i]
+		; Check if already in dictionary
+		If $oDict.Exists($vElem) Then
+			; Increase count
+			$oDict($vElem) = $oDict($vElem) + 1
+		Else
+			; Add to dictionary
+			$oDict.Item($vElem) = 1
+		EndIf
+	Next
+	; Create return array large enough for all elements
+	If $tAddCountToArrayZero Then
+		Local $aRet[UBound($aArray) + 1], $iIndex = 0
+		; Loop through dictionary and transfer multiple elements to return array
+		For $vKey In $oDict
+			; Get count
+			$iCount = $oDict($vKey)
+			; if more than 1
+			If $iCount > 1 Then
+				; Add as many as required
+				For $i = 1 To $iCount
+					$iIndex += 1
+					$aRet[$iIndex] = $vKey
+				Next
+			EndIf
+		Next
+		; Add count to [0]element
+		$aRet[0] = $iIndex
+		; Remove ampty elements of return array
+		ReDim $aRet[$iIndex + 1] ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	Else
+		Local $aRet[UBound($aArray)], $iIndex = 0
+		For $vKey In $oDict
+			$iCount = $oDict($vKey)
+			If $iCount > 1 Then
+				For $i = 1 To $iCount
+					$aRet[$iIndex] = $vKey
+					$iIndex += 1
+				Next
+			EndIf
+		Next
+		ReDim $aRet[$iIndex] ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	EndIf
+	Return $aRet
+EndFunc   ;==>_ArrayDuplicates
 
 ; -----------------------------------------------------------------------------------------------------------------------
 
@@ -3264,8 +3589,8 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
@@ -3372,7 +3697,7 @@ EndFunc   ;==>UpdateGridSelectINI
 #Region ;**** Fail Count Announce ****
 Func FailCountRun()
 	LogWrite(" [--== CRITICAL ERROR! ==-- ] The " & $aGameName & " Dedicated Server (" & $aServerEXE & ") failed to start at least twice within 1 minute. Please check " & $aGameName & " config files and " & $aUtilName & ".ini file")
-	CloseServer($aServerIP, $aTelnetPort, $aTelnetPass)
+	CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, True, False)
 	MsgBox($MB_OK, $aUtilityVer, "[CRITICAL ERROR!] The " & $aGameName & " Dedicated Server (" & $aServerEXE & ") failed to start at least twice within 1 minute. " & @CRLF & @CRLF & "Please check " & $aGameName & " config files and " & $aUtilName & ".ini file and restart " & $aUtilName & ".")
 	Exit
 EndFunc   ;==>FailCountRun
@@ -3390,7 +3715,7 @@ Func SendDiscordMsg($sHookURLs, $sBotMessage, $sBotName = "", $sBotTTS = False, 
 	Local $sJsonMessage = '{"content" : "' & $sBotMessage & '", "username" : "' & $sBotName & '", "tts" : "' & $sBotTTS & '", "avatar_url" : "' & $sBotAvatar & '"}'
 	Local $oHTTPOST = ObjCreate("WinHttp.WinHttpRequest.5.1")
 	$oHTTPOST.Open("POST", StringStripWS($sHookURLs, 2) & "?wait=true", False)
-	$oHTTPOST.Option($WinHttpRequestOption_SslErrorIgnoreFlags) = $WinHttpRequestOption_SslErrorIgnoreFlags_IgnoreAll ;Kim!! Test code
+	$oHTTPOST.Option($WinHttpRequestOption_SslErrorIgnoreFlags) = $WinHttpRequestOption_SslErrorIgnoreFlags_IgnoreAll     ;Kim!! Test code
 ;~ 	$oHTTPOST.setOption(2, 0x3300)   ;<== Modified
 	$oHTTPOST.SetRequestHeader("Content-Type", "application/json")
 	$oHTTPOST.Send($sJsonMessage)
@@ -3421,7 +3746,7 @@ Func SendInGame($mIP, $mPort, $mPass, $mMessage)
 	Next
 	;	If $xDebug Then
 	;	Else
-	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no") ; "no" = do not write to debug log file
+	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no")     ; "no" = do not write to debug log file
 	;	EndIf
 
 	;	Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
@@ -3552,14 +3877,14 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 				SplashOff()
 				$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
 				; ----------------------------------------------------------
-				If $tMB = 6 Then ; YES
+				If $tMB = 6 Then     ; YES
 					$bUpdateRequired = True
 					$aSteamUpdateNow = True
 					$aUpdateVerify = "yes"
 					RunExternalScriptUpdate()
 					$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 					SteamcmdDelete($aSteamCMDDir)
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 					; ----------------------------------------------------------
 				ElseIf ($tMB = 7) And (($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes")) Then
 					$bUpdateRequired = True
@@ -3598,7 +3923,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 					RunExternalScriptUpdate()
 					$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 					SteamcmdDelete($aSteamCMDDir)
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 				EndIf
 ;~ 				$bUpdateRequired = True
 ;~ 				$aSteamUpdateNow = True
@@ -3633,7 +3958,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 		RunExternalScriptUpdate()
 		$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 		SteamcmdDelete($aSteamCMDDir)
-		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 
 	ElseIf Not $aInstalledVersion[0] Then
 		LogWrite(" [Update] Something went wrong retrieving Installed Version. Running update with -validate. (This is normal for new install)")
@@ -3644,7 +3969,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 		RunExternalScriptUpdate()
 		$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 		SteamcmdDelete($aSteamCMDDir)
-		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 
 	ElseIf Not $aLatestVersion[0] Then
 		LogWrite(" [Update] Something went wrong retrieving Latest Version.  Skipping this update check.")
@@ -3658,7 +3983,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 			RunExternalScriptUpdate()
 			$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 			SteamcmdDelete($aSteamCMDDir)
-			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False)
+			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 		Else
 			SplashTextOn($aUtilName, "Utility update check canceled by user." & @CRLF & "Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 			Sleep(2000)
@@ -3795,7 +4120,7 @@ Func GetInstalledVersion($sGameDir)
 		$aReturn[0] = True
 		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
-
+		
 			If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '"buildid"', 1)
 			EndIf
@@ -3809,7 +4134,7 @@ Func GetInstalledVersion($sGameDir)
 			$aReturn[0] = True
 			$aReturn[1] = $aAppInfo[2]
 			EndIf
-
+		
 			If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
 			EndIf
@@ -4234,11 +4559,13 @@ EndFunc   ;==>RemoveTrailingSlash
 #EndRegion ;**** Remove Trailing Slash ****
 
 Func RemoveTrailingSlashT($aString)
-	Local $bString = StringRight($aString, 1)
+	Local $bString = StringRight($aString, 2)
 	If $bString = "\t" Then
-		$aString = StringTrimRight($sString, 1)
+		$cString = StringTrimRight($aString, 2)
+	Else
+		$cString = $aString
 	EndIf
-	Return $aString
+	Return $cString
 EndFunc   ;==>RemoveTrailingSlashT
 
 Func CloseTCP($tIP, $tPort, $tSplash = 0)
@@ -4296,7 +4623,7 @@ EndFunc   ;==>CloseTCP
 ;
 ;==========================================================================================
 
-Func PassCheck($sPass, $sPassString) ;**** PassCheck - Checks if received password matches any of the known passwords ****
+Func PassCheck($sPass, $sPassString)     ;**** PassCheck - Checks if received password matches any of the known passwords ****
 	Local $aPassReturn[3] = [False, "", ""]
 	Local $aPasswords = StringSplit($sPassString, ",")
 	For $i = 1 To $aPasswords[0]
@@ -4317,7 +4644,7 @@ Func PassCheck($sPass, $sPassString) ;**** PassCheck - Checks if received passwo
 	Return $aPassReturn
 EndFunc   ;==>PassCheck
 
-Func ObfPass($sObfPassString) ;**** ObfPass - Obfuscates password string for logging
+Func ObfPass($sObfPassString)     ;**** ObfPass - Obfuscates password string for logging
 	Local $sObfPass = ""
 	For $i = 1 To (StringLen($sObfPassString) - 3)
 		If $i <> 4 Then
@@ -4329,7 +4656,7 @@ Func ObfPass($sObfPassString) ;**** ObfPass - Obfuscates password string for log
 	Return $sObfPass
 EndFunc   ;==>ObfPass
 
-Func _TCP_Server_ClientIP($hSocket) ;**** Function to get IP from Restart Client ****
+Func _TCP_Server_ClientIP($hSocket)     ;**** Function to get IP from Restart Client ****
 	Local $pSocketAddress, $aReturn
 	$pSocketAddress = DllStructCreate("short;ushort;uint;char[8]")
 	$aReturn = DllCall("ws2_32.dll", "int", "getpeername", "int", $hSocket, "ptr", DllStructGetPtr($pSocketAddress), "int*", DllStructGetSize($pSocketAddress))
@@ -4340,7 +4667,7 @@ Func _TCP_Server_ClientIP($hSocket) ;**** Function to get IP from Restart Client
 	Return $aReturn[0]
 EndFunc   ;==>_TCP_Server_ClientIP
 
-Func CheckHTTPReq($sRequest, $sKey = "restart") ;**** Function to Check Request from Browser and return restart string if request is valid****
+Func CheckHTTPReq($sRequest, $sKey = "restart")     ;**** Function to Check Request from Browser and return restart string if request is valid****
 	If IsString($sRequest) Then
 		Local $aRequest = StringRegExp($sRequest, '^GET[[:blank:]]\/\?(?i)' & $sKey & '(?-i)=(\S+)[[:blank:]]HTTP\/\d.\d\R', 2)
 		If Not @error Then
@@ -4355,7 +4682,7 @@ Func CheckHTTPReq($sRequest, $sKey = "restart") ;**** Function to Check Request 
 	EndIf
 EndFunc   ;==>CheckHTTPReq
 
-Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False) ;**** Function to Check for Multiple Password Failures****
+Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)     ;**** Function to Check for Multiple Password Failures****
 	Local $aPassFailure[1][3] = [[0, 0, 0]]
 	For $i = 1 To UBound($aPassFailure, 1) - 1
 		If StringCompare($aPassFailure[$i][0], $sRemoteIP) = 0 Then
@@ -4382,7 +4709,7 @@ Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False) ;**** Fu
 	Return SetError(0, 0, "IP Added to List")
 EndFunc   ;==>MultipleAttempts
 
-Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True) ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
+Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True)     ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
 	Local $vConnectedSocket = TCPAccept($vMSocket)
 	If $vConnectedSocket >= 0 Then
 		Local $sRecvIP = _TCP_Server_ClientIP($vConnectedSocket)
@@ -4459,7 +4786,7 @@ Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $b
 EndFunc   ;==>_RemoteRestart
 #EndRegion ;**** _RemoteRestart ****
 
-Func RotateFile($sFile, $sBackupQty, $bDelOrig = True) ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
+Func RotateFile($sFile, $sBackupQty, $bDelOrig = True)     ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
 	Local $hCreateTime = @YEAR & @MON & @MDAY
 	For $i = $sBackupQty To 1 Step -1
 		If FileExists($sFile & $i) Then
@@ -4569,35 +4896,35 @@ Func _ExtractZip($sZipFile, $sFolderStructure, $sFile, $sDestinationFolder)
 	Do
 		$i += 1
 		$sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
-	Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
+	Until Not FileExists($sTempZipFolder)     ; this folder will be created during extraction
 
 	Local $oShell = ObjCreate("Shell.Application")
 
 	If Not IsObj($oShell) Then
-		Return SetError(1, 0, 0) ; highly unlikely but could happen
+		Return SetError(1, 0, 0)     ; highly unlikely but could happen
 	EndIf
 
 	Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
 	If Not IsObj($oDestinationFolder) Then
-		Return SetError(2, 0, 0) ; unavailable destionation location
+		Return SetError(2, 0, 0)     ; unavailable destionation location
 	EndIf
 
-	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
+	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure)     ; FolderStructure is overstatement because of the available depth
 	If Not IsObj($oOriginFolder) Then
-		Return SetError(3, 0, 0) ; unavailable location
+		Return SetError(3, 0, 0)     ; unavailable location
 	EndIf
 
 	Local $oOriginFile = $oOriginFolder.ParseName($sFile)
 	If Not IsObj($oOriginFile) Then
-		Return SetError(4, 0, 0) ; no such file in ZIP file
+		Return SetError(4, 0, 0)     ; no such file in ZIP file
 	EndIf
 
 	; copy content of origin to destination
-	$oDestinationFolder.CopyHere($oOriginFile, 4) ; 4 means "do not display a progress dialog box", but apparently doesn't work
+	$oDestinationFolder.CopyHere($oOriginFile, 4)     ; 4 means "do not display a progress dialog box", but apparently doesn't work
 
-	DirRemove($sTempZipFolder, 1) ; clean temp dir
+	DirRemove($sTempZipFolder, 1)     ; clean temp dir
 
-	Return 1 ; All OK!
+	Return 1     ; All OK!
 
 EndFunc   ;==>_ExtractZip
 #EndRegion ;**** UnZip Function by trancexx ****
@@ -4627,7 +4954,7 @@ Func FileExistsFunc()
 	Local $sFileExists = FileExists($aSteamCMDDir & "\steamcmd.exe")
 	If $sFileExists = 0 Then
 		InetGet("https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", @ScriptDir & "\steamcmd.zip", 0)
-		DirCreate($aSteamCMDDir) ; to extract to
+		DirCreate($aSteamCMDDir)     ; to extract to
 		_ExtractZip(@ScriptDir & "\steamcmd.zip", "", "steamcmd.exe", $aSteamCMDDir)
 		FileDelete(@ScriptDir & "\steamcmd.zip")
 		LogWrite(" Running SteamCMD. [steamcmd.exe +quit]")
@@ -4643,7 +4970,7 @@ Func FileExistsFunc()
 		If $sFileExists = 0 Then
 			LogWrite(" Downloaded and installed mcrcon.exe")
 			InetGet("https://github.com/Tiiffi/mcrcon/releases/download/v0.0.5/mcrcon-0.0.5-windows.zip", @ScriptDir & "\mcrcon.zip", 0)
-			DirCreate(@ScriptDir) ; to extract to
+			DirCreate(@ScriptDir)     ; to extract to
 			_ExtractZip(@ScriptDir & "\mcrcon.zip", "", "mcrcon.exe", @ScriptDir)
 			FileDelete(@ScriptDir & "\mcrcon.zip")
 			If Not FileExists(@ScriptDir & "\mcrcon.exe") Then
@@ -4732,17 +5059,17 @@ Func CheckMod($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False)
 		ElseIf Not $aInstalledTime[0] Then
 			$xError = True
 			$tError = 2
-			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;No Manifest. Download First Mod
+			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest. Download First Mod
 			If $bStopUpdate Then ExitLoop
 		ElseIf Not $aInstalledTime[1] Then
 			$xError = True
 			$tError = 3
-			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;Mod does not exists. Download
+			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod does not exists. Download
 			If $bStopUpdate Then ExitLoop
 		ElseIf $aInstalledTime[1] And (StringCompare($aLatestTime[2], $aInstalledTime[2]) <> 0) Then
 			$tError = 4
 			$xError = True
-			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;Mod Out of Date. Update.
+			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod Out of Date. Update.
 			If $bStopUpdate Then ExitLoop
 		EndIf
 	Next
@@ -4783,7 +5110,7 @@ Func GetLatestModUpdateTime($sMod, $sShow)
 	EndIf
 
 	If $aReturn[0] Then
-		$aReturn[0] = True ;File Exists
+		$aReturn[0] = True     ;File Exists
 		Local $aAppInfo = StringSplit($sFileRead, 'Update:', 1)
 		If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '">', 1)
@@ -4792,8 +5119,8 @@ Func GetLatestModUpdateTime($sMod, $sShow)
 			$aAppInfo = StringSplit($aAppInfo[1], 'id="', 1)
 		EndIf
 		If UBound($aAppInfo) >= 2 And StringRegExp($aAppInfo[2], '^\d+$') Then
-			$aReturn[1] = True ;Successfully Read numerical value at positition expected
-			$aReturn[2] = $aAppInfo[2] ;Return Value Read
+			$aReturn[1] = True     ;Successfully Read numerical value at positition expected
+			$aReturn[2] = $aAppInfo[2]     ;Return Value Read
 		EndIf
 		Local $zModName = _ArrayToString(_StringBetween($sFileRead, "<title>Steam Community :: ", " :: Change Notes</title>"))
 		$aReturn[3] = $zModName
@@ -4819,7 +5146,7 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	If $hFileOpen = -1 Then
 		$aReturn[0] = False
 	Else
-		$aReturn[0] = True ;File Exists
+		$aReturn[0] = True     ;File Exists
 		Local $sFileRead = FileRead($hFileOpen)
 		Local $aAppInfo = StringSplit($sFileRead, '"WorkshopItemDetails"', 1)
 		If UBound($aAppInfo) >= 3 Then
@@ -4832,8 +5159,8 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 			$aAppInfo = StringSplit($aAppInfo[1], '"', 1)
 		EndIf
 		If UBound($aAppInfo) >= 9 And StringRegExp($aAppInfo[8], '^\d+$') Then
-			$aReturn[1] = True ;Successfully Read numerical value at positition expected
-			$aReturn[2] = $aAppInfo[8] ;Return Value Read
+			$aReturn[1] = True     ;Successfully Read numerical value at positition expected
+			$aReturn[2] = $aAppInfo[8]     ;Return Value Read
 		EndIf
 		If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
@@ -4888,7 +5215,7 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 	Do
 		If Not ProcessExists($tPID) Then ExitLoop
 		Sleep(500)
-	Until TimerDiff($Timer) > 180000 ; Wait 3 minutes for mod to finish downloading
+	Until TimerDiff($Timer) > 180000     ; Wait 3 minutes for mod to finish downloading
 	If ProcessExists($tPID) Then
 		ProcessClose($tPID)
 	EndIf
@@ -4904,10 +5231,50 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 EndFunc   ;==>UpdateMod
 #EndRegion ;**** Functions to Check for Mod Updates ****
 
+Func _InetGetMulti($tCnt, $tFile, $tLink1, $tLink2 = "0")
+	FileDelete($tFile)
+	Local $i = 0
+	Local $tTmp = InetGet($tLink1, $tFile, $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)
+	Do
+		Sleep(100)
+		$i += 1
+	Until InetGetInfo($tTmp, $INET_DOWNLOADCOMPLETE) Or $i = $tCnt
+	InetClose($tTmp)
+	If $i = $tCnt And $tLink2 <> "0" Then
+		$tTmp = InetGet($tLink2, $tFile, $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)
+		Do
+			Sleep(100)
+			$i += 1
+		Until InetGetInfo($tTmp, $INET_DOWNLOADCOMPLETE) Or $i = $tCnt
+	EndIf
+	Local $hFileOpen = FileOpen($tFile, 0)
+	Local $hFileRead = FileRead($hFileOpen)
+	If $hFileOpen = -1 Then
+		FileClose($hFileOpen)
+		Local $hFileRead = _INetGetSource($tLink1)
+		If @error Then
+			If $tLink2 <> "0" Then
+				$hFileRead = _INetGetSource($tLink2)
+				If @error Then
+					Return "Error" ; Error
+				Else
+					FileClose($hFileOpen)
+				EndIf
+			Else
+				Return True ; Error
+			EndIf
+		Else
+			FileClose($hFileOpen)
+		EndIf
+	EndIf
+	Return $hFileRead ; No error
+EndFunc   ;==>_InetGetMulti
+
 #Region ;**** Check for Server Utility Update ****
-Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "requested")
+Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "show")
+	SetStatusBusy("Starting Util Update.")
 	Local $tUtilUpdateAvailableTF = False
-	If $tUpdate = "yes" Or $tUpdate = "requested" Then
+	If $tUpdate = "show" Then
 		Local $tTxt = $aStartText & "Checking for " & $tUtilName & " updates."
 		If $tSplash > 0 Then
 			ControlSetText($tSplash, "", "Static1", $tTxt)
@@ -4917,43 +5284,31 @@ Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "requ
 	EndIf
 	Local $tVer[2]
 	Local $sFilePath = $aFolderTemp & $aUtilName & "_latest_ver.tmp"
-	InetGet($tLink, $sFilePath, 1)
-	Local $hFileOpen = FileOpen($sFilePath, 0)
-	Local $hFileRead = FileRead($hFileOpen)
-	If $hFileOpen = -1 Then
-		FileClose($hFileOpen)
-		Local $hFileRead = _INetGetSource($tLink)
-		If @error Then
-			LogWrite(" [UTIL] " & $tUtilName & " update check failed to download latest version: " & $tLink)
-			If $tUpdate = "yes" Or $tUpdate = "requested" Then
-				If $aShowUpdate Then
-					Local $tTxt = $aStartText & $aUtilName & " update check failed." & @CRLF & "Please try again later."
-					If $tSplash > 0 Then
-						ControlSetText($tSplash, "", "Static1", $tTxt)
-					Else
-						SplashTextOn($aUtilName, $tTxt, 400, 110, -1, -1, $DLG_MOVEABLE, "")
-					EndIf
-					Sleep(2000)
-					$aShowUpdate = False
+	$iGet = _InetGetMulti(20, $sFilePath, $tLink)
+	If $iGet = "Error" Then
+		LogWrite(" [UTIL] " & $tUtilName & " update check failed to download latest version: " & $tLink)
+		If $tUpdate = "show" Then
+			If $aShowUpdate Then
+				Local $tTxt = $aStartText & $aUtilName & " update check failed." & @CRLF & "Please try again later."
+				If $tSplash > 0 Then
+					ControlSetText($tSplash, "", "Static1", $tTxt)
+				Else
+					SplashTextOn($aUtilName, $tTxt, 400, 110, -1, -1, $DLG_MOVEABLE, "")
 				EndIf
+				Sleep(2000)
+				$aShowUpdate = False
 			EndIf
-		Else
-			FileClose($hFileOpen)
 		EndIf
-		If $tUpdate = "yes" Or $tUpdate = "requested" Then
-			SplashTextOn($aUtilName, $aUtilName & " update check failed." & @CRLF & "Please try again later.", 400, 110, -1, -1, $DLG_MOVEABLE, "")
-		EndIf
-;~ 	EndIf
 	Else
-		;		Local $hFileRead = FileRead($hFileOpen)
-		$tVer = StringSplit($hFileRead, "^", 2)
+		$tVer = StringSplit($iGet, "^", 2)
+		Local $tTxt1 = ReplaceCRLF(ReplaceCRwithCRLF($tVer[1]))
 		If $tVer[0] = $tUtil Then
 			$tUtilUpdateAvailableTF = False
-			LogWrite(" [UTIL] " & $tUtilName & " up to date. Version: " & $tVer[0] & ", [UTIL] " & $tUtilName & " up To date. Version : " & $tVer[0] & ", Notes : " & $tVer[1])
+			LogWrite(" [UTIL] " & $tUtilName & " up to date. Version: " & $tVer[0], " [UTIL] " & $tUtilName & " up to date. Version : " & $tVer[0] & ", Notes : " & $tTxt1)
 			If FileExists($aUtilUpdateFile) Then
 				FileDelete($aUtilUpdateFile)
 			EndIf
-			If $tUpdate = "yes" Or $tUpdate = "requested" Then
+			If $tUpdate = "show" Then
 				If $aShowUpdate Then
 					Local $tTxt = $aStartText & $aUtilName & " up to date . . ."
 					If $tSplash > 0 Then
@@ -4962,26 +5317,26 @@ Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "requ
 						SplashTextOn($aUtilName, $tTxt, 400, 110, -1, -1, $DLG_MOVEABLE, "")
 					EndIf
 					Sleep(2000)
-;~ 				SplashTextOn($aUtilName, $aUtilName & " up to date . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 					$aShowUpdate = False
 				EndIf
 			EndIf
 		Else
 			$tUtilUpdateAvailableTF = True
-			LogWrite(" [UTIL] !!! New " & $aUtilName & " update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0], " [UTIL] New " & $aUtilName & " update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0] & ", Notes: " & $tVer[1])
-			FileWrite($aUtilUpdateFile, _NowCalc() & " [UTIL] New " & $aUtilName & " update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0] & ", Notes: " & $tVer[1])
-			If $tUpdate = "yes" Or $tUpdate = "requested" Then
+			LogWrite(" [UTIL] !!! New " & $aUtilName & " update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0], " [UTIL] New " & $aUtilName & _
+					" update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0] & ", Notes: " & $tTxt1)
+			FileWrite($aUtilUpdateFile, _NowCalc() & " [UTIL] New " & $aUtilName & " update available. Installed version: " & $tUtil & ", Latest version: " & $tVer[0] & ", Notes: " & $tTxt1)
+			If ($tUpdate = "show") Or ($tUpdate = "auto") Then
 				SplashOff()
-				$tVer[1] = ReplaceReturn($tVer[1])
-				;			$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "New " & $aUtilName & " update available. " & @CRLF & "Installed version: " & $tUtil & @CRLF & "Latest version: " & $tVer[0] & @CRLF & @CRLF & _
-				;					"Notes: " & @CRLF & $tVer[1] & @CRLF & @CRLF & _
-				;					"Click (OK) to download update to " & @CRLF & @ScriptDir & @CRLF & _
-				;					"Click (CANCEL), or wait 30 seconds, to close this window.", 30)
-				$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "New " & $aUtilName & " update available. " & @CRLF & "Installed version: " & $tUtil & @CRLF & "Latest version: " & $tVer[0] & @CRLF & @CRLF & _
-						"Notes: " & @CRLF & $tVer[1] & @CRLF & @CRLF & _
-						"Click (YES) to download update to " & @CRLF & @ScriptDir & @CRLF & _
-						"Click (NO) to stop checking for updates." & @CRLF & _
-						"Click (CANCEL) to skip this update check.", 15)
+				If ($tUpdate = "Auto") And ($aUpdateAutoUtil = "yes") Then
+					Local $tMB = 6
+				Else
+					SetStatusBusy("Util Update. Waiting for User Input.", "Waiting for User Input")
+					Local $tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "New " & $aUtilName & " update available. " & @CRLF & "Installed version: " & $tUtil & @CRLF & "Latest version: " & $tVer[0] & @CRLF & @CRLF & _
+							"Notes: " & @CRLF & $tVer[1] & @CRLF & @CRLF & _
+							"Click (YES) to download update to " & @CRLF & @ScriptDir & @CRLF & _
+							"Click (NO) to stop checking for updates." & @CRLF & _
+							"Click (CANCEL) to skip this update check.", 15)
+				EndIf
 				If $tMB = 6 Then
 					SplashTextOn($aUtilityVer, " Downloading latest version of " & @CRLF & $tUtilName, 400, 110, -1, -1, $DLG_MOVEABLE, "")
 					Local $tZIP = @ScriptDir & "\" & $tUtilName & "_" & $tVer[0] & ".zip"
@@ -5001,53 +5356,73 @@ Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "requ
 					If Not FileExists(@ScriptDir & "\" & $tUtilName & "_" & $tVer[0] & ".exe") Then
 						LogWrite(" [UTIL] ERROR! " & $tUtilName & ".exe download failed.")
 						SplashOff()
-						$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Download failed . . . " & @CRLF & "Go to """ & $tLink & """ to download latest version." & @CRLF & @CRLF & "Click (OK), (CANCEL), or wait 15 seconds, to resume current version.", 15)
+						$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Utility update download failed . . . " & @CRLF & "Go to """ & $tLink & """ to download latest version." & @CRLF & @CRLF & "Click (OK), (CANCEL), or wait 60 seconds, to resume current version.", 60)
 					Else
 						SplashOff()
-						$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Download complete. . . " & @CRLF & @CRLF & "Click (OK) to run new version (servers will remain running) OR" & @CRLF & "Click (CANCEL), or wait 15 seconds, to resume current version.", 15)
+						If ($tUpdate = "Auto") And ($aUpdateAutoUtil = "yes") Then
+							$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Auto utility update download complete. . . " & @CRLF & @CRLF & "Click (OK) to run new version or wait 60 seconds (servers will remain running) OR" & @CRLF & "Click (CANCEL) to resume current version.", 60)
+							If $tMB = 1 Then ; OK
+
+							ElseIf $tMB = -1 Then
+								$tMB = 1 ; OK
+							ElseIf $tMB = 2 Then ; CANCEL
+
+							EndIf
+						Else
+							$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Utility update download complete. . . " & @CRLF & @CRLF & "Click (OK) to run new version (servers will remain running) OR" & @CRLF & "Click (CANCEL), or wait 15 seconds, to resume current version.", 15)
+						EndIf
 						If $tMB = 1 Then
-							LogWrite(" [" & $aServerName & "] Util Shutdown - Initiated by User to run update.")
+							LogWrite(" [UTIL] Update download complete. Shutting down current version and starting new version. Initiated by User or Auto Update.")
 							CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, 0)
 							PIDSaveServer($aServerPID, $aPIDServerFile)
 							PIDSaveRedis($aServerPIDRedis, $aPIDRedisFile)
 							Run(@ScriptDir & "\" & $tUtilName & "_" & $tVer[0] & ".exe")
 							Exit
+						Else
+							LogWrite(" [UTIL] Update download complete. Per user request, continuing to run current version. Resuming utility . . .")
+							SplashTextOn($aUtilName, "Utility update check canceled by user." & @CRLF & "Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+							Sleep(2000)
+							SplashOff()
 						EndIf
 					EndIf
 				ElseIf $tMB = 7 Then
-					$aUpdateUtil = "no"
-					IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates? (yes/no) ###", "no")
+					$aUpdateUtil = "0"
+					IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $aUpdateUtil)
 					LogWrite(" [UTIL] " & "Utility update check disabled. To enable update check, " & @CRLF & "change [Check for Updates ###=yes] in the .ini.")
 					SplashTextOn($aUtilName, "Utility update check disabled." & @CRLF & "To enable update check, change [Check for Updates ###=yes] in the .ini.", 500, 110, -1, -1, $DLG_MOVEABLE, "")
 					Sleep(5000)
+					SplashOff()
 				ElseIf $tMB = 2 Then
 					LogWrite(" [UTIL] Utility update check canceled by user. Resuming utility . . .")
 					SplashTextOn($aUtilName, "Utility update check canceled by user." & @CRLF & "Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 					Sleep(2000)
+					SplashOff()
 				EndIf
 			EndIf
 		EndIf
 	EndIf
+	SetStatusIdle()
 	Return $tUtilUpdateAvailableTF
 EndFunc   ;==>UtilUpdate
 #EndRegion ;**** Check for Server Utility Update ****
 
 Func ReplaceReturn($tMsg0)
-	If StringInStr($tMsg0, "|") = "0" Then
-	Else
-		Return StringReplace($tMsg0, "|", @CRLF)
-	EndIf
+	Return StringReplace($tMsg0, "|", @CRLF)
 EndFunc   ;==>ReplaceReturn
 
+Func ReplaceCRLF($tMsg0)
+	Return StringReplace($tMsg0, @CRLF, "|")
+EndFunc   ;==>ReplaceCRLF
+
 Func ReplaceSpace($tMsg0)
-	If StringInStr($tMsg0, "%") = "0" Then
-	Else
-		Return StringReplace($tMsg0, "%", Chr(32))
-	EndIf
+;~ 	If StringInStr($tMsg0, "%") = "0" Then
+;~ 	Else
+	Return StringReplace($tMsg0, "%", Chr(32))
+;~ 	EndIf
 EndFunc   ;==>ReplaceSpace
 
-Func ReplaceCRwithCRLF($sString) ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
-	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF) ; Idea by Ascend4nt
+Func ReplaceCRwithCRLF($sString)     ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
+	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF)     ; Idea by Ascend4nt
 EndFunc   ;==>ReplaceCRwithCRLF
 
 Func MakeServerSummaryFile($tServerSummaryFile)
@@ -5202,6 +5577,7 @@ Func F_ExitCloseN($tRestart = False)
 EndFunc   ;==>F_ExitCloseN
 
 Func F_ExitCloseY($tRestart = False)
+	SetStatusBusy("Util Shutdown Initiated")
 	If $tRestart = False Then
 		LogWrite(" [" & $aServerName & "] Utility exit with server shutdown initiated by user (Exit: Shut Down Servers).")
 	EndIf
@@ -5226,6 +5602,7 @@ Func F_ExitCloseY($tRestart = False)
 		EndIf
 		Exit
 	Else
+		SetStatusBusy("Util Shutdown. Waiting for User Input.", "Waiting for User Input")
 		If $aServerUseRedis = "yes" Then
 			$bMsg = "Utility exited unexpectedly or before it was fully initialized." & @CRLF & @CRLF & _
 					"Close utility?" & @CRLF & @CRLF & _
@@ -5242,8 +5619,9 @@ Func F_ExitCloseY($tRestart = False)
 ;~ $tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to shut down all servers and exit this utility?" & @CRLF & @CRLF & _
 ;~ 			"Click (YES) to Shutdown all servers and exit." & @CRLF & _
 ;~ 			"Click (NO) or (CANCEL) to cancel.", 15)
-		If $tMB = 6 Then ; (YES)
-			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass)
+		SetStatusBusy("Util Shutdown Initiated.")
+		If $tMB = 6 Then     ; (YES)
+			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, True, False)
 			SplashOff()
 			If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
 				LogWrite(" [Redis (PID: " & $aServerPIDRedis & ")] Killing Process")
@@ -5277,11 +5655,11 @@ Func F_ExitCloseY($tRestart = False)
 			EndIf
 			Exit
 			; ----------------------------------------------------------
-		ElseIf $tMB = 7 Then ; NO
+		ElseIf $tMB = 7 Then     ; NO
 			Local $aMsg = "Thank you for using " & $aUtilName & "." & @CRLF & "Please report any problems or comments to: " & @CRLF & "Discord: http://discord.gg/EU7pzPs or " & @CRLF & _
 					"Forum: http://phoenix125.createaforum.com/index.php. " & @CRLF & @CRLF & "Visit http://www.Phoenix125.com"
 			LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False) ; Do NOT close redis
+			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)     ; Do NOT close redis
 			SplashOff()
 			If $tRestart = False Then
 				MsgBox(4096, $aUtilityVer, $aMsg, 20)
@@ -5320,17 +5698,19 @@ Func F_ExitCloseY($tRestart = False)
 			Exit
 		EndIf
 	EndIf
+	SetStatusIdle()
 EndFunc   ;==>F_ExitCloseY
 
 Func F_RestartNow()
+	SetStatusBusy("Restart Now. Waiting for User Input.", "Waiting for User Input")
 	LogWrite(" [Server] Restart Server Now requested by user (Restart Server Now) Redis will remain running.")
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to Restart Server Now?" & @CRLF & @CRLF & _
 			"Click (YES) to Restart Server Now." & @CRLF & _
 			"Click (NO) or (CANCEL) to cancel.", 15)
-	If $tMB = 6 Then ; (YES)
+	If $tMB = 6 Then     ; (YES)
 		;		If $aBeginDelayedShutdown = 0 Then
 		LogWrite(" [Server] Restart Server Now request initiated by user.")
-		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False) ; Do NOT close redis
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)     ; Do NOT close redis
 		;		EndIf
 	Else
 		LogWrite(" [Server] Restart Server Now request canceled by user.")
@@ -5338,16 +5718,18 @@ Func F_RestartNow()
 		Sleep(2000)
 	EndIf
 	SplashOff()
+	SetStatusIdle()
 EndFunc   ;==>F_RestartNow
 
 Func F_RemoteRestart()
+	SetStatusBusy("Remote Restart. Waiting for User Input.", "Waiting for User Input")
 	LogWrite(" [Remote Restart] Remote Restart requested by user (Initiate Remote Restart).")
 	If $aRemoteRestartUse <> "yes" Then
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "You must enable Remote Restart in the " & $aUtilName & ".ini." & @CRLF & @CRLF & _
 				"Would you like to enable it? (Port:" & $aRemoteRestartPort & ")" & @CRLF & _
 				"Click (YES) to enable Remote Restart. A utility restart will be required (including shutting down all servers. COMING SOON, this will not be required)" & @CRLF & _
 				"Click (NO) or (CANCEL) to skip.", 15)
-		If $tMB = 6 Then ; (YES)
+		If $tMB = 6 Then     ; (YES)
 			LogWrite(" [Remote Restart] Remote Restart enabled in " & $aUtilName & ".ini per user request")
 			IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", "yes")
 			$aRemoteRestartUse = "yes"
@@ -5364,47 +5746,127 @@ Func F_RemoteRestart()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to initiate Remote Restart (reboot all servers in " & $aRemoteTime[$aRemoteCnt] & "min)?" & @CRLF & @CRLF & _
 				"Click (YES) to Initiate Remote Restart." & @CRLF & _
 				"Click (NO) or (CANCEL) to cancel.", 15)
-		If $tMB = 6 Then ; (YES)
+		If $tMB = 6 Then     ; (YES)
 			If $aBeginDelayedShutdown = 0 Then
 				LogWrite(" [Remote Restart] Remote Restart request initiated by user.")
-				If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
+				If ($sUseDiscordBotRemoteRestart = "yes") Or ($sUseTwitchBotRemoteRestart = "yes") Or ($sInGameAnnounce = "yes") Then
 					$aRebootReason = "remoterestart"
 					$aBeginDelayedShutdown = 1
 					$aTimeCheck0 = _NowCalc()
 				Else
 					RunExternalRemoteRestart()
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False) ; Do NOT close redis
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)     ; Do NOT close redis
 				EndIf
 			EndIf
 		Else
 			LogWrite(" [Remote Restart] Remote Restart request canceled by user.")
 			SplashTextOn($aUtilName, "Remote Restart canceled. Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 			Sleep(2000)
+			SplashOff()
 		EndIf
 	EndIf
+	SetStatusIdle()
 EndFunc   ;==>F_RemoteRestart
 
+Func SetStatusBusy($tMsg0, $tMsg1 = "no")
+	If $tMsg1 = "no" Then $tMsg1 = $tMsg0
+	TraySetToolTip($tMsg0)
+	TraySetIcon($aIconFile, 201)
+	GUICtrlSetImage($IconReady, $aIconFile, 203)     ; Busy Icon
+	GUICtrlSetData($LabelUtilReadyStatus, $tMsg1)
+EndFunc   ;==>SetStatusBusy
+
+Func SetStatusIdle()
+	GUICtrlSetImage($IconReady, $aIconFile, 204)
+	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
+	TraySetToolTip($aIconFile)
+	TraySetIcon($aIconFile, 99)
+EndFunc   ;==>SetStatusIdle
+
+Func F_StopServer()
+	SetStatusBusy("Stop server(s). Waiting for User Input.", "Waiting for User Input")
+	LogWrite(" [" & $aServerName & "] Send shutdown (DoExit) command to servers requested by user (Stop Server(s)).")
+	Local $aMsg = "Do you wish to shut down servers?" & @CRLF & @CRLF & _
+			"Click (YES) to shut down in " & $aStopServerTime[$aStopServerCnt] & " min with announcements?" & @CRLF & _
+			"Click (NO) to shut down servers now without announcements." & @CRLF & _
+			"Click (CANCEL) to cancel."
+	SplashOff()
+	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 15)
+	; ----------------------------------------------------------
+	If $tMB = 6 Then                 ; YES
+		If $aBeginDelayedShutdown = 0 Then
+			SetStatusBusy("Stop Server Started")
+			LogWrite(" [" & $aServerName & "] Stop Server request initiated by user.")
+			If ($sUseDiscordBotStopServer = "no") And (IniRead($aUtilCFGFile, "CFG", "aAskStopServerDiscord", "yes") = "yes") Then
+				IniWrite($aUtilCFGFile, "CFG", "aAskStopServerDiscord", "no")
+				$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, "Notice! Discord announcement for STOP SERVER is disabled in " & @CRLF & $aUtilName & ".ini." & @CRLF & @CRLF & _
+						"Would you like to enable it?" & @CRLF & _
+						"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
+						"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
+				If $tMB1 = 6 Then ; (YES)
+					LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
+					SplashTextOn($aUtilName, "Stop Server Discord and In-Game Announcements were disabled." & @CRLF & @CRLF & "The following setting was changed in the " & $aUtilName & ".ini." & @CRLF _
+							 & """Send Discord message for STOP SERVER? (yes/no) ###=yes""", 500, 150, -1, -1, $DLG_MOVEABLE, "")
+					$sUseDiscordBotStopServer = "yes"
+					IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
+					Sleep(7000)
+					SplashOff()
+				Else
+					LogWrite(" [" & $aServerName & "] No changes made to STOP SERVER Discord announcement setting in " & $aUtilName & ".ini.")
+					SplashTextOn($aUtilName, "No changes were made. Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+					Sleep(2000)
+					SplashOff()
+				EndIf
+			EndIf
+			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
+				$aRebootReason = "stopservers"
+				$aBeginDelayedShutdown = 1
+				$aTimeCheck0 = _NowCalc()
+				SplashTextOn($aUtilName, "Stop Server with announcements initiated.", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+				Sleep(2000)
+				SplashOff()
+			Else
+				LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
+				SplashTextOn($aUtilName, "Stop Server Discord, Twitch, and In-Game announcements are disabled." & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 500, 150, -1, -1, $DLG_MOVEABLE, "")
+				SetStatusBusy("Stopping Servers")
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)     ; Do NOT close redis, But disable servers
+				SetStatusIdle()
+				SplashOff()
+			EndIf
+		EndIf
+		; ----------------------------------------------------------
+	ElseIf $tMB = 7 Then
+		SetStatusBusy("Stopping Servers")
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)     ; Do NOT close redis, But disable servers
+		SetStatusIdle()
+		; ----------------------------------------------------------
+	ElseIf $tMB = 2 Then     ; CANCEL
+		SetStatusBusy("Canceled")
+		LogWrite(" [" & $aServerName & "] Stop Server request canceled by user.")
+		SplashTextOn($aUtilName, "Stop Server canceled. Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+		Sleep(2000)
+		SplashOff()
+	EndIf
+	SetStatusIdle()
+EndFunc   ;==>F_StopServer
+
 Func F_UpdateUtilCheck()
-	LogWrite(" [Update] " & $aUtilName & " update check requested by user (Check for Updates).")
+	LogWrite(" [Util] " & $aUtilName & " update check requested by user (Check for Updates).")
 	$aShowUpdate = True
-	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName)
+	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, 0, "show")
 EndFunc   ;==>F_UpdateUtilCheck
 
 Func F_UpdateServCheck()
 	SplashOff()
 	SplashTextOn($aUtilName, "Checking for server updates.", 400, 110, -1, -1, $DLG_MOVEABLE, "")
-	GUICtrlSetImage($IconReady, $aIconFile, 203)
-	GUICtrlSetData($LabelUtilReadyStatus, "Check: Server Update")
+	SetStatusBusy("Check: Server Update")
 	UpdateCheck(True)
-	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-	GUICtrlSetImage($IconReady, $aIconFile, 204)
+	SetStatusIdle()
 	SplashOff()
-	;	LogWrite(" [Update] " & $aUtilName & " update check requested by user (Check for Updates).")
-	;	$aShowUpdate = True
-	;	UtilUpdate($aServerUpdateLinkBeta, $aServerUpdateLinkBeta, $aUtilVersion, $aUtilName)
 EndFunc   ;==>F_UpdateServCheck
 
 Func F_SendMessage($tAllorSel = "ask")
+	SetStatusBusy("Send Message. Waiting for User Input.", "Waiting for User Input")
 	LogWrite(" [Remote RCON] Broadcast message requested by user (Send message).")
 	SplashOff()
 	;	$tMsg = ""
@@ -5483,10 +5945,12 @@ Func F_SendMessage($tAllorSel = "ask")
 			Sleep(2000)
 		EndIf
 	EndIf
+	SetStatusIdle()
 	SplashOff()
 EndFunc   ;==>F_SendMessage
 
 Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "")
+	SetStatusBusy("Send RCON. Waiting for User Input.", "Waiting for User Input")
 	LogWrite(" [Remote RCON] Send RCON command requested by user (Send command).")
 	SplashOff()
 	;	$tMsg = ""
@@ -5591,82 +6055,142 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "")
 			Sleep(2000)
 		EndIf
 	EndIf
+	SetStatusIdle()
 	SplashOff()
 EndFunc   ;==>F_SendRCON
 
 Func SelectServersStop()
+	SetStatusBusy("Stop select server(s). Waiting for User Input.", "Waiting for User Input")
 	LogWrite(" [Remote RCON] Send shutdown (DoExit) command to select servers requested by user (Stop Server(s)).")
-	$tMsg1 = "Sending shutdown (DoExit) command to select servers."
-	$aSplash = SplashTextOn($aUtilName, $tMsg1, 500, 110, -1, -1, $DLG_MOVEABLE, "")
-	TraySetToolTip("Stopping select server(s).")
-	TraySetIcon($aIconFile, 201)
-	GUICtrlSetImage($IconReady, $aIconFile, 203) ; Busy Icon
-	GUICtrlSetData($LabelUtilReadyStatus, "Stop Server ")
-	For $i = 0 To ($aServerGridTotal - 1)
-		If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
-			ControlSetText($aSplash, "", "Static1", $tMsg1 & @CRLF & @CRLF & "Server:" & $xServergridx[$i] & $xServergridy[$i])
-			GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & $xServergridx[$i] & $xServergridy[$i])
-			SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
-			LogWrite(" [Server] " & $tMsg1 & " IP:" & $xServerIP[$i] & " , Port:" & $xServerRCONPort[$i + 1])
-			$xStartGrid[$i] = "no"
-			$aGridSomeDisable = True
-			IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "no")
-			Sleep(1000 * $aServerShutdownDelay)
+	$bMsg = "Shut down selected server(s)." & @CRLF & @CRLF & _
+			"Click (YES) to shutdown select servers WITH an announcement." & @CRLF & _
+			"Click (NO)  to shutdown select servers with NO announcement." & @CRLF & _
+			"Click (CANCEL) to cancel."
+	SplashOff()
+	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 60)
+	; ----------------------------------------------------------
+	If $tMB = 6 Then                 ; YES
+		If $aBeginDelayedShutdown = 0 Then
+			$tSelectServersTxt = ""
+			For $i = 0 To ($aServerGridTotal - 1)
+				If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+					$tSelectServersTxt &= $xServergridx[$i] & $xServergridy[$i] & " "
+				EndIf
+			Next
+			$aStopServerMsgInGame = AnnounceReplaceTime($sAnnounceNotifyStopServer, $tSelectServersTxt & $sInGameStopServerMessage)
+			$aStopServerMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyStopServer, $tSelectServersTxt & $sDiscordStopServerMessage)
+			$aStopServerMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyStopServer, $tSelectServersTxt & $sTwitchStopServerMessage)
+			SetStatusBusy("Stop Server Started")
+			LogWrite(" [" & $aServerName & "] Stop Server request initiated by user. Servers: " & $tSelectServersTxt)
+			If ($sUseDiscordBotStopServer = "no") And (IniRead($aUtilCFGFile, "CFG", "aAskStopServerDiscord", "yes") = "yes") Then
+				IniWrite($aUtilCFGFile, "CFG", "aAskStopServerDiscord", "no")
+				$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, "Notice! Discord announcement for STOP SERVER is disabled in " & @CRLF & $aUtilName & ".ini." & @CRLF & @CRLF & _
+						"Would you like to enable it?" & @CRLF & _
+						"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
+						"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
+				If $tMB1 = 6 Then ; (YES)
+					LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
+					SplashTextOn($aUtilName, "Stop Server Discord and In-Game Announcements were disabled." & @CRLF & @CRLF & "The following setting was changed in the " & $aUtilName & ".ini." & @CRLF _
+							 & """Send Discord message for STOP SERVER? (yes/no) ###=yes""", 500, 150, -1, -1, $DLG_MOVEABLE, "")
+					$sUseDiscordBotStopServer = "yes"
+					IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
+					Sleep(7000)
+					SplashOff()
+				Else
+					LogWrite(" [" & $aServerName & "] No changes made to STOP SERVER Discord announcement setting in " & $aUtilName & ".ini.")
+					SplashTextOn($aUtilName, "No changes were made. Resuming utility . . .", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+					Sleep(2000)
+					SplashOff()
+				EndIf
+			EndIf
+			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
+				$aRebootReason = "stopservers"
+				$aSelectServers = True
+				$aBeginDelayedShutdown = 1
+				$aTimeCheck0 = _NowCalc()
+				SplashTextOn($aUtilName, "Stop Server with announcements initiated.", 400, 110, -1, -1, $DLG_MOVEABLE, "")
+				Sleep(2000)
+				SplashOff()
+			Else
+				LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
+				SplashTextOn($aUtilName, "Stop Server Discord, Twitch, and In-Game announcements are disabled" & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 500, 150, -1, -1, $DLG_MOVEABLE, "")
+				SetStatusBusy("Stopping Servers")
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)     ; Do NOT close redis, But disable servers
+				SetStatusIdle()
+				SplashOff()
+			EndIf
 		EndIf
-	Next
-	; ---------------------------------------------
-	LogWrite(" Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . .")
-	For $k = 1 To $aShutDnWait
+		; ----------------------------------------------------------
+	ElseIf $tMB = 7 Then             ; NO
+		$tMsg1 = "Sending shutdown (DoExit) command to select servers."
+		$aSplash = SplashTextOn($aUtilName, $tMsg1, 500, 110, -1, -1, $DLG_MOVEABLE, "")
+		SetStatusBusy("Stopping select server(s).", "Stop Server ")
+		For $i = 0 To ($aServerGridTotal - 1)
+			If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+				ControlSetText($aSplash, "", "Static1", $tMsg1 & @CRLF & @CRLF & "Server:" & $xServergridx[$i] & $xServergridy[$i])
+				GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & $xServergridx[$i] & $xServergridy[$i])
+				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
+				LogWrite(" [Server] " & $tMsg1 & " Server:" & $xServergridx[$i] & $xServergridy[$i])
+				$xStartGrid[$i] = "no"
+				$aGridSomeDisable = True
+				IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "no")
+				Sleep(1000 * $aServerShutdownDelay)
+			EndIf
+		Next
+		; ---------------------------------------------
+		LogWrite(" Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . .")
+		For $k = 1 To $aShutDnWait
+			For $i = 0 To ($aServerGridTotal - 1)
+				If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
+					If ProcessExists($aServerPID[$i]) Then
+						$aErrorShutdown = 1
+						SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
+						SendCTRLC($aServerPID[$i])
+					EndIf
+				EndIf
+			Next
+			If $aErrorShutdown = 1 Then
+				Sleep(950)
+				ControlSetText($aSplash, "", "Static1", "Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . ." & @CRLF & @CRLF & "Countdown: " & ($aShutDnWait - $k))
+				GUICtrlSetData($LabelUtilReadyStatus, "Stop Svr Cntdn " & ($aShutDnWait - $k))
+				$aErrorShutdown = 0
+			Else
+				ExitLoop
+			EndIf
+		Next
 		For $i = 0 To ($aServerGridTotal - 1)
 			If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 				If ProcessExists($aServerPID[$i]) Then
 					$aErrorShutdown = 1
-					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no")
-					SendCTRLC($aServerPID[$i])
+					LogWrite(" [Server (PID: " & $aServerPID[$i] & ")] Warning: Shutdown failed. Killing Process")
+					ProcessClose($aServerPID[$i])
+				Else
+					$aServerPID[$i] = ""
 				EndIf
 			EndIf
 		Next
-		If $aErrorShutdown = 1 Then
-			Sleep(950)
-			ControlSetText($aSplash, "", "Static1", "Waiting up to " & $aShutDnWait & " seconds for server(s) to finish saving world . . ." & @CRLF & @CRLF & "Countdown: " & ($aShutDnWait - $k))
-			GUICtrlSetData($LabelUtilReadyStatus, "Stop Svr Cntdn " & ($aShutDnWait - $k))
-			$aErrorShutdown = 0
-		Else
-			ExitLoop
-		EndIf
-	Next
-	For $i = 0 To ($aServerGridTotal - 1)
-		If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
-			If ProcessExists($aServerPID[$i]) Then
-				$aErrorShutdown = 1
-				LogWrite(" [Server (PID: " & $aServerPID[$i] & ")] Warning: Shutdown failed. Killing Process")
-				ProcessClose($aServerPID[$i])
-			Else
-				$aServerPID[$i] = ""
-			EndIf
-		EndIf
-	Next
-	; ---------------------------------------------
-	GUICtrlSetData($LabelUtilReadyStatus, "Stop Server Complete")
-	ControlSetText($aSplash, "", "Static1", "Select server(s) shutdown complete.")
-	Sleep(2000)
-	SplashOff()
-	GUICtrlSetImage($IconReady, $aIconFile, 204)
-	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-	TraySetToolTip($aIconFile)
-	TraySetIcon($aIconFile, 99)
+		; ---------------------------------------------
+		GUICtrlSetData($LabelUtilReadyStatus, "Stop Server Complete")
+		ControlSetText($aSplash, "", "Static1", "Select server(s) shutdown complete.")
+		Sleep(2000)
+		SplashOff()
+	ElseIf $tMB = 2 Then             ; CANCEL
+		LogWrite(" [Remote RCON] Select server(s) shutdown CANCELED.")
+		SplashTextOn($aUtilName, "Select server(s) shutdown CANCELED.", 500, 110, -1, -1, $DLG_MOVEABLE, "")
+		GUICtrlSetData($LabelUtilReadyStatus, "Stop Server CANCELED")
+		Sleep(2000)
+		SplashOff()
+	EndIf
+	SetStatusIdle()
 EndFunc   ;==>SelectServersStop
 
 Func SelectServersStart()
 	LogWrite(" [Server] Start select servers requested by user (Start Server(s)).")
 	$tMsg1 = "Starting select servers." & @CRLF & @CRLF
 	$aSplash = SplashTextOn($aUtilName, $tMsg1, 500, 110, -1, -1, $DLG_MOVEABLE, "")
-	TraySetToolTip("Stopping select server(s).")
-	TraySetIcon($aIconFile, 201)
-	GUICtrlSetImage($IconReady, $aIconFile, 203) ; Busy Icon
-	GUICtrlSetData($LabelUtilReadyStatus, "Stop Server ")
+	SetStatusBusy("Stopping select server(s).", "Stop Server ")
 	For $i = 0 To ($aServerGridTotal - 1)
-		If Not ProcessExists($aServerPID[$i]) And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then ; And ($xStartGrid[$i] = "yes") Then
+		If Not ProcessExists($aServerPID[$i]) And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then     ; And ($xStartGrid[$i] = "yes") Then
 			If ($xLocalGrid[$i] = "yes") Then
 				ControlSetText($aSplash, "", "Static1", "Starting server " & $xServergridx[$i] & $xServergridy[$i])
 				GUICtrlSetData($LabelUtilReadyStatus, "Start Server " & $xServergridx[$i] & $xServergridy[$i])
@@ -5687,10 +6211,7 @@ Func SelectServersStart()
 		EndIf
 	Next
 	SplashOff()
-	GUICtrlSetImage($IconReady, $aIconFile, 204)
-	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
-	TraySetToolTip($aIconFile)
-	TraySetIcon($aIconFile, 99)
+	SetStatusIdle()
 EndFunc   ;==>SelectServersStart
 
 Func PIDSaveRedis($tPID, $tFile)
@@ -5721,7 +6242,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 	If $tTmp = -1 Then
 		$tReturn = "0"
 		LogWrite("", " Lastpidredis.tmp file not found. Existing Redis Server NOT running")
-	ElseIf $tReturn = "" Then ; Empty/Blank File
+	ElseIf $tReturn = "" Then     ; Empty/Blank File
 		$tReturn = "0"
 		FileDelete($tFile)
 		LogWrite("", " Lastpidredis.tmp file corrupt.")
@@ -5733,7 +6254,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 		If $tTmp = -1 Then
 			$tReturn = "0"
 			LogWrite("", " Lastpidredis.tmp.bak file not found. Existing Redis Server NOT running")
-		ElseIf $tReturn = "" Then ; Empty/Blank File
+		ElseIf $tReturn = "" Then     ; Empty/Blank File
 			$tReturn = "0"
 			FileDelete($tFile)
 			LogWrite("", " Lastpidredis.tmp.bak file corrupt.")
@@ -5760,22 +6281,22 @@ EndFunc   ;==>PIDReadRedis
 Func PIDReadServer($tFile, $tSplash = 0)
 	$aPIDServerReadYetTF = True
 	Local $tReturn[$aServersMax]
-	Local $tTmp1 = FileOpen($tFile) ; Open existing ServerPID File
+	Local $tTmp1 = FileOpen($tFile)     ; Open existing ServerPID File
 	Local $tReturn1 = FileRead($tTmp1)
 	FileClose($tTmp1)
-	Local $tTmp2 = FileOpen($tFile & ".bak") ; Open existing ServerPID.bak File
+	Local $tTmp2 = FileOpen($tFile & ".bak")     ; Open existing ServerPID.bak File
 	Local $tReturn2 = FileRead($tTmp2)
 	FileClose($tTmp2)
-	If $tTmp1 = -1 Then ; ServerPID file not exist
+	If $tTmp1 = -1 Then     ; ServerPID file not exist
 		LogWrite("", " [Util PID Check] Lastpidserver.tmp file not found.")
 		$tReturn1 = $tReturn2
 		$aNoExistingPID = True
-		If $tTmp2 = -1 Then ; ServerPID.bak file not exist
+		If $tTmp2 = -1 Then     ; ServerPID.bak file not exist
 			$tReturn[0] = "0"
 			LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak file not found.")
 			$aNoExistingPID = True
 		Else
-			If $tReturn2 = "" Then ; Empty/Blank File
+			If $tReturn2 = "" Then     ; Empty/Blank File
 				$tReturn[0] = "0"
 				LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak contained no server PID data.")
 				$aNoExistingPID = True
@@ -5784,15 +6305,15 @@ Func PIDReadServer($tFile, $tSplash = 0)
 		EndIf
 	Else
 		$aNoExistingPID = False
-		If $tReturn1 = "" Then ; Empty/Blank File
+		If $tReturn1 = "" Then     ; Empty/Blank File
 			LogWrite("", " [Util PID Check] Lastpidserver.tmp file contained no server PID data.")
 			$tReturn1 = $tReturn2
-			If $tTmp2 = -1 Then ; File not exist
+			If $tTmp2 = -1 Then     ; File not exist
 				$tReturn[0] = "0"
 				LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak file not found.")
 				$aNoExistingPID = True
 			Else
-				If $tReturn2 = "" Then ; Empty/Blank File
+				If $tReturn2 = "" Then     ; Empty/Blank File
 					$tReturn[0] = "0"
 					LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak contained no server PID data.")
 					$aNoExistingPID = True
@@ -5850,7 +6371,7 @@ Func SendCTRLC($tPID)
 	ControlSend($hWnd, "", "", "^C" & @CR)
 EndFunc   ;==>SendCTRLC
 
-Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
+Func _WinGetByPID($iPID, $iArray = 1)     ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
 	Local $aError[1] = [0], $aWinList, $sReturn
 	If IsString($iPID) Then
 		$iPID = ProcessExists($iPID)
@@ -6038,10 +6559,7 @@ Func GetPlayerCount($tSplash = 0)
 	$tOnlinePlayers[1] = ""
 	$tOnlinePlayers[2] = ""
 	$tOnlinePlayers[3] = ""
-	TraySetToolTip("Scanning servers for online players.")
-	TraySetIcon($aIconFile, 201)
-	GUICtrlSetImage($IconReady, $aIconFile, 203) ; Busy Icon
-	GUICtrlSetData($LabelUtilReadyStatus, "Check: Players")
+	SetStatusBusy("Scanning servers for online players.", "Check: Players")
 	;			If $tSplash Then
 	;				SplashTextOn($aUtilName, " Checking online players . . . " & @CRLF & "If taking a while, please wait for servers to finish coming online", 400, 110, -1, -1, $DLG_MOVEABLE, "")
 	;			EndIf
@@ -6136,8 +6654,7 @@ Func GetPlayerCount($tSplash = 0)
 		FileDelete($aOnlinePlayerWebFile)
 	EndIf
 	FileWrite($aOnlinePlayerWebFile, $tOnlinePlayers[3])
-	TraySetToolTip($aIconFile)
-	TraySetIcon($aIconFile, 99)
+	SetStatusIdle()
 	Return $tOnlinePlayers
 EndFunc   ;==>GetPlayerCount
 
@@ -6202,8 +6719,8 @@ EndFunc   ;==>ShowPlayerCount
 
 Func _WM_SIZE($hWndGUI, $Msg, $wParam, $lParam)
 	Local $iHeight, $iWidth
-	$iWidth = BitAND($lParam, 0xFFFF) ; _WinAPI_LoWord
-	$iHeight = BitShift($lParam, 16) ; _WinAPI_HiWord
+	$iWidth = BitAND($lParam, 0xFFFF)     ; _WinAPI_LoWord
+	$iHeight = BitShift($lParam, 16)     ; _WinAPI_HiWord
 	If ($hWndGUI = $wOnlinePlayers) Then
 		_WinAPI_MoveWindow($wOnlinePlayers, 10, 10, $iWidth - 20, $iHeight - 20)
 	ElseIf ($hWndGUI = $wGUIMainWindow) Then
@@ -6218,12 +6735,11 @@ Func ShowOnlinePlayersGUI()
 			If $aPlayerCountWindowTF = False Then
 				$gOnlinePlayerWindow = GUICreate($aUtilName & " Online Players", $aGUIW, $aGUIH, -1, -1, $WS_SIZEBOX)
 				GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_OnlinePlayers_Close", $gOnlinePlayerWindow)
-				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY)) ; Horizontal Scroll, NO wrap text
+				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY))     ; Horizontal Scroll, NO wrap text
 				GUICtrlSetState($wOnlinePlayers, $GUI_FOCUS)
 				GUIRegisterMsg($WM_SIZE, "_WM_SIZE")
 				$aPlayerCountWindowTF = True
-				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow) ;Shows the GUI window
-
+				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow)     ;Shows the GUI window
 			EndIf
 			If $tOnlinePlayerReady Then
 				GUICtrlSetData($wOnlinePlayers, _DateTimeFormat(_NowCalc(), 0) & @CRLF & $tOnlinePlayers[2])
@@ -6250,12 +6766,12 @@ Func TrayShowPlayerCheckUnPause()
 	$aServerOnlinePlayerYN = "yes"
 EndFunc   ;==>TrayShowPlayerCheckUnPause
 
-Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16) ; By Phoenix125.com
+Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16)     ; By Phoenix125.com
 	_GDIPlus_Startup()
 	Local $GDIpBmpLarge, $GDIpBmpResized, $GDIbmp, $tReturn
-	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile) ;GDI+ image!
-	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight) ;GDI+ image
-	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized) ;GDI image!
+	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile)     ;GDI+ image!
+	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight)     ;GDI+ image
+	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized)     ;GDI image!
 	$tReturn = _GUIImageList_Add($tGUICreate, $GDIbmp)
 	_GDIPlus_BitmapDispose($GDIpBmpLarge)
 	_GDIPlus_BitmapDispose($GDIpBmpResized)
@@ -6263,6 +6779,10 @@ Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 1
 	_GDIPlus_Shutdown()
 	Return $tReturn
 EndFunc   ;==>_ImageToGUIImageListResized
+
+; ------------------------------------------------------------------------------------------------------------
+;      Main GUI Window
+; ------------------------------------------------------------------------------------------------------------
 
 Func ShowMainGUI($tSplash = 0)
 ;~ 	$aServerPID = ResizeArray($aServerPID)
@@ -6275,31 +6795,11 @@ Func ShowMainGUI($tSplash = 0)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Main_Close", $wGUIMainWindow)
 	GUISetIcon($aIconFile, 99)
 	GUISetBkColor($cMWBackground)
-	Global $ShowWindows = GUICtrlCreateGroup("Show Window", 8, 48, 89, 145)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $ServerInfo = GUICtrlCreateButton("Setup Wizard", 16, 64, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_ServerInfo")
-	GUICtrlSetTip(-1, "Display Server Summary Window")
-	Global $Players = GUICtrlCreateButton("Players", 16, 96, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	If $aPlayerCountShowTF Then GUICtrlSetState(-1, $GUI_DISABLE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_Players")
-	GUICtrlSetTip(-1, "Display Online Players Window")
-	Global $Config = GUICtrlCreateButton("CONFIG", 16, 128, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_Config")
-	GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
-	GUICtrlSetTip(-1, "Display Config Window")
-	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", 16, 160, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_LogFile")
-	GUICtrlSetTip(-1, "Display Latest Log File")
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 8, 592, 985, 97)
+	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 112, 592, 873, 97)     ; Previous(8, 592, 985, 97)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
-	Global $LogTicker = GUICtrlCreateEdit("", 16, 608, 969, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL))
+	Global $LogTicker = GUICtrlCreateEdit("", 120, 608, 857, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL))     ; Previous(16, 608, 969, 73)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
 	GUICtrlSetState($LogTicker, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
@@ -6316,7 +6816,7 @@ Func ShowMainGUI($tSplash = 0)
 	$LabelCPU = GUICtrlCreateLabel("CPU:", 293, 27, 29, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetColor(-1, $cMWMemCPU)
-	Local $MemStats = MemGetStats() ;Retrieves memory related information
+	Local $MemStats = MemGetStats()     ;Retrieves memory related information
 	Global $MemPercent = GUICtrlCreateLabel($MemStats[$MEM_LOAD] & "-- %", 323, 11, 20, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetColor(-1, $cMWMemCPU)
@@ -6370,41 +6870,123 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetResizing(-1, $GUI_DOCKRIGHT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_I_UtilConfig")
 	GUICtrlSetTip(-1, "AtlasServerUpdateUtility Config")
+;~ 	GUICtrlCreateGroup("", -99, -99, 1, 1)
+;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+
+	Local $tX = 8, $tY = 54     ; Starting Location
+	Local $tGroupW = 89, $tButtonW = $tGroupW - 14, $tButtonH = 25     ; Default Group Dimensions
+
+	Local $tButtons = 4, $tGroupH = (32 * $tButtons + 17)
+	Global $ShowWindows = GUICtrlCreateGroup("Show Window", $tX, $tY, $tGroupW, $tGroupH)     ; (8, 48, 89, 145)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	$tY += 16
+	Global $ServerInfo = GUICtrlCreateButton("Setup Wizard", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 64, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_ServerInfo")
+	GUICtrlSetTip(-1, "Display Server Summary Window")
+	$tY += 32
+	Global $Players = GUICtrlCreateButton("Players", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 96, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	If $aPlayerCountShowTF Then GUICtrlSetState(-1, $GUI_DISABLE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_Players")
+	GUICtrlSetTip(-1, "Display Online Players Window")
+	$tY += 32
+	Global $Config = GUICtrlCreateButton("CONFIG", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 128, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_Config")
+	GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
+	GUICtrlSetTip(-1, "Display Config Window")
+	$tY += 32
+	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 160, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_LogFile")
+	GUICtrlSetTip(-1, "Display Latest Log File")
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $Update = GUICtrlCreateGroup("Update", 8, 504, 89, 89)
+
+	$tY += 40
+	Local $tButtons = 5, $tGroupH = (32 * $tButtons + 17)
+	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", $tX, $tY, $tGroupW, $tGroupH)     ; Manual(8, 200, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $UpdateMods = GUICtrlCreateButton("Update Mods", 16, 552, 75, 25)
+	$tY += 16
+	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(6, 216, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendRCON")
+	GUICtrlSetTip(-1, "Send RCON Command to All Grids")
+	$tY += 32
+	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 248, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendMsg")
+	GUICtrlSetTip(-1, "Broadcast In Game Message to All Grids")
+	$tY += 32
+	Global $RemoteRestartAll = GUICtrlCreateButton("Rmt Restart", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 280, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRmtRestart")
+	GUICtrlSetTip(-1, "Initiate Remote Restart: Restart All Local Grid Servers with Message and Delay")
+	$tY += 32
+	Global $RestartNowAll = GUICtrlCreateButton("Restart NOW", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 312, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRestartNow")
+	GUICtrlSetTip(-1, "Restart All Local Grid Servers")
+	$tY += 32
+	Global $StopServerAll = GUICtrlCreateButton("Stop Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 312, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_StopServerAll")
+	GUICtrlSetTip(-1, "Stop All Grids With or Without Announcement")
+	GUICtrlCreateGroup("", -99, -99, 1, 1)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+
+	$tY += 40
+	Local $tButtons = 4, $tGroupH = (32 * $tButtons + 17)
+	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", $tX, $tY, $tGroupW, $tGroupH)     ; (8, 352, 89, 145)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	$tY += 16
+	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)     ;(16, 368, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendRCON")
+	GUICtrlSetTip(-1, "Send RCON Command to Selected Grids")
+	$tY += 32
+	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 400, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendMsg")
+	GUICtrlSetTip(-1, "Send In Game Message to Selected Grids")
+	$tY += 32
+	Global $StartServers = GUICtrlCreateButton("Start Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 432, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStartServers")
+	GUICtrlSetTip(-1, "Start Selected Grids")
+	$tY += 32
+	Global $StopServers = GUICtrlCreateButton("Stop Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 464, 75, 25)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStopServers")
+	GUICtrlSetTip(-1, "Stop Selected Grids With or Without Announcement")
+;~ 	$tY += 32
+	GUICtrlCreateGroup("", -99, -99, 1, 1)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+
+	$tY += 40
+	Local $tButtons = 3, $tGroupH = (32 * $tButtons + 17)
+	Global $Update = GUICtrlCreateGroup("Update", $tX, $tY, $tGroupW, $tGroupH)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	$tY += 16
+	Global $UpdateMods = GUICtrlCreateButton("Update Mods", $tX + 8, $tY, $tButtonW, $tButtonH)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_ModUpdates")
 	GUICtrlSetTip(-1, "Check for Mod Updates")
 	If $aServerModYN = "no" Then GUICtrlSetState(-1, $GUI_DISABLE)
-	Global $UpdateAtlas = GUICtrlCreateButton("Update Atlas", 16, 520, 75, 25)
+	$tY += 32
+	Global $UpdateAtlas = GUICtrlCreateButton("Update " & $aServerName, $tX + 8, $tY, $tButtonW, $tButtonH)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_UpdateGame")
-	GUICtrlSetTip(-1, "Check for Atlas Updates")
+	GUICtrlSetTip(-1, "Check for " & $aServerName & " Updates")
+	$tY += 32
+	Global $UpdateUtil = GUICtrlCreateButton("Update Util", $tX + 8, $tY, $tButtonW, $tButtonH)
+	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_B_UpdateUtil")
+	GUICtrlSetTip(-1, "Check for " & $aUtilName & " Updates")
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", 8, 200, 89, 145)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $RemoteRestartAll = GUICtrlCreateButton("Rmt Restart", 16, 280, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRmtRestart")
-	GUICtrlSetTip(-1, "Initiate Remote Restart: Restart All Local Grid Servers with Message and Delay")
-	Global $RestartNowAll = GUICtrlCreateButton("Restart NOW", 16, 312, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRestartNow")
-	GUICtrlSetTip(-1, "Restart All Local Grid Servers")
-	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", 16, 216, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendRCON")
-	GUICtrlSetTip(-1, "Send RCON Command to All Grids")
-	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", 16, 248, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendMsg")
-	GUICtrlSetTip(-1, "Broadcast In Game Message to All Grids")
-	GUICtrlCreateGroup("", -99, -99, 1, 1)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+
 	Global $wMainListViewWindow = _GUICtrlListView_Create($wGUIMainWindow, "", 112, 64, 873, 497, BitOR($LVS_NOLABELWRAP, $LVS_REPORT, $LVS_SINGLESEL))
 	_GUICtrlListView_SetExtendedListViewStyle($wMainListViewWindow, BitOR($LVS_EX_GRIDLINES, $LVS_EX_SUBITEMIMAGES, $LVS_EX_CHECKBOXES))
 	_GUICtrlListView_SetBkColor($wMainListViewWindow, $cSWBackground)
@@ -6417,13 +6999,13 @@ Func ShowMainGUI($tSplash = 0)
 		_GUICtrlListView_JustifyColumn($wMainListViewWindow, $i, 2)
 	Next
 	Local $tW1 = 24, $tH1 = 16
-	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5) ; Load ListView Icons into memory
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1) ; 0 - Yes toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1) ; 1 - No toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1) ; 2 - Red button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1) ; 3 - Green button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1) ; 4 - Green checkmark 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1) ; 5 - Gray checkmark 1
+	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5)     ; Load ListView Icons into memory
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1)     ; 0 - Yes toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1)     ; 1 - No toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1)     ; 2 - Red button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1)     ; 3 - Green button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1)     ; 4 - Green checkmark 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1)     ; 5 - Gray checkmark 1
 ;~ 	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_left2.png", $tW1, $tH1)		; 5 - Green checkmark 2
 ;~ 		_GUIImageList_AddIcon($hImage, @ScriptDir & "\AtlasUtilFiles\i_toggle_on.ico") 			; 0 - Yes slider
 ;~ 		_GUIImageList_AddIcon($hImage, $aIconFile, 17) 			; 0 - Yes slider
@@ -6437,52 +7019,52 @@ Func ShowMainGUI($tSplash = 0)
 
 	Global $aMainLVW[$aServerGridTotal][12]
 	For $i = 0 To ($aServerGridTotal - 1)
-		$aMainLVW[$i][0] = "" ; $xStartGrid[$i] ; Checked YN
+		$aMainLVW[$i][0] = ""     ; $xStartGrid[$i] ; Checked YN
 		If $xStartGrid[$i] <> "yes" Then
-			$aMainLVW[$i][1] = "--" ; Local YN
+			$aMainLVW[$i][1] = "--"     ; Local YN
 		Else
-			$aMainLVW[$i][1] = $xStartGrid[$i] ; Local YN
+			$aMainLVW[$i][1] = $xStartGrid[$i]     ; Local YN
 		EndIf
 		If $xStartGrid[$i] <> "yes" Then
-			$aMainLVW[$i][2] = "--" ; Local YN
+			$aMainLVW[$i][2] = "--"     ; Local YN
 		Else
-			$aMainLVW[$i][2] = $xStartGrid[$i] ; Local YN
+			$aMainLVW[$i][2] = $xStartGrid[$i]     ; Local YN
 		EndIf
-		If $xStartGrid[$i] = "yes" Then ; Remote YN
+		If $xStartGrid[$i] = "yes" Then     ; Remote YN
 			$aMainLVW[$i][3] = "--"
 		Else
 			$aMainLVW[$i][3] = "yes"
 		EndIf
-		$aMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$aMainLVW[$i][5] = $xServergridx[$i] & $xServergridy[$i] ; Grid
+		$aMainLVW[$i][4] = $xServerNames[$i]     ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$aMainLVW[$i][5] = $xServergridx[$i] & $xServergridy[$i]     ; Grid
 		If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) Then
-			$aMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers ; Online PLayers
+			$aMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers     ; Online PLayers
 		Else
-			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
+			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers     ; Online PLayers
 		EndIf
 		If $xStartGrid[$i] = "yes" Then
-			$aMainLVW[$i][7] = "--" ; CPU
+			$aMainLVW[$i][7] = "--"     ; CPU
 ;~ 			$aMainLVW[$i][8] = (Int($aServerMem[$i] / (1024 ^ 2))) & " MB" ; Memory
 			Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-			$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB" ; Memory
+			$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB"     ; Memory
 		Else
-			$aMainLVW[$i][7] = "" ; CPU
-			$aMainLVW[$i][8] = "" ; Memory
+			$aMainLVW[$i][7] = ""     ; CPU
+			$aMainLVW[$i][8] = ""     ; Memory
 		EndIf
-		$aMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
-		$aMainLVW[$i][10] = $aServerPID[$i] ; PID
+		$aMainLVW[$i][9] = $xServerAltSaveDir[$i]     ; Folder
+		$aMainLVW[$i][10] = $aServerPID[$i]     ; PID
 		If ProcessExists($aServerPID[$i]) Then
-			$aMainLVW[$i][11] = "Running" ; Status
+			$aMainLVW[$i][11] = "Running"     ; Status
 		Else
 			If $xStartGrid[$i] = "yes" Then
-				$aMainLVW[$i][11] = "CRASHED" ; Status
+				$aMainLVW[$i][11] = "CRASHED"     ; Status
 			Else
 				If $xLocalGrid[$i] = "yes" Then
-					$aMainLVW[$i][11] = "Disabled" ; Status
+					$aMainLVW[$i][11] = "Disabled"     ; Status
 				Else
-					$aMainLVW[$i][11] = "Offline" ; Status
+					$aMainLVW[$i][11] = "Offline"     ; Status
 					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then
-						$aMainLVW[$i][11] = "Running" ; Status #008000
+						$aMainLVW[$i][11] = "Running"     ; Status #008000
 					EndIf
 				EndIf
 			EndIf
@@ -6498,14 +7080,14 @@ Func ShowMainGUI($tSplash = 0)
 		Next
 	Next
 
-	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1)     ; Place icon for RUN column
 		If $xStartGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 0)
 		Else
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 1)
 		EndIf
 	Next
-	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1)     ; Place icon for RUN column
 		If $xLocalGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 4)
 		Else
@@ -6513,27 +7095,25 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 				_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 3)
 		EndIf
 	Next
-
 	; -----------------------------------------------------------------------------------------------
-
 	Global $aGUIListViewEX = _GUIListViewEx_Init($wMainListViewWindow, $aMainLVW, 0, 0, True, 2 + 32 + 1024)
 	For $i = 0 To (UBound($aGUI_Main_Columns) - 1)
-		_GUIListViewEx_SetEditStatus($aGUIListViewEX, $i) ; Default = standard text edit
+		_GUIListViewEx_SetEditStatus($aGUIListViewEX, $i)     ; Default = standard text edit
 	Next
 	Local $aSelCol[4] = [Default, $cSWBackground, Default, Default]
 	_GUIListViewEx_SetDefColours($aGUIListViewEX, $aSelCol)
 	For $i = 0 To ($aServerGridTotal - 1)
-		If ProcessExists($aServerPID[$i]) Then ; RUNNING
+		If ProcessExists($aServerPID[$i]) Then     ; RUNNING
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 		Else
-			If $xStartGrid[$i] = "yes" Then ; CRASHED
+			If $xStartGrid[$i] = "yes" Then     ; CRASHED
 				_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $i, 11)
 			Else
-				If $xLocalGrid[$i] = "yes" Then ; DISABLED
+				If $xLocalGrid[$i] = "yes" Then     ; DISABLED
 					_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
-				Else ; OFFLINE
+				Else     ; OFFLINE
 					_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $i, 11)
-					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; REMOTE PLAYERS ONLINE
+					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; REMOTE PLAYERS ONLINE
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 					EndIf
 				EndIf
@@ -6542,9 +7122,7 @@ Func ShowMainGUI($tSplash = 0)
 	Next
 
 	_GUIListViewEx_MsgRegister()
-
 	; -----------------------------------------------------------------------------------------------
-
 	Global $UpdateIntervalLabel = GUICtrlCreateLabel("Player Update Interval (sec)", 710, 568)
 	GUICtrlSetResizing(-1, $GUI_DOCKRIGHT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	Global $UpdateIntervalSlider = GUICtrlCreateSlider(848, 565, 102, 21, BitOR($GUI_SS_DEFAULT_SLIDER, $TBS_NOTICKS))
@@ -6568,7 +7146,7 @@ Func ShowMainGUI($tSplash = 0)
 	Else
 		GUICtrlSetState(-1, $GUI_UNCHECKED)
 	EndIf
-	Global $IconReady = GUICtrlCreateIcon($aIconFile, 204, 113, 563, 24, 24)
+	$IconReady = GUICtrlCreateIcon($aIconFile, 204, 113, 563, 24, 24)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	Global $LabelUtilReadyStatus = GUICtrlCreateLabel("Idle", 144, 568, 120, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
@@ -6591,33 +7169,15 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetState($TotalPlayersEdit, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
 ;~ 	$aTotalPlayersOnline = _ArraySum($aServerPlayers)
-	GUICtrlSetData(-1, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers)
+	GUICtrlSetData(-1, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers)
 	GUICtrlSetBkColor(-1, $cLWBackground)
 	GUICtrlSetTip(-1, "Total Players Online")
 ;~ 		Global $LabelDblClick = GUICtrlCreateLabel("Dbl-Click to Change Value", 255, 568, 163, 17)
 ;~ 		GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 ;~ 		GUICtrlSetColor(-1, $cSWTextHL2)
 ;~ 		GUICtrlCreateGroup("", -99, -99, 1, 1)
-	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", 8, 352, 89, 145)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", 16, 368, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendRCON")
-	GUICtrlSetTip(-1, "Send RCON Command to Selected Grids")
-	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", 16, 400, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendMsg")
-	GUICtrlSetTip(-1, "Send In Game Message to Selected Grids")
-	Global $StartServers = GUICtrlCreateButton("Start Server(s)", 16, 432, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStartServers")
-	GUICtrlSetTip(-1, "Start Selected Grids")
-	Global $StopServers = GUICtrlCreateButton("Stop Server(s)", 16, 464, 75, 25)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStopServers")
-	GUICtrlSetTip(-1, "Stop Selected Grids")
-	GUICtrlCreateGroup("", -99, -99, 1, 1)
-	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
+;~ 	GUICtrlCreateGroup("", -99, -99, 1, 1)
+;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	#EndRegion ### END Koda GUI section ###
 	If $aServerOnlinePlayerYN = "yes" Then
 		$aOnlinePlayers = GetPlayerCount($tSplash)
@@ -6632,10 +7192,13 @@ Func ShowMainGUI($tSplash = 0)
 	If $aServerOnlinePlayerYN = "yes" Then
 		ShowPlayerCount()
 	EndIf
-	GUICtrlSetImage($IconReady, $aIconFile, 204)
-	GUICtrlSetData($LabelUtilReadyStatus, "Idle")
+	SetStatusIdle()
 ;~ 	GUIRegisterMsg($WM_NOTIFY, 'WM_NOTIFY_Main_UpdateIntervalSlider')    ; **** WM_NOTIFY SLIDER
 EndFunc   ;==>ShowMainGUI
+
+; ------------------------------------------------------------------------------------------------------------
+;      Update GUI Main GUI Window
+; ------------------------------------------------------------------------------------------------------------
 
 Func GUIUpdateQuick()
 	Local $MemStats = MemGetStats()
@@ -6653,67 +7216,66 @@ Func GUIUpdateQuick()
 	Local $aHasRemoteServersTF = False
 	For $i = 0 To ($aServerGridTotal - 1)
 		If $xStartGrid[$i] <> "yes" Then
-			$tMainLVW[$i][1] = "--" ; Local YN
+			$tMainLVW[$i][1] = "--"     ; Local YN
 		Else
-			$tMainLVW[$i][1] = $xStartGrid[$i] ; Local YN
+			$tMainLVW[$i][1] = $xStartGrid[$i]     ; Local YN
 		EndIf
 		If $xStartGrid[$i] <> "yes" Then
-			$tMainLVW[$i][2] = "--" ; Local YN
+			$tMainLVW[$i][2] = "--"     ; Local YN
 		Else
-			$tMainLVW[$i][2] = $xStartGrid[$i] ; Local YN
+			$tMainLVW[$i][2] = $xStartGrid[$i]     ; Local YN
 		EndIf
-		$tMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$tMainLVW[$i][5] = $xServergridx[$i] & $xServergridy[$i] ; Grid
+		$tMainLVW[$i][4] = $xServerNames[$i]     ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$tMainLVW[$i][5] = $xServergridx[$i] & $xServergridy[$i]     ; Grid
 		If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And $aServerOnlinePlayerYN = "yes" Then
-			$tMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers ; Online PLayers
+			$tMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers     ; Online PLayers
 		Else
-			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
+			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers     ; Online PLayers
 		EndIf
 
 		If $xStartGrid[$i] = "yes" Then
 			Local $tCPU = _ProcessUsageTracker_GetUsage($xServerCPU[$i])
-			$tMainLVW[$i][7] = Round($tCPU, 1) & "%" ; CPU
+			$tMainLVW[$i][7] = Round($tCPU, 1) & "%"     ; CPU
 			Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-			$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) ; & " MB" ; Memory
+			$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp)     ; & " MB" ; Memory
 		Else
-			$tMainLVW[$i][7] = "" ; CPU
-			$tMainLVW[$i][8] = "" ; Memory
+			$tMainLVW[$i][7] = ""     ; CPU
+			$tMainLVW[$i][8] = ""     ; Memory
 		EndIf
-		$tMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
-		$tMainLVW[$i][10] = $aServerPID[$i] ; PID
-
+		$tMainLVW[$i][9] = $xServerAltSaveDir[$i]     ; Folder
 		If ProcessExists($aServerPID[$i]) Then
-			$tMainLVW[$i][11] = "Running" ; Status #008000
+			$tMainLVW[$i][11] = "Running"     ; Status #008000
 			If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 				_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 			EndIf
-		Else ; Server Not running
+		Else     ; Server Not running
+			$aServerPID[$i] = ""
 			If $xStartGrid[$i] = "yes" Then
 				If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
-					$tMainLVW[$i][11] = "CRASHED" ; Status
+					$tMainLVW[$i][11] = "CRASHED"     ; Status
 					_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $i, 11)
 					LogWrite(" WARNING!!! Server [" & $xServergridx[$i] & $xServergridy[$i] & "] PID [" & $aMainLVW[$i][10] & "] """ & $xServerNames[$i] & """ CRASHED, Restarting server")
 				EndIf
 			Else
-				If $xLocalGrid[$i] = "yes" Then ; Local Server
+				If $xLocalGrid[$i] = "yes" Then     ; Local Server
 					If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
-						$tMainLVW[$i][11] = "Disabled" ; Status
+						$tMainLVW[$i][11] = "Disabled"     ; Status
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
 					EndIf
-				Else ; Remote Server
+				Else     ; Remote Server
 					$aHasRemoteServersTF = True
-					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
-						$tMainLVW[$i][11] = "Running" ; Status #008000
+					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; Remote Server with Online Players
+						$tMainLVW[$i][11] = "Running"     ; Status #008000
 						If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 							_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 						EndIf
-					Else ; Remote Server without ListPlayers response (offline)
+					Else     ; Remote Server without ListPlayers response (offline)
 						If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 							If $aPollRemoteServersYN = "yes" Then
-								$tMainLVW[$i][11] = "Offline" ; Status
+								$tMainLVW[$i][11] = "Offline"     ; Status
 								_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $i, 11)
 							Else
-								$tMainLVW[$i][11] = "Disabled" ; Status
+								$tMainLVW[$i][11] = "Disabled"     ; Status
 								_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
 							EndIf
 						EndIf
@@ -6721,6 +7283,7 @@ Func GUIUpdateQuick()
 				EndIf
 			EndIf
 		EndIf
+		$tMainLVW[$i][10] = $aServerPID[$i]     ; PID
 		For $x = 4 To 11
 			If $tMainLVW[$i][$x] <> $aMainLVW[$i][$x] Then
 				$aMainLVW[$i][$x] = $tMainLVW[$i][$x]
@@ -6775,7 +7338,7 @@ Func GUIUpdateQuick()
 ;~ 	$aTotalPlayersOnline = _ArraySum($aServerPlayers)
 	If $tTotalPlayerError Then $aTotalPlayersOnline = "--"
 ;~ 	If $aTotalPlayersOnline < 0 Then $aTotalPlayersOnline = "--"
-	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers) ; Players Edit Window
+	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers) ; Players Edit Window
 
 EndFunc   ;==>GUIUpdateQuick
 
@@ -6794,17 +7357,21 @@ Func _GUICtrlTab_SetBkColor($hWnd, $hSysTab32, $sBkColor)
 
 EndFunc   ;==>_GUICtrlTab_SetBkColor
 
+; ------------------------------------------------------------------------------------------------------------
+;      Log GUI Window
+; ------------------------------------------------------------------------------------------------------------
+
 Func LogWindow($lDefaultTabNo = 1)
 	If WinExists($LogWindow) Then
 ;~ 		WinSetOnTop($LogWindow, "", 1)
 	Else
 		#Region ### START Koda GUI section ### Form=g:\game server files\autoit\atlasserverupdateutility\temp work files\atladkoda(log-b1).kxf
-		Local $lWidth = 1000, $lHeight = 600 ; 906 , 555
+		Local $lWidth = 1000, $lHeight = 600     ; 906 , 555
 		Global $LogWindow = GUICreate($aUtilityVer & " Logs & Full Config Files", $lWidth, $lHeight, -1, -1, BitOR($GUI_SS_DEFAULT_GUI, $WS_MAXIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_TABSTOP))
 		GUISetIcon($aIconFile, 99)
 		GUISetBkColor($cMWBackground)
 		GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Log_Close", $LogWindow)
-		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18)) ;  889, 537
+		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18))     ;  889, 537
 		GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKVCENTER)
 		; ------------------------------------------------------------------------------------------------------------
 		$lBasicTab = GUICtrlCreateTabItem("Basic Log")
@@ -7069,6 +7636,10 @@ Func WM_NOTIFY_Main_UpdateIntervalSlider($hWnd, $iMsg, $iWParam, $iLParam)
 	;	EndIf
 EndFunc   ;==>WM_NOTIFY_Main_UpdateIntervalSlider
 
+; ------------------------------------------------------------------------------------------------------------
+;      Wizard Select GUI Window
+; ------------------------------------------------------------------------------------------------------------
+
 Func WizardSelect()
 ;~ 	Opt("GUIResizeMode", $GUI_DOCKLEFT + $GUI_DOCKTOP)
 	#Region ### START Koda GUI section ### Form=g:\game server files\autoit\atlasserverupdateutility\temp work files\atladkoda(lwiz-1 new or exist)b1.kxf
@@ -7138,6 +7709,11 @@ EndFunc   ;==>GUI_W1_B_NewInstall
 ;~ Func WizardNew()
 ;~ 	MsgBox(0, $aUtilName, "New Install Coming Soon!", 10)
 ;~ EndFunc   ;==>WizardNew
+
+
+; ------------------------------------------------------------------------------------------------------------
+;      Wizard Existing GUI Window
+; ------------------------------------------------------------------------------------------------------------
 
 Func WizardExisting($wDefaultTabNo = 1)
 	Global $aGUI_W2_LastTab = 0
@@ -7209,11 +7785,11 @@ Func WizardExisting($wDefaultTabNo = 1)
 	GUICtrlSetState($W2_T3_R_Method1, $GUI_CHECKED)
 	GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Method1")
 	Global $W2_T3_R_Method2 = GUICtrlCreateRadio("Custom Method 2: Enter RCON ports one-at-a-time using a new popup window for each server. (Coming Soon!)", 100, 417, 600, 17)
-	GUICtrlSetState(-1, $GUI_DISABLE) ; Disabled (Coming Soon!)
+	GUICtrlSetState(-1, $GUI_DISABLE)     ; Disabled (Coming Soon!)
 	GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Method2")
 	$Label9 = GUICtrlCreateLabel("Server RCON ports (comma separated. Use same order as servers are listed in ServerGrid.json", 116, 337, 447, 17)
 	Global $W2_T3_B_Ports = GUICtrlCreateButton("Enter Ports", 116, 441, 75, 25)
-	GUICtrlSetState(-1, $GUI_DISABLE) ; Disabled (Coming Soon!)
+	GUICtrlSetState(-1, $GUI_DISABLE)     ; Disabled (Coming Soon!)
 	GUICtrlSetOnEvent(-1, "GUI_W2_T3_B_Ports")
 	$Label10 = GUICtrlCreateLabel("Please select the entry method for the RCON ports for each grid server.", 100, 233, 422, 20)
 	GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
@@ -7363,9 +7939,9 @@ EndFunc   ;==>GUI_WizardExist_Close
 
 Func GUI_W2_On_Tab()
 	Switch GUICtrlRead($WizardTabWindow)
-		Case 0 ; Tab 1 Atlas Folder
+		Case 0     ; Tab 1 Atlas Folder
 			GUI_W2_Last_Tab(0)
-		Case 1 ; Tab 2 AltSaveDIR
+		Case 1     ; Tab 2 AltSaveDIR
 			GUI_W2_Last_Tab(1)
 			If $iIniRead Then
 				If $aServerAltSaveSelect = "1" Then GUICtrlSetState($W2_T2_R_Default00, $GUI_CHECKED)
@@ -7375,7 +7951,7 @@ Func GUI_W2_On_Tab()
 					GUICtrlSetData($W2_T2_I_AltSaveDIR, $aServerAltSaveDir)
 				EndIf
 			EndIf
-		Case 2 ; Tab 3 RCON Ports
+		Case 2     ; Tab 3 RCON Ports
 			GUI_W2_Last_Tab(2)
 			If $aConfigSettingsImported Then
 				If $iIniRead Then
@@ -7398,7 +7974,7 @@ Func GUI_W2_On_Tab()
 				EndIf
 			EndIf
 			If $iIniRead And ($aServerRCONImport = "yes") Then GUICtrlSetState($W2_T3_R_Import, $GUI_CHECKED)
-		Case 3 ; Tab 4 Grid Start
+		Case 3     ; Tab 4 Grid Start
 			GUI_W2_Last_Tab(3)
 			If $aConfigSettingsImported Then
 				If FileExists($aGridSelectFile) Then
@@ -7413,7 +7989,7 @@ Func GUI_W2_On_Tab()
 				MsgBox($MB_OK, $aUtilName, "Cannot create GridStartSelect.ini file until the " & $aConfigFile & " file has been imported.")
 				GUICtrlSetState($Tab1, $GUI_SHOW)
 			EndIf
-		Case 4 ; Tab 5 Priority Settings
+		Case 4     ; Tab 5 Priority Settings
 			GUI_W2_Last_Tab(4)
 			If $iIniRead Then
 				GUICtrlSetData($W2_T5_I_AdminPass, $aServerAdminPass)
@@ -7423,13 +7999,13 @@ Func GUI_W2_On_Tab()
 				GUICtrlSetData($W2_T5_I_SteamCMDExtraCMD, $aSteamExtraCMD)
 				GUICtrlSetData($W2_T5_I_UpdateInterval, $aUpdateCheckInterval)
 			EndIf
-		Case 5 ; Tab 6 Review All Settings
+		Case 5     ; Tab 6 Review All Settings
 			Local $tFileOpen = FileOpen($aIniFile)
 			Local $tTxt = FileRead($tFileOpen)
 			FileClose($tFileOpen)
 			GUICtrlSetData($W2_T6_E_Config, $tTxt)
 			GUI_W2_Last_Tab(5)
-		Case 6 ; Tab 7 Finish
+		Case 6     ; Tab 7 Finish
 			GUI_W2_Last_Tab(6)
 	EndSwitch
 EndFunc   ;==>GUI_W2_On_Tab
@@ -7445,7 +8021,7 @@ Func GUI_W2_Last_Tab($tTab)
 				"Click (YES) to Save" & @CRLF & _
 				"Click (NO) to Skip" & @CRLF & _
 				"Click (CANCEL) to Reset.", 10)
-		If $tMB = 6 Then ; YES
+		If $tMB = 6 Then     ; YES
 			Local $tTxt = GUICtrlRead($W2_T4_E_GridStart)
 			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
 			Local $tFile = $aGridSelectFile & "_" & $tTime & ".bak"
@@ -7454,7 +8030,7 @@ Func GUI_W2_Last_Tab($tTab)
 			SplashTextOn($aUtilName, $aUtilName & "GridStartSelect.ini updated." & @CRLF & @CRLF & "Backup created: " & @CRLF & $aUtilName & "GridStartSelect.ini_" & $tTime & ".bak", 525, 110, -1, -1, $DLG_MOVEABLE, "")
 			Sleep(3000)
 			SplashOff()
-		ElseIf $tMB = 2 Then ; CANCEL
+		ElseIf $tMB = 2 Then     ; CANCEL
 			GUI_W2_T4_B_Reset()
 		EndIf
 	EndIf
@@ -7463,9 +8039,9 @@ Func GUI_W2_Last_Tab($tTab)
 				"Click (YES) to Save" & @CRLF & _
 				"Click (NO) to Skip" & @CRLF & _
 				"Click (CANCEL) to Reset.", 10)
-		If $tMB = 6 Then ; YES
+		If $tMB = 6 Then     ; YES
 			GUI_W2_T6_B_Save()
-		ElseIf $tMB = 2 Then ; CANCEL
+		ElseIf $tMB = 2 Then     ; CANCEL
 			GUI_W2_T6_B_Reset()
 		EndIf
 	EndIf
@@ -7668,6 +8244,8 @@ Func W2_T7_B_ExitRestartN()
 EndFunc   ;==>W2_T7_B_ExitRestartN
 
 ; ------------------------------------------------------------------------------------------------------------
+;      Wizard New GUI Window
+; ------------------------------------------------------------------------------------------------------------
 
 Func WizardNew()
 	SplashOff()
@@ -7795,6 +8373,8 @@ Func W3_B_Cancel()
 EndFunc   ;==>W3_B_Cancel
 
 ; ------------------------------------------------------------------------------------------------------------
+;      Config GUI Window
+; ------------------------------------------------------------------------------------------------------------
 
 Func ConfigEdit($tSplash = 0, $tWarn = False)
 	SplashOff()
@@ -7902,7 +8482,7 @@ Func _GetMemArrayRawAvg($pid)
 		For $objItem In $colItems
 			For $x = 0 To (UBound($pid) - 1)
 ;~ 				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = (($objItem.WorkingSetPrivate + $objItem.WorkingSet) / 2) ; Average
-				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate) ; Working Set Private
+				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate)     ; Working Set Private
 				If @error Then Return 0
 			Next
 		Next
@@ -8084,9 +8664,9 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 
 	; XP, XPe, 2000, or 2003? - Affects process access requirement
 	If StringRegExp(@OSVersion, "_(XP|200(0|3))") Then
-		$iAccess = 0x0400 ; PROCESS_QUERY_INFORMATION
+		$iAccess = 0x0400     ; PROCESS_QUERY_INFORMATION
 	Else
-		$iAccess = 0x1000 ; PROCESS_QUERY_LIMITED_INFORMATION
+		$iAccess = 0x1000     ; PROCESS_QUERY_LIMITED_INFORMATION
 	EndIf
 
 	; SYNCHRONIZE access - required to determine if process has terminated
@@ -8121,12 +8701,12 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		EndIf
 	EndIf
 
-	$aProcUsage[0][0] = 1 ; 1 Process Total (possible future expansion)
+	$aProcUsage[0][0] = 1     ; 1 Process Total (possible future expansion)
 
-	$aProcUsage[1][0] = $sProcess ; Process Name
-	$aProcUsage[1][1] = $nPID ; Process ID
-	$aProcUsage[1][2] = $hProcess ; Process Handle
-	$aProcUsage[1][3] = $iAccess ; Access Rights (useful to determine when process terminated)
+	$aProcUsage[1][0] = $sProcess     ; Process Name
+	$aProcUsage[1][1] = $nPID     ; Process ID
+	$aProcUsage[1][2] = $hProcess     ; Process Handle
+	$aProcUsage[1][3] = $iAccess     ; Access Rights (useful to determine when process terminated)
 
 	$aRet = DllCall("kernel32.dll", "bool", "GetProcessTimes", "handle", $hProcess, "uint64*", 0, "uint64*", 0, "uint64*", 0, "uint64*", 0)
 	If @error Or Not $aRet[0] Then
@@ -8135,8 +8715,8 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		Return SetError(-1, $iErr, "")
 	EndIf
 
-	$aProcUsage[1][4] = $aRet[4] ; Process Kernel Time
-	$aProcUsage[1][5] = $aRet[5] ; Process User Time
+	$aProcUsage[1][4] = $aRet[4]     ; Process Kernel Time
+	$aProcUsage[1][5] = $aRet[5]     ; Process User Time
 
 	Return $aProcUsage
 EndFunc   ;==>_ProcessUsageTracker_Create
@@ -8276,6 +8856,10 @@ Func _CPUOverallUsageTracker_GetUsage(ByRef $aCPUsUsage)
 
 	Return Round($nTotalActive * 100 / $nTotal, 1)
 EndFunc   ;==>_CPUOverallUsageTracker_GetUsage
+
+
+
+
 
 
 

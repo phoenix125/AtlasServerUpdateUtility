@@ -1,1 +1,9 @@
-v1.5.4^v1.5.4 Critical Hotfix! (Thanks to Norlinri for reporting both problems)|-Fixed: "Line 35734 Unbalanced brackets in expression" error fixed.|-Fixed: Prompt "Utility exited unexpectedly.. Close utility?" If (NO) was selected and you are using your own redis manager, then my util would shut down all servers when it was not supposed to."||v1.5.3 Hotfixed and bonus|-Fixed? Attempt to fix Discord message error "0x80020009"|-Added: Option to start all servers minimized|-Fixed: SeamlessDataPort now reports correctly in the _Server_Summary_.txt file||v1.5.2 Minor Hotfixes|-Added: Server PID check: When started, util checks to make sure assigned PIDs are actually Atlas servers.|-Added: Removes trailing \t in SeamlessIP if present upon import.|-Added: Adds the SeamlessDataPorts to the _Server_Summary.txt file.|||v1.5.1 Minor Hotfixes|-Fixed: Setup Wizard had several bugs that were fixed.|-Added: Backup Startup Batch files are now created|-Fixed: New mods now update properly|-Changed: 32-bit (x86) is once again the default|-Fixed: Update Mod button now disables if no mods are used.
+v1.5.5^v1.5.5 New Stop Server options, Port Duplicate checker, Optional Auto-Update Util
+- Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
+- Added: Optional automatic util update download and install with no user input. (Default is disabled).
+- Added: Port duplicate checker.
+- Fixed: Remove trailing \t in SeamlessIP if present upon import.
+- Added: Programmable utility update check interval. (Default is every 4 hours).
+- Fixed: When util updates, the .ini config file automatically updates without user input.
+- Fixed: Condition in which Remote Restart would not announce.
+

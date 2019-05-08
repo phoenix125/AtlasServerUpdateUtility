@@ -288,19 +288,32 @@ For update checks:
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
 (2019-05-04) v1.5.5
-- Added: Port duplicate checker: Checks for duplicate ports assigned in ServerGrid.json
+- Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
+- Added: Optional automatic util update download and install with no user input. (Default is disabled).
+- Added: Port duplicate checker: Checks for duplicate ports assigned in ServerGrid.json & RCON ports in .ini or GUS.ini files.
 - Fixed: Remove trailing \t in SeamlessIP if present upon import. Does NOT alter the ServerGrid.json file.
-- Added: Programmable utility update check interval (default is every 4 hours)
-- Added: Option to have utility automatically download and install updates with no user input (Default is disabled)
-- Fixed: Auto Config update (when updating util) would still sometimes prompt user to modify config.
+- Added: Programmable utility update check interval. (Default is every 4 hours).
+- Fixed: When util updates, the .ini config file automatically updates without user input. Previously, it still asked for user input sometimes.
+- Fixed: Condition in which Remote Restart would not announce (If Announce Daily or Update were disabled)
+
+*** New Config Parameters/Changes: ***
+- "Check for AtlasServerUpdateUtility updates every __ hours (0 to disable) (0-24) ###=3
+- "Automatically install AtlasServerUpdateUtility updates? (yes/no) ###=yes
+- "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###=1,3
+- In-Game: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+- Discord: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+- Discord: "Send Discord message for STOP SERVER? (yes/no) ###=no"
+- Twitch:  "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+- Twitch:  "Send Twitch message for STOP SERVER? (yes/no) ###=no"
+
 
 (2019-05-04) v1.5.4 (Thanks to Norlinri for reporting both problems)
 - Fixed: "Line 35734 Unbalanced brackets in expression" error fixed.
-- Fixed: Prompt "Utility exited unexpectedly.. Close utility?" If (NO) was selected and you are using your own redis manager, then my util would shut down all servers when it was not supposed to."
+- Fixed: Prompt "Utility exited unexpectedly.. Close utility?" If (NO) was selected and you are using your own redis manager, then the util would shut down all servers when it was not supposed to.
 
 (2019-05-04) v1.5.3
 - Fixed? Attempt to fix Discord message error "0x80020009". Also added a lot more detail to error code in case this didn't fix the error.
-- Added: Option to start all servers minimized. Added to config.ini: "Start servers minimized (for a cleaner look)? (yes/no) ###=yes"  (Thanks to Infiniti for requesting)
+- Added: Option to start all servers minimized. Added to config.ini: "Start servers minimized (for a cleaner look)? (yes/no) ###=yes"  (Thanks to Infiniti for requesting).
 - Fixed: SeamlessDataPort now reports correctly in the _Server_Summary_.txt file.
 
 (2019-05-04) v1.5.2
@@ -313,7 +326,7 @@ For update checks:
 - Added: The util now creates batch files (in folder "Batch Files (to run Atlas manually)") to manually run and update your Atlas servers in case of SHTF (utility failure!)
 - Fixed: When new mod(s) are added/discovered, the util previously did nothing. It will now restart the servers (with announcements if servers were already running).
 - Changed: 32-bit (x86) version of the utility is once again the default. I received a couple reports of instability possibly related to the 64-bit (x64) version.
-- Fixed: Update Mod button now disables if no mods are used or if "Use this util to install mods and check for mod updates (as listed in ServerGrid.json)? (yes/no) ###=no" (Thanks to funtimes for reporting)
+- Fixed: Update Mod button now disables if no mods are used or if "Use this util to install mods and check for mod updates (as listed in ServerGrid.json)? (yes/no) ###=no" (Thanks to funtimes for reporting).
 
 (2019-04-28) v1.5.0
 - Added: GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
