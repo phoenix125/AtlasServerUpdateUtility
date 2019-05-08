@@ -3456,14 +3456,16 @@ Func _ConfigCheckForDuplicates($tArray, $tParameter)
 	If UBound($aArray) > 0 Then
 		;Local $tTxt = "WARNING!!! There are duplicate entries in your " & $aConfigFile & " file." & @CRLF & "The following list contains a separate entry [Paramater:Duplicate] for each duplicate." & @CRLF & @CRLF
 		For $i = 0 To (UBound($aArray) - 1)
-			$tTxt &= $tParameter & ":" & $aArray[$i] & @CRLF
+			If $aArray[$i] <> "" Then
+				$tTxt &= $tParameter & ":" & $aArray[$i] & @CRLF
+				$aDupError = True
+			EndIf
 		Next
 		;		$tTxt &= @CRLF & "Click (OK) to exit util."
 		;		SplashOff()
 		;		MsgBox($MB_OK, $aUtilName, $tTxt)
 		;		Run("notepad.exe " & $aConfigFull)
 		;		Exit
-		$aDupError = True
 	EndIf
 	Return $tTxt
 EndFunc   ;==>_ConfigCheckForDuplicates
