@@ -10,34 +10,13 @@ AtlasServerUpdateUtility version: (0)Stable, (1)Beta ###=0
  CURRENT BETA VERSION NOTES
 ----------------------------
 NOTICE:
-- LOG FILES, TEMP FILES, AND ONLINE PLAYERS LOG MOVED TO "\_Log\" and "\AtlasUtilFiles\" FOLDERS.
-- Changed log files: It now creates two log files: One with basic info and one with full info.
-- Added Local and Remote server start options to the AtlasServerUpdateUtilityGridStartSelect.ini file.
-- AtlasServerUpdateUtility.ini changes: 
-	- Added:   Check for online players on remote servers? (yes/no) ###=no
-	- Removed: "Server Name", "Debug", "SteamDIR", "Rotate Log Files", from config.
 
-New features / fixes:
-- Added: GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
-- Added: Send custom command lines PER GRID during server startup.
-- Added: Separate log files for Basic logging and Full logging (formerly debug).
-- Added: Option to send RCON commands/messages to select servers only.
-- Added: Button and config option to poll Remote Servers for online players and whether online.
-- Added: Upon starting, the util skips the update checks if the time since last server update check is less than the update check interval for a much faster util restart.
-- Added: Displays memory usage for each server grid.
-- Added: Log entry when a server crashes.
-- Changed: Added date to log files and moved them to "\_Log\" folder.
-- Changed: All log files are now automatically deleted if older than user specified number of days.
-- Changed: Moved all temp and work files into "\AtlasUtilFiles\" folder.
-- Changed: Moved all log files into "\_Log\" folder.
-- Changed: Removed "Server Name", "Debug", "SteamDIR", "Rotate Log Files", from config.
-- Changed: Hard-coded SteamCMD folder as "\SteamCMD\". to simplify installation and because sharing SteamCMD with other programs can cause issues.
-- Changed: During Online Players check, if server is not ready, the util will report "-" instead of "-1" or "0".
-- Fixed: Online Players log now has consistent formatting.
-- Fixed: Online Players window should update without having to refresh every time.
+New features:
+- Added: KeepUtilAlive: An optional second program is now executed to restart util if util crashes. [v1.6.0(beta1)]
+- Added: Network Connections Viewer in Tools section. Displays all ports used by the local computer. [v1.6.0(beta1)]
 
 Notes:
-- Extreme beta version. It should be stable for managing your servers, but some GUI features are not fully implemented yet.
+- Beta version. It should be stable for live use, but bugs can occur.  Use at your own risk.
 
 ----------------
  DOWNLOAD LINKS
@@ -56,170 +35,19 @@ Forum:   https://phoenix125.createaforum.com/index.php
 --------------------------
  Upcoming Features/ Fixes
 --------------------------
-COMING SOON! (Things I Am Working On and hope to get done in the next few days)
-- A Config GUI window..  I know this is desperately needed!
-- Server editing: When you click on the server name, it will bring up a server config window to make changes to GameUserSettings.ini and Game.ini files.
 
-To Do:
-- Custom buttons to send programmable commands
-- Configurable and sortable main window
-- Add: Redis editor
-- Plug-in support ("unload and load" plugins option)
 
 ---------------------------------
  Bugs / Features Not Working Yet
 ---------------------------------
-- No GUI config yet.
+
 
 ------------------------------
  CURRENT BETA VERSION HISTORY
 ------------------------------
-v1.5.0 (2019-04-25) This version is the new STABLE version!
-- Fixed: Total CPU usage fixed.
-
-v1.5.0(beta24) (2019-04-25)
-- Added: CPU usage is now operational.
-- Added: Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times. (Thanks to Norlinri for requesting)
-- Added: Util now creates backup Server and Redis PID files to help prevent duplicate servers from being started.
-- Fixed: The util would freeze and eventually crash if SteamCMD locked up during update check. A 20 second shutdown timer was added to task kill SteamCMD if it locks up.
-- Fixed: The util would freeze and eventually crash if errors occurred when checking current installed server version. A new method was implemented to hopefully prevent further lock ups.
-
-v1.5.0(beta23) (2019-04-22)
-- Added: Main GUI window is now resizable!  You should now be able to see most or all your servers!
-- Changed: If managing the redis server, the redis server now only shuts down when the user requests.  It does not shut down for updates, Remote Restart, etc.
-- Added: New Online Players text file written with each update, "AtlasUtilFiles\AtlasServerUpdateUtility_OnlineUsers.txt".
-         This file could be used on a website with some creativity. either directly or import the data for improved website interface.
-         Coming soon! FTP upload of the text file.. maybe even an HTML page version of Online Players.
-
-v1.5.0(beta22) (2019-04-20) Minor Hotfix
-- Fixed: When the util is started, the Discord announcement, "Servers online" was always announcing, instead of skipping when servers were already online prior to starting util. (Thanks Norlinri for reporting)
-         This also fixed the erroneous log entries, "-ERROR- Server PID() NOT found. Server will be restarted. "
-
-v1.5.0(beta21) (2019-04-20) New Setup Wizard!
-- Added: Setup Wizard. It is now MUCH easier now for new users to start using this utility.
-- Added: New default AltSaveDIR naming scheme: A1,A2,A3,B1,B2,B3,C1,etc.
-- Fixed: No more extra servers being started! Fixed a couple instances where Redis and Server PIDs were not saving correctly when utility exited prematurely.
-- Added: Config updates will now update automatically without user input, unless a required parameter is added.
-- Fixed: (Hopefully) Utility updater should restart without errors.
-
-v1.5.0(beta20) (2019-04-19) Hotfix
-- Fixed: Checking for latest Mod Update failure would force a server reboot.
-- Fixed: When Import RCON port=yes, the util would still put ?RCONEnabled=True?RCONPort=12345 in command line.
-- Changed: Total Players indicator on main window no longer shows max players.  Max players is PER GRID; not the total of all grids.
-
-v1.5.0(beta19) (2019-04-17) Hotfix
-- Changed: Util will now default to 64 bit version (was 32 bit only). The ZIP file includes the 32 bit version for compatibility.
-- Fixed: (Hopefully fixed) Getting Latest Mod Version Error: Added a second method for getting latest mod version.
-- Fixed: When editing config files within the utility, instead of CRLF (carriage return line feed), only the CR was being written.
-- Fixed: Server Names not showing when ServerGrid.json file was edited within the utility (due to error above).
-- Fixed: When stopping select servers, if server fails to shutdown with "DoExit", then util now sends CTRL-C to server (to force a shutdown). If that fails, it task-kills the server(s).
-- Fixed: Config (gear) icon and Tray Show Config links were missing.
-
-v1.5.0(beta18) (2019-04-15) CRITICAL FIX! Fixed Atlas Auto-Updater (and more!)
-- Fixed: Auto Atlas updater was not updating.
-- Added: New "_start_AtlasServerUpdateUtility.bat" file that updates with each util update. If desired, add a shortcut of this file to your startup folder.
-- Fixed: Log Ticker would stop updating.
-- Fixed: You can now edit files in the File Editor/Viewer window. Colorized version coming soon!
-- Fixed: "Start Servers" and "Stop Servers" buttons working.
-- Added: Small delay after deleting Server_Summary.txt file. This will hopefully fix a lockup.
-- Fixed: Improved the utility's recognition of running servers at startup.
-
-v1.5.0(beta17) (2019-04-12) Hotfix & new file viewer/editor window
-- Fixed: An error that can occur while trying to get online players if server is locked up (white screen of death) 
-- Added: New window for viewing and/or editing log files, config files, ServerGrid.json, DefaultGame.ini, DefaultGameUserSettings.ini, DefaultEngine.ini files.
-  (Notice: editing of most files is functional at this time.)
-
-v1.5.0(beta16) (2019-04-11) Hotfix
-- Fixed: Manual Atlas updates were causing Line 35061 and 35452 errors and failed to update.
-
-v1.5.0(beta15) (2019-04-09) NON-Critical Hotfix
-- Fixed: Send Msg to select servers was displaying wrong message and not allowing for user input. (Thanks to Fosh for reporting!)
-- Fixed: The new Remote Restart shutdown checker wasn't being used when auto-installing updates, which could cause the Remote Restart Ports In Use error.
-
-v1.5.0(beta14) (2019-04-09) NON-Critical Hotfix
-- Fixed: Player name being used instead of player count in main GUI window. (Thanks to Josey Wales for reporting.)
-- Fixed: Remote Restart now checks for proper shutdown and will send shutdown command five times or until closed.
-- Fixed: Removed the popup window during automatic mod update checks.
-
-v1.5.0(beta13) (2019-04-09) NON-Critical Hotfix
-- Fixed: Error in Online Players count when Poll Remote Servers used.
-- Fixed: Total Players should now show correct count. If any server is offline/crashed, Total Players will report as "-- / 40"
-- Added: Log entry when Remote Restart fails due to port conflict with RCON ports of existing grid servers.
-
-v1.5.0(beta12) (2019-04-09) Hotfix
-- Fixed: Removed extra space in commandline. When commandline PER GRID was added, the util added a space if the leading character was not a (?). Now it will only add a space if the leading character is a hyphen (-). Thanks Doublee for reporting!
-- Fixed: Error Line 36367: If a mod update failed, it would crash when trying to display the mod name.
-- Added more details to the status line in the main window and load screen.
-- Changed: Once the GUI loads, the Online Players window is put on top.
-
-v1.5.0(beta11) (2019-04-08)
-- Added: Send custom command line parameters PER GRID during server startup in the GridServerSelect.ini file.
-- Fixed: Cleaned up the notification windows: they don't flicker anymore!
-
-v1.5.0(beta10) (2019-04-08) Hotfix 3: Third attempt to fix "Line 37176" or "Line 37178" error. This error also affected the Mem reporting.
-- Fixed: "Line 37176" error (hopefully!): related again to the ServerPID.tmp changes that were made with beta7 (which were undone!).
-- Fixed: Log file, ini file, and notification windows now show correct version when running beta. (Thanks to AceMan for reporting!).
-- Fixed: Removed the flickering on the mod update and util shutdown notification windows.
-
-v1.5.0(beta9) (2019-04-08) Hotfix Again
-- Fixed: "Line 37176" error (hopefully!): related again to the ServerPID.tmp changes that were made with beta7 (which were undone!).
-- Fixed: Mod updater now correctly shows the current mod it is updating/checking for update.
-- Minor notification window changes to hopefully clarify the startup process.
-
-v1.5.0(beta8) (2019-04-07) Hotfix (with "leave redis running" bonus)
-- Fixed: You should now be able to upgrade without having to shut down your servers 
-	I reverted to old method of keeping track of running servers (AtlasServerUpdateUtility_lastpidserver.tmp). (Back to having holders for all 400 servers). Also added one more failsafe.
-- Fixed: Server Names now show correctly
-- Changed: Removed the hard stop for config changes (no need to restart the program), but added hard stop for GridServerSelect.ini file (To allow for disabling servers before they get run).
-- Added: Option to leave redis running during shut downs.
-
-v1.5.0(beta7) (2019-04-07)
-- Added: GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
-- Added: Separate log files for Basic logging and Full logging (formerly debug).
-- Added: Option to send RCON commands/messages to select servers only.
-- Added: Button and config option to poll Remote Servers for online players and whether online.
-- Added: Upon starting, the util skips the update checks if the time since last server update check is less than the update check interval for a much faster util restart.
-- Added: Displays memory usage for each server grid.
-- Added: Log entry when a server crashes.
-- Added: Check for online players on remote servers? (yes/no) ###=no
-- Changed: Added date to log files and moved them to "\_Log\" folder.
-- Changed: All log files are now automatically deleted if older than user specified number of days.
-- Changed: Moved all temp and work files into "\AtlasUtilFiles\" folder.
-- Changed: Moved all log files into "\_Log\" folder.
-- Changed: Removed "Server Name", "Debug", "SteamDIR", "Rotate Log Files", from config.
-- Changed: Hard-coded SteamCMD folder as "\SteamCMD\". to simplify installation and because sharing SteamCMD with other programs can cause issues.
-- Changed: During Online Players check, if server is not ready, the util will report "-" instead of "-1" or "0".
-- Fixed: Online Players log now has consistent formatting.
-- Fixed: Online Players window should update without having to refresh every time.
-- Minor memory and performance tweaks, logfile improvements.
-
-v1.5.0(beta6)
-- Fixed: When restart time is set to midnight, the restart days was off by one (unless daily chosen). It now restarts on days as scheduled. (Thanks Norlinri for reporting).
-- Improved: The Online Players window is now fully resizable.
-
-v1.5.0(beta5)
-- Fixed: Line 14451 error.. hopefully fixed for good now!  (Thanks Doublee for reporting)
-
-v1.5.0(beta4)
-- Fixed: Line 14454 Error. Occurred when SteamID was not found. (Thanks to Doublee for reporting)
-
-v1.5.0(beta3)
-- Fixed: Removed the "[Usr Ck]" log entry for every online player check (was added for testing purposes.. I forgot to remove it)
-
-v1.5.0(beta2)
-- Fixed: Online Users window no longer displays all previous values with each update.
-- Added: Option to disable Online Users check (for window and log file).
-- Added: SteamID to Online Users window and logfile.
-- Added: Restart Server Now tray option.
-- Changed: Increased theoretical grid limit from 100 to 400 (20x20).
-
-v1.5.0(beta1)
-- Added: Window showing online users. Updates every 60 seconds by default, but is user definable.
-- Fixed: Tray icon is much more responsive.
-- Added: Tray icon turns gray when util is busy. 
-- Added: Discord announcement and display notification when servers online and ready for connection.
-- Added: Logs when users come online or go offline in new log file "AtlasServerUpdateUtility_OnlineUserLog.txt".
-- Added: Pause Utility. Pauses all functions.
-- Added: Disable Server Update Check tray menu option.
-- Added: Force Server Update Check tray menu option.
-- Added: Beta version and Stable version selectability.
+v1.6.0 (2019-05-19) Minor hotfix. New KeepUtilAlive and Network Connections Viewer.
+- Fixed: When | (vertical bar) was in a server name, it would cause the program to crash. (Thanks to Slaughter for reporting)
+- Added: KeepUtilAlive: An optional second program is now executed to restart util if util crashes.
+- Added: New warning message when more than one instance of the util is running.
+- Added: Network Connections Viewer in Tools section. Displays all ports used by the local computer.
+- Added: Grid Server Names was added to server_summary.txt file.

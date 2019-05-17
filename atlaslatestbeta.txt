@@ -1,9 +1,7 @@
-v1.5.5^v1.5.5 New Stop Server options, Port Duplicate checker, Optional Auto-Update Util
-- Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
-- Added: Optional automatic util update download and install with no user input. (Default is disabled).
-- Added: Port duplicate checker.
-- Fixed: Remove trailing \t in SeamlessIP if present upon import.
-- Added: Programmable utility update check interval. (Default is every 4 hours).
-- Fixed: When util updates, the .ini config file automatically updates without user input.
-- Fixed: Condition in which Remote Restart would not announce.
+v1.6.0(beta1)^v1.6.0(beta1) Minor hotfix. New KeepUtilAlive and Network Connections Viewer.
+- Fixed: When (vertical bar) was in a server name, it would cause the program to crash.
+- Added: KeepUtilAlive: An optionalsecond program is now executed to restart util if util crashes.
+- Added: New warning message when more than one instance of the util is running.
+- Added: Network Connections Viewer in Tools section. Displays all ports used by the local computer.
+- Added: Grid Server Names was added to server_summary.txt file.
 

@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.5.4 (2019-05-06)
+- Latest version: AtlasServerUpdateUtility_v1.5.7 (2019-05-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -287,7 +287,29 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
-(2019-05-04) v1.5.5
+(2019-05-11) v1.5.8 
+- Added: If Remote Restart port is in use upon util startup, it now asks if you want to close the program causing the interference.
+- Added: "Send Discord" now uses the old method as a backup in case the new method fails.
+- Added: Server name to logfile for in-game messages.
+
+(2019-05-12) v1.5.7 Hotfix! Fixed some Discord announcement errors.
+- Added: New "Send Discord" program was added for announcements. (Coming soon: the old method will be used as a backup once I get the bugs worked out.)
+- Fixed: Fixed various Discord announcement errors that would cause the util to crash.
+- Added: There are now two download sources for mcrcon.exe, AtlasModDownloader.exe, steamcmd.exe, and the new DiscordSendWebhook.exe... in case my main website is ever down.
+- Changed: You can now continue the util after a "TCP Port in Use error" occurs, although the Remote Restart web interface will not function.
+
+(2019-05-11) v1.5.6 Minor hotfixes and a couple new features.
+- Changed: Duplicate Port Checker is no longer run at start of util.  It can now be manually run within the new Tools menu.
+- Added: New Tools Button. Moved Duplicate Port Checker, Setup Wizard, Create Batch Files, Create Server Summary File to Tools menu.
+- Added: Responses to RCON commands and Broadcast messages are now displayed.
+- Fixed: Remote Restart failures: Line 36583 and possibly others. (I accidentally deleted a line). (Thanks Shadowsong & McK1llen for reporting).
+- Added: Default grid naming scheme options for Announcements and Util/Log: "Server naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2", "Announcement naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2" (Thanks Shadowsong for requesting).
+
+*** New Config Parameters/Changes: ***
+- Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
+- Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
+
+(2019-05-08) v1.5.5 
 - Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
 - Added: Optional automatic util update download and install with no user input. (Default is disabled).
 - Added: Port duplicate checker: Checks for duplicate ports assigned in ServerGrid.json & RCON ports in .ini or GUS.ini files.
