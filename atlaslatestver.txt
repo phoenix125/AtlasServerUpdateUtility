@@ -1,22 +1,9 @@
-v1.5.7^v1.5.7 Hotfix! Fixed some Discord announcement errors.
-- Added: New "Send Discord" program was added for announcements. (Coming soon: the old method will be used as a backup.)
-- Fixed: Fixed various Discord announcement errors that would cause the util to crash.
-- Added: A second download source for mcrcon.exe, AtlasModDownloader.exe, steamcmd.exe, and DiscordSendWebhook.exe.
-- Changed: You can now continue the util after a "TCP Port in Use error" occurs.
-
-v1.5.6 Minor hotfixes and a couple new features.
-- Changed: Duplicate Port Checker is no longer run at start of util.  It can now be manually run within the new Tools menu.
-- Added: New Tools Button. Moved Duplicate Port Checker, Setup Wizard, Create Batch Files, Create Server Summary File to Tools menu.
-- Added: Responses to RCON commands and Broadcast messages are now displayed.
-- Fixed: Remote Restart failures: Line 36583 and possibly others. (I accidentally deleted a line).
-- Added: Default grid naming scheme options for Announcements and Util/Log
-
-v1.5.5 New Stop Server options, Port Duplicate checker, Optional Auto-Update Util
-- Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
-- Added: Optional automatic util update download and install with no user input. (Default is disabled).
-- Added: Port duplicate checker.
-- Fixed: Remove trailing \t in SeamlessIP if present upon import.
-- Added: Programmable utility update check interval. (Default is every 4 hours).
-- Fixed: When util updates, the .ini config file automatically updates without user input.
-- Fixed: Condition in which Remote Restart would not announce.
-
+v1.6.1^v1.6.1 Several hotfixes and new Programmable Grid-Specific start delay, ExportData folder, Programmable mod download timeout.
+- Fixed: GridStartSelect.ini: When disabling servers from the main window, it would write A1 A2 or 00 01 instead of 0,0 0,1.
+- Added: Programmable Grid-Specific start delay.
+- Added: WorldFriendlyName (your server's name) and installed Atlas version to the utility's window title.
+- Fixed: Grids started from the main window are now minimized instead of hidden.
+- Fixed: Faster shutdown.
+- Added: User-defined timeout timer for downloading mod updates.
+- Added: ExportData folder containing the latest Online Players count and main GUI table data.
+- Fixed: If using User-Defined redis folder, then the redis server is now started within that folder.

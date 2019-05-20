@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.5.7 (2019-05-12)
+- Latest version: AtlasServerUpdateUtility_v1.6.0 (2019-05-17)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -30,6 +30,7 @@ Sections: (Use Search CTRL-F to quickly access)
 - Send RCON commands via web browser, including from your phone.
 - Run multiple instances of AtlasServerUpdateUtility to manage multiple servers.
 - Clean shutdown of your server(s).
+- Programmable Grid-Specific start delay. (in GridStartSelect.ini)
 More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
@@ -287,10 +288,31 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
-(2019-05-11) v1.5.8 
+v1.6.1 (2019-05-19) Several hotfixes and new Programmable Grid-Specific start delay, ExportData folder, Programmable mod download timeout.
+- Fixed: GridStartSelect.ini: When disabling servers from the main window, it would write A1 A2 or 00 01 instead of 0,0 0,1. (Thanks to GooberGrape for reporting).
+- Added: Startup delay between grids can now be grid-specific in the GridStartSelect.ini. (Thanks to Kara for requesting).
+- Added: WorldFriendlyName (your server's name) and installed Atlas version to the utility's window title. (Thanks to Doublee for requesting).
+- Fixed: When starting grids from the main window, they were previously hidden... now they start minimized.
+- Fixed: Shutdown sequence is now faster. (Timers now subtract the RCON "DoExit" response time from overall shutdown delay time).
+- Added: User-defined timeout timer for downloading mod updates. Default is 10 minutes.
+- Added: ExportData folder containing the latest Online Players count and all the data from the main GUI table.
+- Fixed: If using User-Defined redis folder, then the redis server is now started within that folder. (Thanks to Temil2006 for reporting).
+
+v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force update with -validate" option, "Network Connections Viewer"
+- Fixed: Log/Ini window now is faster and resizable.
+- Added: New warning message when ModIDs has an extra comma before the last quote. (Thanks to Reaper for reporting)
+- Added: New option to force update Atlas with -validate. (Thanks to Doublee for requesting)
+- Fixed: When checking for online players, the util waits up to 5 minutes for servers to come online before writing log entries.
+- Added: If servers are to be started, a new 10 second window appears allowing the ability to cancel: helpful to prevent duplicate server starts. (Thanks to Norlinri for requesting)
+- Added: Update icon in main window now shows exclamation point if utility update is available.
 - Added: If Remote Restart port is in use upon util startup, it now asks if you want to close the program causing the interference.
 - Added: "Send Discord" now uses the old method as a backup in case the new method fails.
 - Added: Server name to logfile for in-game messages.
+- Fixed: When | (vertical bar) was in a server name, it would cause the program to crash. (Thanks to Slaughter for reporting)
+- Added: KeepUtilAlive: An optional second program is now executed to restart util if util crashes.
+- Added: New warning message when more than one instance of the util is running.
+- Added: Network Connections Viewer in Tools section. Displays all ports used by the local computer.
+- Added: Grid Server Names was added to server_summary.txt file.
 
 (2019-05-12) v1.5.7 Hotfix! Fixed some Discord announcement errors.
 - Added: New "Send Discord" program was added for announcements. (Coming soon: the old method will be used as a backup once I get the bugs worked out.)
