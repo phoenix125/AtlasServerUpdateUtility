@@ -1,7 +1,9 @@
-v1.6.0(beta1)^v1.6.0(beta1) Minor hotfix. New KeepUtilAlive and Network Connections Viewer.
-- Fixed: When (vertical bar) was in a server name, it would cause the program to crash.
-- Added: KeepUtilAlive: An optionalsecond program is now executed to restart util if util crashes.
-- Added: New warning message when more than one instance of the util is running.
-- Added: Network Connections Viewer in Tools section. Displays all ports used by the local computer.
-- Added: Grid Server Names was added to server_summary.txt file.
-
+v1.6.1^v1.6.1 Several hotfixes and new Programmable Grid-Specific start delay, ExportData folder, Programmable mod download timeout.
+- Fixed: GridStartSelect.ini: When disabling servers from the main window, it would write A1 A2 or 00 01 instead of 0,0 0,1.
+- Added: Programmable Grid-Specific start delay.
+- Added: WorldFriendlyName (your server's name) and installed Atlas version to the utility's window title.
+- Fixed: Grids started from the main window are now minimized instead of hidden.
+- Fixed: Faster shutdown.
+- Added: User-defined timeout timer for downloading mod updates.
+- Added: ExportData folder containing the latest Online Players count and main GUI table data.
+- Fixed: If using User-Defined redis folder, then the redis server is now started within that folder.
