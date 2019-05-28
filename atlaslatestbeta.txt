@@ -1,9 +1,19 @@
-v1.6.1^v1.6.1 Several hotfixes and new Programmable Grid-Specific start delay, ExportData folder, Programmable mod download timeout.
-- Fixed: GridStartSelect.ini: When disabling servers from the main window, it would write A1 A2 or 00 01 instead of 0,0 0,1.
-- Added: Programmable Grid-Specific start delay.
-- Added: WorldFriendlyName (your server's name) and installed Atlas version to the utility's window title.
-- Fixed: Grids started from the main window are now minimized instead of hidden.
-- Fixed: Faster shutdown.
-- Added: User-defined timeout timer for downloading mod updates.
-- Added: ExportData folder containing the latest Online Players count and main GUI table data.
-- Fixed: If using User-Defined redis folder, then the redis server is now started within that folder.
+v1.6.4^v1.6.4 Added Select All/None, Fixed? Online Players Count failures, Many new options on the Event Scheduler.
+- Added: Select All, Select None, Invert added to main GUI.
+- Added: "Start All Servers" button added to main GUI.
+- Fixed: When all servers were disabled (unchecked), the "All servers online" Discord announcement was being sent.
+- Fixed: Fixed a possible cause of "Util update check failed to download latest version" failure.
+- Added: Added User-defined RCON and Online Players check response wait time to hopefully help solve the "Online Players Count" failures.
+- Fixed: When shutting down select servers, the countdown timer would go real slow.
+- Fixed: Startup delay per grid was only working on initial startup. It is now working for all startups.
+- Added: Added parenthesis around server IDs in announcements when shutting down select servers. ex: (A1 A2 B1 B2) Server is shutting down in 1 minute(s) for maintenance.
+- Added: Added more log info when Online players check fails.
+- Changed: The util no longer downloads AtlasModDownloader.exe or UtilityKeepAlive.exe unless used.
+- Changed: If KeepUtilAlive fails (usually due to Windows Defender) then the util will disable it.
+
+- Scheduler changes:
+	- Send multiple RCON commands in each event.
+	- Send custom Discord and In-game announcements with events.
+	- Optionally reboot servers after event.
+	- Scheduler now can be programmed by day of month and by the month.
+	- A temporary basic schedule is displayed showing scheduled events in order.

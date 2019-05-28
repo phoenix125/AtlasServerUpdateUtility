@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.6.0 (2019-05-17)
+- Latest version: AtlasServerUpdateUtility_v1.6.3 (2019-05-21)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -19,10 +19,11 @@ Sections: (Use Search CTRL-F to quickly access)
 - GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
 - Send RCON commands/messages to select servers only.
 - Send custom command lines PER GRID during server startup.
+- Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
 - Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times.
 - OK to use with most other server managers: Use this tool to install and maintain the server and use your other tools to manage game play features.
 - Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
-- Automatically keeps server updated.
+- Automatically keeps server and mods updated.
 - Announce server updates and/or restarts in game, on Discord and Twitch.
 - KeepServerAlive: Detects server crashes (checks for AtlasGame.exe via PID) and will restart the server.
 - User-defined scheduled reboots.
@@ -30,7 +31,7 @@ Sections: (Use Search CTRL-F to quickly access)
 - Send RCON commands via web browser, including from your phone.
 - Run multiple instances of AtlasServerUpdateUtility to manage multiple servers.
 - Clean shutdown of your server(s).
-- Programmable Grid-Specific start delay. (in GridStartSelect.ini)
+- Programmable PER GRID start delay. (in GridStartSelect.ini).
 More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
@@ -281,13 +282,46 @@ For update checks:
 - It then makes any announcements (ingame, Discord, Twitch) and will restart all servers when the announcement times are fulfilled.
 
 ----------------------------
- CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above)
+ CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above) or http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
 ----------------------------
 - The STABLE version and BETA version are the same at this time.
 
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.6.4 (2019-05-28)
+- Added: Select All, Select None, Invert added to main GUI (Thanks to Shadowsong & Doublee for requesting).
+- Added: "Start All Servers" button to main GUI (Thanks to Norlinri for requesting).
+- Fixed: When all servers were disabled (unchecked), the "All servers online" Discord announcement was being sent. (Thanks to Norlinri & Dead Duck for reporting).
+- Fixed: Fixed a possible cause of "Util update check failed to download latest version" failure.
+- Added: Added User-defined RCON and Online Players check response wait time to hopefully help solve the "Online Players Count" failures.
+- Fixed: When shutting down select servers, the countdown timer would go real slow. (Thanks to Infiniti for reporting).
+- Fixed: Startup delay per grid was only working on initial startup. It is now working for all startups.
+- Added: Added parenthesis around server IDs in announcements when shutting down select servers. ex: (A1 A2 B1 B2) Server is shutting down in 1 minute(s) for maintenance.
+- Added: Added more log info when Online players check fails.
+- Changed: The util no longer downloads AtlasModDownloader.exe or UtilityKeepAlive.exe unless used.
+- Changed: If KeepUtilAlive fails (usually due to Windows Defender) then the util will disable it.
+
+- Scheduler changes:
+	- Send multiple RCON commands in each event.
+	- Send custom Discord and In-game announcements with events.
+	- Optionally reboot servers after event.
+	- Scheduler now can be programmed by day of month and by the month.
+	- A temporary basic schedule is displayed showing scheduled events in order.
+
+v1.6.3 (2019-05-21) Quick Fix for Line error and Selecting grids on main GUI
+- Fixed: Selecting grids on main GUI no longer has popup window.
+- Fixed: For about 30 minutes, I had uploaded the wrong test version which caused a line error.
+
+v1.6.2 (2019-05-20) Minor "feel good" tweaks.
+- Added: Manual Online Players update / refresh button. (Thanks to Doublee for requesting).
+- Added: Finished Setup Wizard! You can now enter RCON ports and AltSaveDIR with server prompts.
+- Fixed: Config editor window is now resizable.
+- Fixed: The Online Players window can now be minimized.
+- Fixed: When "Check for Atlas Updates = no", the util would still check for updates upon util shutdown. (Thanks to telco for reporting).
+- Changed: When resizing main window, the "Total Players" is now centered.
+- Fixed: Added a second AtlasKeepAlive shutdown routine to hopefully prevent multiple AtlasUtil restart.
+
 v1.6.1 (2019-05-19) Several hotfixes and new Programmable Grid-Specific start delay, ExportData folder, Programmable mod download timeout.
 - Fixed: GridStartSelect.ini: When disabling servers from the main window, it would write A1 A2 or 00 01 instead of 0,0 0,1. (Thanks to GooberGrape for reporting).
 - Added: Startup delay between grids can now be grid-specific in the GridStartSelect.ini. (Thanks to Kara for requesting).
