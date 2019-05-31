@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.6.3 (2019-05-21)
+- Latest version: AtlasServerUpdateUtility_v1.6.6 (2019-05-29)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,6 +289,13 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.6.6 (2019-05-29) Critical Hotfix again. Fixed "Line 37744" error.
+- Fixed "Line 37744" error. (Thanks to AceMan, Inity, and others for reporting).
+- Added: Warning message on Setup Wizard when # of AltSafeDIRs does not match number of grids in ServerGrid.json. (Thanks to Kara for reporting).
+
+v1.6.5 (2019-05-28) Critical Hotfix for Mod Users!
+- Fixed: Mod Updater was failing on many mods. I changed the search criteria and hopefully fixed it.
+
 v1.6.4 (2019-05-28)
 - Added: Select All, Select None, Invert added to main GUI (Thanks to Shadowsong & Doublee for requesting).
 - Added: "Start All Servers" button to main GUI (Thanks to Norlinri for requesting).
