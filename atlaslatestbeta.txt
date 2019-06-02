@@ -1,26 +1,14 @@
-v1.6.6^v1.6.6 Critical Hotfix again. Fixed "Line 37744" error.
-- Fixed "Line 37744" error.
-- Added: Warning message on Setup Wizard when # of AltSafeDIRs does not match number of grids in ServerGrid.json.
+v1.6.7^v1.6.8 Critical Hotfix (KeepUtilAlive) and new Atlas Scheduler.
+- Added: Atlas Backup with Scheduler. Still a Work In Progress: It only backs up at this time. Eventually a full recovery will be available. Also max backups not operation yet.
+- Fixed: KeepUtilAlive would timeout if long mod downloads or shutdown.
 
-v1.6.5 Critical Hotfix for Mod Users
-- Fixed: Mod Updater was failing on many mods. I changed the search criteria and hopefully fixed it.
-
-v1.6.4 Added Select All/None, Fixed? Online Players Count failures, Many new options on the Event Scheduler.
-- Added: Select All, Select None, Invert added to main GUI.
-- Added: "Start All Servers" button added to main GUI.
-- Fixed: When all servers were disabled (unchecked), the "All servers online" Discord announcement was being sent.
-- Fixed: Fixed a possible cause of "Util update check failed to download latest version" failure.
-- Added: Added User-defined RCON and Online Players check response wait time to hopefully help solve the "Online Players Count" failures.
-- Fixed: When shutting down select servers, the countdown timer would go real slow.
-- Fixed: Startup delay per grid was only working on initial startup. It is now working for all startups.
-- Added: Added parenthesis around server IDs in announcements when shutting down select servers. ex: (A1 A2 B1 B2) Server is shutting down in 1 minute(s) for maintenance.
-- Added: Added more log info when Online players check fails.
-- Changed: The util no longer downloads AtlasModDownloader.exe or UtilityKeepAlive.exe unless used.
-- Changed: If KeepUtilAlive fails (usually due to Windows Defender) then the util will disable it.
-
-- Scheduler changes:
-	- Send multiple RCON commands in each event.
-	- Send custom Discord and In-game announcements with events.
-	- Optionally reboot servers after event.
-	- Scheduler now can be programmed by day of month and by the month.
-	- A temporary basic schedule is displayed showing scheduled events in order.
+v1.6.7 Hotfixes. Mod Updater now has 3rd update check method and updates when the .mod file is missing from the Atlas Mod folder.
+- Added: KeepUtilAlive now checks for AtlasServerUpdateUtility crashes and hangs.
+- Added: Added a third option for checking for mod updates using wget.exe to hopefully eliminate the "IE Enhanced Security Configuration" error.
+- Added: The Main Window refresh rate is now user-programmable. Default is 10 seconds.
+- Fixed: Line 37544 and Line 40541 errors. A parenthesis ")" was missing in a line in the upgrade process.
+- Fixed: "Poll Remote Servers" was not correctly being checked at util startup.
+- Fixed: If 2 or mods are updated, it would only announce the first mod being updated.
+- Fixed: When a ".mod file" is deleted from the Atlas Mods folder after the util last updated the mod, it will now redownload and install the mod.
+- Fixed: Servers would not restart if "Announcement _ minutes before" only had only one number.
+- Fixed: When servers are restarting, the Status indicator now says "Starting" instead of "CRASHED".

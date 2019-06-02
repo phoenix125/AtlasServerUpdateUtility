@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.6.6 (2019-05-29)
+- Latest version: AtlasServerUpdateUtility_v1.6.8 (2019-06-02)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,6 +289,35 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.6.8 (2019-06-02) Critical Hotfix if using KeepUtilAlive. Also added new Atlas Scheduler (Work in Progress: Only backs up at this time).
+- Added: Atlas Backup with Scheduler. Still a Work In Progress: It only backs up at this time. Eventually a full recovery will be available. Also max backups not operation yet.
+- Fixed: KeepUtilAlive would timeout if long mod downloads or shutdown.
+
+*** New Config Parameters/Changes: ***
+[--------------- BACKUP ---------------]
+Use scheduled backups? (yes/no) ###=yes
+Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###=0
+Backup hours (comma separated 00-23 ex.04,16) ###=06,12,18,00
+Backup minute (00-59) ###=00
+Output folder ###=D:\Game Servers\AtlasServerUpdateUtility\Backups
+Number of backups to keep (1-999) ###=56
+Max time in seconds to wait for backup to complete (30-999) ###=300
+
+
+v1.6.7 (2019-06-01) Hotfixes. Mod Updater now has 3rd update check method and updates when the .mod file is missing from the Atlas Mod folder.
+- Added: KeepUtilAlive now checks for AtlasServerUpdateUtility crashes and hangs.
+- Added: Added a third option for checking for mod updates using wget.exe to hopefully eliminate the "IE Enhanced Security Configuration" error.
+- Added: The Main Window refresh rate is now user-programmable. Default is 10 seconds.
+- Fixed: Line 37544 and Line 40541 errors. A parenthesis ")" was missing in a line in the upgrade process. (Thanks to zozoman for reporting).
+- Fixed: "Poll Remote Servers" was not correctly being checked at util startup. (Thanks to AceMan for reporting).
+- Fixed: If 2 or mods are updated, it would only announce the first mod being updated. (Thanks to GooberGrape for reporting).
+- Fixed: When a ".mod" file is deleted from the Atlas Mods folder after the util last updated the mod, it will now redownload and install the mod. (Thanks to Doublee for reporting).
+- Fixed: Servers would not restart if "Announcement _ minutes before" only had only one number.
+- Fixed: When servers are restarting, the Status indicator now says "Starting" instead of "CRASHED".
+
+*** New Config Parameters/Changes: ***
+- Update the Main Window data every __ seconds (2-60) ###=10
+
 v1.6.6 (2019-05-29) Critical Hotfix again. Fixed "Line 37744" error.
 - Fixed "Line 37744" error. (Thanks to AceMan, Inity, and others for reporting).
 - Added: Warning message on Setup Wizard when # of AltSafeDIRs does not match number of grids in ServerGrid.json. (Thanks to Kara for reporting).
