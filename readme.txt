@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.6.8 (2019-06-02)
+- Latest version: AtlasServerUpdateUtility_v1.6.9 (2019-06-06)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,20 +289,38 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.6.9 (2019-06-06) Backup tweaks. NOTICE!! Config files were moved to "\Config" Folder!! Online Players now checks twice if needed.
+- Changed: The AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files were moved to \Config folder for permissions purposes and to clean up install folder. (Thanks to Linearburn for requesting).
+- Added: Added redis folder to backup.
+- Added: When Backup initiated, optionally send announcement in-game, Discord, and/or Twitch. (Thanks to Dead Duck for requesting).
+- Changed: Backup zip window is now hidden during automated backups.
+- Fixed: Number of backups to keep (1-999) ### is now operational.
+- Changed: After checking for Online Players, if any failed, the util now waits one second then tries the failed grid(s) once more.
+- Changed: Improved Online Players log to only chart changes in online players (removed duplicate entries).
+
+[ New Config Parameters/Changes ]
+	[--------------- BACKUP ---------------]
+	Redis folder (leave blank to use redis folder above or to disable) ###=
+	In-Game announcement when backup initiated (Leave blank to disable) ###=Server backup in progress.
+	Discord announcement when backup initiated (Leave blank to disable) ###=
+	Twitch announcement when backup initiated (Leave blank to disable) ###=
+
+	[--------------- ATLASSERVERUPDATEUTILITY MISC OPTIONS ---------------]
+	Folder to place config files ###=
+
 v1.6.8 (2019-06-02) Critical Hotfix if using KeepUtilAlive. Also added new Atlas Scheduler (Work in Progress: Only backs up at this time).
 - Added: Atlas Backup with Scheduler. Still a Work In Progress: It only backs up at this time. Eventually a full recovery will be available. Also max backups not operation yet.
 - Fixed: KeepUtilAlive would timeout if long mod downloads or shutdown.
 
-*** New Config Parameters/Changes: ***
-[--------------- BACKUP ---------------]
-Use scheduled backups? (yes/no) ###=yes
-Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###=0
-Backup hours (comma separated 00-23 ex.04,16) ###=06,12,18,00
-Backup minute (00-59) ###=00
-Output folder ###=D:\Game Servers\AtlasServerUpdateUtility\Backups
-Number of backups to keep (1-999) ###=56
-Max time in seconds to wait for backup to complete (30-999) ###=300
-
+	[ New Config Parameters/Changes ]
+	[--------------- BACKUP ---------------]
+	Use scheduled backups? (yes/no) ###=yes
+	Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###=0
+	Backup hours (comma separated 00-23 ex.04,16) ###=06,12,18,00
+	Backup minute (00-59) ###=00
+	Output folder ###=D:\Game Servers\AtlasServerUpdateUtility\Backups
+	Number of backups to keep (1-999) ###=56
+	Max time in seconds to wait for backup to complete (30-999) ###=300
 
 v1.6.7 (2019-06-01) Hotfixes. Mod Updater now has 3rd update check method and updates when the .mod file is missing from the Atlas Mod folder.
 - Added: KeepUtilAlive now checks for AtlasServerUpdateUtility crashes and hangs.
@@ -315,8 +333,8 @@ v1.6.7 (2019-06-01) Hotfixes. Mod Updater now has 3rd update check method and up
 - Fixed: Servers would not restart if "Announcement _ minutes before" only had only one number.
 - Fixed: When servers are restarting, the Status indicator now says "Starting" instead of "CRASHED".
 
-*** New Config Parameters/Changes: ***
-- Update the Main Window data every __ seconds (2-60) ###=10
+	[ New Config Parameters/Changes ]
+	- Update the Main Window data every __ seconds (2-60) ###=10
 
 v1.6.6 (2019-05-29) Critical Hotfix again. Fixed "Line 37744" error.
 - Fixed "Line 37744" error. (Thanks to AceMan, Inity, and others for reporting).
@@ -397,9 +415,9 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Fixed: Remote Restart failures: Line 36583 and possibly others. (I accidentally deleted a line). (Thanks Shadowsong & McK1llen for reporting).
 - Added: Default grid naming scheme options for Announcements and Util/Log: "Server naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2", "Announcement naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2" (Thanks Shadowsong for requesting).
 
-*** New Config Parameters/Changes: ***
-- Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
-- Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
+	[ New Config Parameters/Changes ]
+	- Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
+	- Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###=2
 
 (2019-05-08) v1.5.5 
 - Added: Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
@@ -410,16 +428,15 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Fixed: When util updates, the .ini config file automatically updates without user input. Previously, it still asked for user input sometimes.
 - Fixed: Condition in which Remote Restart would not announce (If Announce Daily or Update were disabled)
 
-*** New Config Parameters/Changes: ***
-- "Check for AtlasServerUpdateUtility updates every __ hours (0 to disable) (0-24) ###=3
-- "Automatically install AtlasServerUpdateUtility updates? (yes/no) ###=yes
-- "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###=1,3
-- In-Game: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
-- Discord: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
-- Discord: "Send Discord message for STOP SERVER? (yes/no) ###=no"
-- Twitch:  "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
-- Twitch:  "Send Twitch message for STOP SERVER? (yes/no) ###=no"
-
+	[ New Config Parameters/Changes ]
+	- "Check for AtlasServerUpdateUtility updates every __ hours (0 to disable) (0-24) ###=3
+	- "Automatically install AtlasServerUpdateUtility updates? (yes/no) ###=yes
+	- "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###=1,3
+	- In-Game: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+	- Discord: "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+	- Discord: "Send Discord message for STOP SERVER? (yes/no) ###=no"
+	- Twitch:  "Announcement STOP SERVER (\m - minutes) ###=Server is shutting down in \m minute(s) for maintenance."
+	- Twitch:  "Send Twitch message for STOP SERVER? (yes/no) ###=no"
 
 (2019-05-04) v1.5.4 (Thanks to Norlinri for reporting both problems)
 - Fixed: "Line 35734 Unbalanced brackets in expression" error fixed.

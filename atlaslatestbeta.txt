@@ -1,14 +1,12 @@
-v1.6.8^v1.6.8 Critical Hotfix (KeepUtilAlive) and new Atlas Scheduler.
+v1.6.9^v1.6.9 Backup tweaks. NOTICE!! Config files were moved to "\Config" Folder!! Online Players now checks twice if needed.
+- Changed: Moved config files to \Config folder for permissions purposes and to clean up install folder.
+- Added: Added redis folder to backup.
+- Added: When Backup initiated, optionally send announcement in-game, Discord, and/or Twitch.
+- Changed: Backup zip window is now hidden during automated backups.
+- Fixed: Number of backups to keep (1-999) ### is now operational.
+- Changed: After checking for Online Players, if any failed, the util now waits one second then tries the failed grid(s) once more.
+- Changed: Improved Online Players log to only chart changes in online players (removed duplicate entries).
+
+v1.6.8 Critical Hotfix (KeepUtilAlive) and new Atlas Scheduler.
 - Added: Atlas Backup with Scheduler. Still a Work In Progress: It only backs up at this time. Eventually a full recovery will be available. Also max backups not operation yet.
 - Fixed: KeepUtilAlive would timeout if long mod downloads or shutdown.
-
-v1.6.7 Hotfixes. Mod Updater now has 3rd update check method and updates when the .mod file is missing from the Atlas Mod folder.
-- Added: KeepUtilAlive now checks for AtlasServerUpdateUtility crashes and hangs.
-- Added: Added a third option for checking for mod updates using wget.exe to hopefully eliminate the "IE Enhanced Security Configuration" error.
-- Added: The Main Window refresh rate is now user-programmable. Default is 10 seconds.
-- Fixed: Line 37544 and Line 40541 errors. A parenthesis ")" was missing in a line in the upgrade process.
-- Fixed: "Poll Remote Servers" was not correctly being checked at util startup.
-- Fixed: If 2 or mods are updated, it would only announce the first mod being updated.
-- Fixed: When a ".mod file" is deleted from the Atlas Mods folder after the util last updated the mod, it will now redownload and install the mod.
-- Fixed: Servers would not restart if "Announcement _ minutes before" only had only one number.
-- Fixed: When servers are restarting, the Status indicator now says "Starting" instead of "CRASHED".
