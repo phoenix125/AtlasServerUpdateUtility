@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.6.9 (2019-06-06)
+- Latest version: AtlasServerUpdateUtility_v1.7.0 (2019-06-08)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,9 +289,17 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.0 (2019-06-08) Hotfixes. Fixed several bugs with new installation. Added config files to backups.
+- Added: Backup now includes the AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files. (Thanks to Linearburn for requesting).
+- Changed: Backup now includes full path for all files for easier restoration of files. 
+- Added: Checks for "Atlas\ShooterGame" in .ini under install DIR and removes the "\ShooterGame" part. (Thanks to TheOgopogo for reporting).
+- Fixed: Line 40293 error due to unassigned Event Scheduler default values with new installation. (Thanks to TheOgopogo for reporting).
+- Fixed: Several bug fixes and improvements for new installations.
+- Changed: Online Players GUI and Main GUI buttons / Tray options never disable anymore. (Thanks to Psychoboy for reporting GUI issues).
+
 v1.6.9 (2019-06-06) Backup tweaks. NOTICE!! Config files were moved to "\Config" Folder!! Online Players now checks twice if needed.
 - Changed: The AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files were moved to \Config folder for permissions purposes and to clean up install folder. (Thanks to Linearburn for requesting).
-- Added: Added redis folder to backup.
+- Added: Added redis folder to backup. (You can manually set the redis backup folder if you manage the redis-server yourself).
 - Added: When Backup initiated, optionally send announcement in-game, Discord, and/or Twitch. (Thanks to Dead Duck for requesting).
 - Changed: Backup zip window is now hidden during automated backups.
 - Fixed: Number of backups to keep (1-999) ### is now operational.
