@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.1 (2019-06-09)
+- Latest version: AtlasServerUpdateUtility_v1.7.2 (2019-06-09)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,9 +289,21 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.2 (2019-06-09) Added programmable Broadcast Message display duration!
+- Added: You can now set the approximate duration that messages sent in-game will be displayed.
+         (The util adds extra spaces before and after the message which causes Atlas to display the message longer). (Thanks to Norlinri for requesting).
+
+[ New Config Parameters/Changes ]
+	[--------------- IN-GAME ANNOUNCEMENT CONFIGURATION ---------------]
+	Approximate duration to display messages in-game (seconds)? (6-30) ###=15
+
 v1.7.1 (2019-06-09) Scheduler Hotfix.
 - Fixed: Several bugs with the Event Scheduler. (Thanks to Norlinri for reporting).
 - Added: Minutes option to DestroyWildDinos. (Thanks to Norlinri for requesting).
+
+[ New Config Parameters/Changes ]
+	[--------------- SCHEDULED DESTROYWILDDINOS ---------------]
+	Send DestroyWildDinos minute (0-59) ###=00
 
 v1.7.0 (2019-06-08) Hotfixes. Fixed several bugs with new installation. Added config files to backups.
 - Added: Backup now includes the AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files. (Thanks to Linearburn for requesting).

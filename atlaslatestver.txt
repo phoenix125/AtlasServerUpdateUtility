@@ -1,4 +1,7 @@
-v1.7.1^v1.7.1 Scheduler Hotfix.
+v1.7.2^v1.7.2 Added programmable Broadcast Message display duration!
+- Added: You can now set the approximate duration that messages sent in-game will be displayed.
+
+v1.7.1 Scheduler Hotfix.
 - Fixed: Several bugs with the Event Scheduler.
 - Added: Minutes option to DestroyWildDinos.
 
