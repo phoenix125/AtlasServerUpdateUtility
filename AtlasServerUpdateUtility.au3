@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v1.7.0.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v1.7.0_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v1.7.1.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v1.7.1_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=1.7.0.0
+#AutoIt3Wrapper_Res_Fileversion=1.7.1.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v1.7.0
+#AutoIt3Wrapper_Res_ProductVersion=v1.7.1
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_Icon_Add=Resources\phoenixfaded.ico
@@ -83,9 +83,9 @@ FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\Atla
 FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_off_left0.png", $aFolderTemp, 0)
 FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_on_left0.png", $aFolderTemp, 0)
 
-$aUtilVerStable = "v1.7.0" ; (2019-06-08)
-$aUtilVerBeta = "v1.7.0" ; (2019-06-08)
-Global $aUtilVerNumber = 12 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+$aUtilVerStable = "v1.7.1" ; (2019-06-09)
+$aUtilVerBeta = "v1.7.1" ; (2019-06-09)
+Global $aUtilVerNumber = 13 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -98,7 +98,8 @@ Global $aUtilVerNumber = 12 ; New number assigned for each config file change. U
 ; 9 = v1.6.4/5/6
 ;10 = v1.6.7
 ;11 = v1.6.8
-;12 = v1.6.9
+;12 = v1.6.9/1.7.0
+;13 = v1.7.1
 
 $aUtilName = "AtlasServerUpdateUtility"
 $aServerEXE = "ShooterGameServer.exe"
@@ -133,7 +134,7 @@ Global $aRCONShutdownCMD = "DoExit"
 Global $aServerWorldFriendlyName = "temp"
 Global $aModAppWorkshop = "appworkshop_834910.acf"
 Global $aRebootReason = ""
-Global $xCustomRCONRebootNumber = -1  ; Determines which Custom Schedule number requested the server reboot.
+Global $xCustomRCONRebootNumber = -1 ; Determines which Custom Schedule number requested the server reboot.
 Global $aServerName = $aGameName
 $aServerUpdateLinkVerStable = "http://www.phoenix125.com/share/atlas/atlaslatestver.txt"
 $aServerUpdateLinkVerBeta = "http://www.phoenix125.com/share/atlas/atlaslatestbeta.txt"
@@ -488,14 +489,15 @@ If $aCFGLastVerNumber < 12 Then
 	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Discord announcement when backup initiated (Leave blank to disable) ###", "")
 	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Twitch announcement when backup initiated (Leave blank to disable) ###", "")
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Folder to place config files ###", @ScriptDir & "\Config")
-;~ 	IniWrite($aUtilCFGFile, "CFG", "aIniFile", @ScriptDir & "\Config")
 	DirCreate(@ScriptDir & "\Config")
 	FileMove(@ScriptDir & "\AtlasServerUpdateUtility.ini", @ScriptDir & "\Config\AtlasServerUpdateUtility.ini", 1)
 	FileMove(@ScriptDir & "\AtlasServerUpdateUtilityGridStartSelect.ini", @ScriptDir & "\Config\AtlasServerUpdateUtilityGridStartSelect.ini", 1)
 	FileMove(@ScriptDir & "\*.bak", @ScriptDir & "\Config\*.*", 1)
 	$aIniForceWrite = True
 EndIf
-
+If $aCFGLastVerNumber < 13 Then
+	IniWrite($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", "00")
+EndIf
 ;~ Global $aIniFile = IniRead($aUtilCFGFile, "CFG", "aIniFile", "error")
 ;~ If $aIniFile = "error" Then
 ;~ 	$aIniFile = @ScriptDir & "\Config\" & $aUtilName & ".ini"
@@ -530,16 +532,16 @@ If $tPID > 0 Then
 				"Click (CANCEL) to exit utility."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Then             ; YES
+		If $tMB = 6 Then ; YES
 			LogWrite(" [Util] Closing the other instance and continue running this one.")
 			ProcessClose($tPID)
 			$aSplashStartUp = _Splash("Closing the other instance and continue running this one.", 2000)
 ;~ 			IniWrite(@ScriptDir & "\AtlasServerUpdateUtilityKeepAlive.ini", " --------------- ATLASSERVERUPDATEUTILITYKEEPALIVE --------------- ", "Program to Keep Alive ###", $aUtilName & "_" & $aUtilVersion & ".exe")
 			If $aUseKeepAliveYN = "yes" Then IniWrite($aKeepAliveConfigFileFull, " --------------- ATLASSERVERUPDATEUTILITYKEEPALIVE --------------- ", "System use: Close AtlasServerUpdateUtilityKeepAlive? (Checked prior to restarting above Program... used when purposely shutting down above Program)(yes/no) ###", "no")
-		ElseIf $tMB = 7 Then         ; NO
+		ElseIf $tMB = 7 Then ; NO
 			LogWrite(" [Util] Continuing to run this instance.")
 			$aSplashStartUp = _Splash("Continuing to run this instance.", 2000)
-		ElseIf $tMB = 2 Then         ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			LogWrite(" [Util] Exiting utility.")
 			_Splash($aUtilName & " exiting.", 2000)
 			Exit
@@ -664,7 +666,7 @@ If ($aServerRCONImport = "yes") Then
 	$xServerRCONPort = ImportRCON($aServerDirLocal, $xServerAltSaveDir, $aServerGridTotal, $xStartGrid)
 EndIf
 
-If ($sInGameAnnounce = "yes") Or ($aTelnetCheckYN = "yes") Or ($aEnableRCON = "yes") And ($aServerWorldFriendlyName <> "TempXY") Then     ; "TempXY" indicates temp settings set to complete a fresh install of Atlas files.
+If ($sInGameAnnounce = "yes") Or ($aTelnetCheckYN = "yes") Or ($aEnableRCON = "yes") And ($aServerWorldFriendlyName <> "TempXY") Then ; "TempXY" indicates temp settings set to complete a fresh install of Atlas files.
 	If $aServerGridTotal <> (UBound($xServerRCONPort) - 1) Then
 		SplashOff()
 		Local $aErrorMsg = " [CRITICAL ERROR!] The number of grids does not match the number of RCON ports listed in " & $aUtilName & ".ini." & @CRLF & "Grid Total:" & $aServerGridTotal & ". Number of RCON entries:" & (UBound($xServerRCONPort) - 1) & @CRLF & "Example: Server RCON Port(s) (comma separated, grid order left-to-right ) ###: 57510,57512,57514,57516" & @CRLF & @CRLF & "Please correct the RCON entries in " & $aUtilName & ".ini file and restart " & $aUtilName & "."
@@ -709,7 +711,7 @@ If $aServerModYN = "yes" Then
 	$aServerModCMD = " -manualmanagedmods"
 	Local $aMods = StringSplit($aServerModList, ",")
 	Global $aModName[$aMods[0] + 1]
-	If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) Then     ; $aUtilReboot = A planned reboot of the util... no need to check for updates.
+	If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) Then ; $aUtilReboot = A planned reboot of the util... no need to check for updates.
 ;~ 		$aFirstModCheck = True
 		CheckMod($aServerModList, $aSteamCMDDir, $aServerDirLocal, $aSplashStartUp, True)
 	EndIf
@@ -785,18 +787,18 @@ If $aRemoteRestartUse = "yes" Then
 					SplashOff()
 					$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 					; ----------------------------------------------------------
-					If $tMB = 6 Then     ; YES
+					If $tMB = 6 Then ; YES
 						LogWrite(" [Remote Restart] Program(" & $tProgPID & "), PID(" & $tPID[0] & ") terminated. Remote Restart initialized.")
 						ProcessClose($tPID[0])
 						Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
 						_Splash($aStartText & "Program terminated." & @CRLF & "Initializing Remote Restart.", 2000, 475)
 						$aSplashStartUp = _Splash($aStartText & "Program terminated." & @CRLF & "Initializing Remote Restart.", 0, 475)
-					ElseIf $tMB = 7 Then     ; NO
+					ElseIf $tMB = 7 Then ; NO
 						$aSplashStartUp = _Splash($aStartText & "Continuing startup.", 0, 475)
-					ElseIf $tMB = 2 Then     ; CANCEL
+					ElseIf $tMB = 2 Then ; CANCEL
 						_Splash($aUtilName & " exiting.", 2000)
 						_ExitUtil()
-					ElseIf $tMB = -1 Then        ; Timeout
+					ElseIf $tMB = -1 Then ; Timeout
 						$aSplashStartUp = _Splash($aStartText & "No response. Continuing startup.", 0, 475)
 					EndIf
 				EndIf
@@ -886,16 +888,16 @@ If $tStartedServersTF Then
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 10)
 	; ----------------------------------------------------------
-	If $tMB = 6 Then                 ; YES
+	If $tMB = 6 Then ; YES
 		$aSplashStartUp = _Splash($aStartText, 0, 475)
-	ElseIf $tMB = -1 Then            ; Timeout
+	ElseIf $tMB = -1 Then ; Timeout
 		$aSplashStartUp = _Splash($aStartText, 0, 475)
-	ElseIf $tMB = 7 Then             ; NO
+	ElseIf $tMB = 7 Then ; NO
 		Local $aMsg = "Are you sure you wish to disable all grids?" & @CRLF & @CRLF & _
 				"Click (YES) to DISABLE ALL SERVERS and continue utility." & @CRLF & _
 				"Click (NO) or (CANCEL) to exit utility."
 		$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg)
-		If $tMB1 = 6 Then                     ; YES
+		If $tMB1 = 6 Then ; YES
 			_Splash($aStartText & "Disabling grids.", 2000, 475)
 			$aSplashStartUp = _Splash($aStartText & "Disabling grids.", 0, 475)
 			For $i = 0 To ($aServerGridTotal - 1)
@@ -910,7 +912,7 @@ If $tStartedServersTF Then
 			CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, 0)
 			_ExitUtil()
 		EndIf
-	ElseIf $tMB = 2 Then             ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		_Splash("Exiting utility. . .", 2000)
 		CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, 0)
 		_ExitUtil()
@@ -962,20 +964,20 @@ EndIf
 #Region ;**** Tray Menu ****
 ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Preparing GUI. Getting server information.")
 $aStartText = ""
-Opt("TrayMenuMode", 3)     ; The default tray menu items will not be shown and items are not checked when selected. These are options 1 and 2 for TrayMenuMode.
-Opt("TrayOnEventMode", 1)     ; Enable TrayOnEventMode.
+Opt("TrayMenuMode", 3) ; The default tray menu items will not be shown and items are not checked when selected. These are options 1 and 2 for TrayMenuMode.
+Opt("TrayOnEventMode", 1) ; Enable TrayOnEventMode.
 Local $iTrayShowGUI = TrayCreateItem("- SHOW GUI -")
 TrayItemSetOnEvent(-1, "Tray_ShowGUI")
 Local $iTrayShowConfig = TrayCreateItem("Show Config")
 TrayItemSetOnEvent(-1, "Tray_ShowConfig")
-TrayCreateItem("")     ; Create a separator line.
+TrayCreateItem("") ; Create a separator line.
 Local $iTrayAbout = TrayCreateItem("About")
 TrayItemSetOnEvent(-1, "Tray_About")
 Local $iTrayUpdateUtilCheck = TrayCreateItem("Check for Util Update")
 TrayItemSetOnEvent(-1, "Tray_UtilUpdate")
 Local $iTrayUpdateUtilPause = TrayCreateItem("Pause Util")
 TrayItemSetOnEvent(-1, "Tray_PauseUtil")
-TrayCreateItem("")     ; Create a separator line.
+TrayCreateItem("") ; Create a separator line.
 Local $iTraySendMessage = TrayCreateItem("Send message")
 TrayItemSetOnEvent(-1, "Tray_AllSendMsg")
 Local $iTraySendRCON = TrayCreateItem("Send RCON command")
@@ -990,19 +992,19 @@ TrayItemSetOnEvent(-1, "Tray_OnlinePlayersCheckDisable")
 Local $iTrayPlayerCheckUnPause = TrayCreateItem("Enable Online Players Check/Log")
 TrayItemSetOnEvent(-1, "Tray_OnlinePlayersCheckEnable")
 ;Local $iTrayPlayerHideCount = TrayCreateItem("Hide Online Players")
-TrayCreateItem("")     ; Create a separator line.
+TrayCreateItem("") ; Create a separator line.
 Local $iTrayUpdateServCheck = TrayCreateItem("Check for Server Update")
 TrayItemSetOnEvent(-1, "Tray_ServerUpdateCheck")
 Local $iTrayUpdateServPause = TrayCreateItem("Disable Server Update Check")
 TrayItemSetOnEvent(-1, "Tray_ServerUpdateDisable")
 Local $iTrayUpdateServUnPause = TrayCreateItem("Enable Server Update Check")
 TrayItemSetOnEvent(-1, "Tray_ServerUpdateEnable")
-TrayCreateItem("")     ; Create a separator line.
+TrayCreateItem("") ; Create a separator line.
 Local $iTrayRemoteRestart = TrayCreateItem("Initiate Remote Restart")
 TrayItemSetOnEvent(-1, "Tray_RemoteRestart")
 Local $iTrayRestartNow = TrayCreateItem("Restart Servers Now")
 TrayItemSetOnEvent(-1, "Tray_RestartServersNow")
-TrayCreateItem("")     ; Create a separator line.
+TrayCreateItem("") ; Create a separator line.
 Local $iTrayExitCloseN = TrayCreateItem("Exit: Do NOT Shut Down Servers")
 TrayItemSetOnEvent(-1, "Tray_ExitShutDownN")
 Local $iTrayExitCloseY = TrayCreateItem("Exit: Shut Down Servers")
@@ -1021,12 +1023,12 @@ Else
 	TrayItemSetState($iTrayPlayerCheckPause, $TRAY_DISABLE)
 	TrayItemSetState($iTrayPlayerCheckUnPause, $TRAY_ENABLE)
 EndIf
-TraySetState($TRAY_ICONSTATE_SHOW)     ; Show the tray menu.
+TraySetState($TRAY_ICONSTATE_SHOW) ; Show the tray menu.
 #EndRegion ;**** Tray Menu ****
 
 Opt("GUIResizeMode", $GUI_DOCKAUTO)
 
-$aGUIH = 70 + $aServerGridTotal * 15     ;Create Show Online Players Window Frame
+$aGUIH = 70 + $aServerGridTotal * 15 ;Create Show Online Players Window Frame
 If $aGUIH > 800 Then $aGUIH = 800
 
 ShowMainGUI($aSplashStartUp)
@@ -1047,11 +1049,11 @@ If $xServerIP[0] = "1.2.3.4" Then
 			"Click (NO) to edit the config file." & @CRLF & _
 			"Click (CANCEL) to continue."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $tMsg, 30)
-	If $tMB = 6 Then                 ; YES
+	If $tMB = 6 Then ; YES
 		WizardSelect()
-	ElseIf $tMB = 7 Then             ; NO
+	ElseIf $tMB = 7 Then ; NO
 		ConfigEdit($aSplashStartUp)
-	ElseIf $tMB = 2 Then             ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 	EndIf
 Else
 	Local $tMsg = "NOTICE!!! As of v1.6.9 !!! " & @CRLF & @CRLF & _
@@ -1072,7 +1074,7 @@ Global $lLogTabWindow = 0, $lBasicEdit = 0, $lDetailedEdit = 0, $lOnlinePlayersE
 Global $aRet[3], $iWidth = 1001, $iHeight = 701
 Local $tLVlast = 0, $tLVclick = 0
 
-While True     ;**** Loop Until Closed ****
+While True ;**** Loop Until Closed ****
 	$aSliderNow = GUICtrlRead($UpdateIntervalSlider)
 	If $aSliderNow <> $aSliderPrev Then
 		GUICtrlSetData($UpdateIntervalEdit, $aSliderNow)
@@ -1080,22 +1082,22 @@ While True     ;**** Loop Until Closed ****
 	EndIf
 	#cs
 		If $tClickType <> -1 Then
-			Sleep(200)
-			If $tClickType = "Header" Then SplashTextOn("Click", "Clicked Header Column:" & $tClickHead)
-			If $tClickType = "L1" Then SplashTextOn("Click", "Left Clicked" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
-			If $tClickType = "R1" Then SplashTextOn("Click", "Right Clicked" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
-			If $tClickType = "L2" Then SplashTextOn("Click", "Left Clicked 2" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
-			If $tClickType = "R2" Then SplashTextOn("Click", "Right Clicked 2" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
-	;~ 			If $tClickType = "HotTrack" Then SplashTextOn("Click", "HotTrack" & @CRLF & "Row:" & $tClickHotTrack)
-			Sleep(1000)
-			ControlClick("AtlasServerUpdateUtility v", "", "[CLASS:SysListView32; INSTANCE:1]", "left", 1, 853, 33)
-			SplashOff()
-			$tClickHead = -1
-			$tClickCol = -1
-			$tClickRow = -1
-			$tClickType = -1
-	;~ 			_GUICtrlListView_SetItemSelected($wMainListViewWindow, 99, True, True)
-	;~ 			_GUICtrlListBox_SetSel($wMainListViewWindow, 99, True)
+		Sleep(200)
+		If $tClickType = "Header" Then SplashTextOn("Click", "Clicked Header Column:" & $tClickHead)
+		If $tClickType = "L1" Then SplashTextOn("Click", "Left Clicked" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
+		If $tClickType = "R1" Then SplashTextOn("Click", "Right Clicked" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
+		If $tClickType = "L2" Then SplashTextOn("Click", "Left Clicked 2" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
+		If $tClickType = "R2" Then SplashTextOn("Click", "Right Clicked 2" & @CRLF & "Row:" & $tClickRow & @CRLF & "Column:" & $tClickCol)
+		;~ 			If $tClickType = "HotTrack" Then SplashTextOn("Click", "HotTrack" & @CRLF & "Row:" & $tClickHotTrack)
+		Sleep(1000)
+		ControlClick("AtlasServerUpdateUtility v", "", "[CLASS:SysListView32; INSTANCE:1]", "left", 1, 853, 33)
+		SplashOff()
+		$tClickHead = -1
+		$tClickCol = -1
+		$tClickRow = -1
+		$tClickType = -1
+		;~ 			_GUICtrlListView_SetItemSelected($wMainListViewWindow, 99, True, True)
+		;~ 			_GUICtrlListBox_SetSel($wMainListViewWindow, 99, True)
 		EndIf
 	#ce
 
@@ -1125,7 +1127,7 @@ While True     ;**** Loop Until Closed ****
 		Case 4
 ;~ 			Local $aRet = StringSplit($vRet, ":")
 ;~ 			_Splash("Dragged From ListView " & $aRet[1] & @CRLF & "To ListView " & $aRet[2], 2000)
-		Case 9     ; This is returned after a selection change
+		Case 9 ; This is returned after a selection change
 			ControlClick("AtlasServerUpdateUtility v", "", "[CLASS:SysListView32; INSTANCE:1]", "left", 1, $iWidth - 156, $iHeight - 20)
 			If $vRet[2] > 3 Then
 				MsgBox($MB_OK, $aUtilName, "You clicked on Server " & _ServerNamingScheme($vRet[1], $aNamingScheme) & " " & $xServerNames[$vRet[1]] & "." & _
@@ -1332,7 +1334,7 @@ While True     ;**** Loop Until Closed ****
 							$aTimeCheck0 = _NowCalc()
 						Else
 							RunExternalRemoteRestart()
-							CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)     ; Do NOT restart redis, Do not set servers to disable.
+							CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT restart redis, Do not set servers to disable.
 						EndIf
 					EndIf
 				Case 1 To 4
@@ -1356,7 +1358,7 @@ While True     ;**** Loop Until Closed ****
 		; ------------------------------
 		Local $tFirstGrid = True
 		For $i = 0 To ($aServerGridTotal - 1)
-			If Not ProcessExists($aServerPID[$i]) And ($aShutdown = 0) Then     ; And ($xStartGrid[$i] = "yes") Then
+			If Not ProcessExists($aServerPID[$i]) And ($aShutdown = 0) Then ; And ($xStartGrid[$i] = "yes") Then
 				If $xStartGrid[$i] = "yes" Then
 					If $tFirstGrid = False Then
 						Local $tDelay = Int($aServerStartDelay) + ($xGridStartDelay[$i])
@@ -1459,8 +1461,8 @@ While True     ;**** Loop Until Closed ****
 		#EndRegion ;**** Show Online Players ****
 		GUICtrlSetData($LabelUtilReadyStatus, "Updating Server Info")
 		If ($aDestroyWildDinosYN) = "yes" Then
-			If ((_DateDiff('n', $aTimeCheck7, _NowCalc())) >= 60) Then
-				If RespawnDinosCheck($aDestroyWildDinosDays, $aDestroyWildDinosHours) Then
+			If ((_DateDiff('n', $aTimeCheck7, _NowCalc())) >= 1) Then
+				If RespawnDinosCheck($aDestroyWildDinosDays, $aDestroyWildDinosHours, $aDestroyWildDinosMinute) Then
 					$aTimeCheck7 = _NowCalc()
 					DestroyWildDinos()
 				EndIf
@@ -1497,8 +1499,9 @@ While True     ;**** Loop Until Closed ****
 		If ((_DateDiff('n', $aTimeCheck5, _NowCalc())) >= 1) Then ; Event Scheduler
 			For $t = 0 To ($aMax6moAll - 1)
 				If $xEventTimePastTF[$t] = False Then
-					Local $tDateDiff = _DateDiff('n', _NowCalc(), $xEventRestartTimeAll[$t][0])
-					If $tDateDiff <= 0 And $xEventRestartTimeAll[$t][1] = True Then
+;~ 					Local $tDateDiff = _DateDiff('n', _NowCalc(), $xEventRestartTimeAll[$t][0])
+					Local $tDateDiff = _DateDiff('n', _NowCalc(), _DateAdd('n', 1, $xEventRestartTimeAll[$t][0]))
+					If $tDateDiff <= 0 Then
 						$xEventTimePastTF[$t] = True
 						$i = $xEventRestartTimeAll[$t][1]
 						If $xCustomRCONCmd[$i] <> "" Then
@@ -1509,11 +1512,11 @@ While True     ;**** Loop Until Closed ****
 									F_SendRCON("local", $xCustomRCONSplitCmd[$x])
 								Else
 									LogWrite(" [Scheduled Event " & $i & "] Sending RCON command to ALL servers: " & $xCustomRCONSplitCmd[$x])
-									F_SendRCON("all", $xCustomRCONSplitCmd[$i])
+									F_SendRCON("all", $xCustomRCONSplitCmd[$x])
 								EndIf
 							Next
 						EndIf
-						If $xEventFile <> "" Then
+						If $xEventFile[$i] <> "" Then
 							LogWrite(" [Scheduled Event " & $i & "] Executing file: " & $xEventFile[$i])
 							Run($xEventFile[$i])
 						EndIf
@@ -1696,7 +1699,7 @@ While True     ;**** Loop Until Closed ****
 				$aBeginDelayedShutdown = 2
 				$aTimeCheck0 = _NowCalc()
 
-			ElseIf ($aBeginDelayedShutdown > 2 And ((_DateDiff('n', $aTimeCheck0, _NowCalc())) >= $aDelayShutdownTime)) Then     ; **** REBOOT SERVER ****
+			ElseIf ($aBeginDelayedShutdown > 2 And ((_DateDiff('n', $aTimeCheck0, _NowCalc())) >= $aDelayShutdownTime)) Then ; **** REBOOT SERVER ****
 
 				$aBeginDelayedShutdown = 0
 				$aTimeCheck0 = _NowCalc()
@@ -1722,7 +1725,7 @@ While True     ;**** Loop Until Closed ****
 ;~ 				If $aRebootReason = "stopservers" Then
 				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)
 
-			ElseIf ($aBeginDelayedShutdown = 2) And (_DateDiff('n', $aTimeCheck0, _NowCalc()) >= $aDelayShutdownTime) Then     ; **** REPEAT ANNOUNCEMENTS UNTIL LAST COUNT ***
+			ElseIf ($aBeginDelayedShutdown = 2) And (_DateDiff('n', $aTimeCheck0, _NowCalc()) >= $aDelayShutdownTime) Then ; **** REPEAT ANNOUNCEMENTS UNTIL LAST COUNT ***
 
 				If $aRebootReason = "daily" Then
 					If $aAnnounceCount1 > 1 Then
@@ -1931,7 +1934,7 @@ Func GUI_Main_B_BackupMenu()
 			"Click (NO) Or (CANCEL) to cancel backup."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-	If $tMB = 6 Then         ; YES
+	If $tMB = 6 Then ; YES
 		_Splash("Backup up Atlas files now.")
 		_BackupGame(False)
 		SplashOff()
@@ -2218,19 +2221,19 @@ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 	Switch $hWndFrom
 		Case $hWndListView
 			Switch $iCode
-				Case $LVN_COLUMNCLICK     ; A column was clicked
+				Case $LVN_COLUMNCLICK ; A column was clicked
 					$tInfo = DllStructCreate($tagNMLISTVIEW, $lParam)
 					$tClickType = "Header"
 					$tClickHead = DllStructGetData($tInfo, "SubItem")
 					$tClickRow = -1
 					$tClickCol = -1
-				Case $NM_CLICK     ; Sent by a list-view control when the user clicks an item with the left mouse button
+				Case $NM_CLICK ; Sent by a list-view control when the user clicks an item with the left mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "L1"
 					$tClickHead = -1
 					$tClickRow = DllStructGetData($tInfo, "Index")
 					$tClickCol = DllStructGetData($tInfo, "SubItem")
-				Case $NM_DBLCLK     ; Sent by a list-view control when the user double-clicks an item with the left mouse button
+				Case $NM_DBLCLK ; Sent by a list-view control when the user double-clicks an item with the left mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "L2"
 					$tClickHead = -1
@@ -2240,13 +2243,13 @@ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 ;~ 					_DebugPrint("$NM_HOVER" & @CRLF & "--> hWndFrom:" & @TAB & $hWndFrom & @CRLF & _
 ;~ 							"-->IDFrom:" & @TAB & $iIDFrom & @CRLF & _
 ;~ 							"-->Code:" & @TAB & $iCode)
-				Case $NM_RCLICK     ; Sent by a list-view control when the user clicks an item with the right mouse button
+				Case $NM_RCLICK ; Sent by a list-view control when the user clicks an item with the right mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "R1"
 					$tClickHead = -1
 					$tClickRow = DllStructGetData($tInfo, "Index")
 					$tClickCol = DllStructGetData($tInfo, "SubItem")
-				Case $NM_RDBLCLK     ; Sent by a list-view control when the user double-clicks an item with the right mouse button
+				Case $NM_RDBLCLK ; Sent by a list-view control when the user double-clicks an item with the right mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "R2"
 					$tClickHead = -1
@@ -2294,8 +2297,8 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	;	Global $aServerName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $iniCheck)
@@ -2380,6 +2383,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $aDestroyWildDinosYN = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $iniCheck)
 	Global $aDestroyWildDinosDays = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
 	Global $aDestroyWildDinosHours = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+	Global $aDestroyWildDinosMinute = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $iniCheck)
 
 	;Global $aTelnetCheckYN = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "Use RCON/telnet to check if server is alive? (yes/no) ###", $iniCheck)
 	;Global $aTelnetCheckSec = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet check interval in seconds (30-900) ###", $iniCheck)
@@ -2796,6 +2800,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DestroyWildDinosHours, "
 	EndIf
+	If $iniCheck = $aDestroyWildDinosMinute Then
+		$aDestroyWildDinosMinute = "00"
+		$iIniFail += 1
+		$iIniError = $iIniError & "DestroyWildDinosMinute, "
+	EndIf
 	If $iniCheck = $aEventCount Or $aEventCntIniCheck Then
 		$aEventCount = 1
 		$iIniFail += 1
@@ -2900,7 +2909,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 				"Click (NO) Or (CANCEL) to continue running utility WITHOUT changes."
 		SplashOff()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-		If $tMB = 6 Then     ; YES
+		If $tMB = 6 Then ; YES
 			F_ExitCloseN(True)
 		EndIf
 	EndIf
@@ -3716,6 +3725,7 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $aDestroyWildDinosYN)
 	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aDestroyWildDinosDays)
 	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $aDestroyWildDinosHours)
+	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $aDestroyWildDinosMinute)
 	;	FileWriteLine($sIniFile, "( - !!! - Other server information imported from ServerGrid.json - !!! - )")
 	;	FileWriteLine($sIniFile, "(If ServerGrid.json is not found, Atlas can still be downloaded and installed)")
 
@@ -3849,8 +3859,8 @@ Func ReadCFG($sIniFile)
 	If FileExists($sIniFile) Then
 		Local $aChar[3]
 		For $i = 1 To 13
-			$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-			$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+			$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+			$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 			$iniCheck &= $aChar[Random(0, 1, 1)]
 		Next
 		Global $aUtilReboot = IniRead($sIniFile, "CFG", "aUtilReboot", $iniCheck)
@@ -4098,18 +4108,20 @@ Func EventsCreateCalendarAndOffset()
 	Next
 	Local $tTxt = _NowCalc() & " ----------- Scheduled Events -----------" & @CRLF
 	For $i = 0 To ($aMax6moAll - 1)
-		Local $tYear = StringTrimRight($xEventRestartTimeAll[$i][0], 15)
-		Local $tMonth1 = StringTrimRight($xEventRestartTimeAll[$i][0], 12)
-		Local $tMonth = StringTrimLeft($tMonth1, 5)
-		Local $tDate1 = StringTrimRight($xEventRestartTimeAll[$i][0], 9)
-		Local $tDate = StringTrimLeft($tDate1, 8)
-		Local $tDay1 = _DateToDayOfWeek($tYear, $tMonth, $tDate)
-		Local $tDay = _DateDayOfWeek($tDay1)
+		If $xEventTimePastTF[$i] = False Then
+			Local $tYear = StringTrimRight($xEventRestartTimeAll[$i][0], 15)
+			Local $tMonth1 = StringTrimRight($xEventRestartTimeAll[$i][0], 12)
+			Local $tMonth = StringTrimLeft($tMonth1, 5)
+			Local $tDate1 = StringTrimRight($xEventRestartTimeAll[$i][0], 9)
+			Local $tDate = StringTrimLeft($tDate1, 8)
+			Local $tDay1 = _DateToDayOfWeek($tYear, $tMonth, $tDate)
+			Local $tDay = _DateDayOfWeek($tDay1)
 ;~ 		Local $tTime1 = StringTrimLeft($xEventRestartTimeAll[$i][0], 11)
 ;~ 		Local $tTime = StringTrimRight($tTime1, 3)
 ;~ 		$tTxt &= StringTrimRight($xEventRestartTimeAll[$i][0], 3) & "  Event:" & ($xEventRestartTimeAll[$i][1] + 1) & "  (" & $tTime & ") " & $tDay & @CRLF
-		$tTxt &= StringTrimRight($xEventRestartTimeAll[$i][0], 3) & "  Event:" & ($xEventRestartTimeAll[$i][1] + 1) & "  " & _
-				$xEventName[$xEventRestartTimeAll[$i][1]] & "  (" & $tDay & ")" & @CRLF
+			$tTxt &= StringTrimRight($xEventRestartTimeAll[$i][0], 3) & "  Event:" & ($xEventRestartTimeAll[$i][1] + 1) & "  " & _
+					$xEventName[$xEventRestartTimeAll[$i][1]] & "  (" & $tDay & ")" & @CRLF
+		EndIf
 	Next
 	FileDelete($aEventSaveFile)
 	FileWrite($aEventSaveFile, $tTxt)
@@ -4183,7 +4195,7 @@ Func Gamercide()
 			SplashOff()
 			$Shutdown = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 60)
 			; ----------------------------------------------------------
-			If $Shutdown = 6 Then     ; YES
+			If $Shutdown = 6 Then ; YES
 				LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
 				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, True, False)
 				SplashOff()
@@ -4201,10 +4213,10 @@ Func Gamercide()
 				EndIf
 				_ExitUtil()
 				; ----------------------------------------------------------
-			ElseIf $Shutdown = 7 Then     ; NO
+			ElseIf $Shutdown = 7 Then ; NO
 				If $aServerUseRedis = "yes" Then
 					LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)     ; Do NOT close redis
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT close redis
 					PIDSaveRedis($aServerPIDRedis, $aPIDRedisFile)
 					MsgBox(4096, $aUtilityVer, $aMsg, 20)
 					LogWrite(" " & $aUtilityVer & " Stopped by User")
@@ -4218,7 +4230,7 @@ Func Gamercide()
 				EndIf
 				_ExitUtil()
 				; ----------------------------------------------------------
-			ElseIf $Shutdown = 2 Then     ; CANCEL
+			ElseIf $Shutdown = 2 Then ; CANCEL
 				LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
 				CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, 0)
 				PIDSaveServer($aServerPID, $aPIDServerFile)
@@ -4266,7 +4278,7 @@ Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True, $tDisableServers = Fa
 				Local $tTime = TimerInit()
 				ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server: " & _ServerNamingScheme($i, $aNamingScheme))
 				GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & _ServerNamingScheme($i, $aNamingScheme))
-				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no", 0)     ; False = wait 200ms instead of 1000ms
+				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, "DoExit", "no", 0) ; False = wait 200ms instead of 1000ms
 				LogWrite(" [Server] Sending shutdown (DoExit) command to select servers. Server " & _ServerNamingScheme($i, $aNamingScheme))
 				Local $tDelay = $aServerShutdownDelay - (TimerDiff($tTime) / 1000)
 				If $tDelay < 0 Then $tDelay = 0
@@ -4282,7 +4294,7 @@ Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True, $tDisableServers = Fa
 					$aErrorShutdown = 1
 					ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server: " & _ServerNamingScheme($i, $aNamingScheme))
 					GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & _ServerNamingScheme($i, $aNamingScheme))
-					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "yes", 0)     ; False = wait 200ms instead of 1000ms
+					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "yes", 0) ; False = wait 200ms instead of 1000ms
 					Local $tTimeDiff = TimerDiff($tTime) / 1000
 					Local $tDelay = $aServerShutdownDelay - $tTimeDiff
 					If $tDelay < 0 Then $tDelay = 0
@@ -4302,7 +4314,7 @@ Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True, $tDisableServers = Fa
 						Local $tTime = TimerInit()
 						SendCTRLC($aServerPID[$i])
 						$aErrorShutdown = 1
-						SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "no", 0)     ; False = wait 200ms instead of 1000ms
+						SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "no", 0) ; False = wait 200ms instead of 1000ms
 					EndIf
 				EndIf
 			Next
@@ -4344,7 +4356,7 @@ Func CloseServer($ip, $port, $pass, $tCloseRedisTF = True, $tDisableServers = Fa
 				If ProcessExists($aServerPID[$i]) Then
 					Local $tTime = TimerInit()
 					$aErrorShutdown = 1
-					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "no", 0)     ; False = wait 200ms instead of 1000ms
+					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aRCONShutdownCMD, "no", 0) ; False = wait 200ms instead of 1000ms
 					SendCTRLC($aServerPID[$i])
 				EndIf
 			Next
@@ -4456,14 +4468,14 @@ Func ImportConfig($tServerDirLocal, $tConfigFile)
 				"Click (NO) to continue using manual config editing." & @CRLF & _
 				"Click (CANCEL) to exit utility."
 		$tMB = MsgBox($MB_YESNOCANCEL, "ServerGrid.json file Not Found", $aMsg, 60)
-		If $tMB = 6 Or $tMB = -1 Then        ; YES or Timeout
+		If $tMB = 6 Or $tMB = -1 Then ; YES or Timeout
 			SplashOff()
 			WizardSelect()
-		ElseIf $tMB = 7 Then                           ; NO
+		ElseIf $tMB = 7 Then ; NO
 			_Splash("Using temporary settings to complete the download and installation of " & $aGameName & " dedicated server." & @CRLF & @CRLF & _
 					"Once installation is complete, please exit " & $aUtilName & ", copy your files into the server folder, and rerun " & $aUtilName & ".", 9000, 500, 175)
 			$aSplashStartUp = _Splash($aStartText, 0, 475)
-		ElseIf $tMB = 2 Then                           ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			LogWrite(" !!! ERROR !!! Could not find " & $sConfigPath & ". Program terminated by user.")
 			_ExitUtil()
 		EndIf
@@ -4550,7 +4562,7 @@ Func ImportConfig($tServerDirLocal, $tConfigFile)
 						"Click (NO) or (CANCEL) to continue (Mod updater will error but continue to work)"
 				SplashOff()
 				$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
-				If $tMB = 6 Then     ; YES
+				If $tMB = 6 Then ; YES
 					Run("notepad.exe " & $sConfigPath)
 					_ExitUtil()
 				Else
@@ -4623,7 +4635,7 @@ Func _ConfigCheckForDuplicates($tArray, $tParameter)
 	Return $tTxt
 EndFunc   ;==>_ConfigCheckForDuplicates
 
-Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False)         ; Modified version of Melba23's script: https://www.autoitscript.com/forum/topic/164666-get-duplicate-from-array/
+Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False) ; Modified version of Melba23's script: https://www.autoitscript.com/forum/topic/164666-get-duplicate-from-array/
 	; Create dictionary
 	Local $oDict = ObjCreate("Scripting.Dictionary")
 	Local $vElem
@@ -4659,7 +4671,7 @@ Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False)         ; Modified
 		; Add count to [0]element
 		$aRet[0] = $iIndex
 		; Remove ampty elements of return array
-		ReDim $aRet[$iIndex + 1]         ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		ReDim $aRet[$iIndex + 1] ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	Else
 		Local $aRet[UBound($aArray)], $iIndex = 0
 		For $vKey In $oDict
@@ -4671,7 +4683,7 @@ Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False)         ; Modified
 				Next
 			EndIf
 		Next
-		ReDim $aRet[$iIndex]         ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		ReDim $aRet[$iIndex] ; You need this one ReDim, honest!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	EndIf
 	Return $aRet
 EndFunc   ;==>_ArrayDuplicates
@@ -4745,8 +4757,8 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))         ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))         ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
@@ -4902,7 +4914,7 @@ Func SendDiscordMsg($sHookURLs, $sBotMessage, $sBotName = "", $sBotTTS = False, 
 		Local $sJsonMessage = '{"content" : "' & $sBotMessage & '", "username" : "' & $sBotName & '", "tts" : "' & $sBotTTS & '", "avatar_url" : "' & $sBotAvatar & '"}'
 		Local $oHTTPOST = ObjCreate("WinHttp.WinHttpRequest.5.1")
 		$oHTTPOST.Open("POST", StringStripWS($sHookURLs, 3) & "?wait=true", False)
-		$oHTTPOST.Option(4) = 0x3300         ; ignore all SSL errors
+		$oHTTPOST.Option(4) = 0x3300 ; ignore all SSL errors
 		$oHTTPOST.SetRequestHeader("Content-Type", "multipart/form-data")
 		$oHTTPOST.Send($sJsonMessage)
 		Local $oStatusCode = $oHTTPOST.Status
@@ -4914,29 +4926,29 @@ Func SendDiscordMsg($sHookURLs, $sBotMessage, $sBotName = "", $sBotTTS = False, 
 EndFunc   ;==>SendDiscordMsg
 
 #cs  ; Old script - worked fine for most
-Func _Discord_ErrFunc($oError)
+	Func _Discord_ErrFunc($oError)
 	LogWrite(" [Discord] Error: 0x" & Hex($oError.number) & " While Sending Discord Bot Message.")
-EndFunc   ;==>_Discord_ErrFunc
+	EndFunc   ;==>_Discord_ErrFunc
 
-Func SendDiscordMsg($sHookURLs, $sBotMessage, $sBotName = "", $sBotTTS = False, $sBotAvatar = "", $aServerPID = "0")
+	Func SendDiscordMsg($sHookURLs, $sBotMessage, $sBotName = "", $sBotTTS = False, $sBotAvatar = "", $aServerPID = "0")
 	Local $oErrorHandler = ObjEvent("AutoIt.Error", "_Discord_ErrFunc")
 	Local $sJsonMessage = '{"content" : "' & $sBotMessage & '", "username" : "' & $sBotName & '", "tts" : "' & $sBotTTS & '", "avatar_url" : "' & $sBotAvatar & '"}'
 	Local $oHTTPOST = ObjCreate("WinHttp.WinHttpRequest.5.1")
 	Local $aHookURLs = StringSplit($sHookURLs, ",")
 	For $i = 1 To $aHookURLs[0]
-		$oHTTPOST.Open("POST", StringStripWS($aHookURLs[$i], 2) & "?wait=true", False)
-		$oHTTPOST.SetRequestHeader("Content-Type", "application/json")
-		$oHTTPOST.Send($sJsonMessage)
-		Local $oStatusCode = $oHTTPOST.Status
-		Local $sResponseText = ""
-		If Not $xDebug Then
-			FileWriteLine($aLogFile, _NowCalc() & " [Discord Bot] Message sent: " & $sBotMessage)
-		Else
-			$sResponseText = "Message Response: " & $oHTTPOST.ResponseText
-			FileWriteLine($aLogFile, _NowCalc() & " [Discord Bot] Message Status Code {" & $oStatusCode & "} " & $sResponseText)
-		EndIf
+	$oHTTPOST.Open("POST", StringStripWS($aHookURLs[$i], 2) & "?wait=true", False)
+	$oHTTPOST.SetRequestHeader("Content-Type", "application/json")
+	$oHTTPOST.Send($sJsonMessage)
+	Local $oStatusCode = $oHTTPOST.Status
+	Local $sResponseText = ""
+	If Not $xDebug Then
+	FileWriteLine($aLogFile, _NowCalc() & " [Discord Bot] Message sent: " & $sBotMessage)
+	Else
+	$sResponseText = "Message Response: " & $oHTTPOST.ResponseText
+	FileWriteLine($aLogFile, _NowCalc() & " [Discord Bot] Message Status Code {" & $oStatusCode & "} " & $sResponseText)
+	EndIf
 	Next
-EndFunc
+	EndFunc
 #ce  ; Old script - worked fine for most
 #EndRegion ;**** Function to Send Message to Discord ****
 
@@ -4955,7 +4967,7 @@ Func SendInGame($mIP, $mPort, $mPass, $mMessage)
 			Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
 		EndIf
 	Next
-	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no")         ; "no" = do not write to debug log file
+	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no") ; "no" = do not write to debug log file
 EndFunc   ;==>SendInGame
 #EndRegion ;**** Send In-Game Message via MCRCON ****
 
@@ -5086,7 +5098,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 				SplashOff()
 				$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
 				; ----------------------------------------------------------
-				If $tMB = 6 Then         ; YES
+				If $tMB = 6 Then ; YES
 					$bUpdateRequired = True
 					$aSteamUpdateNow = True
 					$aUpdateVerify = "yes"
@@ -5485,7 +5497,7 @@ Func SendTwitchMsg($sT_Nick, $sT_OAuth, $sT_Channels, $sT_Message)
 		TCPCloseSocket($sTwitchIRC)
 		Return $aTwitchReturn
 	Else
-		$aTwitchReturn[0] = True     ;Successfully Connected to irc
+		$aTwitchReturn[0] = True ;Successfully Connected to irc
 		TCPSend($sTwitchIRC, "PASS " & StringLower($sT_OAuth) & @CRLF)
 		TCPSend($sTwitchIRC, "NICK " & StringLower($sT_Nick) & @CRLF)
 		Local $sTwitchReceive = ""
@@ -5495,20 +5507,20 @@ Func SendTwitchMsg($sT_Nick, $sT_OAuth, $sT_Channels, $sT_Message)
 			If @error Then ExitLoop
 		WEnd
 		Local $aTwitchReceiveLines = StringSplit($sTwitchReceive, @CRLF, 1)
-		$aTwitchReturn[2] = $aTwitchReceiveLines[1]     ;Status Line. Accepted or Not
+		$aTwitchReturn[2] = $aTwitchReceiveLines[1] ;Status Line. Accepted or Not
 		If StringRegExp($aTwitchReceiveLines[$aTwitchReceiveLines[0] - 1], "(?i):tmi.twitch.tv 376 " & $sT_Nick & " :>") Then
-			$aTwitchReturn[1] = True     ;Username and OAuth was accepted. Ready for PRIVMSG
+			$aTwitchReturn[1] = True ;Username and OAuth was accepted. Ready for PRIVMSG
 			Local $aTwitchChannels = StringSplit($sT_Channels, ",")
 			For $i = 1 To $aTwitchChannels[0]
 				TCPSend($sTwitchIRC, "PRIVMSG #" & StringLower($aTwitchChannels[$i]) & " :" & $sT_Message & @CRLF)
 				If @error Then
 					TCPCloseSocket($sTwitchIRC)
-					$aTwitchReturn[3] = False     ;Check that all channels succeeded or none
+					$aTwitchReturn[3] = False ;Check that all channels succeeded or none
 					Return $aTwitchReturn
 					ExitLoop
 				Else
-					$aTwitchReturn[3] = True     ;Check that all channels succeeded or none
-					If $aTwitchChannels[0] > 17 Then     ;This is to make sure we don't break the rate limit
+					$aTwitchReturn[3] = True ;Check that all channels succeeded or none
+					If $aTwitchChannels[0] > 17 Then ;This is to make sure we don't break the rate limit
 						Sleep(1600)
 					Else
 						Sleep(100)
@@ -5878,16 +5890,16 @@ Func DailyRestartOffset($bHour0, $sMin, $sTime)
 	EndIf
 EndFunc   ;==>DailyRestartOffset
 
-Func _DateChange($tType, $tDiff, $tDateBefore)     ; By Phoenix125.com
+Func _DateChange($tType, $tDiff, $tDateBefore) ; By Phoenix125.com
 	#cs
-	Time interval to be used:
-	D - Add/subtract days to/from the specified date
-	M - Add/subtract months to/from the specified date
-	Y - Add/subtract years to/from the specified date
-	w - Add/subtract Weeks to/from the specified date
-	h - Add/subtract hours to/from the specified date
-	n - Add/subtract minutes to/from the specified date
-	s - Add/subtract seconds to/from the specified date
+		Time interval to be used:
+		D - Add/subtract days to/from the specified date
+		M - Add/subtract months to/from the specified date
+		Y - Add/subtract years to/from the specified date
+		w - Add/subtract Weeks to/from the specified date
+		h - Add/subtract hours to/from the specified date
+		n - Add/subtract minutes to/from the specified date
+		s - Add/subtract seconds to/from the specified date
 	#ce
 	If $tDateBefore[0] = "" Then
 		If $tDateBefore[1] = "" Then $tDateBefore[1] = @YEAR
@@ -6050,7 +6062,7 @@ EndFunc   ;==>CloseTCP
 ;
 ;==========================================================================================
 
-Func PassCheck($sPass, $sPassString)         ;**** PassCheck - Checks if received password matches any of the known passwords ****
+Func PassCheck($sPass, $sPassString) ;**** PassCheck - Checks if received password matches any of the known passwords ****
 	Local $aPassReturn[3] = [False, "", ""]
 	Local $aPasswords = StringSplit($sPassString, ",")
 	For $i = 1 To $aPasswords[0]
@@ -6071,7 +6083,7 @@ Func PassCheck($sPass, $sPassString)         ;**** PassCheck - Checks if receive
 	Return $aPassReturn
 EndFunc   ;==>PassCheck
 
-Func ObfPass($sObfPassString)         ;**** ObfPass - Obfuscates password string for logging
+Func ObfPass($sObfPassString) ;**** ObfPass - Obfuscates password string for logging
 	Local $sObfPass = ""
 	For $i = 1 To (StringLen($sObfPassString) - 3)
 		If $i <> 4 Then
@@ -6083,7 +6095,7 @@ Func ObfPass($sObfPassString)         ;**** ObfPass - Obfuscates password string
 	Return $sObfPass
 EndFunc   ;==>ObfPass
 
-Func _TCP_Server_ClientIP($hSocket)         ;**** Function to get IP from Restart Client ****
+Func _TCP_Server_ClientIP($hSocket) ;**** Function to get IP from Restart Client ****
 	Local $pSocketAddress, $aReturn
 	$pSocketAddress = DllStructCreate("short;ushort;uint;char[8]")
 	$aReturn = DllCall("ws2_32.dll", "int", "getpeername", "int", $hSocket, "ptr", DllStructGetPtr($pSocketAddress), "int*", DllStructGetSize($pSocketAddress))
@@ -6094,7 +6106,7 @@ Func _TCP_Server_ClientIP($hSocket)         ;**** Function to get IP from Restar
 	Return $aReturn[0]
 EndFunc   ;==>_TCP_Server_ClientIP
 
-Func CheckHTTPReq($sRequest, $sKey = "restart")         ;**** Function to Check Request from Browser and return restart string if request is valid****
+Func CheckHTTPReq($sRequest, $sKey = "restart") ;**** Function to Check Request from Browser and return restart string if request is valid****
 	If IsString($sRequest) Then
 		Local $aRequest = StringRegExp($sRequest, '^GET[[:blank:]]\/\?(?i)' & $sKey & '(?-i)=(\S+)[[:blank:]]HTTP\/\d.\d\R', 2)
 		If Not @error Then
@@ -6109,7 +6121,7 @@ Func CheckHTTPReq($sRequest, $sKey = "restart")         ;**** Function to Check 
 	EndIf
 EndFunc   ;==>CheckHTTPReq
 
-Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)         ;**** Function to Check for Multiple Password Failures****
+Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False) ;**** Function to Check for Multiple Password Failures****
 	Local $aPassFailure[1][3] = [[0, 0, 0]]
 	For $i = 1 To UBound($aPassFailure, 1) - 1
 		If StringCompare($aPassFailure[$i][0], $sRemoteIP) = 0 Then
@@ -6136,7 +6148,7 @@ Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)         
 	Return SetError(0, 0, "IP Added to List")
 EndFunc   ;==>MultipleAttempts
 
-Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True)         ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
+Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True) ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
 	Local $vConnectedSocket = TCPAccept($vMSocket)
 	If $vConnectedSocket >= 0 Then
 		Local $sRecvIP = _TCP_Server_ClientIP($vConnectedSocket)
@@ -6213,7 +6225,7 @@ Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $b
 EndFunc   ;==>_RemoteRestart
 #EndRegion ;**** _RemoteRestart ****
 
-Func RotateFile($sFile, $sBackupQty, $bDelOrig = True)         ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
+Func RotateFile($sFile, $sBackupQty, $bDelOrig = True) ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
 	Local $hCreateTime = @YEAR & @MON & @MDAY
 	For $i = $sBackupQty To 1 Step -1
 		If FileExists($sFile & $i) Then
@@ -6319,12 +6331,12 @@ Func _ExtractZipAll($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 	Do
 		$i += 1
 		$sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
-	Until Not FileExists($sTempZipFolder)         ; this folder will be created during extraction
+	Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
 
 	Local $oShell = ObjCreate("Shell.Application")
 
 	If Not IsObj($oShell) Then
-		Return SetError(1, 0, 0)         ; highly unlikely but could happen
+		Return SetError(1, 0, 0) ; highly unlikely but could happen
 	EndIf
 
 	Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
@@ -6333,22 +6345,22 @@ Func _ExtractZipAll($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 ;~         Return SetError(2, 0, 0) ; unavailable destionation location
 	EndIf
 
-	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure)         ; FolderStructure is overstatement because of the available depth
+	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
 	If Not IsObj($oOriginFolder) Then
-		Return SetError(3, 0, 0)         ; unavailable location
+		Return SetError(3, 0, 0) ; unavailable location
 	EndIf
 
-	Local $oOriginFile = $oOriginFolder.Items()         ;get all items
+	Local $oOriginFile = $oOriginFolder.Items() ;get all items
 	If Not IsObj($oOriginFile) Then
-		Return SetError(4, 0, 0)         ; no such file in ZIP file
+		Return SetError(4, 0, 0) ; no such file in ZIP file
 	EndIf
 
 	; copy content of origin to destination
-	$oDestinationFolder.CopyHere($oOriginFile, 20)         ; 20 means 4 and 16, replaces files if asked
+	$oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
 
-	DirRemove($sTempZipFolder, 1)         ; clean temp dir
+	DirRemove($sTempZipFolder, 1) ; clean temp dir
 
-	Return 1         ; All OK!
+	Return 1 ; All OK!
 
 EndFunc   ;==>_ExtractZipAll
 
@@ -6379,35 +6391,35 @@ Func _ExtractZip($sZipFile, $sFolderStructure, $sFile, $sDestinationFolder)
 	Do
 		$i += 1
 		$sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
-	Until Not FileExists($sTempZipFolder)         ; this folder will be created during extraction
+	Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
 
 	Local $oShell = ObjCreate("Shell.Application")
 
 	If Not IsObj($oShell) Then
-		Return SetError(1, 0, 0)         ; highly unlikely but could happen
+		Return SetError(1, 0, 0) ; highly unlikely but could happen
 	EndIf
 
 	Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
 	If Not IsObj($oDestinationFolder) Then
-		Return SetError(2, 0, 0)         ; unavailable destionation location
+		Return SetError(2, 0, 0) ; unavailable destionation location
 	EndIf
 
-	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure)         ; FolderStructure is overstatement because of the available depth
+	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
 	If Not IsObj($oOriginFolder) Then
-		Return SetError(3, 0, 0)         ; unavailable location
+		Return SetError(3, 0, 0) ; unavailable location
 	EndIf
 
 	Local $oOriginFile = $oOriginFolder.ParseName($sFile)
 	If Not IsObj($oOriginFile) Then
-		Return SetError(4, 0, 0)         ; no such file in ZIP file
+		Return SetError(4, 0, 0) ; no such file in ZIP file
 	EndIf
 
 	; copy content of origin to destination
-	$oDestinationFolder.CopyHere($oOriginFile, 4)         ; 4 means "do not display a progress dialog box", but apparently doesn't work
+	$oDestinationFolder.CopyHere($oOriginFile, 4) ; 4 means "do not display a progress dialog box", but apparently doesn't work
 
-	DirRemove($sTempZipFolder, 1)         ; clean temp dir
+	DirRemove($sTempZipFolder, 1) ; clean temp dir
 
-	Return 1         ; All OK!
+	Return 1 ; All OK!
 
 EndFunc   ;==>_ExtractZip
 #EndRegion ;**** UnZip Function by trancexx ****
@@ -6465,14 +6477,14 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 		Else
 			_Splash($aStartText & "Downloading " & $tFileName & ".exe.", 0, 475)
 		EndIf
-		DirCreate($tFolder)         ; to extract to
+		DirCreate($tFolder) ; to extract to
 		InetGet($tURL1, $tFolder & "\" & $tFileName & ".zip", 1)
 		If Not FileExists($tFolder & "\" & $tFileName & ".zip") Then
-			SetError(1, 1)         ; Failed to download from source 1
+			SetError(1, 1) ; Failed to download from source 1
 			LogWrite(" [Util] Error downloading " & $tFileName & " from Source1: " & $tURL1)
 			InetGet($tURL2, $tFolder & "\" & $tFileName & ".zip", 1)
 			If Not FileExists($tFolder & "\" & $tFileName & ".zip") Then
-				SetError(1, 2)         ; Failed to download from source 2
+				SetError(1, 2) ; Failed to download from source 2
 				LogWrite(" [Util] Error downloading " & $tFileName & " from Source2: " & $tURL2)
 				SplashOff()
 				MsgBox($MB_OK, $aUtilName, "ERROR!!!  " & $tFileName & ".zip download failed.")
@@ -6480,7 +6492,7 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 				Return
 			EndIf
 		EndIf
-		DirCreate($tFolder)         ; to extract to
+		DirCreate($tFolder) ; to extract to
 		_ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFileName & ".exe", $tFolder)
 		If $tFile2 <> 0 Then _ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFile2, $tFolder)
 		If $tFile3 <> 0 Then _ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFile3, $tFolder)
@@ -6490,7 +6502,7 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 			LogWrite(" [Util] Downloaded and installed " & $tFileName & ".")
 		Else
 			LogWrite(" [Util] Error extracting " & $tFileName & ".exe from " & $tFileName & ".zip")
-			SetError(1, 3)         ; Failed to extract file
+			SetError(1, 3) ; Failed to extract file
 			SplashOff()
 			MsgBox($MB_OK, $aUtilName, "ERROR!!! Extracting " & $tFileName & ".exe from " & $tFileName & ".zip failed.")
 			$aSplashStartUp = _Splash($aStartText, 0, 475)
@@ -6577,26 +6589,26 @@ Func CheckMod($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False)
 			ElseIf Not $aInstalledTime[0] Then
 				$xError = True
 				$tError = 2
-				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest. Download First Mod
+				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;No Manifest. Download First Mod
 				$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 ;~ 				If $bStopUpdate Then ExitLoop
 			ElseIf Not $aInstalledTime[1] Then
 				$xError = True
 				$tError = 3
-				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod does not exists. Download
+				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;Mod does not exists. Download
 				$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 ;~ 				If $bStopUpdate Then ExitLoop
 			ElseIf $aInstalledTime[1] And (StringCompare($aLatestTime[2], $aInstalledTime[2]) <> 0) Then
 				$tError = 4
 				$xError = True
-				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod Out of Date. Update.
+				$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;Mod Out of Date. Update.
 				$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 ;~ 				If $bStopUpdate Then ExitLoop
 			EndIf
 		Else
 			$xError = True
 			$tError = 2
-			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)         ;No Manifest exist in Atlas Mods folder. Download First Mod
+			$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i) ;No Manifest exist in Atlas Mods folder. Download First Mod
 			$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 		EndIf
 ;~ 		Local $bStopUpdate = False
@@ -7001,7 +7013,7 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	If $hFileOpen = -1 Then
 		$aReturn[0] = False
 	Else
-		$aReturn[0] = True         ;File Exists
+		$aReturn[0] = True ;File Exists
 		Local $sFileRead = FileRead($hFileOpen)
 		Local $aAppInfo = StringSplit($sFileRead, '"WorkshopItemDetails"', 1)
 		If UBound($aAppInfo) >= 3 Then
@@ -7014,8 +7026,8 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 			$aAppInfo = StringSplit($aAppInfo[1], '"', 1)
 		EndIf
 		If UBound($aAppInfo) >= 9 And StringRegExp($aAppInfo[8], '^\d+$') Then
-			$aReturn[1] = True         ;Successfully Read numerical value at positition expected
-			$aReturn[2] = $aAppInfo[8]         ;Return Value Read
+			$aReturn[1] = True ;Successfully Read numerical value at positition expected
+			$aReturn[2] = $aAppInfo[8] ;Return Value Read
 		EndIf
 		If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
@@ -7074,7 +7086,7 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 					"Timeout Countdown:" & Int($aServerModTimeoutMin * 60 - (TimerDiff($Timer) / 1000)))
 			Sleep(950)
 			If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
-		Until TimerDiff($Timer) > (60000 * $aServerModTimeoutMin)     ; Wait X minutes for mod to finish downloading
+		Until TimerDiff($Timer) > (60000 * $aServerModTimeoutMin) ; Wait X minutes for mod to finish downloading
 		If ProcessExists($tPID) Then
 			ProcessClose($tPID)
 		EndIf
@@ -7118,14 +7130,14 @@ Func _InetGetMulti($tCnt, $tFile, $tLink1, $tLink2 = "0")
 			If $tLink2 <> "0" Then
 				$hFileRead = _INetGetSource($tLink2)
 				If @error Then
-					Return "Error"         ; Error
+					Return "Error" ; Error
 				Else
 					FileClose($hFileOpen)
 					FileDelete($tFile)
 					FileWrite($tFile, $hFileRead)
 				EndIf
 			Else
-				Return True         ; Error
+				Return True ; Error
 			EndIf
 		Else
 			FileClose($hFileOpen)
@@ -7135,7 +7147,7 @@ Func _InetGetMulti($tCnt, $tFile, $tLink1, $tLink2 = "0")
 	Else
 		FileClose($hFileOpen)
 	EndIf
-	Return $hFileRead         ; No error
+	Return $hFileRead ; No error
 EndFunc   ;==>_InetGetMulti
 
 #Region ;**** Check for Server Utility Update ****
@@ -7229,11 +7241,11 @@ Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "show
 						SplashOff()
 						If ($tUpdate = "Auto") And ($aUpdateAutoUtil = "yes") Then
 							$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Auto utility update download complete. . . " & @CRLF & @CRLF & "Click (OK) to run new version or wait 60 seconds (servers will remain running) OR" & @CRLF & "Click (CANCEL) to resume current version.", 60)
-							If $tMB = 1 Then         ; OK
+							If $tMB = 1 Then ; OK
 
 							ElseIf $tMB = -1 Then
-								$tMB = 1         ; OK
-							ElseIf $tMB = 2 Then         ; CANCEL
+								$tMB = 1 ; OK
+							ElseIf $tMB = 2 Then ; CANCEL
 
 							EndIf
 						Else
@@ -7283,11 +7295,11 @@ Func ReplaceSpace($tMsg0)
 ;~ 	EndIf
 EndFunc   ;==>ReplaceSpace
 
-Func ReplaceCRwithCRLF($sString)         ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
-	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF)         ; Idea by Ascend4nt
+Func ReplaceCRwithCRLF($sString) ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
+	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF) ; Idea by Ascend4nt
 EndFunc   ;==>ReplaceCRwithCRLF
 
-Func ReplaceVerticalBarCRwithSlash($sString)         ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
+Func ReplaceVerticalBarCRwithSlash($sString) ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
 	Return StringReplace($sString, "|", "/")
 EndFunc   ;==>ReplaceVerticalBarCRwithSlash
 
@@ -7475,7 +7487,7 @@ Func F_ExitCloseY($tRestart = False)
 ;~ 			"Click (YES) to Shutdown all servers and exit." & @CRLF & _
 ;~ 			"Click (NO) or (CANCEL) to cancel.", 15)
 		SetStatusBusy("Util Shutdown Initiated.")
-		If $tMB = 6 Then         ; (YES)
+		If $tMB = 6 Then ; (YES)
 			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, True, False)
 			SplashOff()
 			If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
@@ -7506,11 +7518,11 @@ Func F_ExitCloseY($tRestart = False)
 			EndIf
 			_ExitUtil()
 			; ----------------------------------------------------------
-		ElseIf $tMB = 7 Then         ; NO
+		ElseIf $tMB = 7 Then ; NO
 			Local $aMsg = "Thank you for using " & $aUtilName & "." & @CRLF & "Please report any problems or comments to: " & @CRLF & "Discord: http://discord.gg/EU7pzPs or " & @CRLF & _
 					"Forum: http://phoenix125.createaforum.com/index.php. " & @CRLF & @CRLF & "Visit http://www.Phoenix125.com"
 			LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)         ; Do NOT close redis
+			CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT close redis
 			SplashOff()
 			If $tRestart = False Then
 				MsgBox(4096, $aUtilityVer, $aMsg, 20)
@@ -7550,10 +7562,10 @@ Func F_RestartNow()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to Restart Server Now?" & @CRLF & @CRLF & _
 			"Click (YES) to Restart Server Now." & @CRLF & _
 			"Click (NO) or (CANCEL) to cancel.", 15)
-	If $tMB = 6 Then         ; (YES)
+	If $tMB = 6 Then ; (YES)
 		;		If $aBeginDelayedShutdown = 0 Then
 		LogWrite(" [Server] Restart Server Now request initiated by user.")
-		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)         ; Do NOT close redis
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT close redis
 		;		EndIf
 	Else
 		LogWrite(" [Server] Restart Server Now request canceled by user.")
@@ -7572,7 +7584,7 @@ Func F_RemoteRestart()
 				"Would you like to enable it? (Port:" & $aRemoteRestartPort & ")" & @CRLF & _
 				"Click (YES) to enable Remote Restart. A utility restart will be required." & @CRLF & _
 				"Click (NO) or (CANCEL) to skip.", 15)
-		If $tMB = 6 Then         ; (YES)
+		If $tMB = 6 Then ; (YES)
 			LogWrite(" [Remote Restart] Remote Restart enabled in " & $aUtilName & ".ini per user request")
 			IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", "yes")
 			$aRemoteRestartUse = "yes"
@@ -7590,7 +7602,7 @@ Func F_RemoteRestart()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to initiate Remote Restart (reboot all servers in " & $aRemoteTime[$aRemoteCnt] & "min)?" & @CRLF & @CRLF & _
 				"Click (YES) to Initiate Remote Restart." & @CRLF & _
 				"Click (NO) or (CANCEL) to cancel.", 15)
-		If $tMB = 6 Then         ; (YES)
+		If $tMB = 6 Then ; (YES)
 			If $aBeginDelayedShutdown = 0 Then
 				LogWrite(" [Remote Restart] Remote Restart request initiated by user.")
 				If ($sUseDiscordBotRemoteRestart = "yes") Or ($sUseTwitchBotRemoteRestart = "yes") Or ($sInGameAnnounce = "yes") Then
@@ -7599,7 +7611,7 @@ Func F_RemoteRestart()
 					$aTimeCheck0 = _NowCalc()
 				Else
 					RunExternalRemoteRestart()
-					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False)         ; Do NOT close redis
+					CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, False) ; Do NOT close redis
 				EndIf
 			EndIf
 		Else
@@ -7611,7 +7623,7 @@ Func F_RemoteRestart()
 EndFunc   ;==>F_RemoteRestart
 
 #Region _RestartUtil Function
-Func _RestartUtil($fExit = 1)         ; Thanks Yashied!  https://www.autoitscript.com/forum/topic/111215-restart-udf/
+Func _RestartUtil($fExit = 1) ; Thanks Yashied!  https://www.autoitscript.com/forum/topic/111215-restart-udf/
 	;#OnAutoItStartRegister "OnAutoItStart" ; _RestartUtil() ; Put at beginning of program
 	;Global $__Restart = False ; _RestartUtil() ; Put at beginning of program
 	If $aUseKeepAliveYN = "yes" Then IniWrite($aKeepAliveConfigFileFull, " --------------- ATLASSERVERUPDATEUTILITYKEEPALIVE --------------- ", "System use: Close AtlasServerUpdateUtilityKeepAlive? (Checked prior to restarting above Program... used when purposely shutting down above Program)(yes/no) ###", "yes")
@@ -7631,7 +7643,7 @@ Func _RestartUtil($fExit = 1)         ; Thanks Yashied!  https://www.autoitscrip
 	$__Restart = 1
 	If $fExit Then
 		Sleep(50)
-		_ExitUtil(False)     ; False = Exit util without sleep(2000)
+		_ExitUtil(False) ; False = Exit util without sleep(2000)
 	EndIf
 	Return 1
 EndFunc   ;==>_RestartUtil
@@ -7651,7 +7663,7 @@ Func SetStatusBusy($tMsg0, $tMsg1 = "no")
 	If $tMsg1 = "no" Then $tMsg1 = $tMsg0
 	TraySetToolTip($tMsg0)
 	TraySetIcon($aIconFile, 201)
-	GUICtrlSetImage($IconReady, $aIconFile, 203)         ; Busy Icon
+	GUICtrlSetImage($IconReady, $aIconFile, 203) ; Busy Icon
 	GUICtrlSetData($LabelUtilReadyStatus, $tMsg1)
 EndFunc   ;==>SetStatusBusy
 
@@ -7672,7 +7684,7 @@ Func F_StopServer()
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 15)
 	; ----------------------------------------------------------
-	If $tMB = 6 Then                 ; YES
+	If $tMB = 6 Then ; YES
 		If $aBeginDelayedShutdown = 0 Then
 			SetStatusBusy("Stop Server Started")
 			LogWrite(" [" & $aServerName & "] Stop Server request initiated by user.")
@@ -7682,7 +7694,7 @@ Func F_StopServer()
 						"Would you like to enable it?" & @CRLF & _
 						"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
 						"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
-				If $tMB1 = 6 Then         ; (YES)
+				If $tMB1 = 6 Then ; (YES)
 					LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
 					$sUseDiscordBotStopServer = "yes"
 					IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
@@ -7702,7 +7714,7 @@ Func F_StopServer()
 				LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
 				_Splash("Stop Server Discord, Twitch, and In-Game announcements are disabled." & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 0, 500, 150)
 				SetStatusBusy("Stopping Servers")
-				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)         ; Do NOT close redis, But disable servers
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True) ; Do NOT close redis, But disable servers
 				SetStatusIdle()
 				SplashOff()
 			EndIf
@@ -7710,10 +7722,10 @@ Func F_StopServer()
 		; ----------------------------------------------------------
 	ElseIf $tMB = 7 Then
 		SetStatusBusy("Stopping Servers")
-		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)         ; Do NOT close redis, But disable servers
+		CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True) ; Do NOT close redis, But disable servers
 		SetStatusIdle()
 		; ----------------------------------------------------------
-	ElseIf $tMB = 2 Then         ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		SetStatusBusy("Canceled")
 		LogWrite(" [" & $aServerName & "] Stop Server request canceled by user.")
 		_Splash("Stop Server canceled. Resuming utility . . .", 2000)
@@ -7728,7 +7740,7 @@ Func F_StartServer()
 	SetStatusBusy("Starting all server(s).", "Start Servers")
 	Local $tFirstGrid = True
 	For $i = 0 To ($aServerGridTotal - 1)
-		If Not ProcessExists($aServerPID[$i]) Then         ; And ($xStartGrid[$i] = "yes") Then
+		If Not ProcessExists($aServerPID[$i]) Then ; And ($xStartGrid[$i] = "yes") Then
 			If ($xLocalGrid[$i] = "yes") Then
 				_GUICtrlListView_SetItemChecked($wMainListViewWindow, $i, True)
 				If $tFirstGrid = False Then
@@ -7773,21 +7785,21 @@ Func F_UpdateServCheck()
 			"Click (CANCEL) to cancel update check."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-	If $tMB = 6 Then                 ; YES
+	If $tMB = 6 Then ; YES
 		SplashOff()
 		_Splash("Checking for server updates.")
 		SetStatusBusy("Check: Server Update")
 		UpdateCheck(True)
 		SetStatusIdle()
 		SplashOff()
-	ElseIf $tMB = 7 Then             ; NO
+	ElseIf $tMB = 7 Then ; NO
 		Local $aMsg = "Check for " & $aGameName & " server updates." & @CRLF & @CRLF & _
 				"WARNING! Continuing will shut down all servers and perform a steamcmd update with -validate." & @CRLF & @CRLF & _
 				"Click (YES) to shut down servers and perform update." & @CRLF & _
 				"Click (NO) or (CANCEL) to cancel and resume utility."
 		SplashOff()
 		$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-		If $tMB1 = 6 Then                     ; YES
+		If $tMB1 = 6 Then ; YES
 			$bUpdateRequired = True
 			$aSteamUpdateNow = True
 			$aUpdateVerify = "yes"
@@ -7798,7 +7810,7 @@ Func F_UpdateServCheck()
 		Else
 			_Splash("Update check canceled. Resuming utility . . .", 2000)
 		EndIf
-	ElseIf $tMB = 2 Then             ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		_Splash("Update check canceled. Resuming utility . . .", 2000)
 	EndIf
 EndFunc   ;==>F_UpdateServCheck
@@ -8034,7 +8046,7 @@ Func SelectServersStop()
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 60)
 	; ----------------------------------------------------------
-	If $tMB = 6 Then                 ; YES
+	If $tMB = 6 Then ; YES
 		If $aBeginDelayedShutdown = 0 Then
 			Local $tSelectServersTxt1 = "("
 			For $i = 0 To ($aServerGridTotal - 1)
@@ -8055,7 +8067,7 @@ Func SelectServersStop()
 						"Would you like to enable it?" & @CRLF & _
 						"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
 						"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
-				If $tMB1 = 6 Then         ; (YES)
+				If $tMB1 = 6 Then ; (YES)
 					LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
 					$sUseDiscordBotStopServer = "yes"
 					IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
@@ -8076,13 +8088,13 @@ Func SelectServersStop()
 				LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
 				_Splash("Stop Server Discord, Twitch, and In-Game announcements are disabled" & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 0, 500, 150)
 				SetStatusBusy("Stopping Servers")
-				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True)         ; Do NOT close redis, But disable servers
+				CloseServer($aServerIP, $aTelnetPort, $aTelnetPass, False, True) ; Do NOT close redis, But disable servers
 				SetStatusIdle()
 				SplashOff()
 			EndIf
 		EndIf
 		; ----------------------------------------------------------
-	ElseIf $tMB = 7 Then             ; NO
+	ElseIf $tMB = 7 Then ; NO
 		$tMsg1 = "Sending shutdown (DoExit) command to select servers."
 		$aSplash = _Splash($tMsg1, 0, 500)
 		SetStatusBusy("Stopping select server(s).", "Stop Server ")
@@ -8138,7 +8150,7 @@ Func SelectServersStop()
 		ControlSetText($aSplash, "", "Static1", "Select server(s) shutdown complete.")
 		Sleep(2000)
 		SplashOff()
-	ElseIf $tMB = 2 Then             ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		LogWrite(" [Remote RCON] Select server(s) shutdown CANCELED.")
 		GUICtrlSetData($LabelUtilReadyStatus, "Stop Server CANCELED")
 		_Splash("Select server(s) shutdown CANCELED.", 2000)
@@ -8153,7 +8165,7 @@ Func SelectServersStart()
 	SetStatusBusy("Starting select server(s).", "Start Servers")
 	Local $tFirstGrid = True
 	For $i = 0 To ($aServerGridTotal - 1)
-		If Not ProcessExists($aServerPID[$i]) And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then         ; And ($xStartGrid[$i] = "yes") Then
+		If Not ProcessExists($aServerPID[$i]) And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then ; And ($xStartGrid[$i] = "yes") Then
 			If ($xLocalGrid[$i] = "yes") Then
 ;~ 				ControlSetText($aSplash, "", "Static1", "Starting server " & _ServerNamingScheme($i, $aNamingScheme))
 ;~ 				GUICtrlSetData($LabelUtilReadyStatus, "Start Server " & _ServerNamingScheme($i, $aNamingScheme))
@@ -8217,7 +8229,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 	If $tTmp = -1 Then
 		$tReturn = "0"
 		LogWrite("", " Lastpidredis.tmp file not found. Existing Redis Server NOT running")
-	ElseIf $tReturn = "" Then         ; Empty/Blank File
+	ElseIf $tReturn = "" Then ; Empty/Blank File
 		$tReturn = "0"
 		FileDelete($tFile)
 		LogWrite("", " Lastpidredis.tmp file corrupt.")
@@ -8229,7 +8241,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 		If $tTmp = -1 Then
 			$tReturn = "0"
 			LogWrite("", " Lastpidredis.tmp.bak file not found. Existing Redis Server NOT running")
-		ElseIf $tReturn = "" Then         ; Empty/Blank File
+		ElseIf $tReturn = "" Then ; Empty/Blank File
 			$tReturn = "0"
 			FileDelete($tFile)
 			LogWrite("", " Lastpidredis.tmp.bak file corrupt.")
@@ -8256,22 +8268,22 @@ EndFunc   ;==>PIDReadRedis
 Func PIDReadServer($tFile, $tSplash = 0)
 	$aPIDServerReadYetTF = True
 	Local $tReturn[$aServersMax]
-	Local $tTmp1 = FileOpen($tFile)         ; Open existing ServerPID File
+	Local $tTmp1 = FileOpen($tFile) ; Open existing ServerPID File
 	Local $tReturn1 = FileRead($tTmp1)
 	FileClose($tTmp1)
-	Local $tTmp2 = FileOpen($tFile & ".bak")         ; Open existing ServerPID.bak File
+	Local $tTmp2 = FileOpen($tFile & ".bak") ; Open existing ServerPID.bak File
 	Local $tReturn2 = FileRead($tTmp2)
 	FileClose($tTmp2)
-	If $tTmp1 = -1 Then         ; ServerPID file not exist
+	If $tTmp1 = -1 Then ; ServerPID file not exist
 		LogWrite("", " [Util PID Check] Lastpidserver.tmp file not found.")
 		$tReturn1 = $tReturn2
 		$aNoExistingPID = True
-		If $tTmp2 = -1 Then         ; ServerPID.bak file not exist
+		If $tTmp2 = -1 Then ; ServerPID.bak file not exist
 			$tReturn[0] = "0"
 			LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak file not found.")
 			$aNoExistingPID = True
 		Else
-			If $tReturn2 = "" Then         ; Empty/Blank File
+			If $tReturn2 = "" Then ; Empty/Blank File
 				$tReturn[0] = "0"
 				LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak contained no server PID data.")
 				$aNoExistingPID = True
@@ -8280,15 +8292,15 @@ Func PIDReadServer($tFile, $tSplash = 0)
 		EndIf
 	Else
 		$aNoExistingPID = False
-		If $tReturn1 = "" Then         ; Empty/Blank File
+		If $tReturn1 = "" Then ; Empty/Blank File
 			LogWrite("", " [Util PID Check] Lastpidserver.tmp file contained no server PID data.")
 			$tReturn1 = $tReturn2
-			If $tTmp2 = -1 Then         ; File not exist
+			If $tTmp2 = -1 Then ; File not exist
 				$tReturn[0] = "0"
 				LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak file not found.")
 				$aNoExistingPID = True
 			Else
-				If $tReturn2 = "" Then         ; Empty/Blank File
+				If $tReturn2 = "" Then ; Empty/Blank File
 					$tReturn[0] = "0"
 					LogWrite("", " [Util PID Check] Lastpidserver.tmp.bak contained no server PID data.")
 					$aNoExistingPID = True
@@ -8346,7 +8358,7 @@ Func SendCTRLC($tPID)
 	ControlSend($hWnd, "", "", "^C" & @CR)
 EndFunc   ;==>SendCTRLC
 
-Func _WinGetByPID($iPID, $iArray = 1)         ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
+Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
 	Local $aError[1] = [0], $aWinList, $sReturn
 	If IsString($iPID) Then
 		$iPID = ProcessExists($iPID)
@@ -8366,7 +8378,7 @@ Func _WinGetByPID($iPID, $iArray = 1)         ; 0 Will Return 1 Base Array & 1 W
 	Return SetError(1, 0, $aError)
 EndFunc   ;==>_WinGetByPID
 
-Func RespawnDinosCheck($sWDays, $sHours)
+Func RespawnDinosCheck($sWDays, $sHours, $sMin)
 	Local $iDay = -1
 	Local $iHour = -1
 	Local $aDays = StringSplit($sWDays, ",")
@@ -8376,7 +8388,7 @@ Func RespawnDinosCheck($sWDays, $sHours)
 		If Int($iDay) = Int(@WDAY) Or Int($iDay) = 0 Then
 			For $h = 1 To $aHours[0]
 				$iHour = StringStripWS($aHours[$h], 8)
-				If Int($iHour) = Int(@HOUR) Then
+				If Int($iHour) = Int(@HOUR) And Int($sMin) = Int(@MIN) Then
 					Return True
 				EndIf
 			Next
@@ -8491,11 +8503,11 @@ Func _ArraySum(ByRef $a_array, $i_lbound1 = 0, $i_lbound2 = 0)
 	Return $i_add
 EndFunc   ;==>_ArraySum
 
-Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)      ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If true, uses startup splash text. If false, uses standard text.
+Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If true, uses startup splash text. If false, uses standard text.
 	If ((_DateDiff('s', $aTimeCheck6, _NowCalc())) < 300) Then
-		Local $tServerStartDelayDoneTF = False     ; False = Servers Startup Delay time has not lapsed
+		Local $tServerStartDelayDoneTF = False ; False = Servers Startup Delay time has not lapsed
 	Else
-		Local $tServerStartDelayDoneTF = True     ; True = Servers Startup Delay time has lapsed
+		Local $tServerStartDelayDoneTF = True ; True = Servers Startup Delay time has lapsed
 	EndIf
 	Local $aCMD = "listplayers"
 	$tOnlinePlayerReady = True
@@ -8625,7 +8637,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)      ; $
 				$tOnlinePlayers[1] = $tOnlinePlayers[1] & _ServerNamingScheme($i, $aNamingScheme) & "(" & $aServerPlayers[$i] & " " & $tUserLog[$i] & ") "
 				$tOnlinePlayers[2] = $tOnlinePlayers[2] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": " & $aServerPlayers[$i] & " " & $tUserMsg[$i] & @CRLF
 				$tOnlinePlayers[3] = $tOnlinePlayers[3] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": " & $aServerPlayers[$i] & " " & $tUserNoSteam[$i] & @CRLF
-			ElseIf $aServerPlayers[$i] < 0 Then     ; Error getting online players
+			ElseIf $aServerPlayers[$i] < 0 Then ; Error getting online players
 				$tOnlinePlayers[1] = $tOnlinePlayers[1] & _ServerNamingScheme($i, $aNamingScheme) & "(-) "
 				$tOnlinePlayers[2] = $tOnlinePlayers[2] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": -" & @CRLF
 				$tOnlinePlayers[3] = $tOnlinePlayers[3] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": -" & @CRLF
@@ -8731,8 +8743,8 @@ EndFunc   ;==>ShowPlayerCount
 
 Func _WM_SIZE($hWndGUI, $Msg, $wParam, $lParam)
 	Local $iHeight, $iWidth
-	$iWidth = BitAND($lParam, 0xFFFF)         ; _WinAPI_LoWord
-	$iHeight = BitShift($lParam, 16)         ; _WinAPI_HiWord
+	$iWidth = BitAND($lParam, 0xFFFF) ; _WinAPI_LoWord
+	$iHeight = BitShift($lParam, 16) ; _WinAPI_HiWord
 	If ($hWndGUI = $wOnlinePlayers) Then
 		_WinAPI_MoveWindow($wOnlinePlayers, 10, 10, $iWidth - 20, $iHeight - 20)
 	ElseIf ($hWndGUI = $wGUIMainWindow) Then
@@ -8748,11 +8760,11 @@ Func ShowOnlinePlayersGUI()
 			If $aPlayerCountWindowTF = False Then
 				$gOnlinePlayerWindow = GUICreate($aUtilName & " Online Players", $aGUIW, $aGUIH, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX))
 				GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_OnlinePlayers_Close", $gOnlinePlayerWindow)
-				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY))         ; Horizontal Scroll, NO wrap text)
+				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY)) ; Horizontal Scroll, NO wrap text)
 				GUICtrlSetState($wOnlinePlayers, $GUI_FOCUS)
 				GUIRegisterMsg($WM_SIZE, "_WM_SIZE")
 				$aPlayerCountWindowTF = True
-				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow)         ;Shows the GUI window
+				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow) ;Shows the GUI window
 			EndIf
 			If $tOnlinePlayerReady Then
 				GUICtrlSetData($wOnlinePlayers, _DateTimeFormat(_NowCalc(), 0) & @CRLF & $tOnlinePlayers[2])
@@ -8779,12 +8791,12 @@ Func TrayShowPlayerCheckUnPause()
 	$aServerOnlinePlayerYN = "yes"
 EndFunc   ;==>TrayShowPlayerCheckUnPause
 
-Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16)         ; By Phoenix125.com
+Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16) ; By Phoenix125.com
 	_GDIPlus_Startup()
 	Local $GDIpBmpLarge, $GDIpBmpResized, $GDIbmp, $tReturn
-	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile)         ;GDI+ image!
-	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight)         ;GDI+ image
-	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized)         ;GDI image!
+	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile) ;GDI+ image!
+	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight) ;GDI+ image
+	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized) ;GDI image!
 	$tReturn = _GUIImageList_Add($tGUICreate, $GDIbmp)
 	_GDIPlus_BitmapDispose($GDIpBmpLarge)
 	_GDIPlus_BitmapDispose($GDIpBmpResized)
@@ -8820,9 +8832,9 @@ Func ShowMainGUI($tSplash = 0)
 	GUISetBkColor($cMWBackground)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 112, 592, 873, 97)         ; Previous(8, 592, 985, 97)
+	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 112, 592, 873, 97) ; Previous(8, 592, 985, 97)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
-	Global $LogTicker = GUICtrlCreateEdit("", 120, 608, 857, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL))         ; Previous(16, 608, 969, 73)
+	Global $LogTicker = GUICtrlCreateEdit("", 120, 608, 857, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL)) ; Previous(16, 608, 969, 73)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
 	GUICtrlSetState($LogTicker, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
@@ -8839,7 +8851,7 @@ Func ShowMainGUI($tSplash = 0)
 	$LabelCPU = GUICtrlCreateLabel("CPU:", 293, 27, 29, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetColor(-1, $cMWMemCPU)
-	Local $MemStats = MemGetStats()         ;Retrieves memory related information
+	Local $MemStats = MemGetStats() ;Retrieves memory related information
 	Global $MemPercent = GUICtrlCreateLabel($MemStats[$MEM_LOAD] & "-- %", 323, 11, 20, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetColor(-1, $cMWMemCPU)
@@ -8896,32 +8908,32 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 ;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 
-	Local $tX = 8, $tY = 54         ; Starting Location
-	Local $tGroupW = 89, $tButtonW = $tGroupW - 14, $tButtonH = 25         ; Default Group Dimensions
+	Local $tX = 8, $tY = 54 ; Starting Location
+	Local $tGroupW = 89, $tButtonW = $tGroupW - 14, $tButtonH = 25 ; Default Group Dimensions
 
 	Local $tButtons = 4, $tGroupH = (32 * $tButtons + 17)
-	Global $ShowWindows = GUICtrlCreateGroup("Show Window", $tX, $tY, $tGroupW, $tGroupH)         ; (8, 48, 89, 145)
+	Global $ShowWindows = GUICtrlCreateGroup("Show Window", $tX, $tY, $tGroupW, $tGroupH) ; (8, 48, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 16
-	Global $ServerInfo = GUICtrlCreateButton("Tools", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 64, 75, 25)
+	Global $ServerInfo = GUICtrlCreateButton("Tools", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 64, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_Tools")
 	GUICtrlSetTip(-1, "Display Server Summary Window")
 	$tY += 32
-	Global $Players = GUICtrlCreateButton("Players", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 96, 75, 25)
+	Global $Players = GUICtrlCreateButton("Players", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 96, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetState(-1, $GUI_ENABLE)
 ;~ 	If $aPlayerCountShowTF Then GUICtrlSetState(-1, $GUI_DISABLE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_Players")
 	GUICtrlSetTip(-1, "Display Online Players Window")
 	$tY += 32
-	Global $Config = GUICtrlCreateButton("CONFIG", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 128, 75, 25)
+	Global $Config = GUICtrlCreateButton("CONFIG", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 128, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_Config")
 	GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 	GUICtrlSetTip(-1, "Display Config Window")
 	$tY += 32
-	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 160, 75, 25)
+	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 160, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_LogFile")
 	GUICtrlSetTip(-1, "Display Latest Log File")
@@ -8930,35 +8942,35 @@ Func ShowMainGUI($tSplash = 0)
 
 	$tY += 40
 	Local $tButtons = 6, $tGroupH = (32 * $tButtons + 17)
-	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", $tX, $tY, $tGroupW, $tGroupH)         ; Manual(8, 200, 89, 145)
+	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", $tX, $tY, $tGroupW, $tGroupH) ; Manual(8, 200, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 16
-	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(6, 216, 75, 25)
+	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(6, 216, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendRCON")
 	GUICtrlSetTip(-1, "Send RCON Command to All Grids")
 	$tY += 32
-	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(16, 248, 75, 25)
+	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 248, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendMsg")
 	GUICtrlSetTip(-1, "Broadcast In Game Message to All Grids")
 	$tY += 32
-	Global $RemoteRestartAll = GUICtrlCreateButton("Rmt Restart", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(16, 280, 75, 25)
+	Global $RemoteRestartAll = GUICtrlCreateButton("Rmt Restart", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 280, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRmtRestart")
 	GUICtrlSetTip(-1, "Initiate Remote Restart: Restart All Local Grid Servers with Message and Delay")
 	$tY += 32
-	Global $RestartNowAll = GUICtrlCreateButton("Restart NOW", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(16, 312, 75, 25)
+	Global $RestartNowAll = GUICtrlCreateButton("Restart NOW", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRestartNow")
 	GUICtrlSetTip(-1, "Restart All Local Grid Servers")
 	$tY += 32
-	Global $StopServerAll = GUICtrlCreateButton("Stop Servers", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(16, 312, 75, 25)
+	Global $StopServerAll = GUICtrlCreateButton("Stop Servers", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_StopServerAll")
 	GUICtrlSetTip(-1, "Stop All Grids With or Without Announcement")
 	$tY += 32
-	Global $StartServerAll = GUICtrlCreateButton("Start Servers", $tX + 8, $tY, $tButtonW, $tButtonH)         ; Manual(16, 312, 75, 25)
+	Global $StartServerAll = GUICtrlCreateButton("Start Servers", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_StartServerAll")
 	GUICtrlSetTip(-1, "Start All Grids With or Without Announcement")
@@ -8967,25 +8979,25 @@ Func ShowMainGUI($tSplash = 0)
 
 	$tY += 40
 	Local $tButtons = 4, $tGroupH = (32 * $tButtons + 17)
-	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", $tX, $tY, $tGroupW, $tGroupH)         ; (8, 352, 89, 145)
+	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", $tX, $tY, $tGroupW, $tGroupH) ; (8, 352, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 16
-	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)         ;(16, 368, 75, 25)
+	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH) ;(16, 368, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendRCON")
 	GUICtrlSetTip(-1, "Send RCON Command to Selected Grids")
 	$tY += 32
-	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 400, 75, 25)
+	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 400, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendMsg")
 	GUICtrlSetTip(-1, "Send In Game Message to Selected Grids")
 	$tY += 32
-	Global $StartServers = GUICtrlCreateButton("Start Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 432, 75, 25)
+	Global $StartServers = GUICtrlCreateButton("Start Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 432, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStartServers")
 	GUICtrlSetTip(-1, "Start Selected Grids")
 	$tY += 32
-	Global $StopServers = GUICtrlCreateButton("Stop Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH)         ; (16, 464, 75, 25)
+	Global $StopServers = GUICtrlCreateButton("Stop Server(s)", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 464, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStopServers")
 	GUICtrlSetTip(-1, "Stop Selected Grids With or Without Announcement")
@@ -9045,13 +9057,13 @@ Func ShowMainGUI($tSplash = 0)
 		_GUICtrlListView_JustifyColumn($wMainListViewWindow, $i, 2)
 	Next
 	Local $tW1 = 24, $tH1 = 16
-	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5)         ; Load ListView Icons into memory
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1)         ; 0 - Yes toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1)         ; 1 - No toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1)         ; 2 - Red button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1)         ; 3 - Green button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1)         ; 4 - Green checkmark 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1)         ; 5 - Gray checkmark 1
+	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5) ; Load ListView Icons into memory
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1) ; 0 - Yes toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1) ; 1 - No toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1) ; 2 - Red button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1) ; 3 - Green button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1) ; 4 - Green checkmark 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1) ; 5 - Gray checkmark 1
 ;~ 	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_left2.png", $tW1, $tH1)		; 5 - Green checkmark 2
 ;~ 		_GUIImageList_AddIcon($hImage, @ScriptDir & "\AtlasUtilFiles\i_toggle_on.ico") 			; 0 - Yes slider
 ;~ 		_GUIImageList_AddIcon($hImage, $aIconFile, 17) 			; 0 - Yes slider
@@ -9065,52 +9077,52 @@ Func ShowMainGUI($tSplash = 0)
 
 	Global $aMainLVW[$aServerGridTotal][12]
 	For $i = 0 To ($aServerGridTotal - 1)
-		$aMainLVW[$i][0] = ""         ; $xStartGrid[$i] ; Checked YN
+		$aMainLVW[$i][0] = "" ; $xStartGrid[$i] ; Checked YN
 		If $xStartGrid[$i] <> "yes" Then
-			$aMainLVW[$i][1] = "--"         ; Local YN
+			$aMainLVW[$i][1] = "--" ; Local YN
 		Else
-			$aMainLVW[$i][1] = $xStartGrid[$i]         ; Local YN
+			$aMainLVW[$i][1] = $xStartGrid[$i] ; Local YN
 		EndIf
 		If $xStartGrid[$i] <> "yes" Then
-			$aMainLVW[$i][2] = "--"         ; Local YN
+			$aMainLVW[$i][2] = "--" ; Local YN
 		Else
-			$aMainLVW[$i][2] = $xStartGrid[$i]         ; Local YN
+			$aMainLVW[$i][2] = $xStartGrid[$i] ; Local YN
 		EndIf
-		If $xStartGrid[$i] = "yes" Then         ; Remote YN
+		If $xStartGrid[$i] = "yes" Then ; Remote YN
 			$aMainLVW[$i][3] = "--"
 		Else
 			$aMainLVW[$i][3] = "yes"
 		EndIf
-		$aMainLVW[$i][4] = $xServerNames[$i]         ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$aMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme)         ; Grid
+		$aMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$aMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme) ; Grid
 		If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) Then
-			$aMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers         ; Online PLayers
+			$aMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers ; Online PLayers
 		Else
-			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers         ; Online PLayers
+			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
 		EndIf
 		If $xStartGrid[$i] = "yes" Then
-			$aMainLVW[$i][7] = "--"         ; CPU
+			$aMainLVW[$i][7] = "--" ; CPU
 ;~ 			$aMainLVW[$i][8] = (Int($aServerMem[$i] / (1024 ^ 2))) & " MB" ; Memory
 			Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-			$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB"         ; Memory
+			$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB" ; Memory
 		Else
-			$aMainLVW[$i][7] = ""         ; CPU
-			$aMainLVW[$i][8] = ""         ; Memory
+			$aMainLVW[$i][7] = "" ; CPU
+			$aMainLVW[$i][8] = "" ; Memory
 		EndIf
-		$aMainLVW[$i][9] = $xServerAltSaveDir[$i]         ; Folder
-		$aMainLVW[$i][10] = $aServerPID[$i]         ; PID
+		$aMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
+		$aMainLVW[$i][10] = $aServerPID[$i] ; PID
 		If ProcessExists($aServerPID[$i]) Then
-			$aMainLVW[$i][11] = "Running"         ; Status
+			$aMainLVW[$i][11] = "Running" ; Status
 		Else
 			If $xStartGrid[$i] = "yes" Then
-				$aMainLVW[$i][11] = "CRASHED"         ; Status
+				$aMainLVW[$i][11] = "CRASHED" ; Status
 			Else
 				If $xLocalGrid[$i] = "yes" Then
-					$aMainLVW[$i][11] = "Disabled"         ; Status
+					$aMainLVW[$i][11] = "Disabled" ; Status
 				Else
-					$aMainLVW[$i][11] = "Offline"         ; Status
+					$aMainLVW[$i][11] = "Offline" ; Status
 					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then
-						$aMainLVW[$i][11] = "Running"         ; Status #008000
+						$aMainLVW[$i][11] = "Running" ; Status #008000
 					EndIf
 				EndIf
 			EndIf
@@ -9126,14 +9138,14 @@ Func ShowMainGUI($tSplash = 0)
 		Next
 	Next
 
-	For $i = 0 To ($aServerGridTotal - 1)         ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
 		If $xStartGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 0)
 		Else
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 1)
 		EndIf
 	Next
-	For $i = 0 To ($aServerGridTotal - 1)         ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
 		If $xLocalGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 4)
 		Else
@@ -9145,22 +9157,22 @@ Func ShowMainGUI($tSplash = 0)
 	Global $aGUIListViewEX = _GUIListViewEx_Init($wMainListViewWindow, $aMainLVW, 0, 0, True, 32 + 1024)
 	;	Global $aGUIListViewEX = _GUIListViewEx_Init($wMainListViewWindow, $aMainLVW, 0, 0, True, 2 + 32 + 1024)
 	;	For $i = 0 To (UBound($aGUI_Main_Columns) - 1)
-	_GUIListViewEx_SetEditStatus($aGUIListViewEX, "*", 0)      ; 0 = Not editable
+	_GUIListViewEx_SetEditStatus($aGUIListViewEX, "*", 0) ; 0 = Not editable
 	;	Next
 	Local $aSelCol[4] = [Default, $cSWBackground, Default, Default]
 	_GUIListViewEx_SetDefColours($aGUIListViewEX, $aSelCol)
 	For $i = 0 To ($aServerGridTotal - 1)
-		If ProcessExists($aServerPID[$i]) Then         ; RUNNING
+		If ProcessExists($aServerPID[$i]) Then ; RUNNING
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 		Else
-			If $xStartGrid[$i] = "yes" Then         ; CRASHED
+			If $xStartGrid[$i] = "yes" Then ; CRASHED
 				_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $i, 11)
 			Else
-				If $xLocalGrid[$i] = "yes" Then         ; DISABLED
+				If $xLocalGrid[$i] = "yes" Then ; DISABLED
 					_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
-				Else         ; OFFLINE
+				Else ; OFFLINE
 					_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $i, 11)
-					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then         ; REMOTE PLAYERS ONLINE
+					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; REMOTE PLAYERS ONLINE
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 					EndIf
 				EndIf
@@ -9219,7 +9231,7 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	GUICtrlSetState($TotalPlayersEdit, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
-	GUICtrlSetData(-1, $aTotalPlayersOnline)         ; & " / " & $aServerMaxPlayers)
+	GUICtrlSetData(-1, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers)
 	GUICtrlSetBkColor(-1, $cLWBackground)
 	GUICtrlSetTip(-1, "Total Players Online")
 	#EndRegion ### END Koda GUI section ###
@@ -9266,72 +9278,72 @@ Func GUIUpdateQuick()
 	Local $aHasRemoteServersTF = False
 	For $i = 0 To ($aServerGridTotal - 1)
 		If $xStartGrid[$i] <> "yes" Then
-			$tMainLVW[$i][1] = "--"         ; Local YN
+			$tMainLVW[$i][1] = "--" ; Local YN
 		Else
-			$tMainLVW[$i][1] = $xStartGrid[$i]         ; Local YN
+			$tMainLVW[$i][1] = $xStartGrid[$i] ; Local YN
 		EndIf
 		If $xStartGrid[$i] <> "yes" Then
-			$tMainLVW[$i][2] = "--"         ; Local YN
+			$tMainLVW[$i][2] = "--" ; Local YN
 		Else
-			$tMainLVW[$i][2] = $xStartGrid[$i]         ; Local YN
+			$tMainLVW[$i][2] = $xStartGrid[$i] ; Local YN
 		EndIf
-		$tMainLVW[$i][4] = $xServerNames[$i]         ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$tMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme)         ; Grid
+		$tMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$tMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme) ; Grid
 		If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And $aServerOnlinePlayerYN = "yes" Then
-			$tMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers         ; Online PLayers
+			$tMainLVW[$i][6] = $aServerPlayers[$i] & " / " & $aServerMaxPlayers ; Online PLayers
 		Else
-			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers         ; Online PLayers
+			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
 		EndIf
 		If $xStartGrid[$i] = "yes" Then
 			Local $tCPU = _ProcessUsageTracker_GetUsage($xServerCPU[$i])
-			$tMainLVW[$i][7] = Round($tCPU, 1) & "%"         ; CPU
+			$tMainLVW[$i][7] = Round($tCPU, 1) & "%" ; CPU
 			Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-			$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp)         ; & " MB" ; Memory
+			$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) ; & " MB" ; Memory
 		Else
-			$tMainLVW[$i][7] = ""         ; CPU
-			$tMainLVW[$i][8] = ""         ; Memory
+			$tMainLVW[$i][7] = "" ; CPU
+			$tMainLVW[$i][8] = "" ; Memory
 		EndIf
-		$tMainLVW[$i][9] = $xServerAltSaveDir[$i]         ; Folder
+		$tMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
 		If ProcessExists($aServerPID[$i]) Then
-			$tMainLVW[$i][11] = "Running"         ; Status #008000
+			$tMainLVW[$i][11] = "Running" ; Status #008000
 			$aCloseServerTF = False
 			If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 				_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 			EndIf
-		Else         ; Server Not running
+		Else ; Server Not running
 			$aServerPID[$i] = ""
 			If $xStartGrid[$i] = "yes" Then
 				If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 					If $aCloseServerTF Then
-						$tMainLVW[$i][11] = "Starting"     ; Status
+						$tMainLVW[$i][11] = "Starting" ; Status
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWStarting & ";", $i, 11)
 						LogWrite(" Server [" & _ServerNamingScheme($i, $aNamingScheme) & "] PID [" & $aMainLVW[$i][10] & "] """ & $xServerNames[$i] & """ restarting.")
 					Else
-						$tMainLVW[$i][11] = "CRASHED"     ; Status
+						$tMainLVW[$i][11] = "CRASHED" ; Status
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $i, 11)
 						LogWrite(" WARNING!!! Server [" & _ServerNamingScheme($i, $aNamingScheme) & "] PID [" & $aMainLVW[$i][10] & "] """ & $xServerNames[$i] & """ CRASHED, Restarting server")
 					EndIf
 				EndIf
 			Else
-				If $xLocalGrid[$i] = "yes" Then         ; Local Server
+				If $xLocalGrid[$i] = "yes" Then ; Local Server
 					If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
-						$tMainLVW[$i][11] = "Disabled"         ; Status
+						$tMainLVW[$i][11] = "Disabled" ; Status
 						_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
 					EndIf
-				Else         ; Remote Server
+				Else ; Remote Server
 					$aHasRemoteServersTF = True
-					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then         ; Remote Server with Online Players
-						$tMainLVW[$i][11] = "Running"         ; Status #008000
+					If (UBound($aServerPlayers) = $aServerGridTotal) And ($aServerPlayers[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
+						$tMainLVW[$i][11] = "Running" ; Status #008000
 						If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 							_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
 						EndIf
-					Else         ; Remote Server without ListPlayers response (offline)
+					Else ; Remote Server without ListPlayers response (offline)
 						If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
 							If $aPollRemoteServersYN = "yes" Then
-								$tMainLVW[$i][11] = "Offline"         ; Status
+								$tMainLVW[$i][11] = "Offline" ; Status
 								_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $i, 11)
 							Else
-								$tMainLVW[$i][11] = "Disabled"         ; Status
+								$tMainLVW[$i][11] = "Disabled" ; Status
 								_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
 							EndIf
 						EndIf
@@ -9339,7 +9351,7 @@ Func GUIUpdateQuick()
 				EndIf
 			EndIf
 		EndIf
-		$tMainLVW[$i][10] = $aServerPID[$i]         ; PID
+		$tMainLVW[$i][10] = $aServerPID[$i] ; PID
 		For $x = 4 To 11
 			If $tMainLVW[$i][$x] <> $aMainLVW[$i][$x] Then
 				$aMainLVW[$i][$x] = $tMainLVW[$i][$x]
@@ -9394,7 +9406,7 @@ Func GUIUpdateQuick()
 ;~ 	$aTotalPlayersOnline = _ArraySum($aServerPlayers)
 	If $tTotalPlayerError Then $aTotalPlayersOnline = "--"
 ;~ 	If $aTotalPlayersOnline < 0 Then $aTotalPlayersOnline = "--"
-	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline)         ; & " / " & $aServerMaxPlayers) ; Players Edit Window
+	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers) ; Players Edit Window
 	If $tUtilUpdateAvailableTF Then
 		GUICtrlSetImage($IconUpdate, $aIconFile, 216)
 		GUICtrlSetTip($IconUpdate, $aUtilName & " update available")
@@ -9443,12 +9455,12 @@ Func LogWindow($lDefaultTabNo = 1)
 	If WinExists($LogWindow) Then
 	Else
 		#Region ### START Koda GUI section ### Form=g:\game server files\autoit\atlasserverupdateutility\temp work files\atladkoda(log-b1).kxf
-		Local $lWidth = 1000, $lHeight = 600         ; 906 , 555
+		Local $lWidth = 1000, $lHeight = 600 ; 906 , 555
 		Global $LogWindow = GUICreate($aUtilityVer & " Logs & Full Config Files", $lWidth, $lHeight, -1, -1, BitOR($GUI_SS_DEFAULT_GUI, $WS_MAXIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_TABSTOP))
 		GUISetIcon($aIconFile, 99)
 		GUISetBkColor($cMWBackground)
 		GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Log_Close", $LogWindow)
-		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18))         ;  889, 537
+		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18)) ;  889, 537
 		GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKVCENTER)
 		; ------------------------------------------------------------------------------------------------------------
 		$lBasicTab = GUICtrlCreateTabItem("Basic Log")
@@ -9942,9 +9954,9 @@ EndFunc   ;==>GUI_WizardExist_Close
 
 Func GUI_W2_On_Tab()
 	Switch GUICtrlRead($WizardTabWindow)
-		Case 0         ; Tab 1 Atlas Folder
+		Case 0 ; Tab 1 Atlas Folder
 			GUI_W2_Last_Tab(0)
-		Case 1         ; Tab 2 AltSaveDIR
+		Case 1 ; Tab 2 AltSaveDIR
 			GUI_W2_Last_Tab(1)
 			If $iIniRead Then
 				If $aServerAltSaveSelect = "1" Then GUICtrlSetState($W2_T2_R_Default00, $GUI_CHECKED)
@@ -9962,7 +9974,7 @@ Func GUI_W2_On_Tab()
 					GUICtrlSetData($W2_T2_I_AltSaveDIR2, $aServerAltSaveDir)
 				EndIf
 			EndIf
-		Case 2         ; Tab 3 RCON Ports
+		Case 2 ; Tab 3 RCON Ports
 			GUI_W2_Last_Tab(2)
 			If $aConfigSettingsImported Then
 				If $iIniRead Then
@@ -9987,7 +9999,7 @@ Func GUI_W2_On_Tab()
 				EndIf
 			EndIf
 			If $iIniRead And ($aServerRCONImport = "yes") Then GUICtrlSetState($W2_T3_R_Import, $GUI_CHECKED)
-		Case 3         ; Tab 4 Grid Start
+		Case 3 ; Tab 4 Grid Start
 			GUI_W2_Last_Tab(3)
 			If $aConfigSettingsImported Then
 				If FileExists($aGridSelectFile) Then
@@ -10002,7 +10014,7 @@ Func GUI_W2_On_Tab()
 				MsgBox($MB_OK, $aUtilName, "Cannot create GridStartSelect.ini file until the " & $aConfigFile & " file has been imported.")
 				GUICtrlSetState($Tab1, $GUI_SHOW)
 			EndIf
-		Case 4         ; Tab 5 Priority Settings
+		Case 4 ; Tab 5 Priority Settings
 			GUI_W2_Last_Tab(4)
 			If $iIniRead Then
 				GUICtrlSetData($W2_T5_I_AdminPass, $aServerAdminPass)
@@ -10012,13 +10024,13 @@ Func GUI_W2_On_Tab()
 				GUICtrlSetData($W2_T5_I_SteamCMDExtraCMD, $aSteamExtraCMD)
 				GUICtrlSetData($W2_T5_I_UpdateInterval, $aUpdateCheckInterval)
 			EndIf
-		Case 5         ; Tab 6 Review All Settings
+		Case 5 ; Tab 6 Review All Settings
 			Local $tFileOpen = FileOpen($aIniFile)
 			Local $tTxt = FileRead($tFileOpen)
 			FileClose($tFileOpen)
 			GUICtrlSetData($W2_T6_E_Config, $tTxt)
 			GUI_W2_Last_Tab(5)
-		Case 6         ; Tab 7 Finish
+		Case 6 ; Tab 7 Finish
 			GUI_W2_Last_Tab(6)
 	EndSwitch
 EndFunc   ;==>GUI_W2_On_Tab
@@ -10034,14 +10046,14 @@ Func GUI_W2_Last_Tab($tTab)
 				"Click (YES) to Save" & @CRLF & _
 				"Click (NO) to Skip" & @CRLF & _
 				"Click (CANCEL) to Reset.", 10)
-		If $tMB = 6 Then         ; YES
+		If $tMB = 6 Then ; YES
 			Local $tTxt = GUICtrlRead($W2_T4_E_GridStart)
 			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
 			Local $tFile = $aGridSelectFile & "_" & $tTime & ".bak"
 			FileMove($aGridSelectFile, $tFile, 1)
 			FileWrite($aGridSelectFile, $tTxt)
 			_Splash($aUtilName & "GridStartSelect.ini updated." & @CRLF & @CRLF & "Backup created: " & @CRLF & $aUtilName & "GridStartSelect.ini_" & $tTime & ".bak", 3000, 525)
-		ElseIf $tMB = 2 Then         ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			GUI_W2_T4_B_Reset()
 		EndIf
 	EndIf
@@ -10050,9 +10062,9 @@ Func GUI_W2_Last_Tab($tTab)
 				"Click (YES) to Save" & @CRLF & _
 				"Click (NO) to Skip" & @CRLF & _
 				"Click (CANCEL) to Reset.", 10)
-		If $tMB = 6 Then         ; YES
+		If $tMB = 6 Then ; YES
 			GUI_W2_T6_B_Save()
-		ElseIf $tMB = 2 Then         ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			GUI_W2_T6_B_Reset()
 		EndIf
 	EndIf
@@ -10516,8 +10528,8 @@ Func ShowGUITools()
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	$Group2 = GUICtrlCreateGroup("AtlasServerUpdateUtility Tools", 24, 24, 857, 505)
 	GUICtrlSetFont(-1, 12, 800, 0, "MS Sans Serif")
-	Local $tButtonW = 155, $tButtonH = 33, $tLabelH = 20         ; Default Group Dimensions
-	Local $tButtonX = 43, $tButtonY = 67, $tLabelX = $tButtonX + 165, $tLabelY = $tButtonY + 7         ; Starting Location
+	Local $tButtonW = 155, $tButtonH = 33, $tLabelH = 20 ; Default Group Dimensions
+	Local $tButtonX = 43, $tButtonY = 67, $tLabelX = $tButtonX + 165, $tLabelY = $tButtonY + 7 ; Starting Location
 	; -----------------------------------
 	Global $T1_B_SetupWizard = GUICtrlCreateButton("Setup Wizard", $tButtonX, $tButtonY, $tButtonW, $tButtonH)
 	GUICtrlSetOnEvent(-1, "GUI_Tools_B_SetupWizard")
@@ -10697,7 +10709,7 @@ Func _GetMemArrayRawAvg($Pid)
 		For $objItem In $colItems
 			For $x = 0 To (UBound($Pid) - 1)
 ;~ 				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = (($objItem.WorkingSetPrivate + $objItem.WorkingSet) / 2) ; Average
-				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate)         ; Working Set Private
+				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate) ; Working Set Private
 				If @error Then Return 0
 			Next
 		Next
@@ -10879,9 +10891,9 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 
 	; XP, XPe, 2000, or 2003? - Affects process access requirement
 	If StringRegExp(@OSVersion, "_(XP|200(0|3))") Then
-		$iAccess = 0x0400         ; PROCESS_QUERY_INFORMATION
+		$iAccess = 0x0400 ; PROCESS_QUERY_INFORMATION
 	Else
-		$iAccess = 0x1000         ; PROCESS_QUERY_LIMITED_INFORMATION
+		$iAccess = 0x1000 ; PROCESS_QUERY_LIMITED_INFORMATION
 	EndIf
 
 	; SYNCHRONIZE access - required to determine if process has terminated
@@ -10916,12 +10928,12 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		EndIf
 	EndIf
 
-	$aProcUsage[0][0] = 1         ; 1 Process Total (possible future expansion)
+	$aProcUsage[0][0] = 1 ; 1 Process Total (possible future expansion)
 
-	$aProcUsage[1][0] = $sProcess         ; Process Name
-	$aProcUsage[1][1] = $nPID         ; Process ID
-	$aProcUsage[1][2] = $hProcess         ; Process Handle
-	$aProcUsage[1][3] = $iAccess         ; Access Rights (useful to determine when process terminated)
+	$aProcUsage[1][0] = $sProcess ; Process Name
+	$aProcUsage[1][1] = $nPID ; Process ID
+	$aProcUsage[1][2] = $hProcess ; Process Handle
+	$aProcUsage[1][3] = $iAccess ; Access Rights (useful to determine when process terminated)
 
 	$aRet = DllCall("kernel32.dll", "bool", "GetProcessTimes", "handle", $hProcess, "uint64*", 0, "uint64*", 0, "uint64*", 0, "uint64*", 0)
 	If @error Or Not $aRet[0] Then
@@ -10930,8 +10942,8 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		Return SetError(-1, $iErr, "")
 	EndIf
 
-	$aProcUsage[1][4] = $aRet[4]         ; Process Kernel Time
-	$aProcUsage[1][5] = $aRet[5]         ; Process User Time
+	$aProcUsage[1][4] = $aRet[4] ; Process Kernel Time
+	$aProcUsage[1][5] = $aRet[5] ; Process User Time
 
 	Return $aProcUsage
 EndFunc   ;==>_ProcessUsageTracker_Create
@@ -11383,7 +11395,7 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 
 	; If no drag/drop
 	If BitAND($iAdded, 512) Then
-		$aGLVEx_Data[$iLV_Index][12] += 8 + 2     ; Force no external drop
+		$aGLVEx_Data[$iLV_Index][12] += 8 + 2 ; Force no external drop
 	EndIf
 
 	; If single cell selection
@@ -11398,12 +11410,12 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 	EndIf
 
 	;  If checkbox extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then     ; $LVS_EX_CHECKBOXES
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then ; $LVS_EX_CHECKBOXES
 		$aGLVEx_Data[$iLV_Index][6] = 1
 	EndIf
 
 	;  If header drag extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then     ; $LVS_EX_HEADERDRAGDROP
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then ; $LVS_EX_HEADERDRAGDROP
 		$aGLVEx_Data[$iLV_Index][13] = 1
 	EndIf
 
@@ -11624,10 +11636,10 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 
 	; Adjust array depending on mode required
 	Switch $iMode
-		Case 0, 3     ; Content
+		Case 0, 3 ; Content
 			; Array already filled
 
-		Case 1     ; Checkbox state
+		Case 1 ; Checkbox state
 			If $aGLVEx_Data[$iLV_Index][6] Then
 				For $i = 1 To $iDim_1 - 1
 					$aCheck[$i] = _GUICtrlListView_GetItemChecked($hLV, $i - 1)
@@ -11642,7 +11654,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(3, 0, "")
 			EndIf
 
-		Case 2     ; Colour values
+		Case 2 ; Colour values
 			If $aGLVEx_Data[$iLV_Index][19] Then
 				; Load colour array
 				$aData_Colour = $aGLVEx_Data[$iLV_Index][18]
@@ -11657,7 +11669,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(4, 0, "")
 			EndIf
 
-		Case 4     ; Headers
+		Case 4 ; Headers
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -11673,7 +11685,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Next
 			EndIf
 
-		Case 5     ; Header colours
+		Case 5 ; Header colours
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -11691,7 +11703,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 	; Check if columns can be reordered
 	If $aGLVEx_Data[$iLV_Index][13] Then
 		Switch $iMode
-			Case 0, 2, 3     ; 2D data/colour array
+			Case 0, 2, 3 ; 2D data/colour array
 				; Create temp array
 				Local $aData_Colour_Ordered[$iDim_1][$iDim_2]
 				; Fill temp array in correct column order
@@ -11705,7 +11717,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				$aData_Colour = $aData_Colour_Ordered
 				$aData_Colour_Ordered = ""
 
-			Case 4, 5     ; 1D header array
+			Case 4, 5 ; 1D header array
 				; Create return array
 				Local $aHeader_Ordered[$iDim_2]
 				; Fill return array in correct column order
@@ -11804,7 +11816,7 @@ Func _GUIListViewEx_SaveListView($iLV_Index, $sFileName)
 	EndIf
 	$sHeader = StringTrimRight($sHeader, 1)
 	; Get data/check/colour content
-	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3)     ; Force 2D return
+	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3) ; Force 2D return
 	If $iStart Then
 		_ArrayDelete($aData, 0)
 	EndIf
@@ -12530,7 +12542,7 @@ Func _GUIListViewEx_DeleteSpec($iLV_Index, $vRange = "")
 
 	; Check for range
 	If String($vRange) <> "" Then
-		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0)     ; Rows not columns
+		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0) ; Rows not columns
 		If @error Then Return SetError(4, 0, 0)
 	Else
 		; Check if colour or single cell selection enabled
@@ -13019,7 +13031,7 @@ Func _GUIListViewEx_SetEditStatus($iLV_Index, $vCol, $iMode = 1, $vParam1 = Defa
 	Local $aEditable = $aGLVEx_Data[$iLV_Index][7]
 
 	Switch $iMode
-		Case 0, 1     ; Not editable/editable
+		Case 0, 1 ; Not editable/editable
 			If $vParam1 = Default Then $vParam1 = 0
 			If $vParam2 = Default Then $vParam2 = ""
 			Switch $vParam1
@@ -13187,7 +13199,7 @@ Func _GUIListViewEx_EditItem($iLV_Index, $iRow, $iCol, $iEditMode = 0, $iDelta_X
 	EndIf
 	; Check edit mode parameter
 	Switch Abs($iEditMode)
-		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33     ; Single edit or both axes set to valid parameter
+		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33 ; Single edit or both axes set to valid parameter
 			; Allow
 		Case Else
 			Return SetError(5, 0, "")
@@ -13488,14 +13500,14 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	Local $hCombo, $hTemp_Edit, $hTemp_List, $hTemp_Combo, $sCombo_Data
 
 	; Check edit mode
-	If $aHdrData[2][$iCol] Then     ; Combo
+	If $aHdrData[2][$iCol] Then ; Combo
 		$sCombo_Data = $aHdrData[2][$iCol]
 		; Create temporary combo
-		If StringLeft($sCombo_Data, 1) = @TAB Then     ; Read only combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043)     ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		If StringLeft($sCombo_Data, 1) = @TAB Then ; Read only combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 			$sCombo_Data = StringTrimLeft($sCombo_Data, 1)
-		Else     ; Normal combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042)     ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		Else ; Normal combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 		EndIf
 		GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 		; Get combo data
@@ -13504,11 +13516,11 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 				"struct;long BtnLeft;long BtnTop;long BtnRight;long BtnBottom;endstruct;dword BtnState;hwnd hCombo;hwnd hEdit;hwnd hList")
 		Local $iInfo = DllStructGetSize($tInfo)
 		DllStructSetData($tInfo, "Size", $iInfo)
-		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")     ; $CB_GETCOMBOBOXINFO
+		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 		$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 		$hTemp_List = DllStructGetData($tInfo, "hList")
 		$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
-	Else     ; Edit
+	Else ; Edit
 		; Create temporary edit
 		$cGLVEx_EditID = GUICtrlCreateEdit($sHeaderOrgText, $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0)
 		$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
@@ -13519,7 +13531,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	_WinAPI_SetFocus($hTemp_Edit)
 	; Check "select all" flag state
 	If Not $aGLVEx_Data[$iLV_Index][11] Then
-		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)     ; $EM_SETSEL
+		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 	EndIf
 
 	Local $tMouseClick = DllStructCreate($tagPOINT)
@@ -13572,7 +13584,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 		EndIf
 		If $hCombo Then
 			; Check for dropdown open and close
-			Switch _SendMessage($hCombo, 0x157)     ; $CB_GETDROPPEDSTATE
+			Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 				Case 0
 					; If opened and closed
 					If $fCombo_State = True Then
@@ -14122,7 +14134,7 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 
 		; Check Type parameter
 		Switch Abs($iEditMode)
-			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33     ; Single edit or both axes set to valid parameter
+			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33 ; Single edit or both axes set to valid parameter
 				; Allow
 			Case Else
 				Return SetError(1, 0, "")
@@ -14149,10 +14161,10 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 		EndIf
 
 		Switch $aEditable[0][$aLocation[1]]
-			Case 0     ; Not editable
+			Case 0 ; Not editable
 				Return SetError(3, 0, "")
 
-			Case 9     ; User-defined function
+			Case 9 ; User-defined function
 				; Extract user function
 				Local $hUserFunction = $aEditable[1][$aLocation[1]]
 				; Pass function 4 parameters (LV handle, UDF LV index, row, col)
@@ -14323,10 +14335,10 @@ EndFunc   ;==>_GUIListViewEx_EventMonitor
 Func _GUIListViewEx_MsgRegister($fNOTIFY = True, $fMOUSEMOVE = True, $fLBUTTONUP = True, $fSYSCOMMAND = True)
 
 	; Register required messages
-	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler")     ; $WM_NOTIFY
-	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler")     ; $WM_MOUSEMOVE
-	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler")     ; $WM_LBUTTONUP
-	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler")     ; $WM_SYSCOMMAND
+	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler") ; $WM_NOTIFY
+	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler") ; $WM_MOUSEMOVE
+	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler") ; $WM_LBUTTONUP
+	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler") ; $WM_SYSCOMMAND
 
 EndFunc   ;==>_GUIListViewEx_MsgRegister
 
@@ -14357,7 +14369,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 	Local $iCode = BitAND(DllStructGetData($tStruct, 3), 0xFFFFFFFF)
 
 	; Deal with drawing quickly
-	If $iCode = -12 Then     ; $NM_CUSTOMDRAW
+	If $iCode = -12 Then ; $NM_CUSTOMDRAW
 
 		; Prevent redraw if still changing ListView arrays
 		If $aGLVEx_Data[0][12] Then Return
@@ -14389,19 +14401,19 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 			If $aGLVEx_Data[$iLV_Index][19] Or $aGLVEx_Data[$iLV_Index][22] Then
 				Local $tNMLVCUSTOMDRAW = DllStructCreate($tagNMLVCUSTOMDRAW, $lParam)
 				$dwDrawStage = DllStructGetData($tNMLVCUSTOMDRAW, "dwDrawStage")
-				Switch $dwDrawStage     ; Holds a value that specifies the drawing stage
-					Case 1     ; $CDDS_PREPAINT
+				Switch $dwDrawStage ; Holds a value that specifies the drawing stage
+					Case 1 ; $CDDS_PREPAINT
 						; Before the paint cycle begins
-						Return 32     ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
+						Return 32 ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
 
-					Case 65537     ; $CDDS_ITEMPREPAINT
+					Case 65537 ; $CDDS_ITEMPREPAINT
 						; Before painting an item
-						Return 32     ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
+						Return 32 ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
 
-					Case 196609     ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
+					Case 196609 ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
 						; Before painting a subitem
-						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec")     ; Row index
-						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem")     ; Column index
+						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec") ; Row index
+						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem") ; Column index
 						; Check if selected row
 						Local $bSelColour = False
 						If $iItem = $aGLVEx_Data[$iLV_Index][20] Then
@@ -14438,7 +14450,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Set required colours
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrText", $iTextColour)
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrTextBk", $iBackColour)
-						Return 2     ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 
@@ -14461,7 +14473,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Store new handle
 					$aGLVEx_Data[0][20] = DllStructGetData($tStruct, 1)
 					; Get header font
-					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031)     ; $WM_GETFONT
+					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031) ; $WM_GETFONT
 					Local $hObject = _WinAPI_SelectObject($hDC, $hFont)
 					Local $tLogFont = DllStructCreate($tagLOGFONT)
 					; Get header font
@@ -14469,7 +14481,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					_WinAPI_SelectObject($hDC, $hObject)
 					_WinAPI_ReleaseDC(DllStructGetData($tStruct, 1), $hDC)
 					; Set to medium weight
-					DllStructSetData($tLogFont, "Weight", 600)     ; $FW_SEMIBOLD
+					DllStructSetData($tLogFont, "Weight", 600) ; $FW_SEMIBOLD
 					; Store font handle
 					$aGLVEx_Data[0][21] = _WinAPI_CreateFontIndirect($tLogFont)
 				EndIf
@@ -14477,15 +14489,15 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 				; Check drawing stage
 				$dwDrawStage = DllStructGetData($tNMCustomDraw, "dwDrawStage")
 				Switch $dwDrawStage
-					Case 1     ; $CDDS_PREPAINT ; Before the paint cycle begins
-						Return 32     ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
+					Case 1 ; $CDDS_PREPAINT ; Before the paint cycle begins
+						Return 32 ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
 
-					Case 65537     ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
-						Return 0x00000010     ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
+					Case 65537 ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
+						Return 0x00000010 ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
 
-					Case 0x00010002     ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
-						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec")     ; Column
-						$aHdrData = $aGLVEx_Data[$iLV_Index][25]     ; Header data
+					Case 0x00010002 ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
+						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec") ; Column
+						$aHdrData = $aGLVEx_Data[$iLV_Index][25] ; Header data
 						Local $aColSplit = StringSplit($aHdrData[1][$iColumnIndex], ";")
 						; Set default colours
 						Local $aHdrDefCols = $aGLVEx_Data[$iLV_Index][23]
@@ -14508,7 +14520,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						DllStructSetData($tRECT, 3, DllStructGetData($tNMCustomDraw, 8) - 2)
 						DllStructSetData($tRECT, 4, DllStructGetData($tNMCustomDraw, 9) - 2)
 						; Set transparent background
-						_WinAPI_SetBkMode($hDC, 1)     ; $TRANSPARENT
+						_WinAPI_SetBkMode($hDC, 1) ; $TRANSPARENT
 						; Set text font and colour
 						_WinAPI_SelectObject($hDC, $aGLVEx_Data[0][21])
 						_WinAPI_SetTextColor($hDC, $iHdrTextColour)
@@ -14522,12 +14534,12 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							Local $iColAlign = 2 * $aRet[0]
 							_WinAPI_DrawText($hDC, $aHdrData[0][$iColumnIndex], $tRECT, $iColAlign)
 						EndIf
-						Return 2     ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 		EndIf
 
-	Else     ; Not a drawing message
+	Else ; Not a drawing message
 
 		; Flag to indicate use of Edit HotKey
 		Local $fEditHotKey = False
@@ -14592,13 +14604,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 						; Check if Native or UDF and set focus
 						If $cGLVEx_SrcID Then
-							GUICtrlSetState($cGLVEx_SrcID, 256)     ; $GUI_FOCUS
+							GUICtrlSetState($cGLVEx_SrcID, 256) ; $GUI_FOCUS
 						Else
 							_WinAPI_SetFocus($hGLVEx_SrcHandle)
 						EndIf
 
 						; Get dragged item index
-						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4)     ; Item
+						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4) ; Item
 						; Set dragged item count
 						$iGLVEx_Dragging = 1
 
@@ -14620,7 +14632,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								If $aIndex[$i] = $iGLVEx_DraggedIndex Then ExitLoop
 							Next
 							; Now check for consecutive items
-							If $i <> 1 Then     ; Up
+							If $i <> 1 Then ; Up
 								For $j = $i - 1 To 1 Step -1
 									; Consecutive?
 									If $aIndex[$j] <> $aIndex[$j + 1] - 1 Then ExitLoop
@@ -14630,7 +14642,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-							If $i <> $aIndex[0] Then     ; Down
+							If $i <> $aIndex[0] Then ; Down
 								For $j = $i + 1 To $aIndex[0]
 									; Consecutive
 									If $aIndex[$j] <> $aIndex[$j - 1] + 1 Then ExitLoop
@@ -14638,7 +14650,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-						Else     ; Either no selection or only a single
+						Else ; Either no selection or only a single
 							; Set flag
 							$iGLVEx_Dragging = 1
 						EndIf
@@ -14655,7 +14667,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 					EndIf
 
-				Case $LVN_COLUMNCLICK, -2     ; $NM_CLICK
+				Case $LVN_COLUMNCLICK, -2 ; $NM_CLICK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -14685,7 +14697,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Get col width
 						Local $aLV_Pos = WinGetPos($hGLVEx_SrcHandle)
 						; Scroll to left edge if all column not in view
-						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then     ; Reduce by scrollbar width
+						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then ; Reduce by scrollbar width
 							_GUICtrlListView_Scroll($hGLVEx_SrcHandle, $aRect[0], 0)
 						EndIf
 
@@ -14745,7 +14757,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						_GUICtrlListView_SetItemSelected($hLV, $aGLVEx_Data[0][17], False)
 						; Act on left/right keys
 						Switch $aGLVEx_Data[0][16]
-							Case 37     ; Left
+							Case 37 ; Left
 								; Adjust column and prevent overrun
 								If $aGLVEx_Data[0][18] > 0 Then $aGLVEx_Data[0][18] -= 1
 								; Store new column
@@ -14756,7 +14768,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								$fGLVEx_UserSelFlag = 1
 								$fGLVEx_SelChangeFlag = $iLV_Index
 
-							Case 39     ; Right
+							Case 39 ; Right
 								If $aGLVEx_Data[0][18] < _GUICtrlListView_GetColumnCount($hLV) - 1 Then $aGLVEx_Data[0][18] += 1
 								$aGLVEx_Data[$iLV_Index][21] = $aGLVEx_Data[0][18]
 								_GUICtrlListView_RedrawItems($hLV, $aGLVEx_Data[0][17], $aGLVEx_Data[0][17])
@@ -14767,7 +14779,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						EndSwitch
 					EndIf
 
-				Case -3     ; $NM_DBLCLK
+				Case -3 ; $NM_DBLCLK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -14797,13 +14809,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					If $aGLVEx_Data[0][16] <> 0 Then
 						; Check key used
 						Switch $aGLVEx_Data[0][16]
-							Case 38     ; Up
+							Case 38 ; Up
 								If $aGLVEx_Data[0][17] > 0 Then $aGLVEx_Data[0][17] -= 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
 								$fGLVEx_UserSelFlag = 1
 
-							Case 40     ; Down
+							Case 40 ; Down
 								If $aGLVEx_Data[0][17] < _GUICtrlListView_GetItemCount($hLV) - 1 Then $aGLVEx_Data[0][17] += 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
@@ -14847,7 +14859,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Set selection change flag
 					$fGLVEx_SelChangeFlag = $iLV_Index
 
-				Case -5     ; $NM_RCLICK
+				Case -5 ; $NM_RCLICK
 
 					; Set active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -14887,7 +14899,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							; Check header resizing status
 							Local $iHdrResize = $aHdrData[3][$iCol]
 							Switch $iCode
-								Case -306, -326     ; $HDN_BEGINTRACK(W)
+								Case -306, -326 ; $HDN_BEGINTRACK(W)
 									If $iHdrResize Then
 										; Prevent resizing
 										Return True
@@ -14895,7 +14907,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 										; Allow resizing
 										Return False
 									EndIf
-								Case -305, -325     ; $HDN_DIVIDERDBLCLICK(W)
+								Case -305, -325 ; $HDN_DIVIDERDBLCLICK(W)
 									If $iHdrResize Then
 										; Instant resize of column to fixed width
 										_GUICtrlListView_SetColumnWidth($aGLVEx_Data[$iLV_Index][0], $iCol, $iHdrResize)
@@ -14968,7 +14980,7 @@ Func _GUIListViewEx_WM_MOUSEMOVE_Handler($hWnd, $iMsg, $wParam, $lParam)
 					$cGLVEx_TgtID = $aGLVEx_Data[$i][1]
 					$iGLVEx_TgtIndex = $i
 					$aGLVEx_TgtArray = $aGLVEx_Data[$i][2]
-					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10]     ; Set item depth
+					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10] ; Set item depth
 					; No point in looping further
 					ExitLoop
 				EndIf
@@ -15190,7 +15202,7 @@ Func _GUIListViewEx_WM_LBUTTONUP_Handler($hWnd, $iMsg, $wParam, $lParam)
 		$aGLVEx_Data[$aGLVEx_Data[0][1]][2] = $aGLVEx_SrcArray
 		$aGLVEx_Data[$iGLVEx_SrcIndex][18] = $aGLVEx_SrcColArray
 
-	Else     ; Dropping in another ListView
+	Else ; Dropping in another ListView
 
 		; Check checkbox status
 		Local $bCheckbox = (($aGLVEx_Data[$iGLVEx_SrcIndex][6] And $aGLVEx_Data[$iGLVEx_TgtIndex][6]) ? (True) : (False))
@@ -15348,7 +15360,7 @@ Func _GUIListViewEx_WM_SYSCOMMAND_Handler($hWnd, $iMsg, $wParam, $lParam)
 	#forceref $hWnd, $iMsg, $lParam, $lParam
 
 	; Check correct event from ListView GUI
-	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then     ; $SC_CLOSE
+	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then ; $SC_CLOSE
 		$aGLVEx_Data[0][9] = True
 	EndIf
 
@@ -15441,7 +15453,7 @@ Func __GUIListViewEx_HighLight($hLVHandle, $cLV_CID, $iIndexA, $iIndexB = -1)
 
 	; Check if Native or UDF and set focus
 	If $cLV_CID Then
-		GUICtrlSetState($cLV_CID, 256)     ; $GUI_FOCUS
+		GUICtrlSetState($cLV_CID, 256) ; $GUI_FOCUS
 	Else
 		_WinAPI_SetFocus($hLVHandle)
 	EndIf
@@ -15470,7 +15482,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 	If Not IsHWnd($hLVHandle) Then
 		$iError = 1
 	Else
-		Local $hFont = _SendMessage($hLVHandle, 0x0031)     ; WM_GETFONT
+		Local $hFont = _SendMessage($hLVHandle, 0x0031) ; WM_GETFONT
 		If Not $hFont Then
 			$iError = 2
 		Else
@@ -15482,7 +15494,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				$iError = 3
 			Else
 				; Get font size
-				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1)     ; $LOGPIXELSY = 90 => DPI aware
+				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1) ; $LOGPIXELSY = 90 => DPI aware
 				; Now look for font name
 				$aRet = DllCall("gdi32.dll", "int", "GetTextFaceW", "handle", $hDC, "int", 0, "ptr", 0)
 				Local $iCount = $aRet[0]
@@ -15492,7 +15504,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				If @error Then
 					$iError = 4
 				Else
-					$aFontDetails[1] = DllStructGetData($tBuffer, 1)     ; FontFacename
+					$aFontDetails[1] = DllStructGetData($tBuffer, 1) ; FontFacename
 				EndIf
 			EndIf
 			_WinAPI_SelectObject($hDC, $hObjOrg)
@@ -15522,7 +15534,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 	_GUICtrlListView_SetItemSelected($hGLVEx_SrcHandle, $aLocation[0], False)
 
 	; Declare return array
-	Local $aEdited[1][4] = [[0]]     ; [[Number of edited items, blank, blank, blank]]
+	Local $aEdited[1][4] = [[0]] ; [[Number of edited items, blank, blank, blank]]
 
 	; Load active ListView details
 	$hGLVEx_SrcHandle = $aGLVEx_Data[$iLV_Index][0]
@@ -15599,19 +15611,19 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		; Determine type of control required for this cell and extract data if required
 		$iEditType = $aEditable[0][$aLocation[1]]
 		Switch $iEditType
-			Case 0, 1     ; Edit
+			Case 0, 1 ; Edit
 				$fEdit = True
 				If $iForce Then
-					$iEditType = 1     ; Force text edit if called by _GUIListViewEx_EditItem
+					$iEditType = 1 ; Force text edit if called by _GUIListViewEx_EditItem
 				EndIf
 
-			Case 2     ; Combo
+			Case 2 ; Combo
 				$fCombo = True
 				Local $sCombo_Data = $aEditable[1][$aLocation[1]]
 				$fRead_Only = (BitAND($aEditable[2][$aLocation[1]], 1) = 1)
 				$fAuto_Drop = (BitAND($aEditable[2][$aLocation[1]], 2) = 2)
 
-			Case 3     ; DTP
+			Case 3 ; DTP
 				$fDTP = True
 				Local $sDTP_Default = $aEditable[1][$aLocation[1]]
 				If StringRight($sDTP_Default, 1) = "#" Then
@@ -15635,30 +15647,30 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		$iWidth = Number($aWidth[$aLocation[1]])
 		; Alter edit/combo width if required value less than current width
 		If $iWidth > $aEdit_Pos[2] Then
-			If $fRead_Only Then     ; Only adjust read-only combo edit width if value is negative
+			If $fRead_Only Then ; Only adjust read-only combo edit width if value is negative
 				If $iWidth < 0 Then
 					$aEdit_Pos[2] = Abs($iWidth)
 				EndIf
-			Else     ; Always adjust for if manual input accepted
+			Else ; Always adjust for if manual input accepted
 				$aEdit_Pos[2] = Abs($iWidth)
 			EndIf
 		EndIf
 
 		; Create control
 		Switch $iEditType
-			Case 1     ; Edit
+			Case 1 ; Edit
 				; Create temporary edit - get handle, set font size, give keyboard focus and select all text
-				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128)     ; $ES_AUTOHSCROLL
+				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128) ; $ES_AUTOHSCROLL
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Check if UpDown required
 				If $aEditable[1][$aLocation[1]] = 1 Then
-					Local $iWrap = -1     ; Default no wrap
+					Local $iWrap = -1 ; Default no wrap
 					; Check if limits to be applied
 					If $aEditable[2][$aLocation[1]] Then
 						$aSplit = StringSplit($aEditable[2][$aLocation[1]], "|")
 						; Check valid syntax
 						If UBound($aSplit) = 4 Then
-							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1))     ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
+							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1)) ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
 						EndIf
 					EndIf
 					; Create UpDowm
@@ -15672,14 +15684,14 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					_WinAPI_RedrawWindow($hUpDown)
 				EndIf
 
-			Case 2     ; Combo
+			Case 2 ; Combo
 				; Create temporary combo - get handle, set font size, give keyboard focus
 				If $fRead_Only Then
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043)     ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Set existing content as default for read-only
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data, $sItemOrgText)
 				Else
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042)     ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Do NOT set existing content as default only for editable
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 				EndIf
@@ -15691,21 +15703,21 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				Local $hCombo = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set readonly combo dropped width if required
 				If $fRead_Only And Abs($iWidth) > $aEdit_Pos[2] Then
-					_SendMessage($hCombo, 0x160, Abs($iWidth))     ; $CB_SETDROPPEDWIDTH
+					_SendMessage($hCombo, 0x160, Abs($iWidth)) ; $CB_SETDROPPEDWIDTH
 				EndIf
 				; Get combo data
-				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")     ; $CB_GETCOMBOBOXINFO
+				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 				$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 				$hTemp_List = DllStructGetData($tInfo, "hList")
 				$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
 
-			Case 3     ; DTP
+			Case 3 ; DTP
 				; Create temp date picker
 				$cGLVEx_EditID = GUICtrlCreateDate($sDTP_Default, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3])
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set format if required
 				If $sDTP_Format Then
-					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format)     ; $DTM_SETFORMATW
+					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format) ; $DTM_SETFORMATW
 				EndIf
 
 		EndSwitch
@@ -15717,15 +15729,15 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		_WinAPI_SetFocus($hTemp_Edit)
 		; Check "select all" flag state
 		If Not $aGLVEx_Data[$iLV_Index][11] Then
-			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)     ; $EM_SETSEL
+			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 		EndIf
 		; Check for auto "drop-down" combo
 		If $fAuto_Drop Then
 			Switch $iEditType
 				Case 2
-					_SendMessage($hCombo, 0x14F, True)     ; $$CB_SHOWDROPDOWN
+					_SendMessage($hCombo, 0x14F, True) ; $$CB_SHOWDROPDOWN
 				Case 3
-					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10)     ; WM_LBUTTONDOWN
+					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10) ; WM_LBUTTONDOWN
 			EndSwitch
 		EndIf
 
@@ -15776,9 +15788,9 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				If $fEdit Then
 					; Set appropriate behaviour
 					If $fClick_Move Then
-						$iKey_Code = 0x02     ; Confirm edit and move to next cell
+						$iKey_Code = 0x02 ; Confirm edit and move to next cell
 					Else
-						$iKey_Code = 0x01     ; Abandon editing process
+						$iKey_Code = 0x01 ; Abandon editing process
 					EndIf
 				EndIf
 				ExitLoop
@@ -15787,7 +15799,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			If $fCombo Then
 
 				; Check for dropdown open and close
-				Switch _SendMessage($hCombo, 0x157)     ; $CB_GETDROPPEDSTATE
+				Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 
 					Case 0
 						; If opened and closed
@@ -15813,7 +15825,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			EndIf
 
 			; Check for valid key pressed
-			For $i = 0 To 2     ; TAB, ENTER, ESC
+			For $i = 0 To 2 ; TAB, ENTER, ESC
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) Then
 					; Set key pressed flag
@@ -15821,7 +15833,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					ExitLoop 2
 				EndIf
 			Next
-			For $i = 3 To 6     ; l/r/u/d with ctrl pressed
+			For $i = 3 To 6 ; l/r/u/d with ctrl pressed
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) And _WinAPI_GetAsyncKeyState(0x11) Then
 					; Set key pressed flag
@@ -15841,13 +15853,13 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 
 		; Check if edit to be confirmed
 		Switch $iKey_Code
-			Case 0x25, 0x26, 0x27, 0x28     ; arrow keys
+			Case 0x25, 0x26, 0x27, 0x28 ; arrow keys
 				; If not standard edit control then abandon edit
 				If $fEdit Then
 					ContinueCase
 				EndIf
 
-			Case 0x02, 0x09, 0x0D     ; Mouse (with Click_Move), TAB, ENTER
+			Case 0x02, 0x09, 0x0D ; Mouse (with Click_Move), TAB, ENTER
 				; Read edit content
 				Local $sItemNewText = GUICtrlRead($cGLVEx_EditID)
 				; Check replacement required
@@ -15877,7 +15889,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		Opt("MouseCoordMode", $iOldMouseOpt)
 
 		; Check edit mode
-		If $iEditMode = 0 Then     ; Single edit
+		If $iEditMode = 0 Then ; Single edit
 			; Exit edit process
 			ExitLoop
 		Else
@@ -15886,7 +15898,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					$iKey_Code = 0x01
 					ContinueCase
 
-				Case 0x00, 0x01, 0x0D     ; Edit lost focus, mouse button outside edit, ENTER pressed
+				Case 0x00, 0x01, 0x0D ; Edit lost focus, mouse button outside edit, ENTER pressed
 					; Wait until key/button no longer pressed
 					_WinAPI_GetAsyncKeyState($iKey_Code)
 					While _WinAPI_GetAsyncKeyState($iKey_Code)
@@ -15895,7 +15907,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x1B     ; ESC pressed
+				Case 0x1B ; ESC pressed
 					; Check Reset-on-ESC mode
 					If $fReset_Edits Then
 						; Reset previous confirmed edits starting with most recent
@@ -15928,7 +15940,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x09, 0x27     ; TAB or right arrow
+				Case 0x09, 0x27 ; TAB or right arrow
 					While 1
 						If $iEditCol <> 0 Then
 							; Set next column
@@ -15963,7 +15975,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x25     ; Left arrow
+				Case 0x25 ; Left arrow
 					While 1
 						If $iEditCol <> 0 Then
 							$aLocation[1] -= 1
@@ -15990,7 +16002,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x28     ; Down key
+				Case 0x28 ; Down key
 					While 1
 						If $iEditRow <> 0 Then
 							; Set next row
@@ -16020,7 +16032,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x26     ; Up key
+				Case 0x26 ; Up key
 					While 1
 						If $iEditRow <> 0 Then
 							$aLocation[0] -= 1
@@ -16264,18 +16276,18 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1     ; Checkbox array
-			If UBound($vAdd, 0) = 2 Or $fMultiRow Then     ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vAdd, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim]
-			Else     ; 1D as columns
+			Else ; 1D as columns
 				ReDim $avArray[$iIndex_Max + 1]
 			EndIf
 
-		Case 2     ; Data array
+		Case 2 ; Data array
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vAdd, 0) = 2 Then     ; 2D add
+			If UBound($vAdd, 0) = 2 Then ; 2D add
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -16293,7 +16305,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					Next
 				Next
 
-			ElseIf $fMultiRow Then     ; 1D add as rows
+			ElseIf $fMultiRow Then ; 1D add as rows
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -16303,7 +16315,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					$avArray[$iIndex_Max + $i][0] = $vAdd[$i]
 				Next
 
-			Else     ; 1D add as columns
+			Else ; 1D add as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				If $bCount Then
@@ -16347,8 +16359,8 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1     ; Checkbox array
-			If UBound($vInsert, 0) = 2 Or $fMultiRow Then     ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vInsert, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				; Resize array
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim]
 
@@ -16357,7 +16369,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$i] = $avArray[$i - 1]
 				Next
 
-			Else     ; 1D as columns
+			Else ; 1D as columns
 
 				; Resize array
 				ReDim $avArray[$iIndex_Max + 1]
@@ -16372,7 +16384,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 			EndIf
 
-		Case 2     ; Data array
+		Case 2 ; Data array
 			; If at end of array
 			If $iIndex > $iIndex_Max - 1 Then
 				__GUIListViewEx_Array_Add($avArray, $vInsert, $fMultiRow, $bCount)
@@ -16380,7 +16392,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 			EndIf
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vInsert, 0) = 2 Then     ; 2D insert
+			If UBound($vInsert, 0) = 2 Then ; 2D insert
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -16406,7 +16418,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					Next
 				Next
 
-			ElseIf $fMultiRow Then     ; 1D insert as rows
+			ElseIf $fMultiRow Then ; 1D insert as rows
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -16422,7 +16434,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$iIndex + $i][0] = $vInsert[$i]
 				Next
 
-			Else     ; 1D insert as columns
+			Else ; 1D insert as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				$avArray[0][0] += 1
@@ -16470,7 +16482,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1     ; Checkbox array
+		Case 1 ; Checkbox array
 			; Move up all elements below the new index
 			For $i = $iIndex To $iIndex_Max - 2
 				$avArray[$i] = $avArray[$i + 1]
@@ -16478,7 +16490,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 			; Redim the Array
 			ReDim $avArray[$iIndex_Max - 1]
 
-		Case 2     ; Data array
+		Case 2 ; Data array
 			; Get size of second dimension
 			Local $iDim2 = UBound($avArray, 2)
 			; Move up all elements below the new index
@@ -16700,8 +16712,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		EndIf
 
 		; Enter the sorted ListView data
-		For $i = 1 To $iItemCount     ; Rows
-			For $j = 0 To $iColumnCount - 1     ; Columns
+		For $i = 1 To $iItemCount ; Rows
+			For $j = 0 To $iColumnCount - 1 ; Columns
 				_GUICtrlListView_SetItemText($hLV, $i - 1, $aListViewContent[$i][$j], $j)
 				; Reset the colour array if colour enabled
 				If $fColourEnabled Then
@@ -16749,8 +16761,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		$aGLVEx_Data[$iLV_Index][18] = $aColourSettings
 
 		; Set flags using ListView index
-		$aGLVEx_Data[0][19] = $iLV_Index     ; SortEvent
-		$aGLVEx_Data[0][22] = 1     ; ColourEvent
+		$aGLVEx_Data[0][19] = $iLV_Index ; SortEvent
+		$aGLVEx_Data[0][22] = 1 ; ColourEvent
 
 	EndIf
 

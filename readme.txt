@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.0 (2019-06-08)
+- Latest version: AtlasServerUpdateUtility_v1.7.1 (2019-06-09)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -289,6 +289,10 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.1 (2019-06-09) Scheduler Hotfix.
+- Fixed: Several bugs with the Event Scheduler. (Thanks to Norlinri for reporting).
+- Added: Minutes option to DestroyWildDinos. (Thanks to Norlinri for requesting).
+
 v1.7.0 (2019-06-08) Hotfixes. Fixed several bugs with new installation. Added config files to backups.
 - Added: Backup now includes the AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files. (Thanks to Linearburn for requesting).
 - Changed: Backup now includes full path for all files for easier restoration of files. 
