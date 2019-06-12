@@ -1,11 +1,8 @@
-v1.7.2^v1.7.2 Added programmable Broadcast Message display duration!
+v1.7.3^v1.7.3 New Grid Configurator Phase I !
+- Added: Grid Configurator Phase I: Easily view and edit common grid files. Phase II will have configurable common Atlas settings.
+- Fixed: If server startup sequence took a long time, the KeepAlive util would restart the util.
+- Fixed: A few minor issues if trying to open menus/windows more than once.
+
+v1.7.2 Added programmable Broadcast Message display duration!
 - Added: You can now set the approximate duration that messages sent in-game will be displayed.
 
-v1.7.1 Scheduler Hotfix.
-- Fixed: Several bugs with the Event Scheduler.
-- Added: Minutes option to DestroyWildDinos.
-
-v1.7.0 Hotfixes. Fixed several New Installation bugs. Added config files to backups.
-- Added: Backup now includes the AtlasServerUpdateUtility.ini and AtlasServerUpdateUtilityGridStartSelect.ini files.
-- Fixed: Line 40293 error due to unassigned Event Scheduler default values with new installation.
-- Fixed: Several bug fixes and improvements for new installations

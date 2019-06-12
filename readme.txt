@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.2 (2019-06-09)
+- Latest version: AtlasServerUpdateUtility_v1.7.3 (2019-06-10)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -15,7 +15,7 @@ Sections: (Use Search CTRL-F to quickly access)
 - Works with multiple server PC systems (See "HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS" below)
 - Optionally automatically check for mod updates, install them, announce the update to in-Game/Discord/Twitch, and restart the server. (Looks for ModIDS in ServerGrid.json only)
 - Automatically imports available server data from ServerGrid.json & GameServerUser.ini files (if enabled).
-- Optionally start selected gri﻿d servers only.
+- Optionally start selected grid servers only.
 - GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
 - Send RCON commands/messages to select servers only.
 - Send custom command lines PER GRID during server startup.
@@ -72,7 +72,7 @@ CONGRATS! Your server should be up-to-date and running!
  INSTRUCTIONS
 -------------- 
 To shut down your server:
-- Click on the AtlasServerUpdateUtility (phoenix) icon in bottom right taskbar and select EXIT.
+- Click on the AtlasServerUpdateUtility (phoenix) icon in bottom right task bar and select EXIT.
 
 To restart your server:
 - Run AtlasServerUpdateUtility.exe
@@ -137,7 +137,6 @@ WORKAROUND:
 - Cross chat (I would probably use an existing cross chat util as a "plug in" to this util)
 - 7zip backups
 - CPU Affinity (Reports state that Atlas itself does a job with CPU, though, so not likely add this one)
-- GUI interface (will take a while to get done)
 - Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
    (Not as great as it sounds... when someone logs off of a non-home server, that server would have to remain online. Eventually, all servers would need to remain online).
 
@@ -167,7 +166,7 @@ To create a Discord webhook:
         Server AltSaveDirectoryName(s) (comma separated. Leave blank for default 00,01,10, etc) ###=	
             a. Type in the folder names of ALL servers here, including folders for remote servers.
               (This util pairs each folder entry to each server listed in ServerGrid.json, therefore even folders not used on the local server need to be entered) *OR*
-            b. Leave this blank [recommended] and change your existing folders to match this util's default assignment: (00 10 20 30 01 02 03 etc.)
+            b. Leave this blank [recommended] and change your existing folders to match this utility's default assignment: (00 10 20 30 01 02 03 etc.)
 - Run the utility again to create the AtlasServerUpdateUtilityGridStartSelect.ini file.  This file is used to determine which grid servers start on the local server.
     - Edit this file. Type "no" to any of the grids being run on remote servers. The local server will only run the grids marked as "yes".
 
@@ -272,14 +271,14 @@ It then repeats this process for the remainder of the servers listed in the Serv
 -------------------------------
 At very first run of the util, all mods will be downloaded and installed. This is necessary to create temp file(s) used to determine current version of each mod.
 - The util downloads another util I created, AtlasModDownloader.exe, to perform the downloading and updating. (Python was much better at uncompressing the .z files than AutoIT).
-- Each mod is updated one-at-a-time. AtlasModDownloader uses SteamCMD to download new mod content, move the folder content to ../content/mods folder, uncompress the .z files, then delete the SteamCMD cache folder.
+- AtlasModDownloader uses SteamCMD to download new mod content, move the folder content to ../content/mods folder, uncompress the .z files, then delete the SteamCMD cache folder.
 - The app_manifest file created by SteamCMD will then be renamed and moved to the Util folder. This what my util uses to determine current installed version.
 
 For update checks:
 - The util goes to this website: http://steamcommunity.com/sharedfiles/filedetails/changelog/[MODID] to check for latest version.
 - It then reads the mod_[MODID]_appworkshop.tmp (created each time a mod is downloaded) and compares the two. If the same, it skips.
-- If different buildid, it reruns the AtlasModDownloader.exe program again which redownloads and installs the mod.
-- It then makes any announcements (ingame, Discord, Twitch) and will restart all servers when the announcement times are fulfilled.
+- If different buildid, it reruns the AtlasModDownloader.exe program again which re-downloads and installs the mod.
+- It then makes any announcements (In-Game, Discord, Twitch) and will restart all servers when the announcement times are fulfilled.
 
 ----------------------------
  CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above) or http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
@@ -289,6 +288,11 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.3 (2019-06-11) New Grid Configurator Phase I !
+- Added: Grid Configurator Phase I: Easily view and edit common grid files. Phase II will have configurable common Atlas settings.
+- Fixed: If server startup sequence took a long time, the KeepAlive util would restart the util.
+- Fixed: A few minor issues if trying to open menus/windows more than once.
+
 v1.7.2 (2019-06-09) Added programmable Broadcast Message display duration!
 - Added: You can now set the approximate duration that messages sent in-game will be displayed.
          (The util adds extra spaces before and after the message which causes Atlas to display the message longer). (Thanks to Norlinri for requesting).
@@ -388,7 +392,7 @@ v1.6.4 (2019-05-28)
 	- A temporary basic schedule is displayed showing scheduled events in order.
 
 v1.6.3 (2019-05-21) Quick Fix for Line error and Selecting grids on main GUI
-- Fixed: Selecting grids on main GUI no longer has popup window.
+- Fixed: Selecting grids on main GUI no longer has pop up window.
 - Fixed: For about 30 minutes, I had uploaded the wrong test version which caused a line error.
 
 v1.6.2 (2019-05-20) Minor "feel good" tweaks.
@@ -602,22 +606,22 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Added: Option to assign RCON IP so that port forwarding of RCON ports is not necessary.
 
 (2019-02-25) v1.3.1
-- Changed 'Ocean' to 'ocean' in the server startup commandline.
+- Changed: 'Ocean' to 'ocean' in the server startup commandline.
 
 (2019-02-24) v1.3.0
 - Added: Mod support!! Optionally automatically check for mod updates, install them, announce the update, and restart the server.
 - Added: External script execution for mod updates (Runs the external script when mod update discovered... while server is still running)
 - Added: External script execution: Option to "Wait for script to finish before continuing".
-- Minor log file and notification window improvements.
+- Changed: Minor log file and notification window improvements.
 
 (2019-02-24) v1.2.5
 - Fixed: Error when manually assigning AltSaveFolders (Thanks UPPERKING [PlayAtlas.com] for reporting)
-- Clarified two .ini entries.
-- Log file improvements
+- Changed: Clarified two .ini entries.
+- Changed: Log file improvements
 
 (2019-02-23) v1.2.4
 - Fixed: The utility no longer checks for GameUserSettings.ini on disabled grid servers (Thanks UPPERKING [PlayAtlas.com] for reporting)
-- Removed log entries for unused grid servers.
+- Removed: log entries for unused grid servers.
 - Added: Optionally use a different redis config file
 
 
@@ -625,23 +629,23 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Fixed: "Atlas extra commandline parameters" always put a [space] at beginning of command. If "Atlas extra commandline parameters" starts with ? , the util will remove the [space]. (Thanks Doublee [Discord] for reporting)
 
 (2019-02-22) v1.2.2
-- Fixed (again): "Line 10255" error. Occurs when Steamcmd fails to provide latest server version during update check. The verification process was improved.
+- Fixed: (again): "Line 10255" error. Occurs when Steamcmd fails to provide latest server version during update check. The verification process was improved.
 - Fixed: Problem attaining Query Port from ServerGrid.json if more entries containing "ip" were at front of file. (Thanks Doublee [Discord] for reporting)
 - Fixed: Removed "No GameUserSettings.ini" warning during new install.
 
 (2019-02-21) v1.2.1
 - Fixed: Extra space and quotation mark at end of Atlas server command line. (Thanks to Minku [Discord] and Doublee [Discord] for noticing and reporting error)
-- Added some instructions to this readme.txt
+- Added: some instructions to this readme.txt
 
 (2019-02-21) v1.2.0
-- Added option to start selected grid servers only.
+- Added: option to start selected grid servers only.
 - Shutdown sequence now closes as soon as servers have completed saving world and continues to send "DoExit" command every second until servers shutdown.
-- Added user-defined maximum time to wait for SaveWorld before forced shutdown (taskkill) of servers.
-- Added more info to startup and shutdown sequence windows.
+- Added: user-defined maximum time to wait for SaveWorld before forced shutdown (task-kill) of servers.
+- Added: more info to startup and shutdown sequence windows.
 
 (2019-02-21) v1.1.5
-- Added user-defined delay between grid server startups.
-- Added ability to import RCON ports from GameServerUser.ini on existing servers. (Thanks to Minku [Discord] for the suggestion!)
+- Added: user-defined delay between grid server startups.
+- Added: ability to import RCON ports from GameServerUser.ini on existing servers. (Thanks to Minku [Discord] for the suggestion!)
 - Fixed: Error when Steamcmd fails to provide latest server version during update check.
 - Fixed: No longer need to delete RCON ports and AltSaveDir during new installation. 
 - Eliminated: "Failed to start at least twice within 1 minute" warning message. 
@@ -651,25 +655,25 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Hotfix - Temporarily disabled the "failed to start at least twice within 1 minute" warning message.
 
 (2019-02-17) v1.1.3
-- Added option to disable redis-server.exe autostart & keep-alive.
-- Added error message if number of AltSaveDirectory entries does not match number of grid servers. 
+- Added: option to disable redis-server.exe autostart & keep-alive.
+- Added: error message if number of AltSaveDirectory entries does not match number of grid servers. 
 
 (2019-02-17) v1.1.2
-- Now closes redis-server.exe AFTER shutting down Atlas servers (prevents popups when servers do not shut down properly)
-- Added error message if number of RCON port entries does not match number of grid servers. 
-- Added error message if Atlas servers do not shut down properly AND multi-home IP is NOT blank.
+- Now closes redis-server.exe AFTER shutting down Atlas servers (prevents pop ups when servers do not shut down properly)
+- Added: error message if number of RCON port entries does not match number of grid servers. 
+- Added: error message if Atlas servers do not shut down properly AND multi-home IP is NOT blank.
 - When the .ini has changed, the utility will now give a brief description of what changes were added to the .ini.
 
 (2019-02-17) v1.1.1
 - Fixed: CRITICAL ERROR that caused "Assertion Failed: usGamePort != usQueryPort" error. I had reversed the GamePort & Queryport.  (Thanks to Sorori (Discord) for the help!)
 
 (2019-02-16) v1.1.0
-- Added *theoretical* support for up to 100 grids (10x10).
+- Added: *theoretical* support for up to 100 grids (10x10).
 - Automatically imports available server data from ServerGrid.json.
-- Added more information to log file and popup info screens. 
+- Added: more information to log file and pop up info screens. 
 
 (2019-02-16) v1.0.4
-- Added error message if Atlas Server (ShooterGameServer.exe) fails to start twice within 1 minute.
+- Added: error message if Atlas Server (ShooterGameServer.exe) fails to start twice within 1 minute.
 
 (2019-02-15) v1.0.3
 - Fixed: Line 8918 Variable used without being declared (Yep.. another one)
@@ -686,7 +690,7 @@ v1.6.0 (2019-05-17) Several minor improvements and new "KeepUtilAlive", "Force u
 - Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
 - Automatically keeps server updated.
 - Announce server updates and/or restarts in game, on Discord and Twitch.
-- KeepServerAlive: Detects server crashes (checks for AtlasGame.exe and telnet response) and will restart the server.
+- KeepServerAlive: Detects server crashes (checks for AtlasGame.exe and RCON response) and will restart the server.
 - User-defined scheduled reboots.
 - Remote restart (via web browser).
 - Run multiple instances of AtlasServerUpdateUtility to manage multiple servers.
