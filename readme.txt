@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.3 (2019-06-10)
+- Latest version: AtlasServerUpdateUtility_v1.7.4 (2019-06-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,9 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.4 (2019-06-12) Hotfix: Fixed Grid Configurator alignment when more than 30 grids are used.
+- Fixed: Grid Configurator alignment when more than 30 grids are used.
+
 v1.7.3 (2019-06-11) New Grid Configurator Phase I !
 - Added: Grid Configurator Phase I: Easily view and edit common grid files. Phase II will have configurable common Atlas settings.
 - Fixed: If server startup sequence took a long time, the KeepAlive util would restart the util.
