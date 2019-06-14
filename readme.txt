@@ -288,6 +288,20 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.5 (2019-06-14) Greatly reduced Main Window update time. Several bug fixes and optimizations. 
+NOTICE!! Config folder was renamed from "\Config" to "\_Config" to place config folder at top.
+- Changed: Config folder was renamed from "\Config" to "\_Config" to place config folder at top.
+- Added: Util now runs all update checks when started, but skips them if util is restarted & not due for an update check yet. (Thanks to Doublee for reporting issues when skipping update check).
+- Added: If 0 players are online, announcements are skipped during server restarts. (No need to wait to restart/update when empty!) (Thanks to Doublee for requesting).
+- Added: "Previous_Versions" Folder: On first ever run of this version, all older AtlasServerUpdateUtility_v(x).exe files will be moved to "Previous_Versions" folder and only the previous version will be moved with future auto-updates. (Thanks to Doublee and others for requesting).
+- Fixed: During backups, Discord & Twitch announcements were not working correctly. (Thanks to Psychoboy for reporting).
+- Changed: Faster main window updates when servers are disabled.
+- Changed: Added more color to buttons: Red=Server Reboot, Yellow=UTIL reboot, Green=Server Start.
+- Added: Every time when checking for Atlas updates via steamcmd, the util now checks for valid install of steamcmd. (Thanks to Inity for discovering).
+- Added: More detailed information in status indicator during Main Window Updates.
+- Fixed: The Atlas Server Version in window title now updates with all server restarts. (Thanks to Inity & AceMan for reporting).
+- Fixed: Util line error if Remote Restart Port was <10000 and another used port ended in same port #.  Ex. RR Port 8000, but if another used port was 18000 or 28000, etc. , the util would error.
+
 v1.7.4 (2019-06-12) Hotfix: Fixed Grid Configurator alignment when more than 30 grids are used.
 - Fixed: Grid Configurator alignment when more than 30 grids are used.
 
