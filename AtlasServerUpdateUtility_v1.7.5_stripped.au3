@@ -35108,7 +35108,7 @@ ConfigEdit($aSplashStartUp)
 ElseIf $tMB = 2 Then
 EndIf
 Else
-Local $tMsg = "NOTICE!!! As of v1.6.9 !!! " & @CRLF & @CRLF & "- The AtlasServerUpateUtility.ini and " & @CRLF & "AtlasServerUpateUtilityGridSelect.ini files" & @CRLF & "were moved to ""\_Config"" folder ..."
+Local $tMsg = "NOTICE!!! As of v1.7.5 !!! " & @CRLF & @CRLF & "- The AtlasServerUpateUtility.ini and " & @CRLF & "AtlasServerUpateUtilityGridSelect.ini files" & @CRLF & "were moved to ""\_Config"" folder ..."
 MsgBox(0, $aUtilName, $tMsg, 15)
 EndIf
 If $aUpdateUtil > 0 Then AdlibRegister("RunUtilUpdate", $aUpdateUtil * 3600000)

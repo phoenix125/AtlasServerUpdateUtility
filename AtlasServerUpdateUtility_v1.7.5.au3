@@ -1101,7 +1101,7 @@ If $xServerIP[0] = "1.2.3.4" Then
 	ElseIf $tMB = 2 Then ; CANCEL
 	EndIf
 Else
-	Local $tMsg = "NOTICE!!! As of v1.6.9 !!! " & @CRLF & @CRLF & _
+	Local $tMsg = "NOTICE!!! As of v1.7.5 !!! " & @CRLF & @CRLF & _
 			"- The AtlasServerUpateUtility.ini and " & @CRLF & "AtlasServerUpateUtilityGridSelect.ini files" & @CRLF & _
 			"were moved to ""\_Config"" folder ..."
 	MsgBox(0, $aUtilName, $tMsg, 15)
