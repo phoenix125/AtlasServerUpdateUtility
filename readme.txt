@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.4 (2019-06-12)
+- Latest version: AtlasServerUpdateUtility_v1.7.6 (2019-06-14)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,8 +288,14 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.6 (2019-06-14) Minor Hotfix. Added Restart Util and Servers buttons to most editable windows.
+- Fixed: v1.7.5 moved the main .exe file to the \Previous_Versions folder. (Thanks to Doublee and Psychoboy for reporting).
+- Added: Restart Util and Servers buttons to most editable windows.
+- Changed: All Grids: Send Msg and Send RCON now ask whether to send to Local only or Local & Remote grids (if remote grids present). (Thanks to Psychoboy for requesting).
+
 v1.7.5 (2019-06-14) Greatly reduced Main Window update time. Several bug fixes and optimizations. 
 NOTICE!! Config folder was renamed from "\Config" to "\_Config" to place config folder at top.
+- Added: User-definable number of Online Players RCON retries. Default: 3 retries.
 - Changed: Config folder was renamed from "\Config" to "\_Config" to place config folder at top.
 - Added: Util now runs all update checks when started, but skips them if util is restarted & not due for an update check yet. (Thanks to Doublee for reporting issues when skipping update check).
 - Added: If 0 players are online, announcements are skipped during server restarts. (No need to wait to restart/update when empty!) (Thanks to Doublee for requesting).
