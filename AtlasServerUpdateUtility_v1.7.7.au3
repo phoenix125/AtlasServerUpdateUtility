@@ -4974,7 +4974,7 @@ Func ImportRCON($zServerDirLocal, $zServerAltSaveDir, $zServerGridTotal, $zStart
 						MsgBox($MB_OK, $aUtilityVer, $aErrorMsg & @CRLF & "Please add RCONEnabled=True and RCONPort=[port] to GameUserSettings.ini" & @CRLF & "OR add RCON ports to " & $aUtilName & ".ini and restart " & $aUtilName & ".")
 						_ExitUtil()
 					EndIf
-					LogWrite("", " Server: " & _ServerNamingScheme($i, $aNamingScheme) & " , RCON Port:" & $hRCON[$i])
+					LogWrite("", " Server: " & _ServerNamingScheme(($i - 1), $aNamingScheme) & " , RCON Port:" & $hRCON[$i])
 				EndIf
 			EndIf
 			FileClose($hFileOpen)
