@@ -295,8 +295,11 @@ v1.7.7 (2019-06-20) Grid Configurator Phase II Done!
 
 Grid Configurator Notes:
 - Parameters can be modified and shared to fit your needs.
-- File: "\_Config\GridParameters.csv". Edit with a spreadsheet (Excel) for easy view or use any text editor. Comma separated values.
-- File key: "[Highlight],[ParamName],[DefaultValue],[File],[HeadingInFile],[Description]"
+- To revert back to default values (the ones I put in), just delete or rename GridParameters.csv and the util will create the default one.
+- Add all your custom parameters to easily view the parameter settings on all your grids.
+- Parameter text in green=has a value set.  Gray=No value set for that grid.
+  File: "\_Config\GridParameters.csv". Edit with a spreadsheet (Excel) for easy view or use any text editor. Comma separated values.
+  File key: "[Highlight],[ParamName],[DefaultValue],[File],[HeadingInFile],[Description]"
    Example: "True,Message,Welcome to your favorite Atlas server!,3,[MessageOfTheDay],Set message of the day (MOTD)"
 
 v1.7.6 (2019-06-14) Minor Hotfix. Added Restart Util and Servers buttons to most editable windows.
