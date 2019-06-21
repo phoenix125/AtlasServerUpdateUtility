@@ -14391,13 +14391,16 @@ Func _ParamFileDefault()
 			"------------------------------------------" & @CRLF & _
 			" AtlasServerUpdateUtility Grid Parameters" & @CRLF & _
 			"------------------------------------------" & @CRLF & _
-			"[Highlight/Active] [ParamName] [Value] [File] [HeadingInFile] [Description]" & @CRLF & _
+			" Tip: Edit with a spreadsheet (Excel) for easy view/edit or use any text editor. Comma separated values !" & @CRLF & _
+			" Key: [Highlight] [ParamName] [Value] [File] [HeadingInFile] [Description]" & @CRLF & _
+			"    [Highlight] Highlight / Select parameter" & @CRLF & _
 			"    [ParamName] Name of Parameter" & @CRLF & _
-			"        [Value] Value assigned to parameter" & @CRLF & _
-			"         [File] (0) Command line entry  (1) ServerGrid  (2) GameUserSettings.ini  (3) Game.ini  (4) Engine.ini" & @CRLF & _
+			" [DefaultValue] Default value for parameter" & @CRLF & _
+			"         [File] File the paramater is in. (0)Command line entry  (1)ServerGrid.json (2)GameUserSettings.ini (3)Game.ini (4)Engine.ini" & @CRLF & _
 			"[HeadingInFile] The heading the parameter is under / follows" & @CRLF & _
 			"  [Description] Description displayed when hovering mouse over parameter name" & @CRLF & _
-			"- ! WARNING ! - NO COMMAS allowed in any part of any parameter.  It will cause glitches." & @CRLF & _
+			"------------------------------------------" & @CRLF & _
+			"  ! WARNING !   NO COMMAS allowed in any part of any parameter.  It will cause glitches." & @CRLF & _
 			"------------------------------------------" & @CRLF & _
 			"[Begin Parameters]" & @CRLF & _
 			"True,NoBattlEye,True,0,n/a,Run server without BattleEye" & @CRLF & _
@@ -14405,7 +14408,7 @@ Func _ParamFileDefault()
 			"True,ServerGameLog,True,0,n/a,Enable Server Admin Logs (including RCON support) use RCON command ?getgamelog? to print 100 entries at a time also outputs to dated file in in ?\Logs? adjust max length of RCON buffer with commandline: ??RCONServerGameLogBuffer=600?" & @CRLF & _
 			"True,bClampHomeServerXP,True,3,[/Script/ShooterGame.ShooterGameMode],Remove Level cap on Freeport / Home servers" & @CRLF & _
 			"True,ClampHomeServerXPLevel,8,3,[/Script/ShooterGame.ShooterGameMode],Level cap on Freeport / Home servers" & @CRLF & _
-			"False,XPMultiplier,1,2,[ServerSettings],No description." & @CRLF & _
+			"False,XPMultiplier,1,2,[ServerSettings],General XP multiplier." & @CRLF & _
 			"False,HarvestAmountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for yields from all harvesting activities (chopping down trees picking berries carving carcasses mining rocks etc.). Higher values increase the amount of materials harvested with each strike." & @CRLF & _
 			"False,AllowAnyoneBabyImprintCuddle,False,2,[ServerSettings],""Use this if you want ANYONE to be able to """"take care"""" of a Baby Dino (cuddle etc.) not just whomever Imprinted on it.""" & @CRLF & _
 			"False,AllowHideDamageSourceFromLogs,False,2,[ServerSettings],Allows the hiding of damage sources in tribe logs." & @CRLF & _
