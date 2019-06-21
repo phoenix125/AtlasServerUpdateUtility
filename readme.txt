@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.6 (2019-06-14)
+- Latest version: AtlasServerUpdateUtility_v1.7.7 (2019-06-20)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,17 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.7 (2019-06-20) Grid Configurator Phase II Done!
+- Added: Finished the Grid Configurator!  You can now quickly see/edit popular parameters and copy them to all/some grids.
+- Fixed: KeepUtilAlive could activate during grid startups.
+- Fixed: If no players are online, now makes a one-time announce to Discord/Twitch before restarting servers (to alert players wanting to connect).
+
+Grid Configurator Notes:
+- Parameters can be modified and shared to fit your needs.
+- File: "\_Config\GridParameters.csv". Edit with a spreadsheet (Excel) for easy view or use any text editor. Comma separated values.
+- File key: "[Highlight],[ParamName],[DefaultValue],[File],[HeadingInFile],[Description]"
+   Example: "True,Message,Welcome to your favorite Atlas server!,3,[MessageOfTheDay],Set message of the day (MOTD)"
+
 v1.7.6 (2019-06-14) Minor Hotfix. Added Restart Util and Servers buttons to most editable windows.
 - Fixed: v1.7.5 moved the main .exe file to the \Previous_Versions folder. (Thanks to Doublee and Psychoboy for reporting).
 - Added: Restart Util and Servers buttons to most editable windows.

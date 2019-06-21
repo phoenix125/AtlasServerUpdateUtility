@@ -1,14 +1,9 @@
-v1.7.6^v1.7.6 Minor Hotfix. Added more Restart Util and Servers buttons.
+v1.7.7^v1.7.7 Grid Configurator Phase II Done!
+- Added: Finished the Grid Configurator!  You can now quickly see/edit popular parameters and copy them to all/some grids.
+- Fixed: KeepUtilAlive could activate during grid startups.
+- Fixed: If no players are online, now makes a one-time announce to Discord/Twitch before restarting servers (to alert players wanting to connect).
+
+v1.7.6 Minor Hotfix. Added more Restart Util and Servers buttons.
 - Fixed: v1.7.5 moved the main .exe file to the \Previous_Versions folder.
 - Added: Restart Util and Servers buttons to most editable windows.
 - Changed: All Grids: Send Msg and Send RCON now ask whether to send to Local only or Local & Remote grids (if remote grids present).
-
-
-v1.7.5 Greatly reduced Main Window update time. Several bug fixes and optimizations. 
-- Changed: Config folder was renamed from "\Config" to "\_Config" to place config folder at top.
-- Added: "Previous_Versions" Folder: On first ever run of this version, all older AtlasServerUpdateUtility_v(x).exe files will be moved to "Previous_Versions" folder and only the previous version will be moved with future auto-updates. (Thanks to Doublee and others for requesting).
-- Added: Util now runs all update checks when started, but skips them if util is restarted & not due for an update check yet.
-- Added: If 0 players are online, announcements are skipped during server restarts. 
-- Fixed: During backups, Discord & Twitch announcements were not working correctly.
-- Changed: Added more color to buttons: Red=Server Reboot, Yellow=UTIL reboot, Green=Server Start.
-- Fixed: The Atlas Server Version in window title now updates with all server restarts.
