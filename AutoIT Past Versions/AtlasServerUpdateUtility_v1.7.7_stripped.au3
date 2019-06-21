@@ -47217,7 +47217,7 @@ If StringInStr($t_Array[$t_i], $t_Parameter & "=") = 0 Then
 $t_OldParam = "None"
 Else
 $t_OldParam = $t_Array[$t_i]
-$t_Pos = $i
+$t_Pos = $t_i
 ExitLoop
 EndIf
 Next
@@ -47249,7 +47249,7 @@ _ArrayInsert($t_Array, 0, $gParamTFHeading[$t_ParamNum])
 EndIf
 Else
 For $t_i = 0 To (UBound($t_Array) - 1)
-If StringInStr($t_Array[$i], $gParamNumHeading[$t_ParamNum]) = 0 Then
+If StringInStr($t_Array[$t_i], $gParamNumHeading[$t_ParamNum]) = 0 Then
 Else
 $t_Pos = $t_i + 1
 ExitLoop

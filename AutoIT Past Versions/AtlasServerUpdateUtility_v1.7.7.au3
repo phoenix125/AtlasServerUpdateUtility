@@ -14607,10 +14607,11 @@ Func _ReplaceParamInArray($t_Array, $t_Param, $t_ParamNum = -1, $t_TForNum = "TF
 			$t_OldParam = "None"
 		Else
 			$t_OldParam = $t_Array[$t_i]
-			$t_Pos = $i
+			$t_Pos = $t_i
 			ExitLoop
 		EndIf
 	Next
+;~ 	MsgBox(0,"Kim","$t_pos:" & $t_pos) ; Kim!!!
 	If $t_Pos = -1 Then
 		If $t_Parameter = "RCONPort" Or $t_Parameter = "ServerPVE" Then
 			For $t_i = 0 To (UBound($t_Array) - 1)
@@ -14618,6 +14619,7 @@ Func _ReplaceParamInArray($t_Array, $t_Param, $t_ParamNum = -1, $t_TForNum = "TF
 				Else
 					$t_Pos = $t_i + 1
 					_ArrayInsert($t_Array, $t_Pos)
+;~ 					$t_Array[$t_Pos] = " " ; Kim
 					ExitLoop
 				EndIf
 			Next
@@ -14639,7 +14641,7 @@ Func _ReplaceParamInArray($t_Array, $t_Param, $t_ParamNum = -1, $t_TForNum = "TF
 				EndIf
 			Else
 				For $t_i = 0 To (UBound($t_Array) - 1)
-					If StringInStr($t_Array[$i], $gParamNumHeading[$t_ParamNum]) = 0 Then
+					If StringInStr($t_Array[$t_i], $gParamNumHeading[$t_ParamNum]) = 0 Then
 					Else
 						$t_Pos = $t_i + 1     ; Position of header
 						ExitLoop
@@ -14656,6 +14658,7 @@ Func _ReplaceParamInArray($t_Array, $t_Param, $t_ParamNum = -1, $t_TForNum = "TF
 		EndIf
 	Else
 	EndIf
+;~ 	MsgBox(0,"Kim","t_Pos:" & $t_Pos & "Param=" & $t_Param) ; Kim!!
 	If $t_Pos > -1 Then $t_Array[$t_Pos] = $t_Param
 	If $t_OldParam <> $t_Param Then
 		LogWrite("", " [Param] Changed Parameter in Server " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " [" & $t_File & "] From:" & $t_OldParam & " to " & $t_Param)
