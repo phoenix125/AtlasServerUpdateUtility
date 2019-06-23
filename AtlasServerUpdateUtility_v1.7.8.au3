@@ -5021,7 +5021,7 @@ Func ImportRCON($zServerDirLocal, $zServerAltSaveDir, $zServerGridTotal, $zStart
 						MsgBox($MB_OK, $aUtilityVer, $aErrorMsg & @CRLF & "Please add RCONEnabled=True and RCONPort=[port] to GameUserSettings.ini" & @CRLF & "OR add RCON ports to " & $aUtilName & ".ini and restart " & $aUtilName & ".")
 						_ExitUtil()
 					EndIf
-					LogWrite("", " Server: " & _ServerNamingScheme($i, $aNamingScheme) & " , RCON Port:" & $hRCON[$i])
+					LogWrite("", " Server: " & _ServerNamingScheme($i - 1, $aNamingScheme) & " , RCON Port:" & $hRCON[$i])
 				EndIf
 			EndIf
 			FileClose($hFileOpen)
@@ -8161,7 +8161,7 @@ Func F_SendMessage($tAllorSel = "ask")
 				_Splash("Broadcast Message canceled. Resuming utility . . .", 2000)
 			Else
 				$tMsg = "broadcast " & $tMsg
-				If $tMB = 6 Then  ; Yes
+				If $tMB = 6 Then ; Yes
 					LogWrite(" [Remote RCON] Sending message to ALL grids (Local and Remote):" & $tMsg)
 					Local $tSplash = _Splash("Sending message to ALL grids: " & @CRLF & $tMsg)
 ;~ 					$tMsg = SendMessageAddDuration($tMsg)
@@ -8251,7 +8251,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "")
 				LogWrite(" [Remote RCON] Send RCON command canceled by user.")
 				_Splash("Send RCON command canceled. Resuming utility . . .", 2000)
 			Else
-				If $tMB = 6 Then  ; Yes
+				If $tMB = 6 Then ; Yes
 					LogWrite(" [Remote RCON] Sending RCON command to ALL grids (Local and Remote):" & $tMsg)
 					Local $tSplash = _Splash("Sending RCON command to ALL grids: " & @CRLF & $tMsg)
 					For $i = 0 To ($aServerGridTotal - 1)
@@ -9705,10 +9705,10 @@ Func GUIUpdateQuick()
 			$aServerPID[$i] = ""
 			If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
 				If $aCloseServerTF Then
-					$tMainLVW[$i][11] = "Starting"     ; Status
+					$tMainLVW[$i][11] = "Starting" ; Status
 					LogWrite(" Server [" & _ServerNamingScheme($i, $aNamingScheme) & "] PID [" & $aMainLVW[$i][10] & "] """ & $xServerNames[$i] & """ restarting.")
 				Else
-					$tMainLVW[$i][11] = "CRASHED"     ; Status
+					$tMainLVW[$i][11] = "CRASHED" ; Status
 					LogWrite(" WARNING!!! Server [" & _ServerNamingScheme($i, $aNamingScheme) & "] PID [" & $aMainLVW[$i][10] & "] """ & $xServerNames[$i] & """ CRASHED, Restarting server")
 				EndIf
 			Else
@@ -9720,9 +9720,9 @@ Func GUIUpdateQuick()
 						$tMainLVW[$i][11] = "Running" ; Status #008000
 					Else ; Remote Server without ListPlayers response (offline)
 						If $aPollRemoteServersYN = "yes" Then
-							$tMainLVW[$i][11] = "Offline"     ; Status
+							$tMainLVW[$i][11] = "Offline" ; Status
 						Else
-							$tMainLVW[$i][11] = "Poll Off"     ; Status
+							$tMainLVW[$i][11] = "Poll Off" ; Status
 						EndIf
 					EndIf
 				EndIf
@@ -11408,7 +11408,7 @@ Func GridConfiguratorGUI($tGridClicked)
 		Local $tX = 508, $tY = $gY + 57
 		Local $G_T1_G_LocalRemote = GUICtrlCreateGroup("", $tX, $tY, 115, 41) ; 372/57
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $G_T1_R4_PVE = GUICtrlCreateRadio("PVE", $tX + 8, $tY + 16, 40, 17)  ; 380/73
+		Global $G_T1_R4_PVE = GUICtrlCreateRadio("PVE", $tX + 8, $tY + 16, 40, 17) ; 380/73
 		GUICtrlSetOnEvent(-1, "G_T1_R4_PVE")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		Global $G_T1_R4_PVP = GUICtrlCreateRadio("PVP", $tX + 62, $tY + 16, 40, 17) ; 436/73
@@ -12352,7 +12352,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 2 Then     ; Tab 3 Game.ini
+	If $G_LastTab = 2 Then ; Tab 3 Game.ini
 		If $tG_T3_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to Game.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12373,7 +12373,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 3 Then     ; Tab 4 Engine.ini
+	If $G_LastTab = 3 Then ; Tab 4 Engine.ini
 		If $tG_T4_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to Engine.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12394,7 +12394,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 4 Then     ; Tab 5 ServerGrid.json
+	If $G_LastTab = 4 Then ; Tab 5 ServerGrid.json
 		If $tG_T5_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to ServerGrid.json?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12415,7 +12415,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 5 Then     ; Tab 6 DefaultGUS.ini
+	If $G_LastTab = 5 Then ; Tab 6 DefaultGUS.ini
 		If $tG_T6_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultGameUserSettings.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12436,7 +12436,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 6 Then     ; Tab 7 DefaultGame.ini
+	If $G_LastTab = 6 Then ; Tab 7 DefaultGame.ini
 		If $tG_T7_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultGame.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12457,7 +12457,7 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 7 Then         ; Tab 8 DefaultEngine.ini
+	If $G_LastTab = 7 Then ; Tab 8 DefaultEngine.ini
 		If $tG_T8_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultEngine.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
@@ -12609,14 +12609,14 @@ Func G_TA_B_RestartServers()
 			"Click (CANCEL) to cancel."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 30)
-	If $tMB = 6 Then     ; (YES)
+	If $tMB = 6 Then ; (YES)
 		F_RemoteRestart()
 	ElseIf $tMB = 7 Then
 		F_RestartNow(False)
 	ElseIf $tMB = 2 Then
 		LogWrite("", " [Server] Restart Server canceled by user.")
 		_Splash("Restart cancelled.", 2000)
-	ElseIf $tMB = -1 Then     ; Timeout
+	ElseIf $tMB = -1 Then ; Timeout
 		LogWrite("", " [Server] Restart Server canceled by user.")
 		_Splash("Restart cancelled.", 2000)
 	EndIf
@@ -13060,7 +13060,7 @@ Func G_T2_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T2_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13098,7 +13098,7 @@ Func G_T2_B_CopyAllGrids()
 			"Click (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T2_E_Edit)
@@ -13111,12 +13111,12 @@ Func G_T2_B_CopyAllGrids()
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
 					_BackupFile($tFileTemp, "", False)
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
-					If $tMB = 6 Then _Update_GUS_File($tFileTemp, $i)     ; NO (Copy AS IS)
+					If $tMB = 6 Then _Update_GUS_File($tFileTemp, $i) ; NO (Copy AS IS)
 				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T2_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -13207,7 +13207,7 @@ Func G_T3_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T3_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13245,7 +13245,7 @@ Func G_T3_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T3_E_Edit)
@@ -13263,7 +13263,7 @@ Func G_T3_B_CopyAllGrids()
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T3_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -13354,7 +13354,7 @@ Func G_T4_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T4_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13392,7 +13392,7 @@ Func G_T4_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T4_E_Edit)
@@ -13410,7 +13410,7 @@ Func G_T4_B_CopyAllGrids()
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T4_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -13501,7 +13501,7 @@ Func G_T5_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T5_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13512,7 +13512,7 @@ Func G_T5_B_Replace()
 		_Splash("Replace canceled.", 1500)
 	EndIf
 EndFunc   ;==>G_T5_B_Replace
-Func G_T5_B_Find()     ; Kim !!!
+Func G_T5_B_Find() ; Kim !!!
 	$tTxt = InputBox($aUtilName, "Enter text to find", "", "", -1, 125)
 	If $tTxt = "" Then
 	Else
@@ -13581,7 +13581,7 @@ Func G_T6_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T6_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13618,7 +13618,7 @@ Func G_T6_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T6_E_Edit)
@@ -13636,7 +13636,7 @@ Func G_T6_B_CopyAllGrids()
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T6_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -13727,7 +13727,7 @@ Func G_T7_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T7_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13764,7 +13764,7 @@ Func G_T7_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T7_E_Edit)
@@ -13782,7 +13782,7 @@ Func G_T7_B_CopyAllGrids()
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T7_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -13873,7 +13873,7 @@ Func G_T8_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then     ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T8_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -13910,7 +13910,7 @@ Func G_T8_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then     ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T8_E_Edit)
@@ -13928,7 +13928,7 @@ Func G_T8_B_CopyAllGrids()
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then     ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T8_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -14005,13 +14005,13 @@ Func _AnySelGrid()
 	Next
 	Return False
 EndFunc   ;==>_AnySelGrid
-Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridX = -1, $tGridY = -1, $tFileLoad = -1, $tQuotesTF = -1, $tSplashTF = True)     ; (Par, TxtOld, TxtNew, X, Y, File, QuoteTF)
+Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridX = -1, $tGridY = -1, $tFileLoad = -1, $tQuotesTF = -1, $tSplashTF = True) ; (Par, TxtOld, TxtNew, X, Y, File, QuoteTF)
 	If $tGridX = -1 Then $tGridX = $xServergridx[$tGridActive]
 	If $tGridY = -1 Then $tGridY = $xServergridy[$tGridActive]
 	If $tFileLoad = -1 Then $tFileLoad = $aConfigFull
 	If $tQuotesTF = -1 Then $tQuotesTF = True
-	Local $tXFound = False, $tYFound = False, $tReturn = 0     ; (no error)
-	Local $xfile, $tXFound = False, $tYFound = False, $tReturn = 0     ; (no error)
+	Local $tXFound = False, $tYFound = False, $tReturn = 0 ; (no error)
+	Local $xfile, $tXFound = False, $tYFound = False, $tReturn = 0 ; (no error)
 	Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
 	Local $tFileSave = StringTrimRight($tFileLoad, 4) & $tTime & ".json"
 	_FileReadToArray($tFileLoad, $xfile, 0)
@@ -14038,7 +14038,7 @@ Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridX 
 EndFunc   ;==>_ReplaceServerGrid
 Func _ReplaceCommandLine($tGrid, $tCMD, $tAddTF)
 	Local $tCntTot = 0, $tCntChanged = 0, $tReturn[2]
-	If $tAddTF = True Then     ; Add parameter
+	If $tAddTF = True Then ; Add parameter
 		$tCntTot += 1
 		If StringInStr($xServerGridExtraCMD[$tGrid], $tCMD) = 0 Then
 			$xServerGridExtraCMD[$tGrid] &= " -" & $tCMD
@@ -14047,7 +14047,7 @@ Func _ReplaceCommandLine($tGrid, $tCMD, $tAddTF)
 			$tCntChanged += 1
 		Else
 		EndIf
-	Else     ; Remove Parameter
+	Else ; Remove Parameter
 		$tCntTot += 1
 		If StringInStr($xServerGridExtraCMD[$tGrid], $tCMD) = 0 Then
 		Else
@@ -14103,10 +14103,10 @@ Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False)
 	If $tSplashTF Then _Splash($tFileOnly & " updated." & @CRLF & @CRLF & "Backup created:" & @CRLF & $tFileOnly & "." & $tExt & "_" & $tTime & ".bak", 1500)
 	Return $tFileSave
 EndFunc   ;==>_BackupFile
-Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum = -1, $tTForNum = "TF", $tSplashTF = True)     ; $tSplashTF = Show Splash screen during _BackupFile function.
+Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum = -1, $tTForNum = "TF", $tSplashTF = True) ; $tSplashTF = Show Splash screen during _BackupFile function.
 	; Takes $tTxtToReplace (RCON=5710) and changes it to $tTxtToReplaceWith (1234) to be RCON=1234
 	Local $tTxt, $tPos = -1, $tExt, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly
-	Local $xfile, $tXFound = False, $tYFound = False, $tReturn = 0, $tFoundTF = False   ; (no error)
+	Local $xfile, $tXFound = False, $tYFound = False, $tReturn = 0, $tFoundTF = False ; (no error)
 	For $tC = 1 To StringLen($tTxtToReplace)
 		$tTxt = StringRight($tTxtToReplace, $tC)
 		If StringInStr($tTxt, "=") = 0 Then
@@ -14148,7 +14148,7 @@ Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum =
 				For $i = 0 To (UBound($xfile) - 1)
 					If StringInStr($xfile[$i], $gParamTFHeading[$tParamNum]) = 0 Then
 					Else
-						$tPos = $i + 1     ; Position of header
+						$tPos = $i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -14163,7 +14163,7 @@ Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum =
 				For $i = 0 To (UBound($xfile) - 1)
 					If StringInStr($xfile[$i], $gParamNumHeading[$tParamNum]) = 0 Then
 					Else
-						$tPos = $i + 1     ; Position of header
+						$tPos = $i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -14202,7 +14202,7 @@ Func _GUS_R_RCON($tGrid)
 	_ReplaceStringFile($aFile, $tBefore, $tRCON, -1, "RCON", False)
 EndFunc   ;==>_GUS_R_RCON
 Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
-	If $aTForNum = "TF" Then     ; A True/False Paramater
+	If $aTForNum = "TF" Then ; A True/False Paramater
 		If $gParamTFValue[$tX] = True Then
 			Local $aTxtOld = $gParamTFName[$tX] & "=False"
 			Local $aValueOld = False
@@ -14210,11 +14210,11 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 			Local $aTxtOld = $gParamTFName[$tX] & "=True"
 			Local $aValueOld = True
 		EndIf
-		If $gParamTFFile[$tX] = 0 Then     ; CommandLine
+		If $gParamTFFile[$tX] = 0 Then ; CommandLine
 			Local $tTxt = $gParamTFName[$tX]
 			Local $tAddorRemove = $gParamTFValue[$tX]
 			_ReplaceCommandLine($tGridActive, $tTxt, $tAddorRemove)
-		ElseIf $gParamTFFile[$tX] = 1 Then     ; ServerGrid.json
+		ElseIf $gParamTFFile[$tX] = 1 Then ; ServerGrid.json
 			Local $aTxtNew = $gParamTFValue[$tX]
 			Local $tParam = $gParamTFName[$tX]
 			Local $tLine = _ReplaceServerGrid($tParam, $aTxtOld, $aTxtNew, $xServergridx[$tGridActive], $xServergridy[$tGridActive], $aConfigFull, False, False)
@@ -14222,26 +14222,26 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 				$gParamTFValue[$tX] = $aValueOld
 				_Splash("ERROR! " & $gParamTFName[$tX] & " value not saved!" & @CRLF & @CRLF & "(Check if ServerGrid.json file is read-only)", 5000)
 			EndIf
-		ElseIf $gParamTFFile[$tX] = 2 Then     ; GameUserSettings.ini
+		ElseIf $gParamTFFile[$tX] = 2 Then ; GameUserSettings.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\GameUserSettings.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False)
-		ElseIf $gParamTFFile[$tX] = 3 Then     ; Game.ini
+		ElseIf $gParamTFFile[$tX] = 3 Then ; Game.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Game.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False)
-		ElseIf $gParamTFFile[$tX] = 4 Then     ; Engine.ini
+		ElseIf $gParamTFFile[$tX] = 4 Then ; Engine.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Engine.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False)
 		EndIf
-	Else     ; A Numeric / Text Paramater
+	Else ; A Numeric / Text Paramater
 		Local $aTxtOld = $gParamNumName[$tX] & "=" & $aNumOldValue
-		If $gParamNumFile[$tX] = 0 Then     ; CommandLine
+		If $gParamNumFile[$tX] = 0 Then ; CommandLine
 			Local $tTxt = $gParamNumName[$tX]
 			Local $tAddorRemove = $gParamNumValue[$tX]
 			_ReplaceCommandLine($tGridActive, $tTxt, $tAddorRemove)
-		ElseIf $gParamNumFile[$tX] = 1 Then     ; ServerGrid.json
+		ElseIf $gParamNumFile[$tX] = 1 Then ; ServerGrid.json
 			Local $aTxtNew = $gParamNumValue[$tX]
 			Local $tParam = $gParamNumName[$tX]
 			Local $tLine = _ReplaceServerGrid($tParam, $aTxtOld, $aTxtNew, $xServergridx[$tGridActive], $xServergridy[$tGridActive], $aConfigFull, False, False)
@@ -14249,22 +14249,22 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 				$gParamNumValue[$tX] = $aNumOldValue
 				_Splash("ERROR! " & $gParamNumName[$tX] & " value not saved!" & @CRLF & @CRLF & "(Check if ServerGrid.json file is read-only)", 5000)
 			EndIf
-		ElseIf $gParamNumFile[$tX] = 2 Then     ; GameUserSettings.ini
+		ElseIf $gParamNumFile[$tX] = 2 Then ; GameUserSettings.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\GameUserSettings.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False)
-		ElseIf $gParamNumFile[$tX] = 3 Then     ; Game.ini
+		ElseIf $gParamNumFile[$tX] = 3 Then ; Game.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Game.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False)
-		ElseIf $gParamNumFile[$tX] = 4 Then     ; Engine.ini
+		ElseIf $gParamNumFile[$tX] = 4 Then ; Engine.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Engine.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False)
 		EndIf
 	EndIf
 EndFunc   ;==>_ParamClicked
-Func _ParamFileImport($tParamToImport = "")     ; "" = Import all, "Value" = Default Values, "Highlight" = Default Highlight settings.
+Func _ParamFileImport($tParamToImport = "") ; "" = Import all, "Value" = Default Values, "Highlight" = Default Highlight settings.
 	Local $xfileLoad
 	Local $tFail = _FileReadToArray($aParametersFile, $xfileLoad, 0)
 	If $tFail = 0 Then
@@ -14401,7 +14401,7 @@ Func _ParamFileImport($tParamToImport = "")     ; "" = Import all, "Value" = Def
 		Next
 	EndIf
 EndFunc   ;==>_ParamFileImport
-Func _ParamFileWrite($tParam = "na", $tPar = 0)             ; "" = Update entire file (code not written yet)
+Func _ParamFileWrite($tParam = "na", $tPar = 0) ; "" = Update entire file (code not written yet)
 	Local $xfileRead, $tCount = 0
 	Local $tFail = _FileReadToArray($aParametersFile, $xfileRead, 0)
 	Local $xfile = ResizeArray($xfileRead)
@@ -14581,7 +14581,7 @@ Func _ParamFileDefault()
 			"FALSE,TribeNameChangeCooldown,300,2,[ServerSettings],Cooldown in minutes in between tribe name changes"
 	_BackupFile($aParametersFile, $tTxt, False)
 EndFunc   ;==>_ParamFileDefault
-Func _ParamsSave($tAllorSel = "all", $tWhichFileToUse = "all", $tGrid = $tGridActive)     ; $tAllorSel: all,sel. $tWhichFileToUse:all,CommandLine,ServerGrid,GameUserSettings,Game,Engine
+Func _ParamsSave($tAllorSel = "all", $tWhichFileToUse = "all", $tGrid = $tGridActive) ; $tAllorSel: all,sel. $tWhichFileToUse:all,CommandLine,ServerGrid,GameUserSettings,Game,Engine
 	Local $tFile[5], $tFileRead[5], $tFileName[5], $tSplit, $tFound, $tPar, $tBound[5], $tArray, $tCountTotal = 0, $tCountReplaced = 0, $tRead[2]
 	$tFileName[0] = "Command Line"
 	$tFileName[1] = "ServerGrid.json"
@@ -14724,7 +14724,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 		Local $t_Array = $t_Array1
 	EndIf
 	Local $t_Parameter, $t_Ext, $t_Txt, $t_Pos = -1, $tNoExt, $tTime, $t_OldParam = "None"
-	Local $t_XFound = False, $t_YFound = False, $t_Return = 0     ; (no error)
+	Local $t_XFound = False, $t_YFound = False, $t_Return = 0 ; (no error)
 	For $tC = 1 To StringLen($t_Param)
 		$t_Txt = StringRight($t_Param, $tC)
 		If StringInStr($t_Txt, "=") = 0 Then
@@ -14759,7 +14759,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 				For $t_i = 0 To (UBound($t_Array) - 1)
 					If StringInStr($t_Array[$t_i], $gParamTFHeading[$t_ParamNum]) = 0 Then
 					Else
-						$t_Pos = $t_i + 1     ; Position of header
+						$t_Pos = $t_i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -14774,7 +14774,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 				For $t_i = 0 To (UBound($t_Array) - 1)
 					If StringInStr($t_Array[$t_i], $gParamNumHeading[$t_ParamNum]) = 0 Then
 					Else
-						$t_Pos = $t_i + 1     ; Position of header
+						$t_Pos = $t_i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -14860,7 +14860,7 @@ Func _GetMemArrayRawAvg($Pid)
 		For $objItem In $colItems
 			For $x = 0 To (UBound($Pid) - 1)
 ;~ 				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = (($objItem.WorkingSetPrivate + $objItem.WorkingSet) / 2) ; Average
-				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate)             ; Working Set Private
+				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate) ; Working Set Private
 				If @error Then Return 0
 			Next
 		Next
@@ -15041,9 +15041,9 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 
 	; XP, XPe, 2000, or 2003? - Affects process access requirement
 	If StringRegExp(@OSVersion, "_(XP|200(0|3))") Then
-		$iAccess = 0x0400             ; PROCESS_QUERY_INFORMATION
+		$iAccess = 0x0400 ; PROCESS_QUERY_INFORMATION
 	Else
-		$iAccess = 0x1000             ; PROCESS_QUERY_LIMITED_INFORMATION
+		$iAccess = 0x1000 ; PROCESS_QUERY_LIMITED_INFORMATION
 	EndIf
 
 	; SYNCHRONIZE access - required to determine if process has terminated
@@ -15078,12 +15078,12 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		EndIf
 	EndIf
 
-	$aProcUsage[0][0] = 1             ; 1 Process Total (possible future expansion)
+	$aProcUsage[0][0] = 1 ; 1 Process Total (possible future expansion)
 
-	$aProcUsage[1][0] = $sProcess             ; Process Name
-	$aProcUsage[1][1] = $nPID             ; Process ID
-	$aProcUsage[1][2] = $hProcess             ; Process Handle
-	$aProcUsage[1][3] = $iAccess             ; Access Rights (useful to determine when process terminated)
+	$aProcUsage[1][0] = $sProcess ; Process Name
+	$aProcUsage[1][1] = $nPID ; Process ID
+	$aProcUsage[1][2] = $hProcess ; Process Handle
+	$aProcUsage[1][3] = $iAccess ; Access Rights (useful to determine when process terminated)
 
 	$aRet = DllCall("kernel32.dll", "bool", "GetProcessTimes", "handle", $hProcess, "uint64*", 0, "uint64*", 0, "uint64*", 0, "uint64*", 0)
 	If @error Or Not $aRet[0] Then
@@ -15092,8 +15092,8 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		Return SetError(-1, $iErr, "")
 	EndIf
 
-	$aProcUsage[1][4] = $aRet[4]             ; Process Kernel Time
-	$aProcUsage[1][5] = $aRet[5]             ; Process User Time
+	$aProcUsage[1][4] = $aRet[4] ; Process Kernel Time
+	$aProcUsage[1][5] = $aRet[5] ; Process User Time
 
 	Return $aProcUsage
 EndFunc   ;==>_ProcessUsageTracker_Create
@@ -15545,7 +15545,7 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 
 	; If no drag/drop
 	If BitAND($iAdded, 512) Then
-		$aGLVEx_Data[$iLV_Index][12] += 8 + 2             ; Force no external drop
+		$aGLVEx_Data[$iLV_Index][12] += 8 + 2 ; Force no external drop
 	EndIf
 
 	; If single cell selection
@@ -15560,12 +15560,12 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 	EndIf
 
 	;  If checkbox extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then             ; $LVS_EX_CHECKBOXES
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then ; $LVS_EX_CHECKBOXES
 		$aGLVEx_Data[$iLV_Index][6] = 1
 	EndIf
 
 	;  If header drag extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then             ; $LVS_EX_HEADERDRAGDROP
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then ; $LVS_EX_HEADERDRAGDROP
 		$aGLVEx_Data[$iLV_Index][13] = 1
 	EndIf
 
@@ -15786,10 +15786,10 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 
 	; Adjust array depending on mode required
 	Switch $iMode
-		Case 0, 3             ; Content
+		Case 0, 3 ; Content
 			; Array already filled
 
-		Case 1             ; Checkbox state
+		Case 1 ; Checkbox state
 			If $aGLVEx_Data[$iLV_Index][6] Then
 				For $i = 1 To $iDim_1 - 1
 					$aCheck[$i] = _GUICtrlListView_GetItemChecked($hLV, $i - 1)
@@ -15804,7 +15804,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(3, 0, "")
 			EndIf
 
-		Case 2             ; Colour values
+		Case 2 ; Colour values
 			If $aGLVEx_Data[$iLV_Index][19] Then
 				; Load colour array
 				$aData_Colour = $aGLVEx_Data[$iLV_Index][18]
@@ -15819,7 +15819,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(4, 0, "")
 			EndIf
 
-		Case 4             ; Headers
+		Case 4 ; Headers
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -15835,7 +15835,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Next
 			EndIf
 
-		Case 5             ; Header colours
+		Case 5 ; Header colours
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -15853,7 +15853,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 	; Check if columns can be reordered
 	If $aGLVEx_Data[$iLV_Index][13] Then
 		Switch $iMode
-			Case 0, 2, 3             ; 2D data/colour array
+			Case 0, 2, 3 ; 2D data/colour array
 				; Create temp array
 				Local $aData_Colour_Ordered[$iDim_1][$iDim_2]
 				; Fill temp array in correct column order
@@ -15867,7 +15867,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				$aData_Colour = $aData_Colour_Ordered
 				$aData_Colour_Ordered = ""
 
-			Case 4, 5             ; 1D header array
+			Case 4, 5 ; 1D header array
 				; Create return array
 				Local $aHeader_Ordered[$iDim_2]
 				; Fill return array in correct column order
@@ -15966,7 +15966,7 @@ Func _GUIListViewEx_SaveListView($iLV_Index, $sFileName)
 	EndIf
 	$sHeader = StringTrimRight($sHeader, 1)
 	; Get data/check/colour content
-	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3)             ; Force 2D return
+	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3) ; Force 2D return
 	If $iStart Then
 		_ArrayDelete($aData, 0)
 	EndIf
@@ -16692,7 +16692,7 @@ Func _GUIListViewEx_DeleteSpec($iLV_Index, $vRange = "")
 
 	; Check for range
 	If String($vRange) <> "" Then
-		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0)             ; Rows not columns
+		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0) ; Rows not columns
 		If @error Then Return SetError(4, 0, 0)
 	Else
 		; Check if colour or single cell selection enabled
@@ -17181,7 +17181,7 @@ Func _GUIListViewEx_SetEditStatus($iLV_Index, $vCol, $iMode = 1, $vParam1 = Defa
 	Local $aEditable = $aGLVEx_Data[$iLV_Index][7]
 
 	Switch $iMode
-		Case 0, 1             ; Not editable/editable
+		Case 0, 1 ; Not editable/editable
 			If $vParam1 = Default Then $vParam1 = 0
 			If $vParam2 = Default Then $vParam2 = ""
 			Switch $vParam1
@@ -17349,7 +17349,7 @@ Func _GUIListViewEx_EditItem($iLV_Index, $iRow, $iCol, $iEditMode = 0, $iDelta_X
 	EndIf
 	; Check edit mode parameter
 	Switch Abs($iEditMode)
-		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33             ; Single edit or both axes set to valid parameter
+		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33 ; Single edit or both axes set to valid parameter
 			; Allow
 		Case Else
 			Return SetError(5, 0, "")
@@ -17650,14 +17650,14 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	Local $hCombo, $hTemp_Edit, $hTemp_List, $hTemp_Combo, $sCombo_Data
 
 	; Check edit mode
-	If $aHdrData[2][$iCol] Then             ; Combo
+	If $aHdrData[2][$iCol] Then ; Combo
 		$sCombo_Data = $aHdrData[2][$iCol]
 		; Create temporary combo
-		If StringLeft($sCombo_Data, 1) = @TAB Then             ; Read only combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043)             ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		If StringLeft($sCombo_Data, 1) = @TAB Then ; Read only combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 			$sCombo_Data = StringTrimLeft($sCombo_Data, 1)
-		Else             ; Normal combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042)             ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		Else ; Normal combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 		EndIf
 		GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 		; Get combo data
@@ -17666,11 +17666,11 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 				"struct;long BtnLeft;long BtnTop;long BtnRight;long BtnBottom;endstruct;dword BtnState;hwnd hCombo;hwnd hEdit;hwnd hList")
 		Local $iInfo = DllStructGetSize($tInfo)
 		DllStructSetData($tInfo, "Size", $iInfo)
-		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")             ; $CB_GETCOMBOBOXINFO
+		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 		$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 		$hTemp_List = DllStructGetData($tInfo, "hList")
 		$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
-	Else             ; Edit
+	Else ; Edit
 		; Create temporary edit
 		$cGLVEx_EditID = GUICtrlCreateEdit($sHeaderOrgText, $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0)
 		$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
@@ -17681,7 +17681,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	_WinAPI_SetFocus($hTemp_Edit)
 	; Check "select all" flag state
 	If Not $aGLVEx_Data[$iLV_Index][11] Then
-		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)             ; $EM_SETSEL
+		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 	EndIf
 
 	Local $tMouseClick = DllStructCreate($tagPOINT)
@@ -17734,7 +17734,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 		EndIf
 		If $hCombo Then
 			; Check for dropdown open and close
-			Switch _SendMessage($hCombo, 0x157)             ; $CB_GETDROPPEDSTATE
+			Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 				Case 0
 					; If opened and closed
 					If $fCombo_State = True Then
@@ -18284,7 +18284,7 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 
 		; Check Type parameter
 		Switch Abs($iEditMode)
-			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33             ; Single edit or both axes set to valid parameter
+			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33 ; Single edit or both axes set to valid parameter
 				; Allow
 			Case Else
 				Return SetError(1, 0, "")
@@ -18311,10 +18311,10 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 		EndIf
 
 		Switch $aEditable[0][$aLocation[1]]
-			Case 0             ; Not editable
+			Case 0 ; Not editable
 				Return SetError(3, 0, "")
 
-			Case 9             ; User-defined function
+			Case 9 ; User-defined function
 				; Extract user function
 				Local $hUserFunction = $aEditable[1][$aLocation[1]]
 				; Pass function 4 parameters (LV handle, UDF LV index, row, col)
@@ -18485,10 +18485,10 @@ EndFunc   ;==>_GUIListViewEx_EventMonitor
 Func _GUIListViewEx_MsgRegister($fNOTIFY = True, $fMOUSEMOVE = True, $fLBUTTONUP = True, $fSYSCOMMAND = True)
 
 	; Register required messages
-	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler")             ; $WM_NOTIFY
-	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler")             ; $WM_MOUSEMOVE
-	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler")             ; $WM_LBUTTONUP
-	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler")             ; $WM_SYSCOMMAND
+	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler") ; $WM_NOTIFY
+	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler") ; $WM_MOUSEMOVE
+	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler") ; $WM_LBUTTONUP
+	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler") ; $WM_SYSCOMMAND
 
 EndFunc   ;==>_GUIListViewEx_MsgRegister
 
@@ -18519,7 +18519,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 	Local $iCode = BitAND(DllStructGetData($tStruct, 3), 0xFFFFFFFF)
 
 	; Deal with drawing quickly
-	If $iCode = -12 Then             ; $NM_CUSTOMDRAW
+	If $iCode = -12 Then ; $NM_CUSTOMDRAW
 
 		; Prevent redraw if still changing ListView arrays
 		If $aGLVEx_Data[0][12] Then Return
@@ -18551,19 +18551,19 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 			If $aGLVEx_Data[$iLV_Index][19] Or $aGLVEx_Data[$iLV_Index][22] Then
 				Local $tNMLVCUSTOMDRAW = DllStructCreate($tagNMLVCUSTOMDRAW, $lParam)
 				$dwDrawStage = DllStructGetData($tNMLVCUSTOMDRAW, "dwDrawStage")
-				Switch $dwDrawStage             ; Holds a value that specifies the drawing stage
-					Case 1             ; $CDDS_PREPAINT
+				Switch $dwDrawStage ; Holds a value that specifies the drawing stage
+					Case 1 ; $CDDS_PREPAINT
 						; Before the paint cycle begins
-						Return 32             ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
+						Return 32 ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
 
-					Case 65537             ; $CDDS_ITEMPREPAINT
+					Case 65537 ; $CDDS_ITEMPREPAINT
 						; Before painting an item
-						Return 32             ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
+						Return 32 ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
 
-					Case 196609             ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
+					Case 196609 ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
 						; Before painting a subitem
-						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec")             ; Row index
-						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem")             ; Column index
+						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec") ; Row index
+						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem") ; Column index
 						; Check if selected row
 						Local $bSelColour = False
 						If $iItem = $aGLVEx_Data[$iLV_Index][20] Then
@@ -18600,7 +18600,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Set required colours
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrText", $iTextColour)
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrTextBk", $iBackColour)
-						Return 2             ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 
@@ -18623,7 +18623,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Store new handle
 					$aGLVEx_Data[0][20] = DllStructGetData($tStruct, 1)
 					; Get header font
-					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031)             ; $WM_GETFONT
+					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031) ; $WM_GETFONT
 					Local $hObject = _WinAPI_SelectObject($hDC, $hFont)
 					Local $tLogFont = DllStructCreate($tagLOGFONT)
 					; Get header font
@@ -18631,7 +18631,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					_WinAPI_SelectObject($hDC, $hObject)
 					_WinAPI_ReleaseDC(DllStructGetData($tStruct, 1), $hDC)
 					; Set to medium weight
-					DllStructSetData($tLogFont, "Weight", 600)             ; $FW_SEMIBOLD
+					DllStructSetData($tLogFont, "Weight", 600) ; $FW_SEMIBOLD
 					; Store font handle
 					$aGLVEx_Data[0][21] = _WinAPI_CreateFontIndirect($tLogFont)
 				EndIf
@@ -18639,15 +18639,15 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 				; Check drawing stage
 				$dwDrawStage = DllStructGetData($tNMCustomDraw, "dwDrawStage")
 				Switch $dwDrawStage
-					Case 1             ; $CDDS_PREPAINT ; Before the paint cycle begins
-						Return 32             ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
+					Case 1 ; $CDDS_PREPAINT ; Before the paint cycle begins
+						Return 32 ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
 
-					Case 65537             ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
-						Return 0x00000010             ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
+					Case 65537 ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
+						Return 0x00000010 ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
 
-					Case 0x00010002             ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
-						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec")             ; Column
-						$aHdrData = $aGLVEx_Data[$iLV_Index][25]             ; Header data
+					Case 0x00010002 ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
+						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec") ; Column
+						$aHdrData = $aGLVEx_Data[$iLV_Index][25] ; Header data
 						Local $aColSplit = StringSplit($aHdrData[1][$iColumnIndex], ";")
 						; Set default colours
 						Local $aHdrDefCols = $aGLVEx_Data[$iLV_Index][23]
@@ -18670,7 +18670,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						DllStructSetData($tRECT, 3, DllStructGetData($tNMCustomDraw, 8) - 2)
 						DllStructSetData($tRECT, 4, DllStructGetData($tNMCustomDraw, 9) - 2)
 						; Set transparent background
-						_WinAPI_SetBkMode($hDC, 1)             ; $TRANSPARENT
+						_WinAPI_SetBkMode($hDC, 1) ; $TRANSPARENT
 						; Set text font and colour
 						_WinAPI_SelectObject($hDC, $aGLVEx_Data[0][21])
 						_WinAPI_SetTextColor($hDC, $iHdrTextColour)
@@ -18684,12 +18684,12 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							Local $iColAlign = 2 * $aRet[0]
 							_WinAPI_DrawText($hDC, $aHdrData[0][$iColumnIndex], $tRECT, $iColAlign)
 						EndIf
-						Return 2             ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 		EndIf
 
-	Else             ; Not a drawing message
+	Else ; Not a drawing message
 
 		; Flag to indicate use of Edit HotKey
 		Local $fEditHotKey = False
@@ -18754,13 +18754,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 						; Check if Native or UDF and set focus
 						If $cGLVEx_SrcID Then
-							GUICtrlSetState($cGLVEx_SrcID, 256)             ; $GUI_FOCUS
+							GUICtrlSetState($cGLVEx_SrcID, 256) ; $GUI_FOCUS
 						Else
 							_WinAPI_SetFocus($hGLVEx_SrcHandle)
 						EndIf
 
 						; Get dragged item index
-						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4)             ; Item
+						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4) ; Item
 						; Set dragged item count
 						$iGLVEx_Dragging = 1
 
@@ -18782,7 +18782,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								If $aIndex[$i] = $iGLVEx_DraggedIndex Then ExitLoop
 							Next
 							; Now check for consecutive items
-							If $i <> 1 Then             ; Up
+							If $i <> 1 Then ; Up
 								For $j = $i - 1 To 1 Step -1
 									; Consecutive?
 									If $aIndex[$j] <> $aIndex[$j + 1] - 1 Then ExitLoop
@@ -18792,7 +18792,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-							If $i <> $aIndex[0] Then             ; Down
+							If $i <> $aIndex[0] Then ; Down
 								For $j = $i + 1 To $aIndex[0]
 									; Consecutive
 									If $aIndex[$j] <> $aIndex[$j - 1] + 1 Then ExitLoop
@@ -18800,7 +18800,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-						Else             ; Either no selection or only a single
+						Else ; Either no selection or only a single
 							; Set flag
 							$iGLVEx_Dragging = 1
 						EndIf
@@ -18817,7 +18817,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 					EndIf
 
-				Case $LVN_COLUMNCLICK, -2             ; $NM_CLICK
+				Case $LVN_COLUMNCLICK, -2 ; $NM_CLICK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -18847,7 +18847,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Get col width
 						Local $aLV_Pos = WinGetPos($hGLVEx_SrcHandle)
 						; Scroll to left edge if all column not in view
-						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then             ; Reduce by scrollbar width
+						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then ; Reduce by scrollbar width
 							_GUICtrlListView_Scroll($hGLVEx_SrcHandle, $aRect[0], 0)
 						EndIf
 
@@ -18907,7 +18907,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						_GUICtrlListView_SetItemSelected($hLV, $aGLVEx_Data[0][17], False)
 						; Act on left/right keys
 						Switch $aGLVEx_Data[0][16]
-							Case 37             ; Left
+							Case 37 ; Left
 								; Adjust column and prevent overrun
 								If $aGLVEx_Data[0][18] > 0 Then $aGLVEx_Data[0][18] -= 1
 								; Store new column
@@ -18918,7 +18918,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								$fGLVEx_UserSelFlag = 1
 								$fGLVEx_SelChangeFlag = $iLV_Index
 
-							Case 39             ; Right
+							Case 39 ; Right
 								If $aGLVEx_Data[0][18] < _GUICtrlListView_GetColumnCount($hLV) - 1 Then $aGLVEx_Data[0][18] += 1
 								$aGLVEx_Data[$iLV_Index][21] = $aGLVEx_Data[0][18]
 								_GUICtrlListView_RedrawItems($hLV, $aGLVEx_Data[0][17], $aGLVEx_Data[0][17])
@@ -18929,7 +18929,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						EndSwitch
 					EndIf
 
-				Case -3             ; $NM_DBLCLK
+				Case -3 ; $NM_DBLCLK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -18959,13 +18959,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					If $aGLVEx_Data[0][16] <> 0 Then
 						; Check key used
 						Switch $aGLVEx_Data[0][16]
-							Case 38             ; Up
+							Case 38 ; Up
 								If $aGLVEx_Data[0][17] > 0 Then $aGLVEx_Data[0][17] -= 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
 								$fGLVEx_UserSelFlag = 1
 
-							Case 40             ; Down
+							Case 40 ; Down
 								If $aGLVEx_Data[0][17] < _GUICtrlListView_GetItemCount($hLV) - 1 Then $aGLVEx_Data[0][17] += 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
@@ -19009,7 +19009,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Set selection change flag
 					$fGLVEx_SelChangeFlag = $iLV_Index
 
-				Case -5             ; $NM_RCLICK
+				Case -5 ; $NM_RCLICK
 
 					; Set active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -19049,7 +19049,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							; Check header resizing status
 							Local $iHdrResize = $aHdrData[3][$iCol]
 							Switch $iCode
-								Case -306, -326             ; $HDN_BEGINTRACK(W)
+								Case -306, -326 ; $HDN_BEGINTRACK(W)
 									If $iHdrResize Then
 										; Prevent resizing
 										Return True
@@ -19057,7 +19057,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 										; Allow resizing
 										Return False
 									EndIf
-								Case -305, -325             ; $HDN_DIVIDERDBLCLICK(W)
+								Case -305, -325 ; $HDN_DIVIDERDBLCLICK(W)
 									If $iHdrResize Then
 										; Instant resize of column to fixed width
 										_GUICtrlListView_SetColumnWidth($aGLVEx_Data[$iLV_Index][0], $iCol, $iHdrResize)
@@ -19130,7 +19130,7 @@ Func _GUIListViewEx_WM_MOUSEMOVE_Handler($hWnd, $iMsg, $wParam, $lParam)
 					$cGLVEx_TgtID = $aGLVEx_Data[$i][1]
 					$iGLVEx_TgtIndex = $i
 					$aGLVEx_TgtArray = $aGLVEx_Data[$i][2]
-					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10]             ; Set item depth
+					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10] ; Set item depth
 					; No point in looping further
 					ExitLoop
 				EndIf
@@ -19352,7 +19352,7 @@ Func _GUIListViewEx_WM_LBUTTONUP_Handler($hWnd, $iMsg, $wParam, $lParam)
 		$aGLVEx_Data[$aGLVEx_Data[0][1]][2] = $aGLVEx_SrcArray
 		$aGLVEx_Data[$iGLVEx_SrcIndex][18] = $aGLVEx_SrcColArray
 
-	Else             ; Dropping in another ListView
+	Else ; Dropping in another ListView
 
 		; Check checkbox status
 		Local $bCheckbox = (($aGLVEx_Data[$iGLVEx_SrcIndex][6] And $aGLVEx_Data[$iGLVEx_TgtIndex][6]) ? (True) : (False))
@@ -19510,7 +19510,7 @@ Func _GUIListViewEx_WM_SYSCOMMAND_Handler($hWnd, $iMsg, $wParam, $lParam)
 	#forceref $hWnd, $iMsg, $lParam, $lParam
 
 	; Check correct event from ListView GUI
-	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then             ; $SC_CLOSE
+	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then ; $SC_CLOSE
 		$aGLVEx_Data[0][9] = True
 	EndIf
 
@@ -19603,7 +19603,7 @@ Func __GUIListViewEx_HighLight($hLVHandle, $cLV_CID, $iIndexA, $iIndexB = -1)
 
 	; Check if Native or UDF and set focus
 	If $cLV_CID Then
-		GUICtrlSetState($cLV_CID, 256)             ; $GUI_FOCUS
+		GUICtrlSetState($cLV_CID, 256) ; $GUI_FOCUS
 	Else
 		_WinAPI_SetFocus($hLVHandle)
 	EndIf
@@ -19632,7 +19632,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 	If Not IsHWnd($hLVHandle) Then
 		$iError = 1
 	Else
-		Local $hFont = _SendMessage($hLVHandle, 0x0031)             ; WM_GETFONT
+		Local $hFont = _SendMessage($hLVHandle, 0x0031) ; WM_GETFONT
 		If Not $hFont Then
 			$iError = 2
 		Else
@@ -19644,7 +19644,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				$iError = 3
 			Else
 				; Get font size
-				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1)             ; $LOGPIXELSY = 90 => DPI aware
+				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1) ; $LOGPIXELSY = 90 => DPI aware
 				; Now look for font name
 				$aRet = DllCall("gdi32.dll", "int", "GetTextFaceW", "handle", $hDC, "int", 0, "ptr", 0)
 				Local $iCount = $aRet[0]
@@ -19654,7 +19654,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				If @error Then
 					$iError = 4
 				Else
-					$aFontDetails[1] = DllStructGetData($tBuffer, 1)             ; FontFacename
+					$aFontDetails[1] = DllStructGetData($tBuffer, 1) ; FontFacename
 				EndIf
 			EndIf
 			_WinAPI_SelectObject($hDC, $hObjOrg)
@@ -19684,7 +19684,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 	_GUICtrlListView_SetItemSelected($hGLVEx_SrcHandle, $aLocation[0], False)
 
 	; Declare return array
-	Local $aEdited[1][4] = [[0]]             ; [[Number of edited items, blank, blank, blank]]
+	Local $aEdited[1][4] = [[0]] ; [[Number of edited items, blank, blank, blank]]
 
 	; Load active ListView details
 	$hGLVEx_SrcHandle = $aGLVEx_Data[$iLV_Index][0]
@@ -19761,19 +19761,19 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		; Determine type of control required for this cell and extract data if required
 		$iEditType = $aEditable[0][$aLocation[1]]
 		Switch $iEditType
-			Case 0, 1             ; Edit
+			Case 0, 1 ; Edit
 				$fEdit = True
 				If $iForce Then
-					$iEditType = 1             ; Force text edit if called by _GUIListViewEx_EditItem
+					$iEditType = 1 ; Force text edit if called by _GUIListViewEx_EditItem
 				EndIf
 
-			Case 2             ; Combo
+			Case 2 ; Combo
 				$fCombo = True
 				Local $sCombo_Data = $aEditable[1][$aLocation[1]]
 				$fRead_Only = (BitAND($aEditable[2][$aLocation[1]], 1) = 1)
 				$fAuto_Drop = (BitAND($aEditable[2][$aLocation[1]], 2) = 2)
 
-			Case 3             ; DTP
+			Case 3 ; DTP
 				$fDTP = True
 				Local $sDTP_Default = $aEditable[1][$aLocation[1]]
 				If StringRight($sDTP_Default, 1) = "#" Then
@@ -19797,30 +19797,30 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		$iWidth = Number($aWidth[$aLocation[1]])
 		; Alter edit/combo width if required value less than current width
 		If $iWidth > $aEdit_Pos[2] Then
-			If $fRead_Only Then             ; Only adjust read-only combo edit width if value is negative
+			If $fRead_Only Then ; Only adjust read-only combo edit width if value is negative
 				If $iWidth < 0 Then
 					$aEdit_Pos[2] = Abs($iWidth)
 				EndIf
-			Else             ; Always adjust for if manual input accepted
+			Else ; Always adjust for if manual input accepted
 				$aEdit_Pos[2] = Abs($iWidth)
 			EndIf
 		EndIf
 
 		; Create control
 		Switch $iEditType
-			Case 1             ; Edit
+			Case 1 ; Edit
 				; Create temporary edit - get handle, set font size, give keyboard focus and select all text
-				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128)             ; $ES_AUTOHSCROLL
+				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128) ; $ES_AUTOHSCROLL
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Check if UpDown required
 				If $aEditable[1][$aLocation[1]] = 1 Then
-					Local $iWrap = -1             ; Default no wrap
+					Local $iWrap = -1 ; Default no wrap
 					; Check if limits to be applied
 					If $aEditable[2][$aLocation[1]] Then
 						$aSplit = StringSplit($aEditable[2][$aLocation[1]], "|")
 						; Check valid syntax
 						If UBound($aSplit) = 4 Then
-							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1))             ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
+							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1)) ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
 						EndIf
 					EndIf
 					; Create UpDowm
@@ -19834,14 +19834,14 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					_WinAPI_RedrawWindow($hUpDown)
 				EndIf
 
-			Case 2             ; Combo
+			Case 2 ; Combo
 				; Create temporary combo - get handle, set font size, give keyboard focus
 				If $fRead_Only Then
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043)             ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Set existing content as default for read-only
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data, $sItemOrgText)
 				Else
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042)             ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Do NOT set existing content as default only for editable
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 				EndIf
@@ -19853,21 +19853,21 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				Local $hCombo = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set readonly combo dropped width if required
 				If $fRead_Only And Abs($iWidth) > $aEdit_Pos[2] Then
-					_SendMessage($hCombo, 0x160, Abs($iWidth))             ; $CB_SETDROPPEDWIDTH
+					_SendMessage($hCombo, 0x160, Abs($iWidth)) ; $CB_SETDROPPEDWIDTH
 				EndIf
 				; Get combo data
-				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")             ; $CB_GETCOMBOBOXINFO
+				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 				$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 				$hTemp_List = DllStructGetData($tInfo, "hList")
 				$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
 
-			Case 3             ; DTP
+			Case 3 ; DTP
 				; Create temp date picker
 				$cGLVEx_EditID = GUICtrlCreateDate($sDTP_Default, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3])
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set format if required
 				If $sDTP_Format Then
-					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format)             ; $DTM_SETFORMATW
+					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format) ; $DTM_SETFORMATW
 				EndIf
 
 		EndSwitch
@@ -19879,15 +19879,15 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		_WinAPI_SetFocus($hTemp_Edit)
 		; Check "select all" flag state
 		If Not $aGLVEx_Data[$iLV_Index][11] Then
-			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)             ; $EM_SETSEL
+			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 		EndIf
 		; Check for auto "drop-down" combo
 		If $fAuto_Drop Then
 			Switch $iEditType
 				Case 2
-					_SendMessage($hCombo, 0x14F, True)             ; $CB_SHOWDROPDOWN
+					_SendMessage($hCombo, 0x14F, True) ; $CB_SHOWDROPDOWN
 				Case 3
-					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10)             ; WM_LBUTTONDOWN
+					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10) ; WM_LBUTTONDOWN
 			EndSwitch
 		EndIf
 
@@ -19938,9 +19938,9 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				If $fEdit Then
 					; Set appropriate behaviour
 					If $fClick_Move Then
-						$iKey_Code = 0x02             ; Confirm edit and move to next cell
+						$iKey_Code = 0x02 ; Confirm edit and move to next cell
 					Else
-						$iKey_Code = 0x01             ; Abandon editing process
+						$iKey_Code = 0x01 ; Abandon editing process
 					EndIf
 				EndIf
 				ExitLoop
@@ -19949,7 +19949,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			If $fCombo Then
 
 				; Check for dropdown open and close
-				Switch _SendMessage($hCombo, 0x157)             ; $CB_GETDROPPEDSTATE
+				Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 
 					Case 0
 						; If opened and closed
@@ -19975,7 +19975,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			EndIf
 
 			; Check for valid key pressed
-			For $i = 0 To 2             ; TAB, ENTER, ESC
+			For $i = 0 To 2 ; TAB, ENTER, ESC
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) Then
 					; Set key pressed flag
@@ -19983,7 +19983,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					ExitLoop 2
 				EndIf
 			Next
-			For $i = 3 To 6             ; l/r/u/d with ctrl pressed
+			For $i = 3 To 6 ; l/r/u/d with ctrl pressed
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) And _WinAPI_GetAsyncKeyState(0x11) Then
 					; Set key pressed flag
@@ -20003,13 +20003,13 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 
 		; Check if edit to be confirmed
 		Switch $iKey_Code
-			Case 0x25, 0x26, 0x27, 0x28             ; arrow keys
+			Case 0x25, 0x26, 0x27, 0x28 ; arrow keys
 				; If not standard edit control then abandon edit
 				If $fEdit Then
 					ContinueCase
 				EndIf
 
-			Case 0x02, 0x09, 0x0D             ; Mouse (with Click_Move), TAB, ENTER
+			Case 0x02, 0x09, 0x0D ; Mouse (with Click_Move), TAB, ENTER
 				; Read edit content
 				Local $sItemNewText = GUICtrlRead($cGLVEx_EditID)
 				; Check replacement required
@@ -20039,7 +20039,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		Opt("MouseCoordMode", $iOldMouseOpt)
 
 		; Check edit mode
-		If $iEditMode = 0 Then             ; Single edit
+		If $iEditMode = 0 Then ; Single edit
 			; Exit edit process
 			ExitLoop
 		Else
@@ -20048,7 +20048,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					$iKey_Code = 0x01
 					ContinueCase
 
-				Case 0x00, 0x01, 0x0D             ; Edit lost focus, mouse button outside edit, ENTER pressed
+				Case 0x00, 0x01, 0x0D ; Edit lost focus, mouse button outside edit, ENTER pressed
 					; Wait until key/button no longer pressed
 					_WinAPI_GetAsyncKeyState($iKey_Code)
 					While _WinAPI_GetAsyncKeyState($iKey_Code)
@@ -20057,7 +20057,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x1B             ; ESC pressed
+				Case 0x1B ; ESC pressed
 					; Check Reset-on-ESC mode
 					If $fReset_Edits Then
 						; Reset previous confirmed edits starting with most recent
@@ -20090,7 +20090,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x09, 0x27             ; TAB or right arrow
+				Case 0x09, 0x27 ; TAB or right arrow
 					While 1
 						If $iEditCol <> 0 Then
 							; Set next column
@@ -20125,7 +20125,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x25             ; Left arrow
+				Case 0x25 ; Left arrow
 					While 1
 						If $iEditCol <> 0 Then
 							$aLocation[1] -= 1
@@ -20152,7 +20152,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x28             ; Down key
+				Case 0x28 ; Down key
 					While 1
 						If $iEditRow <> 0 Then
 							; Set next row
@@ -20182,7 +20182,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x26             ; Up key
+				Case 0x26 ; Up key
 					While 1
 						If $iEditRow <> 0 Then
 							$aLocation[0] -= 1
@@ -20426,18 +20426,18 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1             ; Checkbox array
-			If UBound($vAdd, 0) = 2 Or $fMultiRow Then             ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vAdd, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim]
-			Else             ; 1D as columns
+			Else ; 1D as columns
 				ReDim $avArray[$iIndex_Max + 1]
 			EndIf
 
-		Case 2             ; Data array
+		Case 2 ; Data array
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vAdd, 0) = 2 Then             ; 2D add
+			If UBound($vAdd, 0) = 2 Then ; 2D add
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -20455,7 +20455,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					Next
 				Next
 
-			ElseIf $fMultiRow Then             ; 1D add as rows
+			ElseIf $fMultiRow Then ; 1D add as rows
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -20465,7 +20465,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					$avArray[$iIndex_Max + $i][0] = $vAdd[$i]
 				Next
 
-			Else             ; 1D add as columns
+			Else ; 1D add as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				If $bCount Then
@@ -20509,8 +20509,8 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1             ; Checkbox array
-			If UBound($vInsert, 0) = 2 Or $fMultiRow Then             ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vInsert, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				; Resize array
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim]
 
@@ -20519,7 +20519,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$i] = $avArray[$i - 1]
 				Next
 
-			Else             ; 1D as columns
+			Else ; 1D as columns
 
 				; Resize array
 				ReDim $avArray[$iIndex_Max + 1]
@@ -20534,7 +20534,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 			EndIf
 
-		Case 2             ; Data array
+		Case 2 ; Data array
 			; If at end of array
 			If $iIndex > $iIndex_Max - 1 Then
 				__GUIListViewEx_Array_Add($avArray, $vInsert, $fMultiRow, $bCount)
@@ -20542,7 +20542,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 			EndIf
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vInsert, 0) = 2 Then             ; 2D insert
+			If UBound($vInsert, 0) = 2 Then ; 2D insert
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -20568,7 +20568,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					Next
 				Next
 
-			ElseIf $fMultiRow Then             ; 1D insert as rows
+			ElseIf $fMultiRow Then ; 1D insert as rows
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -20584,7 +20584,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$iIndex + $i][0] = $vInsert[$i]
 				Next
 
-			Else             ; 1D insert as columns
+			Else ; 1D insert as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				$avArray[0][0] += 1
@@ -20632,7 +20632,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1             ; Checkbox array
+		Case 1 ; Checkbox array
 			; Move up all elements below the new index
 			For $i = $iIndex To $iIndex_Max - 2
 				$avArray[$i] = $avArray[$i + 1]
@@ -20640,7 +20640,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 			; Redim the Array
 			ReDim $avArray[$iIndex_Max - 1]
 
-		Case 2             ; Data array
+		Case 2 ; Data array
 			; Get size of second dimension
 			Local $iDim2 = UBound($avArray, 2)
 			; Move up all elements below the new index
@@ -20862,8 +20862,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		EndIf
 
 		; Enter the sorted ListView data
-		For $i = 1 To $iItemCount             ; Rows
-			For $j = 0 To $iColumnCount - 1             ; Columns
+		For $i = 1 To $iItemCount ; Rows
+			For $j = 0 To $iColumnCount - 1 ; Columns
 				_GUICtrlListView_SetItemText($hLV, $i - 1, $aListViewContent[$i][$j], $j)
 				; Reset the colour array if colour enabled
 				If $fColourEnabled Then
@@ -20911,8 +20911,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		$aGLVEx_Data[$iLV_Index][18] = $aColourSettings
 
 		; Set flags using ListView index
-		$aGLVEx_Data[0][19] = $iLV_Index             ; SortEvent
-		$aGLVEx_Data[0][22] = 1             ; ColourEvent
+		$aGLVEx_Data[0][19] = $iLV_Index ; SortEvent
+		$aGLVEx_Data[0][22] = 1 ; ColourEvent
 
 	EndIf
 
@@ -21000,8 +21000,8 @@ Func _GUIScrollBars_Globals()
 	;                                   [n][7] = Vertical max setting
 	;                                   [n][8] = Vertical scrollbar position for minimize/restore
 	;                                   [n][9] = Horizontal scrollbar position for minimize/restore
-	$__g_aSB_WindowInfo[0][5] = _WinAPI_GetSystemMetrics(2)             ; Width of VScrollbar:  SM_CXVSCROLL
-	$__g_aSB_WindowInfo[0][6] = _WinAPI_GetSystemMetrics(3)             ; Height of HScrollbar: SM_CYHSCROLL
+	$__g_aSB_WindowInfo[0][5] = _WinAPI_GetSystemMetrics(2) ; Width of VScrollbar:  SM_CXVSCROLL
+	$__g_aSB_WindowInfo[0][6] = _WinAPI_GetSystemMetrics(3) ; Height of HScrollbar: SM_CYHSCROLL
 	Global $__g_aSB_WindowInfoEx[1][9]
 	; [n][0] = Horizontal scrollable size
 	; [n][1] = Vertical scrollable size
@@ -21246,7 +21246,7 @@ Func _GUIScrollbars_Generate($hWnd, $iH_Scroll = 0, $iV_Scroll = 0, $iH_Tight = 
 	$__g_aSB_WindowInfoEx[$iIndex][3] = $aRet[3]
 	$__g_aSB_WindowInfoEx[$iIndex][4] = $fBefore
 	$__g_aSB_WindowInfoEx[$iIndex][5] = $iRepeat
-	$__g_aSB_WindowInfoEx[$iIndex][6] = (($iRepeat) ? ($iRepeat) : (7))             ; Set default 7 for mousewheel if no keys registered
+	$__g_aSB_WindowInfoEx[$iIndex][6] = (($iRepeat) ? ($iRepeat) : (7)) ; Set default 7 for mousewheel if no keys registered
 
 	Local $fSuccess = True
 	If _GUIScrollBars_ShowScrollBar($hWnd, $SB_BOTH, False) = False Then $fSuccess = False
@@ -21666,20 +21666,20 @@ EndFunc   ;==>_Scrollbars_WM_HSCROLL
 Func _Scrollbars_WM_MOUSEWHEEL($hWnd, $iMsg, $wParam, $lParam)
 
 	#forceref $hWnd, $iMsg, $lParam
-	Local $iDirn, $iDelta = BitShift($wParam, 16)             ; Mouse wheel movement
+	Local $iDirn, $iDelta = BitShift($wParam, 16) ; Mouse wheel movement
 	; Find window index
 	Local $iIndex = -1
 	For $i = 0 To UBound($__g_aSB_WindowInfo) - 1
 		If $hWnd = $__g_aSB_WindowInfo[$i][0] Then $iIndex = $i
 	Next
 	If $iIndex <> -1 Then
-		If BitAND($wParam, 0x0000FFFF) Then             ; If Ctrl or Shft pressed move Horz scrollbar
+		If BitAND($wParam, 0x0000FFFF) Then ; If Ctrl or Shft pressed move Horz scrollbar
 			$iDirn = $SB_LINERIGHT
 			If $iDelta > 0 Then $iDirn = $SB_LINELEFT
 			For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][6]
 				_SendMessage($hWnd, $WM_HSCROLL, $iDirn)
 			Next
-		Else             ; Move Vert scrollbar
+		Else ; Move Vert scrollbar
 			$iDirn = $SB_LINEDOWN
 			If $iDelta > 0 Then $iDirn = $SB_LINEUP
 			For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][6]
@@ -21704,7 +21704,7 @@ Func _Scrollbars_WM_MOUSEHWHEEL($hWnd, $iMsg, $wParam, $lParam)
 
 	#forceref $hWnd, $iMsg, $lParam
 	Local $iDirn = $SB_LINERIGHT
-	If BitShift($wParam, 16) > 0 Then $iDirn = $SB_LINELEFT             ; Mouse wheel movement
+	If BitShift($wParam, 16) > 0 Then $iDirn = $SB_LINELEFT ; Mouse wheel movement
 	; Find window index
 	Local $iIndex = -1
 	For $i = 0 To UBound($__g_aSB_WindowInfo) - 1
@@ -21745,43 +21745,43 @@ Func _Scrollbars_WM_KEYUP($hWnd, $iMsg, $wParam, $lParam)
 		If $aRet_Ctrl[0] Then $bCtrl = True
 		; Check key pressed
 		Switch $wParam
-			Case 0x21             ; PageUp
+			Case 0x21 ; PageUp
 				If $bCtrl Then
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGELEFT)
 				Else
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEUP)
 				EndIf
-			Case 0x22             ; PageDown
+			Case 0x22 ; PageDown
 				If $bCtrl Then
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGERIGHT)
 				Else
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEDOWN)
 				EndIf
-			Case 0x23             ; End
+			Case 0x23 ; End
 				If $bCtrl Then
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, $__g_aSB_WindowInfo[$iIndex][6])
 				Else
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, $__g_aSB_WindowInfo[$iIndex][7])
 				EndIf
-			Case 0x24             ; Home
+			Case 0x24 ; Home
 				If $bCtrl Then
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, 0)
 				Else
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, 0)
 				EndIf
-			Case 0x25             ; Left
+			Case 0x25 ; Left
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_LINELEFT)
 				Next
-			Case 0x26             ; Up
+			Case 0x26 ; Up
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEUP)
 				Next
-			Case 0x27             ; Right
+			Case 0x27 ; Right
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_LINERIGHT)
 				Next
-			Case 0x28             ; Down
+			Case 0x28 ; Down
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEDOWN)
 				Next
@@ -21846,11 +21846,11 @@ Func _Scrollbars_WM_EXITSIZEMOVE($hWnd, $iMsg, $wParam, $lParam)
 		For $i = 1 To 2
 			If $aClientSize[0] < $__g_aSB_WindowInfoEx[$iIndex][7] + $iH_Reduction Then
 				$iH_Aperture = $__g_aSB_WindowInfoEx[$iIndex][7] + $iH_Reduction
-				$iV_Reduction = $__g_aSB_WindowInfo[0][6]             ; Height of HScrollbar
+				$iV_Reduction = $__g_aSB_WindowInfo[0][6] ; Height of HScrollbar
 			EndIf
 			If $aClientSize[1] < $__g_aSB_WindowInfoEx[$iIndex][8] + $iV_Reduction Then
 				$iV_Aperture = $__g_aSB_WindowInfoEx[$iIndex][8] + $iV_Reduction
-				$iH_Reduction = $__g_aSB_WindowInfo[0][5]             ; Width of VScrollbar
+				$iH_Reduction = $__g_aSB_WindowInfo[0][5] ; Width of VScrollbar
 			EndIf
 		Next
 		; Generate required scrollbars
