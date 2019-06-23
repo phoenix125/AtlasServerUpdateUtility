@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.8 (2019-06-23)
+- Latest version: AtlasServerUpdateUtility_v1.7.9 (2019-06-23)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,14 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.9 (2019-06-23) Hotfixes
+- Fixed: Line x error when using Send RCON clicked. (Thanks to Nyt for reporting)
+- Fixed: Event scheduler RCON commands would open the "RCON command to send to all grids" window. (Thanks to Norlinri for reporting)
+- Changed: Added a timeout for all question windows, so that util resumes running when an input window is not completed. (Thanks to Norlinri for reporting)
+- Added: Restart Now button now asks if you want to send a Discord announcement.
+- Changed: Restart Now now restarts the servers immediately instead of waiting the default 10 seconds for the main window to refresh. (Thanks to Nyt for reporting)
+- Fixed: When shutting down servers from main window, the "Atlas servers online and ready for connection" Discord message would send. (Thanks to Nyt for reporting)
+
 v1.7.8 (2019-06-23) Several Hotfixes, including "!! ERROR !!! Could not find GameUserSettings.ini error".
 - Fixed: Grid Configurator:
 	-Params "changed count" did not include Command Line params. 
