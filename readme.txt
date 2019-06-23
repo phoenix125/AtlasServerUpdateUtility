@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.7 (2019-06-20)
+- Latest version: AtlasServerUpdateUtility_v1.7.8 (2019-06-23)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,16 @@ For update checks:
 ------------------------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ------------------------
+v1.7.8 (2019-06-23) Several Hotfixes, including "!! ERROR !!! Could not find GameUserSettings.ini error".
+- Fixed: Grid Configurator:
+	-Params "changed count" did not include Command Line params. 
+	-Command Line params now have bold text. 
+	-Changed wording of log entries for consistency.
+	-New parameters were not being added to blank GUS, Game, and Engine files.
+	-If GameUserSettings.ini file did not exist on any local grids (ie. disabled grids), the util would give an error message. (Thanks to Deviliath for reporting).
+	-Changed: The Grid Configurator can now modify all grids, including Remote grids by creating the Save folder and placing the files there.
+- Fixed: Several bugs with the setup wizard. (Thanks to [A1] Steel for reporting).
+
 v1.7.7 (2019-06-20) Grid Configurator Phase II Done!
 - Added: Finished the Grid Configurator!  You can now quickly see/edit popular parameters and copy them to all/some grids.
 - Fixed: KeepUtilAlive could activate during grid startups.

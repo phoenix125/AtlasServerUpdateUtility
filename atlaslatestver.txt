@@ -1,9 +1,14 @@
-v1.7.7^v1.7.7 Grid Configurator Phase II Done!
+v1.7.8^v1.7.8 Several Hotfixes, including "!! ERROR !!! Could not find GameUserSettings.ini error".
+- Fixed: Grid Configurator:
+	-Params "changed count" did not include Command Line params. 
+	-Command Line params now have bold text. 
+	-Changed wording of log entries for consistency.
+	-New parameters were not being added to blank GUS, Game, and Engine files.
+	-If GameUserSettings.ini file did not exist on any local grids (ie. disabled grids), the util would give an error message. (Thanks to Deviliath for reporting).
+	-Changed: The Grid Configurator can now modify all grids, including Remote grids by creating the Save folder and placing the files there.
+- Fixed: Several bugs with the setup wizard. (Thanks to [A1] Steel for reporting).
+
+v1.7.7 Grid Configurator Phase II Done!
 - Added: Finished the Grid Configurator!  You can now quickly see/edit popular parameters and copy them to all/some grids.
 - Fixed: KeepUtilAlive could activate during grid startups.
 - Fixed: If no players are online, now makes a one-time announce to Discord/Twitch before restarting servers (to alert players wanting to connect).
-
-v1.7.6 Minor Hotfix. Added more Restart Util and Servers buttons.
-- Fixed: v1.7.5 moved the main .exe file to the \Previous_Versions folder.
-- Added: Restart Util and Servers buttons to most editable windows.
-- Changed: All Grids: Send Msg and Send RCON now ask whether to send to Local only or Local & Remote grids (if remote grids present).
