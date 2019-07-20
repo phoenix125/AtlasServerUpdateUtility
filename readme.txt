@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.7.9 (2019-06-23)
+- Latest version: AtlasServerUpdateUtility_v1.9.4 (2019-07-18)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -36,9 +36,9 @@ More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
 
------------------
+--
  GETTING STARTED
------------------
+--
 NEW SERVER INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server")
 1) Place AtlasServerUpdateUtility.exe into any folder and run it.
 - The file "AtlasServerUpdateUtility.ini" will be created and the program will exit.
@@ -83,9 +83,9 @@ To send RCON message via web browser: (Requires Remote Restart Enabled)
 
 To restart your server remotely from any web browser, including your phone, see REMOTE RESTART INSTRUCTIONS below.
 
------------------
+--
  TIPS & COMMENTS
------------------
+--
 Comments:
 - Place ModIDs in ServerGrid.json only.
 - If running multiple instances of this utility, each copy must be in a separate folder.
@@ -125,24 +125,24 @@ REASON:
 WORKAROUND:
 - Install on another partition such as D:
 
--------------------
+----
  UPCOMING FEATURES
--------------------
+----
 - Second Discord webhook for admin use (announce server info into a separate Discord channel)
 - html and/or PDF documentation
 
---------------------
+-----
  REQUESTED FEATURES  (Unknown whether they'll get added or not)
---------------------
+-----
 - Cross chat (I would probably use an existing cross chat util as a "plug in" to this util)
 - 7zip backups
 - CPU Affinity (Reports state that Atlas itself does a job with CPU, though, so not likely add this one)
 - Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
    (Not as great as it sounds... when someone logs off of a non-home server, that server would have to remain online. Eventually, all servers would need to remain online).
 
----------------------------------------------
+
  To Create Discord Webhook for announcements
----------------------------------------------
+
 Discord announcements are handled through Discord webhooks.
 To create a Discord webhook:
 - In Discord, click the Settings gear icon of the desired Discord channel.
@@ -151,9 +151,9 @@ To create a Discord webhook:
 - Copy and paste the new URL into the AtlasServerUpdateUtility.ini as "URL ###=".
 - Then save and restart the AtlasServerUpdateUtility (does NOT require server restart).
 
-----------------------------------------------
+-
  HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS
-----------------------------------------------
+-
 ( Disclaimer: I am only running a 2x2 server on a single server. I have NO experience in running larger multi-server setups.)
 ( The following is only my best guess as to how to use this utility on multi-server setups.)
 
@@ -176,14 +176,14 @@ Below is an example of how to have this utility start your existing redis server
     Edit beforesteamcmd.bat and include the following (changing it to point to your existing redis-server file, of course!)
         start cmd /k Call D:\Game Servers\Atlas Dedicated Server\AtlasTools\RedisDatabase\redis-server_start.bat 3333
 - Edit AtlasServerUpdateUtility.ini as follows:
-    [--------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START ---------------]
+    [ EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START ]
     1-Execute external script BEFORE update? (yes/no) ###=yes
     1-Script directory ###=D:\Game Servers\Atlas Dedicated Server\Scripts
     1-Script filename ###=beforesteamcmd.bat
 
------------------------------
+--------------
  REMOTE RESTART INSTRUCTIONS
------------------------------
+--------------
 ====> Request Restart From Browser <====
 - If enabled on the server, use to remotely restart the server (for multiple system setups).
 - When restarting, an announcement will be made in-game, on Discord, and in Twitch if enabled, with the set duration of delay (warning).
@@ -207,9 +207,9 @@ RestartCode=password
 - You can have multiple passwords. For example: RestartCode=password1,pass2,pwd3
 In a standard web browser, type in the URL http://192.168.1.30:57520?restart=password. The Server would compare the pass and find that it is correct. It would respond with 200 OK And HTML Code stating the server is restarting.
 
-----------------
+-
  DOWNLOAD LINKS
-----------------
+-
 Latest Stable Version:    http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
 Previous Stable Versions: http://www.phoenix125.com/share/atlas/atlashistory/
 Latest Beta Version:      http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
@@ -229,9 +229,9 @@ More ServerUpdateUtilities available: 7 Days To Die and Conan Exiles.  Rust and 
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0
 https://gamercide.org/forum/topic/10558-conan-exiles-server-utility/
 
----------------------
+------
  Questions & Answers  Q&A from commonly asked questions
----------------------
+------
 (WORK IN PROGRESS)
 What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, etc. files?
 - The utility makes no direct changes to any of Atlas' config files. Anything added to the "Atlas extra commandline parameters ###=" will get added by Atlas itself.
@@ -239,12 +239,12 @@ What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, 
 How does the utility shut down the servers?
 - I removed the SaveWorld command because it wasn't working last time I checked.  The DoExit and CTRL-X both force a SaveWorld ... I've tested them quite a bit. Even if the RCON ports are wrong, the CTRL-X should safely shutdown servers. 
 
---------------------------------------------------------
+-----------
  FYI: DETAILS OF HOW THIS UTIL PERFORMS CERTAIN ACTIONS
---------------------------------------------------------
+-----------
 
  INFORMATION ON IMPORTING DATA (Details on what information is imported and how it is used)
--------------------------------
+-
 The following information is imported from the ServerGrid.json:
  (All servers)
     "totalGridsX" - Used in combination with totalGridsY to calculate total number of servers.
@@ -268,7 +268,7 @@ It then repeats this process for the remainder of the servers listed in the Serv
 - The utility continues to import the data for each server listed in ServerGrid.json, even if the server isn't used or is disabled.
 
  METHOD USED FOR UPDATING MODS (Details on how mods are downloaded and checked for updates)
--------------------------------
+-
 At very first run of the util, all mods will be downloaded and installed. This is necessary to create temp file(s) used to determine current version of each mod.
 - The util downloads another util I created, AtlasModDownloader.exe, to perform the downloading and updating. (Python was much better at uncompressing the .z files than AutoIT).
 - AtlasModDownloader uses SteamCMD to download new mod content, move the folder content to ../content/mods folder, uncompress the .z files, then delete the SteamCMD cache folder.
@@ -280,14 +280,197 @@ For update checks:
 - If different buildid, it reruns the AtlasModDownloader.exe program again which re-downloads and installs the mod.
 - It then makes any announcements (In-Game, Discord, Twitch) and will restart all servers when the announcement times are fulfilled.
 
-----------------------------
+-------------
  CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above) or http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
-----------------------------
+-------------
 - The STABLE version and BETA version are the same at this time.
 
-------------------------
+---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
-------------------------
+---------
+v1.9.4 (2019-07-19)
+- Fixed: Start batch file: If using 64-bit version, the batch file will now update to run the 64-bit version.
+
+v1.9.3 (2019-07-18) Crash Watchdog, Rt-Click Menu, Improved shutdown, Some hotfixes.
+- Added: Right-click on server name to bring up a pop up menu with Send RCON, Send Msg, Restart, Stop, Start, Grid Configurator for that specific grid cell (Thanks to @Nyt for requesting)
+- Added: Crash Watchdog: Uses Online Player poll to check for frozen grid. If no response in 5 minutes, or a lost response for 2 intervals (time and count user-definable), the util will restart the froze grid. (Thanks to Infiniti and others for requesting)
+- Added: Crash Watchdog: If a grid still freezes after three restarts in 30 minutes (count and time user-definable), the affected grids will be disabled to stop restart looping.
+- Added: Restart sequence (announcements with delay) are now skipped if all grids are offline. (Thanks to @Colvr for reporting)
+- Added: Freeport grids are now started first. (Thanks to Deviliath for requesting)
+- Added: SteamCMD Update: If update fails, the util now deletes the \SteamCMD folder and re-downloads all steamcmd files. Also leaves last .tmp file for troubleshooting. (Thanks to @AceMan for inspiring).
+- Changed: Changed the secondary close grid method from CTRL-C to Alt-F4, which is comparable to clicking the X (Close) which still forces a game save. (Tested!)
+- Fixed: The "Skip daily restarts" had a typo. Other improvements were made, too. It should work as intended now.
+- Fixed: Send Msg to Select Servers was not adding "broadcast " before the command, thereby not sending the message.
+- Fixed: When starting a grid, the Status would not display "Starting".
+- Fixed: Grid Configurator: If "Start grid at startup" was changed to yes, the util reported it as crashed when starting.
+- Fixed: Setup Wizard: More bug fixes. (Thanks to Karl Tibbs for reporting issue if no ServerGrid.json file exists)
+
+[ New Config Parameters/Changes ]
+CRASH WATCHDOG -> Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###=2
+CRASH WATCHDOG -> Minutes to wait for RCON response before restarting grid (0-Disable, 0-10) (Default is 5) ###=5
+CRASH WATCHDOG -> Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###=3
+CRASH WATCHDOG -> Minutes the crashes have to occur within before disabling grid (5-720) ###=30
+CRASH WATCHDOG -> Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###=no
+CRASH WATCHDOG -> In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
+CRASH WATCHDOG -> Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###=no
+CRASH WATCHDOG -> WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###=
+CRASH WATCHDOG -> Discord announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
+
+v1.9.2 (2019-07-13) Discord Hotfix!
+- Fixed: "DiscordMainWHSel" parameter window that pops up with util restarts which caused all Discord announcements to fail.
+- Added: Skip daily restarts if all servers restarted within _ minutes with optional Discord announcement. (Thanks to @Nyt for requesting)
+- Added: Cancel Restart button with optional announcements.
+
+[ New Config Parameters/Changes ]
+	SCHEDULED RESTARTS -> Skip scheduled restart if servers restarted within _ minutes (0-720) ###=60
+	DISCORD INTEGRATION -> Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###=no
+	DISCORD INTEGRATION -> Announcement Skip scheduled restart if servers restarted recently ###=Daily restart skipped because servers restarted recently.
+	IN-GAME ANNOUNCEMENT CONFIGURATION -> Announcement Skip scheduled restart if servers restarted recently ###=Daily restart skipped because servers restarted recently.
+
+v1.9.1 (2019-07-13) Tiny potential hotfixes.
+- Changed: Discord: Added "Comma separated" to each Discord webhook selection. (Thanks to Nyt for suggesting)
+- Fixed: Removed any special characters from Online Players names for stability. (Thanks to Nyt for reporting)
+- Changed: A ghost click was moved in the main window in an attempt to fix main window issues a couple people are having. Clicked cells will remain highlighted. (Thanks to AceMan and Psychoboy for reporting)
+
+v1.9.0 (2019-07-11) 2 Hotfixes & a 3rd Discord Webhook.
+- Added: Third Discord Webhook (Thanks to Linearburn for requesting)
+- Fixed: Discord Log Message: If the log entry has quotes " in it, the Discord message gets messed up.
+- Fixed: Backup: Backup should work as intended now. I also removed the \* requirement for folders. (The util will automatically add the trailing *)
+
+v1.8.9 (2019-07-10) Another Hotfix
+- Fixed: Line error 42279 Undefined variable. (Thanks to noelpy for reporting)
+
+v1.8.8 (2019-07-10) Quick Hotfix
+- Fixed: If "Include SteamID" was disabled, then the Online Players log would write an entry with every check.
+
+v1.8.7 (2019-07-10) Two Hotfixes, Setup Wizard, and Grid Configurator improvements.
+- Fixed: Line 42204 Undefined variable error. (Thanks to Noelpy for reporting)
+- Fixed: Resizing the main window could fail to resize properly. (Thanks to Doublee for reporting).
+- Added: Grid Status now includes "No Response" when a grid fails an RCON "ListPlayers" response.
+- Fixed: (Hopefully) Randomly, some grids will switch to "Starting" status then "Ready" for no apparent reason. (Thanks to Inifini and Nyt for reporting)
+- Added: Discord: Optionally send all log entries to selected Discord Webhook. (Thanks to Linearburn for requesting)
+- Added: Backup: Option to manually perform a "save folder only" or a "Full Atlas folder" backup. (Inspired by Anorak1313)
+- Fixed: Grid Configurator: Only files that are modified are backed up now. Was previously backing up all files.
+- Fixed: Grid Configurator: "Added Commandline This Grid" was not always updating the GridStartSelect file properly.
+- Added: Grid Configurator: Now shows commandline for each grid. (Thanks to Nyt for requesting)
+- Added: Setup Wizard: RCON port generator option. (Thanks to Nyt for requesting)
+- Added: Setup Wizard: Grid Start options to start all local grids or disable all grids. Also, grids default to disabled for new installs. (Thanks to Nyt for inspiring)
+- Added: Option to Include SteamID or not in logs and in Online PLayers window. (Thanks to Nyt for requesting)
+- Added: If Atlas password has a question mark ? in it, the util ignores the ? and sends a log warning message. (Thanks to Infiniti for reporting)
+
+v1.8.6 (2019-07-05) Hotfixes
+- Added: Added the option to send in-game select restart messages to all grids or only the affected grids. (Thanks to Nyt for requesting)
+- Fixed: Online Players window was not updating. (Thanks to Nyt for reporting)
+- Fixed: Error with in-game select grid restart announcement. (Thanks to Nyt for reporting)
+- Changed: Changed the wording of Restart Grids in the config file to reflect the \g - grid substitution option.
+
+v1.8.5 (2019-07-04) Hotfixes. Added "Restart Grid","Start With Windows", better Discord Webhook management. Read-Only file options.
+- Added: Read-Only: (and all other attributes) are retained when working with GameUserSettings.ini, Game.ini, Engine.ini, ServerGrid.json, and default files. (AceMan)
+- Added: Read-Only: If GameUserSettings.ini, Game.ini, Engine.ini, ServerGrid.json, and default files are Read-only, the util will ask to overwrite or use user-defined preset value. (Nyt)
+- Added: Start with Windows option in .ini file and Setup Wizard (Thanks to @SłȺᵾǥħŧɇɍ fro requesting)
+- Fixed: Setup Wizard Tab 2 AltSaveDIR: It would always use Custom Method 1 and the Folders list would often have duplicates. (Thanks to Kara for reporting)
+- Added: "Restart ALL grids" and "Restart This Grid" buttons to configurator and "Restart Select Grids" button added to main window. (Thanks to AceMan, Nyt, and others for requesting).
+- Fixed: All grids: "Send Msg" and "Send RCON" Line 41993 Error (Thanks to Infiniti for reporting)
+- Added: Discord: Grid Status: Added two more text replacement options: Announcement grid status (\g - server, \s - status, \f - folder name, \n - server name) (Thanks to Linearburn for requesting)
+- Added: Discord: New option: WebHook to send GENERAL messages to: 0-Disable, 1-WebHook Main, 2-WebHook Status, 3-Both ###=1
+- Fixed: Discord: Minor tweak to response to hopefully improve reliability. (Thanks to Infiniti for reporting continued errors)
+- Fixed: Discord: Grid name is added to announcement when "Stop Server" button is used in Grid Configurator. (Thanks to AceMan for reporting)
+- Fixed: Discord: Grids duplicated in shutdown announcements: "(C2) (C2) Shutting down..." (Thanks to Nyt & Psychoboy for reporting)
+- Fixed: Discord: WebHook 2 now ignores <-NO TRAILING SLASH AND USE FULL URL FROM WEBHOOK URL ON DISCORD. Default value changed for new users. (Thanks to Linearburn for reporting)
+- Fixed: When Poll Online Players is Disabled, Grid Status in main window would show "starting" (Thanks to Anorak for reporting)
+- Fixed: Grid Configurator: During parameter changes, the log logged the active grid for all parameter changes, instead of the affected grids. (Thanks to AceMan for reporting)
+
+[ New Config Parameters/Changes ]
+	GAME SERVER CONFIGURATION | Start AtlasServerUpdateUtility with Windows? (yes/no) ###=no
+	ANNOUNCEMENT CONFIGURATION | Announcement grid status (\g - server, \s - status, \f - folder name, \n - server name) ###
+	IN-GAME ANNOUNCEMENT CONFIGURATION | Announcement RESTART GRIDS (\m - minutes) ###
+	DISCORD INTEGRATION | Send Discord message for RESTART GRIDS? (yes/no) ###
+	DISCORD INTEGRATION | Announcement RESTART GRIDS (\m - minutes) ###
+	DISCORD INTEGRATION | Announcement RESTART GRIDS when No Online Players ###
+	DISCORD INTEGRATION | WebHook to send GENERAL Messages to: 0-Disable, 1-WebHook Main, 2-WebHook Status, 3-Both ###=1
+	TWITCH INTEGRATION | Send Twitch message for RESTART GRIDS? (yes/no) ###
+	TWITCH INTEGRATION | Announcement RESTART GRIDS (\m - minutes) ###
+	TWITCH INTEGRATION | Announcement RESTART GRIDS when No Online Players ###
+	AtlasServerUpdateUtility MISC OPTIONS | If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###=3
+
+v1.8.4 (2019-06-28) Many Hotfixes. Fixed Backups. Added GRID CRASH announcements. Improved Discord reliability.
+- Added: User-definable "Server status labels (Comma separated. Defaults: Starting, Ready,CRASHED,Offline,Disabled,Poll Off) ###="Starting,Ready,CRASHED,Offline,Disabled,Poll Off (Thanks to Nyt for requesting)
+- Fixed: Backups: Added 0 to disable Full Atlas backups (Thanks to Infiniti for requesting)
+- Fixed: Backups: The Full Atlas and Util folder backup every __ backups was backing up the backups. (Excludes backup files now)
+- Fixed: Backups: For additional folders/files, removed the quotes requirement.. it was causing issues.
+- Fixed: "WebHook to use for error messages: 0-Disable, 1-WH Main, 2-WH Error, 3-Both ###=0" now defaults to zero. (Thanks to AceMan for reporting)
+- Fixed: "Restart NOW" button would sometimes only shut down servers and not restart.
+- Fixed: When new mods were detected while util running, new mods weren't downloaded. (Thanks to Infiniti for reporting)
+- Added: Added name of selected servers to announcements when "Stop Server(s)" button used.
+- Fixed: Remote Restart was getting shut down with any server shutdown.
+- Fixed: "Atlas server online and ready for connection" announcement was once again announcing when only shutting down a server.
+- Added: Optionally send CRASHED grid server status updates to Main and/or Status Discord webhook and/or In-Game. (Notify your players that a grid crashed and is restarting, then ready).
+- Fixed: Grids sometimes would not restart after a crash detected. 
+- Fixed: When all grids were disable, the Online Players log would write "[Online Players]  " with every check.
+- Added: Announcement options added for immediate restarts ("0 minute(s)" when no online players). (Thanks for Doublee for reporting)
+- Added: Second notice when shutting down servers, "Are you sure you want to shut down all servers?". (Thanks to AceMan for pointing out potential disaster)
+- Added: Improved Discord response detection. Also, added a second attempt using DiscordSendWebhook.exe. If that fails, will use alternative method once. (Thanks to AceMan for reporting Discord issues still)
+- Fixed: Broadcast scheduled event was opening and closing the "RCON command to send" window, but was not sending anything. (Thanks to Norlinri for reporting)
+
+[ New Config Parameters/Changes ]
+	AtlasServerUpdateUtility MISC OPTIONS | Server status labels Main Window (Comma separated. Default:Starting,Running,CRASHED,Offline,Disabled,Poll Off) ###=Starting,Ready,CRASHED,Offline,Disabled,Poll Off
+	AtlasServerUpdateUtility MISC OPTIONS | Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off) ###=Starting,Ready,CRASHED,Offline,Disabled,Poll Off
+	DISCORD INTEGRATION | Announcement DAILY when No Online Players ###=Daily server restart begins now.
+	DISCORD INTEGRATION | Announcement UPDATES when No Online Players ###=A new server update has been released. Server is restarting now.
+	DISCORD INTEGRATION | Announcement REMOTE RESTART when No Online Players ###=Admin has requested a server reboot. Server is restarting now.
+	DISCORD INTEGRATION | Announcement STOP SERVER when No Online Players ###=Servers shutting down for maintenance.
+	DISCORD INTEGRATION | Announcement MOD UPDATE when No Online Players (\x - Mod ID) ###=Mod \x released an update. Server is restarting now.
+	TWITCH INTEGRATION | Announcement DAILY when No Online Players ###=Daily server restart begins now.
+	TWITCH INTEGRATION | Announcement UPDATES when No Online Players ###=A new server update has been released. Server is restarting now.
+	TWITCH INTEGRATION | Announcement REMOTE RESTART when No Online Players ###=Admin has requested a server reboot. Server is restarting now.
+	TWITCH INTEGRATION | Announcement STOP SERVER when No Online Players ###=Servers shutting down for maintenance.
+	TWITCH INTEGRATION | Announcement MOD UPDATE when No Online Players (\x - Mod ID) ###=Mod \x released an update. Server is restarting now.
+	DISCORD INTEGRATION | Webhook to send CRASHED GRID Status Messages to: 0-Disable, 1-WebHook Main, 2-WebHook Status, 3-Both ###=0
+	ANNOUNCEMENT CONFIGURATION | Announcement Grid Status (\g - server, \s - status) ###=(\g) Grid server status: \s
+	IN-GAME ANNOUNCEMENT CONFIGURATION | Announce CRASHED GRID Status (notify when crash, restarting, and ready)(yes/no) ###=yes
+
+v1.8.3 (2019-06-28) New! Detects running servers. Map name came be changed. Mod \x fixed. Server status change Discord announcements. More backup options.
+- Added: Now checks for existing grids servers & redis-server and auto-assigns Process ID (PID) if possible to reduce duplicate server starts.
+- Added: User-Definable map name added to in config: "Map Name ###=ocean" (Added option to change the Ocean part of the launch command). (Thanks to Colvr for requesting)
+- Added: Backup: Added Multiple comma-separated folders  to backups. (Thanks to Infiniti for requesting)
+- Added: Backup: Added "Full Atlas and Util folder backup every __ backups (1-99) ###"
+- Changed: Backup: Disabled the timeout countdown timer so that the util can resume its functions without waiting for the backup to finish.
+- Fixed: Line 43805 Error during Setup Wizard. (Thanks to Nyt for reporting)
+- Fixed: "Mod \x released" announcements. (Thanks to Doublee and others for reporting)
+- Changed: At util start, if any grid servers are started, it skips the initial Online Player check to speed up startup process. (Thanks to TheOgoPogo for requesting)
+- Added: The util now checks for mod changes in the ServerGrid.json file and will download & install new mods (or remove them) then reboot the servers with announcements.
+- Added: "Allow multiple instances of AtlasServerUpdateUtility? (yes/no) ###=no". Disables KeepAlive and Auto-Detect of running servers/Redis when PID file is corrupt.
+- Added: Discord notification for grids crashing, restarting, disabled, and running. Optionally send message to a second Discord webhook, the main one, or both. (Thanks to Nyt & Infiniti for most recently requesting)
+- Changed: Added a "Starting" status when the grid is starting but not ready for connection. Requires Poll Online Players enabled.
+- Fixed: Main Window Status color didn't change when grid was Disabled.
+- Fixed: Main Window Run status didn't update when changed.
+
+[ New Config Parameters/Changes ]
+	AtlasServerUpdateUtility MISC OPTIONS | Allow multiple instances of AtlasServerUpdateUtility? (yes/no) ###=no
+	GAME SERVER CONFIGURATION | Map Name ###=ocean
+	ANNOUNCEMENT CONFIGURATION | Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###=1,2,5
+	IN-GAME ANNOUNCEMENT CONFIGURATION | Announcement MOD LIST CHANGE (\m - minutes, \x - Mod ID) ###=Server Mod List changed. \x. Server is rebooting in \m minute(s).
+	TWITCH INTEGRATION | Announcement MOD LIST CHANGE (\m - minutes, \x - Mod ID) ###=Server Mod List changed. \x. Server is rebooting in \m minute(s).
+	DISCORD INTEGRATION | Announcement MOD LIST CHANGE (\m - minutes, \x - Mod ID) ###=Server Mod List changed. \x. Server is rebooting in \m minute(s).
+	BACKUP | Full Atlas and Util folder backup every __ backups (1-99) ###=10
+	BACKUP | Additional backup folders / files (in quotes, comma separated) ###=example: "C:\Temp","D:\Atlas"
+	DISCORD INTEGRATION | WebHook 1 Main URL ###=(Previous Discord Webhook)
+	DISCORD INTEGRATION | WebHook 2 Error Message URL (optional) ###=(Previous Discord Webhook)
+	DISCORD INTEGRATION | WebHook to use for error messages: 0-Disable, 1-WH Main, 2-WH Error, 3-Both ###=1
+	DISCORD INTEGRATION | Bot Name ###=Atlas Server
+	DISCORD INTEGRATION | Bot 1 Main Name ###=(Previous Bot Name)
+	DISCORD INTEGRATION | Bot 2 Error Name ###=Atlas Server Status
+
+v1.8.2 (2019-06-25) Hotfix & Automatically closes the "AtlasGame has stopped working" window in case of grid crash.
+- Fixed: If "Poll Online Players"=no (disabled), then the util would skip announcements during reboots. (Thanks to Anorak1313 for reporting)
+- Added: Automatically closes the "AtlasGame has stopped working" window in case of grid crash. (Thanks to Telco for requesting)
+
+v1.8.1 (2019-06-24) Hotfix
+- Fixed: All Grids "Send RCON" was not working. (Thanks to infiniti for reporting)
+
+v1.8.0 (2019-06-24) Hotfix
+- Fixed: Line 45521 error when clicking on MOTD. (Thanks to infiniti for reporting)
+
 v1.7.9 (2019-06-23) Hotfixes
 - Fixed: Line x error when using Send RCON clicked. (Thanks to Nyt for reporting)
 - Fixed: Event scheduler RCON commands would open the "RCON command to send to all grids" window. (Thanks to Norlinri for reporting)
@@ -353,7 +536,7 @@ v1.7.2 (2019-06-09) Added programmable Broadcast Message display duration!
          (The util adds extra spaces before and after the message which causes Atlas to display the message longer). (Thanks to Norlinri for requesting).
 
 [ New Config Parameters/Changes ]
-	[--------------- IN-GAME ANNOUNCEMENT CONFIGURATION ---------------]
+	[ IN-GAME ANNOUNCEMENT CONFIGURATION ]
 	Approximate duration to display messages in-game (seconds)? (6-30) ###=15
 
 v1.7.1 (2019-06-09) Scheduler Hotfix.
@@ -361,7 +544,7 @@ v1.7.1 (2019-06-09) Scheduler Hotfix.
 - Added: Minutes option to DestroyWildDinos. (Thanks to Norlinri for requesting).
 
 [ New Config Parameters/Changes ]
-	[--------------- SCHEDULED DESTROYWILDDINOS ---------------]
+	[ SCHEDULED DESTROYWILDDINOS ]
 	Send DestroyWildDinos minute (0-59) ###=00
 
 v1.7.0 (2019-06-08) Hotfixes. Fixed several bugs with new installation. Added config files to backups.
@@ -382,13 +565,13 @@ v1.6.9 (2019-06-06) Backup tweaks. NOTICE!! Config files were moved to "\Config"
 - Changed: Improved Online Players log to only chart changes in online players (removed duplicate entries).
 
 [ New Config Parameters/Changes ]
-	[--------------- BACKUP ---------------]
+	[ BACKUP ]
 	Redis folder (leave blank to use redis folder above or to disable) ###=
 	In-Game announcement when backup initiated (Leave blank to disable) ###=Server backup in progress.
 	Discord announcement when backup initiated (Leave blank to disable) ###=
 	Twitch announcement when backup initiated (Leave blank to disable) ###=
 
-	[--------------- ATLASSERVERUPDATEUTILITY MISC OPTIONS ---------------]
+	[ ATLASSERVERUPDATEUTILITY MISC OPTIONS ]
 	Folder to place config files ###=
 
 v1.6.8 (2019-06-02) Critical Hotfix if using KeepUtilAlive. Also added new Atlas Scheduler (Work in Progress: Only backs up at this time).
@@ -396,7 +579,7 @@ v1.6.8 (2019-06-02) Critical Hotfix if using KeepUtilAlive. Also added new Atlas
 - Fixed: KeepUtilAlive would timeout if long mod downloads or shutdown.
 
 	[ New Config Parameters/Changes ]
-	[--------------- BACKUP ---------------]
+	[ BACKUP ]
 	Use scheduled backups? (yes/no) ###=yes
 	Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###=0
 	Backup hours (comma separated 00-23 ex.04,16) ###=06,12,18,00
