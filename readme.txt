@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.9.4 (2019-07-18)
+- Latest version: AtlasServerUpdateUtility_v1.9.4 (2019-07-22)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,8 +288,19 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
-v1.9.4 (2019-07-19)
+v1.9.4 (2019-07-22) Hotfixes. Set priority to Low on empty grids, Fixed support for 15x15 grids, Fixed Multiple Instances
+- Added: Optionally set Windows priority to low/idle on empty grids.
+- Added: Option to send Grid Status updates for Local, Remote, or Both. Previously sent messages for both. (Thanks to AceMan for noticing issues)
 - Fixed: Start batch file: If using 64-bit version, the batch file will now update to run the 64-bit version.
+- Fixed: Large ServerGrid.json files, such as the official 15x15, were too large for AutoIT to process. The util now trims the data down internally to only what it needs. This takes a little longer, but works :) (Thanks to Temil2006 for reporting)
+- Fixed: When starting servers, the log states restarting. (Psychoboy & Nyt)
+- Fixed: "Allow multiple instances of AtlasServerUpdateUtility": One section was missed when set to no. (Thanks to Nyt for reporting)
+- Fixed: KeepUtilAlive: Several bug fixes. Now restarts util like it should; properly shuts down; Text fits into window, If util paused, KeepUtilAlive also pauses. (Thanks to @Infiniti for reporting failure to restart)
+- Fixed: Main Window: When changing from Local to Remote or vice versa, both checks marks were displaying. Unused check mark is now removed. (Thanks to AceMan for reporting)
+
+[ New Config Parameters/Changes ]
+GAME SERVER CONFIGURATION -> Set Windows priority to Low/Idle on grids with no players? (yes/no) ###=no
+ANNOUNCEMENT CONFIGURATION -> Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###=local
 
 v1.9.3 (2019-07-18) Crash Watchdog, Rt-Click Menu, Improved shutdown, Some hotfixes.
 - Added: Right-click on server name to bring up a pop up menu with Send RCON, Send Msg, Restart, Stop, Start, Grid Configurator for that specific grid cell (Thanks to @Nyt for requesting)
