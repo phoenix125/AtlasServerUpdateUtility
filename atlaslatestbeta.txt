@@ -1,10 +1,12 @@
-v1.9.4^v1.9.4 Hotfixes. Set priority to Low on empty grids, Fixed support for 15x15 grids, Fixed Multiple Instances
-- Added: Optionally set Windows priority to low/idle on empty grids.
-- Added: Option to send Grid Status updates for Local, Remote, or Both. Previously sent messages for both.
-- Fixed: Start batch file: If using 64-bit version, the batch file will now update to run the 64-bit version.
-- Fixed: Large ServerGrid.json files, such as the official 15x15, were too large for AutoIT to process. The util now trims the data down internally to only what it needs. This takes a little longer, but works :)
-- Fixed: When starting servers, the log states restarting.
-- Fixed: "Allow multiple instances of AtlasServerUpdateUtility": One section was missed when set to no.
-- Fixed: KeepUtilAlive: Several bug fixes. Now restarts util like it should; properly shuts down; Text fits into window, If util paused, KeepUtilAlive also pauses.
-- Fixed: Main Window: When changing from Local to Remote or vice versa, both checks marks were displaying. Unused check mark is now removed.
+v1.9.7b^v1.9.7b Quick fix of Grid Auto Detect & Batch file change.
+- Fixed: Grid auto-detected would crash or simply not work.
+- Changed: If a grid is auto-detected, it now sets it to start in the GridStartSelect.ini file.
+- Changed: Batch files: The util now makes batch files for ALL grids, a new "Launch_Atlas Select.bat" file for enabled grids and the "Launch_Atlas All.bat" now includes ALL grids.
 
+v1.9.7a Quick Fix
+- Fixed: Line 44680 (or close) error due to failure to get Memory Usage of a grid.
+
+v1.9.7 Critical Hotfixes! Shutdown sequence had several bugs.
+- Fixed: Shutdown: Fixed several issues with the shut down sequence.
+- Changed: Crash Watchdog: The "timer" for unresponsive grids now starts after all grids have started. Servers with many grids and.or long waits between starts previously would time out prematurely.
+- Changed: KeepAlive: Improved the detection of a running KeepAlive program for shutdown.

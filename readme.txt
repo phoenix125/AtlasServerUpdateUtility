@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.9.4 (2019-07-22)
+- Latest version: AtlasServerUpdateUtility_v1.9.7 (2019-08-10)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,46 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v1.9.7b (2019-08-10) Quick fix of Grid Auto Detect & Batch file change.
+- Fixed: Grid auto-detected would crash or simply not work.
+- Changed: If a grid is auto-detected, it now sets it to start in the GridStartSelect.ini file.
+- Changed: Batch files: The util now makes batch files for ALL grids, a new "Launch_Atlas Select.bat" file for enabled grids and the "Launch_Atlas All.bat" now includes ALL grids.
+
+v1.9.7a (2019-08-10) Quick Fix.
+- Fixed: Line 44680 (or close) error due to failure to get Memory Usage of a grid. If the error occurs, the util just won't show the affected grid's usage instead of crashing. (Thanks to Sgt. Rock and OG | The Owl Sky for reporting)
+
+v1.9.7 (2019-08-10) Critical Hotfixes! Shutdown sequence had several bugs.
+- Fixed: Shutdown: Fixed several issues with the shut down sequence. (Thanks to Nyt, AceMan, OG | TheOwlSky, and many others for reporting)
+- Changed: Crash Watchdog: The "timer" for unresponsive grids now starts after all grids have started. Servers with many grids and.or long waits between starts previously would time out prematurely. (Thanks to Nyt for reporting)
+- Changed: KeepAlive: Improved the detection of a running KeepAlive program for shutdown. (Thanks to Infiniti for reporting)
+- Changed: If a server restart is in progress (ie. a 10 minute wait after first Discord announcement), and another restart gets scheduled (ie. Mod update), the util will not restart timer anymore. (Thanks to Nyt for requsting)
+- Fixed: ServerGrid.json new or removed mod: Fixed another instance that this would fail. (Thanks to Infiniti for reporting)
+- Added: Rt-Click: Added option to send announcement when "Stop Grid" is selected.
+- Added: Duplicate grid start prevention: Before starting ANY grid, the util makes sure one isn't already running for that grid location. (Disables if Multiple Instances of Util is enabled)
+
+v1.9.6 (2019-08-08) Hotfixes. Fixed Restart and Stop grid buttons, error if ServerGrid.json has "Templates Section, Extra grid starts.
+- Fixed: "Restart Grids" was always only restarting A2. (Thanks to Nyt, JOEW ALABEL, and others for reporting)
+- Fixed: Rt-Click: "Stop Grid", "Start Grid", and "Restart Grid" were not working properly. (Thanks to Nyt, JOEW ALABEL, and others for reporting)
+- Fixed: Mods: If latest version of mod not found, the util reported it as an update and restarted. (Thanks to Linearburn for reporting)
+- Fixed: If ServerGrid.json has "  "serverTemplates": [" section, the util now ignores it completely. (Thanks to Daniel W for reporting and Daniel & Doublee for helping solve)
+- Fixed: Extra grids were being started after a server restart. (Thanks to Infiniti for reporting)
+
+v1.9.5 (2019-08-05) Improved Game Save reliability. New Parameter Editor. Minor big fixes.
+- Added: Grid Shut Down: The util now monitors the [map].atlas file to ensure a game save has started and continues to make sure it has finished saving before task-killing grid. (Thanks to Nyt for reporting Game Save problems & AceMan/Nyt for helping with solution)
+- Fixed: Undefined variable when editing a read-only file and have:
+	"If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###=1" (Thanks to Sgt.Rock for reporting)
+- Added: "Detailed Log" entry added when Alt-F4 is used to shut down a server (after "DoExit" has failed). (Thanks to Nyt for reporting)
+- Fixed: If Lower Priority is changed from yes to no, all grid priority will be set to normal. (Thanks to Anorak for reporting)
+- Fixed: Line 47763 Undefined Variable error. Occurred when editing the "Added Commandline (This Grid)" in Grid Configurator. (Thanks to noelpy for reporting)
+- Fixed: Grid Configurator: If a parameter was blank, such as "name": "", ASUU would blank that line in the ServerGrid.json.
+- Added: Now notifies if ServerGrid.json file has mismatch in number of parameters, such as Port, Name, Gameport, SeamlessData, etc.
+- Updated: Link to Atlas Setup Guide in Setup Wizard has been updated. (Thanks to SRZ and Demens for reporting)
+- Added: Grid Configurator: Added "Parameters Editor". Easily edit the parameters list for customization. Don't forget, you can share the parameter file, too!
+
+[ New Config Parameters/Changes ]
+GAME SERVER CONFIGURATION -> Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###=60
+GAME SERVER CONFIGURATION -> Number of 3 second attempts to ensure game save has completed (1-99) ###=10
+
 v1.9.4 (2019-07-22) Hotfixes. Set priority to Low on empty grids, Fixed support for 15x15 grids, Fixed Multiple Instances
 - Added: Optionally set Windows priority to low/idle on empty grids.
 - Added: Option to send Grid Status updates for Local, Remote, or Both. Previously sent messages for both. (Thanks to AceMan for noticing issues)
