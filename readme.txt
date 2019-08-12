@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.9.7 (2019-08-10)
+- Latest version: AtlasServerUpdateUtility_v1.9.8 (2019-08-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -288,6 +288,22 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v1.9.8 (2019-08-12) More minor bug fixes and improvements.
+- Added: Startup logo.
+- Added: A Preview to the Blackwood Wizard! (in other words, I ran out of time to finish it.. lol)
+- Fixed: Change Windows Priority: If enabled, it added log entries with every check instead of only when changes were made.
+- Fixed again: Line 44680 (or close) error due to failure to get Memory Usage of a grid. If the error occurs, the util just won't show the affected grid's usage instead of crashing. (Thanks to Sgt. Rock and OG | The Owl Sky for reporting)
+- Changed: Status announcements & log entries: Remote grids will now show "PID [Remote]" instead of "PID []". (Thanks to Nyt and AceMan for reporting)
+- Fixed: Grid Configurator: Start Server button wasn't working.
+- Fixed: "Daily restart skipped..." message was being sent even if grids were restarted, if they restart process took less than one minute. (Thanks to Nyt for reporting)
+- Changed: Crash Watchdog: Added Online Player Check interval to the "Minutes to wait for RCON response before restarting grid" to prevent premature shutting down of grid. (Thanks to Nyt for inspiring)
+- Fixed: Status: Sometimes the status would update before a grid was restarted, causing extra "Starting, Running, Starting" announcements.  (Thanks to Nyt and AceMan for reporting)
+- Added: Util Already Running Detection: Added a second detection to help eliminate duplicate starts of the util. (Thanks to Infiniti for reporting)
+- Added: Discord: If "Poll Remote Servers" is enabled, then you can now decide whether to wait for all remote grids to come online before announcing all servers are online. (Dedicated to AceMan)
+
+[ New Config Parameters/Changes ]
+"Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###=no"
+
 v1.9.7b (2019-08-10) Quick fix of Grid Auto Detect & Batch file change.
 - Fixed: Grid auto-detected would crash or simply not work.
 - Changed: If a grid is auto-detected, it now sets it to start in the GridStartSelect.ini file.

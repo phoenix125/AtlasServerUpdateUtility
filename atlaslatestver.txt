@@ -1,12 +1,12 @@
-v1.9.7b^v1.9.7b Quick fix of Grid Auto Detect & Batch file change.
-- Fixed: Grid auto-detected would crash or simply not work.
-- Changed: If a grid is auto-detected, it now sets it to start in the GridStartSelect.ini file.
-- Changed: Batch files: The util now makes batch files for ALL grids, a new "Launch_Atlas Select.bat" file for enabled grids and the "Launch_Atlas All.bat" now includes ALL grids.
-
-v1.9.7a Quick Fix
-- Fixed: Line 44680 (or close) error due to failure to get Memory Usage of a grid.
-
-v1.9.7 Critical Hotfixes! Shutdown sequence had several bugs.
-- Fixed: Shutdown: Fixed several issues with the shut down sequence.
-- Changed: Crash Watchdog: The "timer" for unresponsive grids now starts after all grids have started. Servers with many grids and.or long waits between starts previously would time out prematurely.
-- Changed: KeepAlive: Improved the detection of a running KeepAlive program for shutdown.
+v1.9.8^v1.9.8 More minor bug fixes and improvements.
+- Added: Startup logo.
+- Added: A Preview to the Blackwood Wizard! (in other words, I ran out of time to finish it.. lol)
+- Fixed: Change Windows Priority: If enabled, it added log entries with every check.
+- Fixed again: Line 44680 (or close) error due to failure to get Memory Usage of a grid.
+- Changed: Status announcements & log entries: Remote grids will now show "PID [Remote]" instead of "PID []".
+- Fixed: Grid Configurator: Start Server button wasn't working.
+- Fixed: "Daily restart skipped..." message was being sent even if grids were restarted, if they restart process took less than one minute.
+- Changed: Crash Watchdog: Added Online Player Check interval to the "Minutes to wait for RCON response before restarting grid" to prevent premature shutting down of grid.
+- Fixed: Status: Sometimes the status would update before a grid was restarted, causing extra "Starting, Running, Starting" announcements.
+- Added: Util Already Running Detection: Added a second detection to help eliminate duplicate starts of the util.
+- Added: Discord: If "Poll Remote Servers" is enabled, then you can now decide whether to wait for all remote grids to come online before announcing all servers are online.
