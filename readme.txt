@@ -36,9 +36,9 @@ More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
   *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
 
---
+-----------------
  GETTING STARTED
---
+-----------------
 NEW SERVER INSTALLATION: (Using this utility to download and install server files - STILL REQUIRES MAP (SERVERGRID.JSON) FILES - Google "how to set up an atlas dedicated server")
 1) Place AtlasServerUpdateUtility.exe into any folder and run it.
 - The file "AtlasServerUpdateUtility.ini" will be created and the program will exit.
@@ -70,7 +70,7 @@ CONGRATS! Your server should be up-to-date and running!
 
 --------------
  INSTRUCTIONS
--------------- 
+--------------
 To shut down your server:
 - Click on the AtlasServerUpdateUtility (phoenix) icon in bottom right task bar and select EXIT.
 
@@ -83,9 +83,9 @@ To send RCON message via web browser: (Requires Remote Restart Enabled)
 
 To restart your server remotely from any web browser, including your phone, see REMOTE RESTART INSTRUCTIONS below.
 
---
+-----------------
  TIPS & COMMENTS
---
+-----------------
 Comments:
 - Place ModIDs in ServerGrid.json only.
 - If running multiple instances of this utility, each copy must be in a separate folder.
@@ -100,24 +100,7 @@ Tips:
  KNOWN BUGS
 ------------
 ### ISSUE ###
-- An issue when SteamCMD does not update and validate files properly and therefore performs an update with every update check.
-
-REASON: 
-Short answer: Steamcmd is not properly put the latest "buildid" in the appmanifest.acf file after an update.
-Long Answer:
-- The appmanifest_1006030.acf file is created by steamcmd during updates.
-- It is what my util uses to check for the latest version. It looks at the "buildid" "3594004" within that file.
-- When my util notices an update is available, it renames this file (adds date & time) then runs steamcmd update again.
-- When running steamcmd update, it sets "buildid" to "0" until the update is finished, then it puts the proper latest buildid there.
-- For some reason, steamcmd sometimes does not replace the "0" with "3594004" (or latest number).
-
-WORKAROUND:
-- A temporary quick "fix" is to Rt-Click the AtlasServerupdateUtilkity (Phoenix) icon in bottom right and pause the utility.  It will no longer do anything, but your server(s) will stay running.
-- A better workaround is:
-  - Replace "D:\Game Servers\Atlas Dedicated Server\steamapps\appmanifest.acf" with a backup version that does not have the buildid as "0" in it.
-  
-### ISSUE ###
-- Update problems when running Atlas and/or AtlasServerUpdateUtility in C:\ partition
+- Update problems when running Atlas and/or AtlasServerUpdateUtility in C:\ partition, especially the Desktop.
 
 REASON:
 - It appears that Windows block certain files from being downloaded or created by AtlasServerUpdateUtility.
@@ -128,21 +111,17 @@ WORKAROUND:
 ----
  UPCOMING FEATURES
 ----
-- Second Discord webhook for admin use (announce server info into a separate Discord channel)
 - html and/or PDF documentation
 
 -----
  REQUESTED FEATURES  (Unknown whether they'll get added or not)
 -----
 - Cross chat (I would probably use an existing cross chat util as a "plug in" to this util)
-- 7zip backups
 - CPU Affinity (Reports state that Atlas itself does a job with CPU, though, so not likely add this one)
-- Activate only the server start point: When it detects that a player enters a grid, automatically start surrounding grid servers.
-   (Not as great as it sounds... when someone logs off of a non-home server, that server would have to remain online. Eventually, all servers would need to remain online).
 
-
+---------------------------------------------
  To Create Discord Webhook for announcements
-
+---------------------------------------------
 Discord announcements are handled through Discord webhooks.
 To create a Discord webhook:
 - In Discord, click the Settings gear icon of the desired Discord channel.
@@ -181,9 +160,9 @@ Below is an example of how to have this utility start your existing redis server
     1-Script directory ###=D:\Game Servers\Atlas Dedicated Server\Scripts
     1-Script filename ###=beforesteamcmd.bat
 
---------------
+-----------------------------
  REMOTE RESTART INSTRUCTIONS
---------------
+-----------------------------
 ====> Request Restart From Browser <====
 - If enabled on the server, use to remotely restart the server (for multiple system setups).
 - When restarting, an announcement will be made in-game, on Discord, and in Twitch if enabled, with the set duration of delay (warning).
@@ -207,9 +186,9 @@ RestartCode=password
 - You can have multiple passwords. For example: RestartCode=password1,pass2,pwd3
 In a standard web browser, type in the URL http://192.168.1.30:57520?restart=password. The Server would compare the pass and find that it is correct. It would respond with 200 OK And HTML Code stating the server is restarting.
 
--
+----------------
  DOWNLOAD LINKS
--
+----------------
 Latest Stable Version:    http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtility.zip
 Previous Stable Versions: http://www.phoenix125.com/share/atlas/atlashistory/
 Latest Beta Version:      http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
@@ -229,20 +208,23 @@ More ServerUpdateUtilities available: 7 Days To Die and Conan Exiles.  Rust and 
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0
 https://gamercide.org/forum/topic/10558-conan-exiles-server-utility/
 
-------
+--------------------------------------------------------
  Questions & Answers  Q&A from commonly asked questions
-------
+--------------------------------------------------------
 (WORK IN PROGRESS)
-What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, etc. files?
-- The utility makes no direct changes to any of Atlas' config files. Anything added to the "Atlas extra commandline parameters ###=" will get added by Atlas itself.
+What changes does the utility make to the Atlas GameUserSettings.ini, Game.ini, Engine.ini, ServerGrid.json, etc. files?
+- The utility makes no direct changes to any of Atlas' config files, unless using the Grid Configurator. Anything added to the "Atlas extra commandline parameters ###=" will get added by Atlas itself.
 
 How does the utility shut down the servers?
-- I removed the SaveWorld command because it wasn't working last time I checked.  The DoExit and CTRL-X both force a SaveWorld ... I've tested them quite a bit. Even if the RCON ports are wrong, the CTRL-X should safely shutdown servers. 
+- The SaveWorld command does not work with Atlas. The RCON "DoExit" and Alt-F4 both force a SaveWorld.
+- The util also monitors the [mapname].atlas file fro each grid. It ensures the file has changed (a SaveWorld started) and that it has finished saving before task killing the grids.
+1. The util first sends RCON "DoExit". This forces a Save World.
+2. After a definable time, if "DoExiy" fails, it then sends Alt-F4 to each stuck grid (which is the same as clicking the "X" [Close] button). This also forces a Save World.
+3. If that also fails, it will then Task Kill the grid.
 
------------
+--------------------------------------------------------
  FYI: DETAILS OF HOW THIS UTIL PERFORMS CERTAIN ACTIONS
------------
-
+--------------------------------------------------------
  INFORMATION ON IMPORTING DATA (Details on what information is imported and how it is used)
 -
 The following information is imported from the ServerGrid.json:
