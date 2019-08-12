@@ -302,7 +302,7 @@ v1.9.8 (2019-08-12) More minor bug fixes and improvements.
 - Added: Discord: If "Poll Remote Servers" is enabled, then you can now decide whether to wait for all remote grids to come online before announcing all servers are online. (Dedicated to AceMan)
 
 [ New Config Parameters/Changes ]
-"Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###=no"
+DISCORD INTEGRATION -> Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###=no
 
 v1.9.7b (2019-08-10) Quick fix of Grid Auto Detect & Batch file change.
 - Fixed: Grid auto-detected would crash or simply not work.

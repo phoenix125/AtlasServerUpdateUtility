@@ -824,8 +824,8 @@ If $aAllowMultipleUtilsYN = "no" Then
 	Else
 		$aUtilVersion = $aUtilVerStable
 	EndIf
-	Local $tHwd1 = 0
-	Local $tHwd2 = 0
+	Local $tHwd1 = WinWait("[REGEXPTITLE:AtlasServerUpdateUtility v[0-9]", "", 2)
+	Local $tHwd2 = WinWait("AtlasServerUpdateUtility v", "", 2)
 	Local $tPID1 = WinGetProcess($tHwd1)
 	Local $tPID2 = WinGetProcess($tHwd2)
 	Local $tPID3 = ProcessExists($aUtilName & "_" & $aUtilVersion & ".exe")
@@ -843,7 +843,21 @@ If $aAllowMultipleUtilsYN = "no" Then
 		If $tPID <> @AutoItPID Then
 			ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Another instance of Util PID[" & $tPID & "] is running." & @CRLF & "Waiting 5 seconds for it to close.")
 			Sleep(5000)
-			Local $tPID = WinGetProcess("AtlasServerUpdateUtility v")
+			Local $tHwd1 = WinWait("[REGEXPTITLE:AtlasServerUpdateUtility v[0-9]", "", 2)
+			Local $tHwd2 = WinWait("AtlasServerUpdateUtility v", "", 2)
+			Local $tPID1 = WinGetProcess($tHwd1)
+			Local $tPID2 = WinGetProcess($tHwd2)
+			Local $tPID3 = ProcessExists($aUtilName & "_" & $aUtilVersion & ".exe")
+			If $tPID1 >= $tPID2 Then
+				Local $tPID0 = $tPID1
+			Else
+				Local $tPID0 = $tPID2
+			EndIf
+			If $tPID3 >= $tPID0 Then
+				Local $tPID = $tPID3
+			Else
+				Local $tPID = $tPID0
+			EndIf
 			If $tPID > 0 Then
 				SplashOff()
 				LogWrite(" [Util] Another instance of " & $aUtilName & " PID[" & $tPID & "] is already running.")
