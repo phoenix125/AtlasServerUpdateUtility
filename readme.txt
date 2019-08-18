@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.9.8 (2019-08-12)
+- Latest version: AtlasServerUpdateUtility_v1.9.9a (2019-08-16)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -270,6 +270,30 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v1.9.9c (2019-08-16) Minor backup tweak.
+- Fixed: If a redis-server was started, any reboot in process would be stopped. (Thanks to MsgAmmo for reporting)
+- Fixed: Improved the "existing redis-server.exe" detection. Also now checks for existing redis-server every time it attempts to restart. (Thanks to MsgAmmo for reporting)
+- Fixed: Improved the "Existing grid server" detection slightly.
+
+v1.9.9b (2019-08-16) Minor backup tweak.
+- Added: User-definable 7zip backup command line. (Thanks to Foppa for requesting)
+[ New Config Parameters/Changes ]
+BACKUP -> 7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###=a -spf -r -tzip -ssw
+
+v1.9.9a (2019-08-16) Minor tweaks.
+- Added: Blackwood Wizard: Added "AltSaveDIR" option. (Thanks to NEITFALL for reporting)
+- Changed: Wizard: Changed the "Coming Soon!" description for Blackwood to the intended text. (Thanks to NEITFALL for reporting)
+- Fixed: Util Update: The util wasn't completing the shutdown before running updated util. (Unfortunately, this won't help until NEXT update.)
+- Added: Added Blackwood icon to "Select Wizard".
+
+v1.9.9 (2019-08-16) New Blackwood Wizard! Try the new Blackwood map!
+- Added: Blackwood Wizard!
+- Fixed: Setup Wizard: If GridStartSelect file was too big, you could not edit the data. Buffer limit is now increased.
+- Fixed: Setup Wizard: When closed during startup, the startup info screen was not displayed.
+- Fixed: Line 36135 error when NOT using the "Poll Online Players" option. (Thanks to Eggonomicon for reporting)
+- Added: When clicking button to open a window that is already open, that window will now to put to front.
+- Added: Grid Configurator: "NetServerMaxTickRate" (Thanks Anorak for requesting) and "NoSeamlessServer" to default parameter list.
+
 v1.9.8 (2019-08-12) More minor bug fixes and improvements.
 - Added: Startup logo.
 - Added: A Preview to the Blackwood Wizard! (in other words, I ran out of time to finish it.. lol)

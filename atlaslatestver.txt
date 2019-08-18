@@ -1,12 +1,15 @@
-v1.9.8^v1.9.8 More minor bug fixes and improvements.
-- Added: Startup logo.
-- Added: A Preview to the Blackwood Wizard! (in other words, I ran out of time to finish it.. lol)
-- Fixed: Change Windows Priority: If enabled, it added log entries with every check.
-- Fixed again: Line 44680 (or close) error due to failure to get Memory Usage of a grid.
-- Changed: Status announcements & log entries: Remote grids will now show "PID [Remote]" instead of "PID []".
-- Fixed: Grid Configurator: Start Server button wasn't working.
-- Fixed: "Daily restart skipped..." message was being sent even if grids were restarted, if they restart process took less than one minute.
-- Changed: Crash Watchdog: Added Online Player Check interval to the "Minutes to wait for RCON response before restarting grid" to prevent premature shutting down of grid.
-- Fixed: Status: Sometimes the status would update before a grid was restarted, causing extra "Starting, Running, Starting" announcements.
-- Added: Util Already Running Detection: Added a second detection to help eliminate duplicate starts of the util.
-- Added: Discord: If "Poll Remote Servers" is enabled, then you can now decide whether to wait for all remote grids to come online before announcing all servers are online.
+v1.9.9b^v1.9.9b Minor backup tweak.
+- Added: User-definable 7zip backup command line.
+
+v1.9.9a Minor tweaks.
+- Added: Blackwood Wizard: Added "AltSaveDIR" option.
+- Changed: Wizard: Changed the "Coming Soon!" description for Blackwood to the intended text.
+- Fixed: Util Update: The util wasn't completing the shutdown before running updated util. (Unfortunately, this won't help until NEXT update.)
+
+v1.9.9 New Blackwood Wizard! Try the new Blackwood map!
+- Added: Blackwood Wizard!
+- Fixed: Setup Wizard: If GridStartSelect file was too big, you could not edit the data. Buffer limit is now increased.
+- Fixed: Setup Wizard: When closed during startup, the startup info screen was not displayed.
+- Fixed: Line 36135 error when NOT using the "Poll Online Players" option.
+- Added: When clicking button to open a window that is already open, that window will now to put to front.
+- Added: Grid Configurator: "NetServerMaxTickRate" and "NoSeamlessServer" to default parameter list.
