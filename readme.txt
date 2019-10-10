@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: AtlasServerUpdateUtility_v1.9.9a (2019-08-16)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.0.5 (2019-10-09)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -265,20 +265,113 @@ For update checks:
 -------------
  CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above) or http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
 -------------
-- The STABLE version and BETA version are the same at this time.
+v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes (for real this time!).
+- Differences from stable:
+	- "Fast Method" Discord is enabled by default.
+	- "Tools" -> "Test Redis" button.
 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
-v1.9.9c (2019-08-16) Minor backup tweak.
+v2.0.5 (2019-10-08) Bug Fix.
+- Fixed: Line 34774 error fix. (Thanks to Infiniti for reporting)
+
+v2.0.4 (2019-10-06) Bug Fixes and a few new things.
+NOTICE! The Redis Integration for Online Players is temporarily disabled while until I get it working for people other than me :)
+- Added: Optionally disable Grid Memory and CPU reporting. (Thanks to Deviliath for requesting)
+- Added: Disable grid process crash detection (for using util with ChromeSDK's Atlas Server Controller). (Thanks to Neitfall for requesting)
+	WARNING! (Extreme BETA! For now, will NOT RESTART grids after ANY shutdown, including daily restarts, mod/server updates, etc.)
+			 (In future release, I will have it detect running grids and restart those during daily restarts, mod/server updates, and skip polling online players for "crashed" grids.)
+- Fixed: Line 39838 Error. (Thanks to Infiniti for reporting)
+- Fixed: Line 39857 Error. (Thanks to Infiniti for reporting)
+- Fixed: Send Msg to ALL GRIDS was not working. (Thanks to Wartai for reporting)
+- Fixed: Grid Configurator: AltSaveDIR was only accepting numbers. (Thanks to Linearburn for reporting)
+- Fixed: 64-bit version batch file wasn't updating properly. (Thanks to Visual for reporting)
+
+[ New Config Parameters/Changes ]
+	MISC OPTIONS -> Disable Grid Memory and CPU monitoring? (yes/no) ###=no
+	CRASH WATCHDOG -> Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###=no
+
+v2.0.3 (2019-09-11) Bug fix
+- Fixed: Line 39999 error. Occurred when util forced to task kill servers during shutdown. (Thanks to Visual and Deviliath)
+
+v2.0.2 (2019-09-04) Bug fixes, improvements
+- Fixed: Mod update would fail if a previous operation erred. (Thanks to ZeroCooL fro reporting)
+- Changed: "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99) (Default is 5) ###" -> Increased range of minutes from 0-10 to 0-99. (Thanks to Infiniti for reporting)
+- Fixed: If "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99) (Default is 5) ###=0" (disabled), it may not have completely disabled. (Thanks to Infiniti for reporting)
+- Added: New "Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###=7" option. (Thanks to Nyt and others for requesting)
+
+[ New Config Parameters/Changes ]
+	CRASH WATCHDOG -> Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###=0
+	CRASH WATCHDOG -> Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###=7
+
+v2.0.1 (2019-08-28) Bug Fix with Blackwood ModIDs
+- Fixed: Bug Fix with Blackwood ModIDs (Thanks to AceMan for reporting)
+
+v2.0.0 (2019-08-28) STABLE and BETA branches being used again! Bug fixes (for real this time!).
+- Fixed: Still couldn't change the "Fast Discord" and "Use Redis for online players." (Thanks to Nyt for reporting)
+- Fixed: Redis-Server will not start automatically after v1.9.9c. (Thanks to Yet for requesting)
+- Fixed: Line 42024 Error: Occurred when mod list in GUS was edited on Blackwood server instead of using wizard. (Thanks to XCITE for reporting)
+- Fixed: Blackwood: If mods were changed in the GUS.ini, the util didn't update the mod list.
+- Fixed: If ModList was changed in ServerGrid.json, the util would error.
+- Added: If status stuck at "Starting..." then util now displays a notice and opens a help file in default text viewer.
+- Added: If "Fast Method" of Discord causes error, the log now shows a recommendation to disable the "Fast Method"
+
+v1.9.9l (2019-08-26) Bug fix. Couldn't change the two new variables from v1.9.9i (Thanks to Nyt for reporting)
+
+v1.9.9k (2019-08-26) Bug fix. Error in Line.
+
+v1.9.9j (2019-08-26) Made the new redis feature disabled by default.
+- To enable it, change: GAME SERVER CONFIGURATION -> Use redis for improved accuracy of online players? (yes/no) ###=yes
+
+v1.9.9i (2019-08-25) Faster Discord. Part 1 of Redis Integration for Online Players
+- Added: Redis Part 1 (Thanks to Nyt, AceMan, and Infiniti for much help!)
+	- Optionally use the redis to accurately show current players' location(s).
+	- NOTICE! Still in early stages: It does not accurately remove logged out players.
+	- Coming soon (hopefully):
+		- Remove logged out players from list
+		- Provide detailed player info
+		- Click on player name to get more player info
+		- Player commands, such as ban, make admin, etc.
+- Added: Added a "Fast Method" Discord message send option.
+- Added: Improved reliability of Discord message sending.
+- Change: To speed up util's boot time, when util is started, it now only makes one attempt to get online players and skips the rechecks. (Thanks to TheOwnSky for inspiring)
+- Fixed: "Line 41733" error which occurred when the mod list was increased. (Thanks to TheOwlSky for reporting)
+- Fixed: Some things would cause all or part of the config file to reset.
+- Fixed: Mod changes to the ServerGrid.json file were not always detected properly.
+
+[ New Config Parameters/Changes ]
+	GAME SERVER CONFIGURATION -> Use redis for improved accuracy of online players? (yes/no) ###=yes
+	DISCORD INTEGRATION -> Use Fast Method to send Discord messages (if problems, disable)? (yes/no) ###=yes
+
+v1.9.9h (2019-08-21) Blackwood Wizard Critical Fix!
+- Fixed: Blackwood Wizard was looping (Thanks to Kelarin for reporting)
+- Fixed: Removed the "Preparing" status indicator for disabled grids.
+- Fixed: Line 39527 Error (Thanks to TheOwlSky for reporting)
+
+v1.9.9g (2019-08-20)
+- Fixed: A rare condition that would cause Line 41754 error. Occurs if util has been updated since v1.6.4 and Discord is disabled. (Thanks to TheOwlSky for reporting)
+
+v1.9.9f (2019-08-20) Fixed another Redis bug.
+- Fixed: Another Redis bug with new installations.
+
+v1.9.9e (2019-08-20) Redis started despite being disabled
+- Fixed: Redis was started despite being disabled. (Thanks to Nevcairiel for reporting)
+- Fixed: Blackwood Wizard: "Convert existing" has some inconsistencies.
+
+v1.9.9d (2019-08-20) Line 43467 Error Fix
+- Fixed: Line 43467 Error. I forgot to declare a redis variable as Global. (Thanks to Nevcairiel for reporting)
+
+v1.9.9c (2019-08-19) Redis-Server detection improvements.
 - Fixed: If a redis-server was started, any reboot in process would be stopped. (Thanks to MsgAmmo for reporting)
 - Fixed: Improved the "existing redis-server.exe" detection. Also now checks for existing redis-server every time it attempts to restart. (Thanks to MsgAmmo for reporting)
-- Fixed: Improved the "Existing grid server" detection slightly.
+- Fixed: Improved the "existing grid server" detection slightly.
+- Fixed: At startup, log entry showed ERROR when grids were disabled.
 
 v1.9.9b (2019-08-16) Minor backup tweak.
 - Added: User-definable 7zip backup command line. (Thanks to Foppa for requesting)
 [ New Config Parameters/Changes ]
-BACKUP -> 7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###=a -spf -r -tzip -ssw
+	BACKUP -> 7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###=a -spf -r -tzip -ssw
 
 v1.9.9a (2019-08-16) Minor tweaks.
 - Added: Blackwood Wizard: Added "AltSaveDIR" option. (Thanks to NEITFALL for reporting)
@@ -308,7 +401,7 @@ v1.9.8 (2019-08-12) More minor bug fixes and improvements.
 - Added: Discord: If "Poll Remote Servers" is enabled, then you can now decide whether to wait for all remote grids to come online before announcing all servers are online. (Dedicated to AceMan)
 
 [ New Config Parameters/Changes ]
-DISCORD INTEGRATION -> Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###=no
+	DISCORD INTEGRATION -> Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###=no
 
 v1.9.7b (2019-08-10) Quick fix of Grid Auto Detect & Batch file change.
 - Fixed: Grid auto-detected would crash or simply not work.
@@ -347,8 +440,8 @@ v1.9.5 (2019-08-05) Improved Game Save reliability. New Parameter Editor. Minor 
 - Added: Grid Configurator: Added "Parameters Editor". Easily edit the parameters list for customization. Don't forget, you can share the parameter file, too!
 
 [ New Config Parameters/Changes ]
-GAME SERVER CONFIGURATION -> Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###=60
-GAME SERVER CONFIGURATION -> Number of 3 second attempts to ensure game save has completed (1-99) ###=10
+	GAME SERVER CONFIGURATION -> Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###=60
+	GAME SERVER CONFIGURATION -> Number of 3 second attempts to ensure game save has completed (1-99) ###=10
 
 v1.9.4 (2019-07-22) Hotfixes. Set priority to Low on empty grids, Fixed support for 15x15 grids, Fixed Multiple Instances
 - Added: Optionally set Windows priority to low/idle on empty grids.
@@ -361,8 +454,8 @@ v1.9.4 (2019-07-22) Hotfixes. Set priority to Low on empty grids, Fixed support 
 - Fixed: Main Window: When changing from Local to Remote or vice versa, both checks marks were displaying. Unused check mark is now removed. (Thanks to AceMan for reporting)
 
 [ New Config Parameters/Changes ]
-GAME SERVER CONFIGURATION -> Set Windows priority to Low/Idle on grids with no players? (yes/no) ###=no
-ANNOUNCEMENT CONFIGURATION -> Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###=local
+	GAME SERVER CONFIGURATION -> Set Windows priority to Low/Idle on grids with no players? (yes/no) ###=no
+	ANNOUNCEMENT CONFIGURATION -> Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###=local
 
 v1.9.3 (2019-07-18) Crash Watchdog, Rt-Click Menu, Improved shutdown, Some hotfixes.
 - Added: Right-click on server name to bring up a pop up menu with Send RCON, Send Msg, Restart, Stop, Start, Grid Configurator for that specific grid cell (Thanks to @Nyt for requesting)
@@ -379,15 +472,15 @@ v1.9.3 (2019-07-18) Crash Watchdog, Rt-Click Menu, Improved shutdown, Some hotfi
 - Fixed: Setup Wizard: More bug fixes. (Thanks to Karl Tibbs for reporting issue if no ServerGrid.json file exists)
 
 [ New Config Parameters/Changes ]
-CRASH WATCHDOG -> Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###=2
-CRASH WATCHDOG -> Minutes to wait for RCON response before restarting grid (0-Disable, 0-10) (Default is 5) ###=5
-CRASH WATCHDOG -> Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###=3
-CRASH WATCHDOG -> Minutes the crashes have to occur within before disabling grid (5-720) ###=30
-CRASH WATCHDOG -> Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###=no
-CRASH WATCHDOG -> In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
-CRASH WATCHDOG -> Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###=no
-CRASH WATCHDOG -> WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###=
-CRASH WATCHDOG -> Discord announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
+	CRASH WATCHDOG -> Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###=2
+	CRASH WATCHDOG -> Minutes to wait for RCON response before restarting grid (0-Disable, 0-10) (Default is 5) ###=5
+	CRASH WATCHDOG -> Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###=3
+	CRASH WATCHDOG -> Minutes the crashes have to occur within before disabling grid (5-720) ###=30
+	CRASH WATCHDOG -> Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###=no
+	CRASH WATCHDOG -> In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
+	CRASH WATCHDOG -> Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###=no
+	CRASH WATCHDOG -> WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###=
+	CRASH WATCHDOG -> Discord announcement when grid is disabled due to too many crashes (\g - grids) ###=Grid (\g) Disabled due to crashes.
 
 v1.9.2 (2019-07-13) Discord Hotfix!
 - Fixed: "DiscordMainWHSel" parameter window that pops up with util restarts which caused all Discord announcements to fail.
