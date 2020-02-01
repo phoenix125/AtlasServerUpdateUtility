@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.0.5 (2019-10-09)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.0 (2020-01-27)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -273,6 +273,57 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.0 (2020-01-27) Hotfixes. NOTE! CPU Affinity. If >32 Logical Processors, you must run 64-bit version of ASUU.
+- Fixed: CPU Affinity now works properly on systems with <65 logical processors. NOTE! If 32-64 processors, you must run 64-bit version of ASUU! >64 processor support coming soon! (Thanks to Infiniti & AceMan for help with troubleshooting)
+- Fixed: 48338 Error when clicking "Fix 'Starting' Status" button in Tools Menu. (Thanks to GooberGrape for reporting)
+- Fixed: 64-Bit version was not properly updating the _Start_AtlasServerUpdateUtility.bat file.
+- Added: The 64-bit version of ASUU will automatically be extracted in future updates.
+
+v2.0.9 (2020-01-26) Hotfix.
+- Fixed: If AtlasServerUpdateUtilityGridStartSelect.ini was out of sync, ASUU was not adding the new CPU Affinity parameters. (Thanks to JW2020 for reporting)
+- Fixed: Another attempt to fix Undefined Variable during Mod Updates. (Thanks to JW2020 for reporting)
+
+v.2.0.8 (2020-01-26) New! CPU Affinity! Bug Fixes.
+- Added: CPU/Process Affinity added to Grid Configurator. Affinity can be changed without restarting servers. (Thanks to Infiniti, Revy, & Shadowsong) for requesting)
+- Fixed: Line 43225 Error. (Thanks to JW2020) for reporting.
+- Fixed: Line 49621 Error. (Thanks to msmcpeake for reporting)
+- Fixed: ASUU was not unassigning PIDs during some shutdowns. This should prevent misidentifying existing servers. (Thanks to Yet for reporting)
+
+v.2.0.7 (2020-01-23) Bug Fixes. Improved ASUU "already running" duplicate detection. Added a total of 140 ini parameters to Grid Configurator.
+- Added: grid configurator now has all known (and some untested) parameters from  https://docs.google.com/spreadsheets/d/1X4nY0xMzsr65ud5ugvhdF2ZItDXcacbEBxxudfxseyM/edit#gid=607610888 (Inspired by DFS)
+- Fixed: Line 43163 Variable Used Without Being Declared Error. (Thanks to msmcpeake for reporting)
+- Fixed: MUCH NEEDED! Added a third (and more reliable) ASUU Duplicate Instance check routine to help prevent unintentional multiple instances of ASUU.
+- Changed: Removed Underscore _ from filenames in main ASUU folder, except the _Start.bat file. (Thanks to Linebeck for requesting)
+- Changed: ServerSummary creation only gets logged in the Detailed log now to prevent it from being broadcast to Discord. (Thanks to Linebeck for requesting)
+- Fixed: When closing the Grid Configurator or any of the Wizards, all fields are now saved  by using a new close button. (Thanks to msmcpeake for reporting and helping diagnose issue)
+- Added: Web Links to NAT Loopback Help, Redis Desktop Manager, and Fix "Starting" Grid Status notice.
+
+v2.0.6 (2020-01-12) Fixed Discord Fast Method, added ModIDs field & Online Player List (Hover Mouse) to Configurator, added Discord "Ready" status announce delay, added mod LIST (ID & Names) to ServerSummary.
+- Added: Option to check for mod updates but not install them until "Update Mods" button pressed. Helps prevent mod update from crashing your server without you knowing. (Thanks to Neitfall for requesting)
+- Added: Added an "Enabled" check box in the ALL GRIDS section to help prevent executing commands on all grids when intending to do select grids only. (Thanks to Neitfall for requesting)
+- Added: ModIDs field to Grid Configurator. Hover mouse over text to see current mod list with names.
+- Added: Discord announcement delay after grid reaches Ready status. (Thanks to Nyt & Infiniti for requesting)
+- Added: If more than one RCON port entry is in a GUS.ini file, ASUU warns the user and uses the first entry.
+- Added: Execute external script before BACK UP feature added. (Thanks to Infiniti fro requesting)
+- Added: ModIDs and Names List added to ServerSummary.txt file at end of file. (Thanks to Anorak1313, AceMan, & Infiniti for inspiring)
+- Added: Discord: If error 429 (Too many requests), ASUU skips retries.
+- Added: Online Players list when you hover over grid name/number in Grid Configurator.
+- Fixed: Backup: Added DefaultGUS, DefaultEngine, etc to backups. (Thanks to Neitfall for reporting)
+- Fixed: Discord Fast Method: The code was improved. It should work on more systems. (Thanks to AceMan, Linebeck, and others for reporting)
+- Fixed: "Error allocating memory" error. I fixed three known causes of this error; Most likely cause was a large log file. (Thanks to AceMan for reporting)
+- Changed: Number of Online Player RCON retry attempts (0-3) ###= increased max number to 9 (Thanks to Nyt for requesting)
+- Changed: Log: Added more entries/details for server restarts, more details in Discord Fast Method log entries.
+- Changed: Batch File folder no longer deletes the entire folder, but batch files still get overwritten every time ASUU is started. (Thanks to Bentofox for requesting)
+
+[ New Config Parameters/Changes ]
+	GAME SERVER CONFIGURATION -> Detect mod updates but DO NOT automatically install them? (yes/no) ###=no
+	GAME SERVER CONFIGURATION -> Number of Online Player RCON retry attempts (0-9) ###=3
+	DISCORD INTEGRATION -> Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###=0
+	EEXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* -> 8-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###=no
+	EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* -> 8-Script directory ###=
+	EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* -> 8-Script filename ###=backup.bat
+	EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* -> 8-Wait for script to complete before continuing? (yes/no) ###=no
+
 v2.0.5 (2019-10-08) Bug Fix.
 - Fixed: Line 34774 error fix. (Thanks to Infiniti for reporting)
 

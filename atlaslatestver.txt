@@ -1,15 +1,13 @@
-v1.9.9b^v1.9.9b Minor backup tweak.
-- Added: User-definable 7zip backup command line.
+v2.1.0^v2.1.0 Hotfixes. NOTE! CPU Affinity. If >32 Logical Processors, you must run 64-bit version of ASUU.
+- Fixed: CPU Affinity now works properly on systems with <65 logical processors. NOTE! If 32-64 processors, you must run 64-bit version of ASUU! >64 processor support coming soon! (Thanks to Infiniti & AceMan for help with troubleshooting)
+- Fixed: 48338 Error when clicking "Fix 'Starting' Status" button in Tools Menu. (Thanks to GooberGrape for reporting)
+- Fixed: 64-Bit version was not properly updating the _Start_AtlasServerUpdateUtility.bat file.
 
-v1.9.9a Minor tweaks.
-- Added: Blackwood Wizard: Added "AltSaveDIR" option.
-- Changed: Wizard: Changed the "Coming Soon!" description for Blackwood to the intended text.
-- Fixed: Util Update: The util wasn't completing the shutdown before running updated util. (Unfortunately, this won't help until NEXT update.)
+v2.0.9
+- Fixed: If AtlasServerUpdateUtilityGridStartSelect.ini was out of sync, ASUU was not adding the new CPU Affinity parameters.
+- Fixed: Another attempt to fix Undefined Variable during Mod Updates.
 
-v1.9.9 New Blackwood Wizard! Try the new Blackwood map!
-- Added: Blackwood Wizard!
-- Fixed: Setup Wizard: If GridStartSelect file was too big, you could not edit the data. Buffer limit is now increased.
-- Fixed: Setup Wizard: When closed during startup, the startup info screen was not displayed.
-- Fixed: Line 36135 error when NOT using the "Poll Online Players" option.
-- Added: When clicking button to open a window that is already open, that window will now to put to front.
-- Added: Grid Configurator: "NetServerMaxTickRate" and "NoSeamlessServer" to default parameter list.
+v2.0.8 New! CPU Affinity! Bug Fixes.
+- Added: CPU/Process Affinity added to Grid Configurator. Affinity can be changed without restarting servers.
+- Fixed: Line 43225 & 49621 Errors.
+- Fixed: ASUU was not unassigning PIDs during some shutdowns. This should prevent misidentifying existing servers.
