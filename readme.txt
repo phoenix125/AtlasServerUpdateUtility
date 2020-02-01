@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.0 (2020-01-27)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.1 (2020-01-31)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -273,6 +273,11 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.1 (2020-01-31) Hotfixes.
+- Fixed: Line 43283 error. (Thanks to AceMan for reporting)
+- Fixed: Grids were not rebooting when stuck/frozen. (Thanks to Infiniti for reporting)
+- Fixed: When updating ASUU update, if your were using the 64-bit version, it will continue to use the 64-bit version after updating.
+
 v2.1.0 (2020-01-27) Hotfixes. NOTE! CPU Affinity. If >32 Logical Processors, you must run 64-bit version of ASUU.
 - Fixed: CPU Affinity now works properly on systems with <65 logical processors. NOTE! If 32-64 processors, you must run 64-bit version of ASUU! >64 processor support coming soon! (Thanks to Infiniti & AceMan for help with troubleshooting)
 - Fixed: 48338 Error when clicking "Fix 'Starting' Status" button in Tools Menu. (Thanks to GooberGrape for reporting)

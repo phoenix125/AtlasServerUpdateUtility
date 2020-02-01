@@ -1,13 +1,4 @@
-v2.1.0^v2.1.0 Hotfixes. NOTE! CPU Affinity. If >32 Logical Processors, you must run 64-bit version of ASUU.
-- Fixed: CPU Affinity now works properly on systems with <65 logical processors. NOTE! If 32-64 processors, you must run 64-bit version of ASUU! >64 processor support coming soon! (Thanks to Infiniti & AceMan for help with troubleshooting)
-- Fixed: 48338 Error when clicking "Fix 'Starting' Status" button in Tools Menu. (Thanks to GooberGrape for reporting)
-- Fixed: 64-Bit version was not properly updating the _Start_AtlasServerUpdateUtility.bat file.
-
-v2.0.9
-- Fixed: If AtlasServerUpdateUtilityGridStartSelect.ini was out of sync, ASUU was not adding the new CPU Affinity parameters.
-- Fixed: Another attempt to fix Undefined Variable during Mod Updates.
-
-v2.0.8 New! CPU Affinity! Bug Fixes.
-- Added: CPU/Process Affinity added to Grid Configurator. Affinity can be changed without restarting servers.
-- Fixed: Line 43225 & 49621 Errors.
-- Fixed: ASUU was not unassigning PIDs during some shutdowns. This should prevent misidentifying existing servers.
+v2.1.1^v2.1.1 Hotfixes.
+- Fixed: Line 43283 error.
+- Fixed: Grids were not rebooting when stuck/frozen.
+- Fixed: When updating ASUU update, if your were using the 64-bit version, it will continue to use the 64-bit version after updating.
