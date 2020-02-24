@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.3 (2020-02-23)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.5 (2020-02-24)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -273,6 +273,14 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.5 (2020-02-24) Hotfixes
+- Fixed: Line 36898 error. (Thanks to AceMan for reporting)
+- Fixed: Some Mods would go into an update loop.
+
+v2.1.4 (2020-02-23) Hotfixes
+- Fixed: Line 42830 and other Line errors when mod update notes were blank. (Thanks to AceMan for reporting)
+- Fixed: When a mod update note has /' in it, it caused Fast Method Discord to fail as seen in Mod 1760515965 "They can\'t be placed in water"
+
 v2.1.3 (2020-02-23) Memory Leak Fix! Fixed params with spaces. Added Mod Update notes to announcements.
 - Fixed: Memory Leak! All output from RCON was not being properly dumped, therefore ASUU was buffering all RCON activity. (Thanks to Meatshield for reporting and finding cause of memory leak).
 - Added: Mod update notes can now also be sent with Discord announcements. (Thanks to Doublee for requesting)
