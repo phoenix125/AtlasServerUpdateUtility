@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.1 (2020-01-31)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.3 (2020-02-23)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -273,6 +273,38 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.3 (2020-02-23) Memory Leak Fix! Fixed params with spaces. Added Mod Update notes to announcements.
+- Fixed: Memory Leak! All output from RCON was not being properly dumped, therefore ASUU was buffering all RCON activity. (Thanks to Meatshield for reporting and finding cause of memory leak).
+- Added: Mod update notes can now also be sent with Discord announcements. (Thanks to Doublee for requesting)
+- Fixed: Auto Update would restart the old version instead of the downloaded version.
+- Added: "Running" button to main window (in addition to the "All", "None", "Local", etc. (Thanks to Neitfall for requesting)
+- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values. (Thanks to Norlinri for requesting)
+- Fixed: Grid Configurator: Several parameters were adding a space between param and =. ie. layerDefaultNoDiscoveriesMaxLevelUps =35. (Thanks to Meatshield for reporting)
+- Fixed: If an unknown error occurred in an object, ASUU would have crashed.
+
+[ New Config Parameters/Changes ]
+	IN-GAME ANNOUNCEMENT CONFIGURATION -> Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###
+	IN-GAME ANNOUNCEMENT CONFIGURATION -> Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###
+	DISCORD INTEGRATION -> Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###
+	DISCORD INTEGRATION -> Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###
+	DISCORD INTEGRATION -> Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###
+	TWITCH INTEGRATION -> Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###
+	TWITCH INTEGRATION -> Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###
+	TWITCH INTEGRATION -> Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###
+
+v2.1.2 (2020-02-02) More Hotfixes. Fixed KeepAlive & "All Servers Online" announcement.
+- Fixed: KeepAlive was stuck in a paused state. New AtlasServerUpdateUtilityKeepAlive_v1.6. Also added Last Update Seconds Ago and Program Status to Tray. (Thanks to Linebeck & Infiniti for reporting)
+- Fixed: When going from status "No response" to "Ready", it was skipping the "Starting" status. (Thanks to Infiniti for reporting)
+- Fixed: Main menu's "All Grid" group frame would not resize  properly.
+- Fixed: When restarting the 64-bit version of ASUU, it now restarts the 64-bit version.
+- Fixed: Crash Watchdog: "Number of failed RCON attempts (after grid had responded at least once) before restarting grid" was being halved. ie. When set to 4 counts, ASUU would restart after only 2.
+- Fixed: Attempt #1: "All servers are back online" message would not always announce. (Thanks to AceMan for reporting)
+- Added: Added the option to have the "All servers are back online" announcement to send only after ALL grids have restarted to avoid spamming during individual grid maintenance.
+- Changed: Log: Combined all server PVE & PVP entries to one line.
+
+[ New Config Parameters/Changes ]
+	DISCORD INTEGRATION -> Send Discord message when all servers are back online only when ALL servers rebooted (yes/no) ###=yes
+
 v2.1.1 (2020-01-31) Hotfixes.
 - Fixed: Line 43283 error. (Thanks to AceMan for reporting)
 - Fixed: Grids were not rebooting when stuck/frozen. (Thanks to Infiniti for reporting)
