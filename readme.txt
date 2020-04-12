@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.5 (2020-02-24)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.6 (2020-04-12)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -273,6 +273,23 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.6 (2020-04-12) CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
+- Added: CPU Affinity support for up to 128 processors (Thanks to Infiniti for helping develop and test)
+- Changed: Discord status updates are grouped into one message for each update session (by default with every 10 second update check) (Thanks to Infiniti and others for requesting)
+- Added: Restart Grids now has a GUI where you can define a custom message or restart interval/time. (Thanks to Doublee, Nyt, and Infiniti for requesting)
+- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values... for real this time. (Thanks to Norlinri for requesting)
+- Fixed: All ASUU restarts will use a batch file to restart to hopefully fix improper shutdowns. (Thanks to AceMan for reporting issue)
+- Fixed: Improved ASUU duplicate running instance detection. (Thanks to AceMan for reporting issue)
+- Added: Max servers running limit can be set in config. (Thanks to Linebeck for requesting)
+- Fixed: When mods were updated, ASUU would sometimes restart servers immediately and again at end of timer. (Thanks to AceMan for reporting)
+- Added: Option to disable the "Skip Countdown Announcements When No One is Online" feature added to config.
+- Added: If a period is used instead of a comma in the config, ASUU will treat it as a comma (comma separated 00-23 ex.04,16) ###=03.15
+- Fixed: Widened the "Running" and "Remote" buttons in main window. (Thanks to Neitfall for reporting)
+
+[ New Config Parameters/Changes ]
+	ANNOUNCEMENT CONFIGURATION -> Skip Countdown Announcements When No One is Online? (yes/no) ###=yes
+	ATLASSERVERUPDATEUTILITY MISC OPTIONS -> Max number of running grids allowed (0-400) ###=400
+
 v2.1.5 (2020-02-24) Hotfixes
 - Fixed: Line 36898 error. (Thanks to AceMan for reporting)
 - Fixed: Some Mods would go into an update loop.

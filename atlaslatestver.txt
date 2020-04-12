@@ -1,15 +1,12 @@
-v2.1.5^v2.1.5 Hotfixes
-- Fixed: Line 36898 error.
-- Fixed: Some Mods would go into an update loop.
-
-v2.1.4 Hotfixes
-- Fixed: Line 42830 and other Line errors when mod update notes were blank.
-- Fixed: When a mod update note has /' in it, it caused Fast Method Discord to fail.
-
-v2.1.3 Memory Leak Fix! Fixed params with spaces. Added Mod Update notes to announcements.
-- Fixed: Memory Leak! All output from RCON was not being properly dumped.
-- Added: Mod update notes can now also be sent with Discord announcements.
-- Added: "Running" button to main window.
-- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values.
-- Fixed: Grid Configurator: Several parameters were adding a space between param and =.
-- Fixed: If an unknown error occurred in an object, ASUU would have crashed.
+v2.1.6^v2.1.6 (2020-04-12) CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
+- Added: CPU Affinity support for up to 128 processors
+- Changed: Discord status updates are grouped into one message for each update session
+- Added: Restart Grids now has a GUI where you can define a custom message or restart interval/time
+- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values
+- Fixed: All ASUU restarts will use a batch file to restart to hopefully fix improper shutdowns
+- Added: Max servers running limit can be set in config.
+- Fixed: Improved ASUU duplicate running instance detection
+- Fixed: When mods were updated, ASUU would sometimes restart servers immediately and again at end of timer
+- Added: Option to disable the "Skip Countdown Announcements When No One is Online" feature added to config
+- Added: If a period is used instead of a comma in the config, ASUU will treat it as a comma
+- Fixed: Widened the "Running" and "Remote" buttons in main window.
