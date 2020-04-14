@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.8 (2020-04-14)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.9 (2020-04-14)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -274,6 +274,9 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.9 (2020-04-14) Critical bug fix
+- Fixed: Line 37217 error which occurred whenever last grid was restarted. (Thanks to Kron for reporting)
+
 v2.1.8 (2020-04-13) Bug Fixes
 - Added: Restart Util button (yellow "R") on main screen.
 - Fixed: Line 37279 error (Thanks to AceMan for reporting)

@@ -1,10 +1,13 @@
-v2.1.8^v2.1.8 Bug Fixes
+v2.1.9^v2.1.9 Critical bug fix
+- Fixed: Line 37217 error which occurred whenever last grid was restarted.
+
+v2.1.8 Bug Fixes
 - Added: Restart Util button (yellow "R") on main screen.
 - Fixed: Line 37279 error
 - Fixed: Restart GUI: All values would reset if last edited a text field then closed window using the X. The X close window is now disabled.
 - Fixed (hopefully): Discord occasionally not substituting \g, \f, \n, etc.
 
-2.1.7 Bug Fix!
+v2.1.7 Bug Fix!
 - Fixed: Line 37217 Error
 
 v2.1.6 CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
