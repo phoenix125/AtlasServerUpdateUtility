@@ -1,4 +1,13 @@
-v2.1.6^v2.1.6 (2020-04-12) CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
+v2.1.8^v2.1.8 Bug Fixes
+- Added: Restart Util button (yellow "R") on main screen.
+- Fixed: Line 37279 error
+- Fixed: Restart GUI: All values would reset if last edited a text field then closed window using the X. The X close window is now disabled.
+- Fixed (hopefully): Discord occasionally not substituting \g, \f, \n, etc.
+
+2.1.7 Bug Fix!
+- Fixed: Line 37217 Error
+
+v2.1.6 CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
 - Added: CPU Affinity support for up to 128 processors
 - Changed: Discord status updates are grouped into one message for each update session
 - Added: Restart Grids now has a GUI where you can define a custom message or restart interval/time

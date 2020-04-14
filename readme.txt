@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.6 (2020-04-12)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.1.8 (2020-04-14)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -13,6 +13,7 @@ Sections: (Use Search CTRL-F to quickly access)
 ----------
 - Works with up to 400 grids (20x20).
 - Works with multiple server PC systems (See "HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS" below)
+- Assign CPU Affinity for each grid.
 - Optionally automatically check for mod updates, install them, announce the update to in-Game/Discord/Twitch, and restart the server. (Looks for ModIDS in ServerGrid.json only)
 - Automatically imports available server data from ServerGrid.json & GameServerUser.ini files (if enabled).
 - Optionally start selected grid servers only.
@@ -273,11 +274,20 @@ v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.1.8 (2020-04-13) Bug Fixes
+- Added: Restart Util button (yellow "R") on main screen.
+- Fixed: Line 37279 error (Thanks to AceMan for reporting)
+- Fixed: Restart GUI: All values would reset if last edited a text field then closed window using the X. The X close window is now disabled.
+- Fixed (hopefully): Discord occasionally not substituting \g, \f, \n, etc. (Thanks to Joe Swanson for reporting)
+
+v2.1.7 (2020-04-12) Bug Fix!
+- Fixed: Line 37217 Error (Thanks to Kron and AceMan for reporting)
+
 v2.1.6 (2020-04-12) CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
 - Added: CPU Affinity support for up to 128 processors (Thanks to Infiniti for helping develop and test)
 - Changed: Discord status updates are grouped into one message for each update session (by default with every 10 second update check) (Thanks to Infiniti and others for requesting)
 - Added: Restart Grids now has a GUI where you can define a custom message or restart interval/time. (Thanks to Doublee, Nyt, and Infiniti for requesting)
-- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values... for real this time. (Thanks to Norlinri for requesting)
+- Added: Grid Configurator: Added EggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values... for real this time. (Thanks to Norlinri for requesting)
 - Fixed: All ASUU restarts will use a batch file to restart to hopefully fix improper shutdowns. (Thanks to AceMan for reporting issue)
 - Fixed: Improved ASUU duplicate running instance detection. (Thanks to AceMan for reporting issue)
 - Added: Max servers running limit can be set in config. (Thanks to Linebeck for requesting)
