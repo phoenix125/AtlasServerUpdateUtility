@@ -1,24 +1,11 @@
-v2.1.9^v2.1.9 Critical bug fix
-- Fixed: Line 37217 error which occurred whenever last grid was restarted.
+v2.2.1^v2.2.1 New! User-Defined Windows Defender Port Blocking Delay. Minor Bug Fixes.
+- Added: Firewall Delay. Optionally block Windows Firewall ports after select grids started for user-defined seconds. Useful to prevent crashes when players connect while stacking mods are still processing.
+- Added: Log Window: "Open File" to all files in the log file window.
+- Fixed: Grid Configurator: Fixed editor window sizes to fit main window
+- Fixed: Server Updates: When polling remote servers, ASUU would sometimes start countdown but not update/restart on first attempt.
+- Fixed: Parameter: Changed bAutoGenerateIslandSpawnRegions to AutoGenerateIslandSpawnRegions (removed the 'b')
+- Fixed: Grid Configurator: "Stop Server" button now uses new stop window.
+- Fixed: When stopping a grid with no online players, the Discord announcement was using old default instead of replacing /g with grid(s).
+- Fixed: Discord Status Updates: ASUU was not sending status updates if first grid was disabled
+- Fixed: Discord Status Updates: If more than one webhook was selected for status updates, duplicate messages were sent.
 
-v2.1.8 Bug Fixes
-- Added: Restart Util button (yellow "R") on main screen.
-- Fixed: Line 37279 error
-- Fixed: Restart GUI: All values would reset if last edited a text field then closed window using the X. The X close window is now disabled.
-- Fixed (hopefully): Discord occasionally not substituting \g, \f, \n, etc.
-
-v2.1.7 Bug Fix!
-- Fixed: Line 37217 Error
-
-v2.1.6 CPU Affinity up to 128 Cores | New Restart Grids GUI | Discord Status Updates now Grouped | Bug Fixes
-- Added: CPU Affinity support for up to 128 processors
-- Changed: Discord status updates are grouped into one message for each update session
-- Added: Restart Grids now has a GUI where you can define a custom message or restart interval/time
-- Added: Grid Configurator: AddedEggHatchSpeedMultiplier, BabyMatureSpeedMultiplier values
-- Fixed: All ASUU restarts will use a batch file to restart to hopefully fix improper shutdowns
-- Added: Max servers running limit can be set in config.
-- Fixed: Improved ASUU duplicate running instance detection
-- Fixed: When mods were updated, ASUU would sometimes restart servers immediately and again at end of timer
-- Added: Option to disable the "Skip Countdown Announcements When No One is Online" feature added to config
-- Added: If a period is used instead of a comma in the config, ASUU will treat it as a comma
-- Fixed: Widened the "Running" and "Remote" buttons in main window.

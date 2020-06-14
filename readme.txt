@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.1.9 (2020-04-14)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.1 (2020-05-03)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -11,31 +11,48 @@ Sections: (Use Search CTRL-F to quickly access)
 ----------
  FEATURES
 ----------
+- Free Open Source program.
+- Easy setup! Use Wizard to easily set up your ocean or Blackwood server or manually edit config. Imports almost all required data from ServerGrid.json & GameServerUser.ini files (if enabled).
+- Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
+- Automatically keeps server and mods updated.
 - Works with up to 400 grids (20x20).
 - Works with multiple server PC systems (See "HOW TO USE THIS UTIL FOR MULTI-SERVER SETUPS" below)
 - Assign CPU Affinity for each grid.
-- Optionally automatically check for mod updates, install them, announce the update to in-Game/Discord/Twitch, and restart the server. (Looks for ModIDS in ServerGrid.json only)
-- Automatically imports available server data from ServerGrid.json & GameServerUser.ini files (if enabled).
-- Optionally start selected grid servers only.
-- GUI INTERFACE for server info only... no config GUI window yet. (Still incomplete). The util can still run without the GUI for minimalists.
-- Send RCON commands/messages to select servers only.
-- Send custom command lines PER GRID during server startup.
-- Shut down all or select servers with/without announcement to Discord/Twitch/In-Game.
+- Player List: See who's on each of your grids, with SteamIDs.
+- Optionally automatically check for mod updates, install them, announce the update with notes to in-Game/Discord/Twitch, and restart the server.
+- Optionally start select or all grids manually or automatically on a schedule.
+- Modify all your GameUserSettings.ini, Game.ini, and Engine.ini files in one easy screen.  No need to go to every server's folder to make changes.
+- Adjust many parameters, such as IP, ports, PVP/PVE, ModIDs, etc settings in an easy to use screen.
+- Backup: can perform automated backups of essential files and/or entire server every x number of backups.
+- Can be run without GUI: basic features available via the task bar icon.
+- Send RCON commands/messages to select or all servers.
+- Assign unique custom command lines PER GRID during server startup.
+- Shut down or restart all or select servers with/without announcement to Discord/Twitch/In-Game.
 - Scheduled events: Send RCON commands to All or Local grids or run any file at scheduled times.
 - OK to use with most other server managers: Use this tool to install and maintain the server and use your other tools to manage game play features.
-- Automatically download and install a new Atlas Dedicated Server: No need to do it manually.
-- Automatically keeps server and mods updated.
 - Announce server updates and/or restarts in game, on Discord and Twitch.
-- KeepServerAlive: Detects server crashes (checks for AtlasGame.exe via PID) and will restart the server.
-- User-defined scheduled reboots.
-- Remote restart via web browser, including your phone.
+- Discord: Sends grid running status and optionally all basic log entries to Discord.
+- Discord: Sends mod update notes to Discord.
+- Crash Watchdog: Detects server crashes using three methods and will restart crashed grids.
+- KeepAlive feature: If utility crashes, it can restart itself.
+- Remote Restart: restart and/or send RCON commands via any web browser, including your phone.
 - Send RCON commands via web browser, including from your phone.
 - Run multiple instances of AtlasServerUpdateUtility to manage multiple servers.
-- Clean shutdown of your server(s).
-- Programmable PER GRID start delay. (in GridStartSelect.ini).
+- Clean shutdown of your grids using three methods, including verifying that your game has finished saving before completely shutting down the grid.
+- Programmable PER GRID start and shutdown delay between grids.
+- Starts Home Servers first, then rest of servers.
+- Creates batch files to start all and/or select servers to manually manage your servers, if desired.
+- Detailed and basic log files are generated to assess nearly every action performed by ASUU.
+- Real-time CPU and Memory usage per grid is displayed.
+- Server Summary: Creates a text file with easy to read grid information, such as IP addresses, ports, Mods, etc.
+- Duplicate port checker: checks all your port assignments for duplicate ports.
+- Real-time basic log window to keep track of what ASUU is doing.
+- Sends "DestroyWildDinos" on a user-defined schedule.
+- Displays the actual command line used to start each grid in the Grid Configurator.
+
 More detailed features:
 - Optionally execute external files for seven unique conditions, including at server updates, mod updates, scheduled restarts, remote restart, when first restart notice is announced.
-  *These options are great executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
+  *These options are great for executing a batch file to disable certain mods during a server update, to run custom announcement scripts, make config changes (enable PVP at scheduled times), etc.
 
 -----------------
  GETTING STARTED
@@ -101,24 +118,18 @@ Tips:
  KNOWN BUGS
 ------------
 ### ISSUE ###
-- Update problems when running Atlas and/or AtlasServerUpdateUtility in C:\ partition, especially the Desktop.
 
 REASON:
-- It appears that Windows block certain files from being downloaded or created by AtlasServerUpdateUtility.
 
 WORKAROUND:
-- Install on another partition such as D:
 
 ----
  UPCOMING FEATURES
 ----
-- html and/or PDF documentation
 
 -----
  REQUESTED FEATURES  (Unknown whether they'll get added or not)
 -----
-- Cross chat (I would probably use an existing cross chat util as a "plug in" to this util)
-- CPU Affinity (Reports state that Atlas itself does a job with CPU, though, so not likely add this one)
 
 ---------------------------------------------
  To Create Discord Webhook for announcements
@@ -201,7 +212,7 @@ Website: http://www.Phoenix125.com
 Discord: http://discord.gg/EU7pzPs
 Forum:   https://phoenix125.createaforum.com/index.php
 
-More ServerUpdateUtilities available: 7 Days To Die and Conan Exiles.  Rust and Empyrion coming soon!
+More ServerUpdateUtilities available: 7 Days To Die and Conan Exiles.
 
 ---------
  CREDITS
@@ -266,14 +277,35 @@ For update checks:
 -------------
  CURRENT BETA VERSION NOTES (To download beta version, see LINKS section above) or http://www.phoenix125.com/share/atlas/AtlasServerUpdateUtilityBeta.zip
 -------------
-v2.0.0(beta1) (2019-08-28) STABLE and BETA branches being used again! Bug fixes (for real this time!).
-- Differences from stable:
-	- "Fast Method" Discord is enabled by default.
-	- "Tools" -> "Test Redis" button.
+- Beta and Stable versions are the same at this time.
 
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.1 (2020-05-03) New! User-Defined Windows Defender Port Blocking Delay. Minor Bug Fixes.
+- Added: Firewall Delay. Optionally block Windows Firewall ports after select grids started for user-defined seconds. Useful to prevent crashes when players connect while stacking mods are still processing. (Thanks to Infiniti for requesting)
+- Added: Log Window: "Open File" to all files in the log file window.
+- Fixed: Grid Configurator: Fixed editor window sizes to fit main window
+- Fixed: Server Updates: When polling remote servers, ASUU would sometimes start countdown but not update/restart on first attempt. (Thanks to AceMan for reporting and helping)
+- Fixed: Parameter: Changed bAutoGenerateIslandSpawnRegions to AutoGenerateIslandSpawnRegions (removed the 'b') (Thanks to Flagoss)
+- Fixed: Grid Configurator: "Stop Server" button now uses new stop window.
+- Fixed: When stopping a grid with no online players, the Discord announcement was using old default instead of replacing /g with grid(s). (Thanks to Doublee for reporting)
+- Fixed: Discord Status Updates: ASUU was not sending status updates if first grid was disabled
+- Fixed: Discord Status Updates: If more than one webhook was selected for status updates, duplicate messages were sent.
+
+v2.2.0 (2020-04-22) New Stop Server Window, New Wipe Server Window
+- Added: Wipe Server option under Tools -> Wipe Server. (Thanks to Infiniti for requesting)
+- Added: Stop Grids now has the same GUI as the Restart Grids where you can define a custom message or restart interval/time. (Thanks to Doublee, Nyt, and Infiniti for requesting)
+- Fixed: Restart Grids button would not enable after being disabled.
+- Fixed: On Restart Select Grids, ASUU was using checked grids at time of restart instead of at time restart was selected.
+
+[ Config Parameters Changes ]
+	DISCORD INTEGRATION -> Announcement STOP SERVER (\m - minutes, \g - grids) ###= [Added \g - grids]
+	DISCORD INTEGRATION -> Announcement STOP SERVER when No Online Players  (\g - grids) ###= [Added \g - grids]
+	TWITCH INTEGRATION -> Announcement STOP SERVER (\m - minutes, \g - grids) ###= [Added \g - grids]
+	TWITCH INTEGRATION -> Announcement STOP SERVER when No Online Players  (\g - grids) ###= [Added \g - grids]
+	IN-GAME ANNOUNCEMENT CONFIGURATION -> Announcement STOP SERVER (\m - minutes, \g - grids) ###= [Added \g - grids]
+
 v2.1.9 (2020-04-14) Critical bug fix
 - Fixed: Line 37217 error which occurred whenever last grid was restarted. (Thanks to Kron for reporting)
 
