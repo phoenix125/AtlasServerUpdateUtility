@@ -1,16 +1,17 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.1.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.1_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.2.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.2_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.1
+#AutoIt3Wrapper_Res_Fileversion=2.2.2.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.1
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.2
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
+#AutoIt3Wrapper_Res_SaveSource=y
 #AutoIt3Wrapper_Res_Icon_Add=Resources\phoenixfaded.ico
 #AutoIt3Wrapper_Res_Icon_Add=Resources\check1.ico
 #AutoIt3Wrapper_Res_Icon_Add=Resources\no.ico
@@ -29,6 +30,7 @@
 #AutoIt3Wrapper_Res_Icon_Add=Resources\refreshnotice.ico
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-d -w 1 -w 2 -w 3 -w 4 -w 5 -w 6
+#AutoIt3Wrapper_Tidy_Stop_OnError=n
 #AutoIt3Wrapper_Run_Au3Stripper=y
 #Au3Stripper_Parameters=/mo
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -80,20 +82,20 @@ If Not FileExists($aFolderTemp) Then
 		DirCreate($aFolderTemp)
 	Until FileExists($aFolderTemp)
 EndIf
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_button_green_left1.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_button_red_left1.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_check_gray_left1.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_check_green_left1.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_off_left0.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_on_left0.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blank.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_AtlasLogo.png", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
-FileInstall("G:\Game Server Files\AutoIT\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_button_green_left1.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_button_red_left1.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_check_gray_left1.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_check_green_left1.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_off_left0.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_toggle_on_left0.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blank.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_AtlasLogo.png", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
+FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.1" ; (2020-04-22)
-Local $aUtilVerBeta = "v2.2.1" ; (2020-04-22)
-Global $aUtilVerNumber = 45 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.2.2" ; (2020-07-06)
+Local $aUtilVerBeta = "v2.2.2" ; (2020-07-06)
+Global $aUtilVerNumber = 46 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -140,6 +142,7 @@ Global $aUtilVerNumber = 45 ; New number assigned for each config file change. U
 ;43 = v2.1.6/7/8/9
 ;44 = v2.2.0
 ;45 = v2.2.1
+;46 = v2.2.2
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -285,6 +288,8 @@ Global $tStatusUpdateText3 = ""
 Global $tStatusUpdateText4 = ""
 Global $tStatusUpdateText5 = ""
 Global $tStatusUpdateText6 = ""
+Global $tStatusUpdateText7 = ""
+Global $tStatusUpdateText8 = ""
 
 Global $aCPUOverallTracker, $fPercent
 Global $aCPUOverallTracker = _CPUOverallUsageTracker_Create()
@@ -903,8 +908,6 @@ EndFunc   ;==>_Redis_GetServers
 
 ; END ---------------------------------------------------------------------------------------
 
-
-
 #Region ;**** Startup Checks. Initial Log, Read INI, Check for Correct Paths, Check Remote Restart is bound to port. ****
 OnAutoItExitRegister("Gamercide")
 Global $aCFGLastVerNumber = IniRead($aUtilCFGFile, "CFG", "aCFGLastVerNumber", 999)
@@ -1411,6 +1414,33 @@ If $aCFGLastVerNumber < 45 And $aIniExist Then
 		Next
 	EndIf
 EndIf
+If $aCFGLastVerNumber < 46 And $aIniExist Then
+	Global $sDiscordWH1URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 Main URL ###", "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $sDiscordWH1URL)
+	Global $sDiscordWH2URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 Grid Status Message URL (optional) ###", "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $sDiscordWH2URL)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde")
+	Global $sDiscordMainWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send GENERAL Messages to (Comma separated. ex. For WH 1 & 3, use 1,3. Blank for none) ###", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $sDiscordMainWHSel)
+	Global $sDiscordStatusAllWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL GRID STATUS messages to (Comma separated ex. For WH 1, 2 & 3, use 1,2,3. Blank for none) ###", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $sDiscordStatusAllWHSel)
+	Global $sDiscordStatusCrashWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send CRASHED GRID STATUS Messages to (Comma separated ex. For WH 1, use 1, Blank for none) ###", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $sDiscordStatusCrashWHSel)
+	Global $sDiscordLogWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL LOG traffic to (Comma separated ex. For WH 3, use 3, Blank for none) ###", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $sDiscordLogWHSel)
+	Global $sDiscordPlayersWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send Players join or leave message (Comma separated) ###", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $sDiscordPlayersWHSel)
+	Global $sDiscordBot1Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Main Name ###", $aGameName & " Bot")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $sDiscordBot1Name)
+	Global $sDiscordBot2Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Server Status Name ###", $aGameName & " Bot")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $sDiscordBot2Name)
+	Global $sDiscordBot3Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $aGameName & " Bot")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $sDiscordBot3Name)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $aGameName & " Bot")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", "no")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", "Players Online: **\o / \m**")
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -1810,7 +1840,6 @@ If $aRemoteRestartUse = "yes" Then
 	TCPStartup()
 	Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
 	If $aRemoteRestartSocket = -1 Then
-		SplashOff()
 ;~ 		MsgBox($MB_OK, "TCP Error", "Could not bind to [" & $aRemoteRestartIP & "] Check server IP, disable Remote Restart in INI, or check for multiple instances of this util using the same port." & @CRLF & @CRLF & _
 ;~ 				"Remote Restart will likely not function. Click (OK) to continue", 15)
 ;~ 		LogWrite(" [Remote Restart] Remote Restart enabled. Could not bind to " & $aRemoteRestartIP & ":" & $aRemoteRestartPort)
@@ -1826,7 +1855,7 @@ If $aRemoteRestartUse = "yes" Then
 			$tRead = FileRead($tFile, 100000000)
 			FileClose($tFile)
 			$tTxt1 = _StringBetween($tRead, $aRemoteRestartIP & ":" & $aRemoteRestartPort, "CP")
-			If $tTxt1 = "" Then
+			If @error Or $tTxt1 = "" Then
 			Else
 				Local $tTxt = _StringBetween($tTxt1[0], "LISTENING", "T")
 				$tPID = StringRegExp($tTxt[0], '\d+', 1)
@@ -3273,6 +3302,7 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 		Local $aMsg1Sent = False
 		Local $aMsg2Sent = False
 		Local $aMsg3Sent = False
+		Local $aMsg4Sent = False
 		If StringInStr($sDiscordStatusAllWHSel, "1") Then
 			$aMsg1Sent = True
 			If $tBufferMessageTF Then
@@ -3282,7 +3312,7 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 					$tStatusUpdateText1 &= @CRLF & $tMsg
 				EndIf
 			Else
-				If ($tSendMessageType = 2 And $tWB = 1) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+				If ($tSendMessageType = 2 And $tWB = 1) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
 			EndIf
 		EndIf
 		If StringInStr($sDiscordStatusAllWHSel, "2") Then
@@ -3309,19 +3339,20 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 				If ($tSendMessageType = 2 And $tWB = 3) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
 			EndIf
 		EndIf
+		If StringInStr($sDiscordStatusAllWHSel, "4") Then
+			$aMsg4Sent = True
+			If $tBufferMessageTF Then
+				If $tStatusUpdateText4 = "" Then
+					$tStatusUpdateText4 = $tMsg
+				Else
+					$tStatusUpdateText4 &= @CRLF & $tMsg
+				EndIf
+			Else
+				If ($tSendMessageType = 2 And $tWB = 4) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
+			EndIf
+		EndIf
 		If $tCrash = True Then
 			If StringInStr($sDiscordStatusCrashWHSel, "1") And $aMsg1Sent = False Then
-				If $tBufferMessageTF Then
-					If $tStatusUpdateText4 = "" Then
-						$tStatusUpdateText4 = $tMsg
-					Else
-						$tStatusUpdateText4 &= @CRLF & $tMsg
-					EndIf
-				Else
-					If ($tSendMessageType = 2 And $tWB = 4) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
-				EndIf
-			EndIf
-			If StringInStr($sDiscordStatusCrashWHSel, "2") And $aMsg2Sent = False Then
 				If $tBufferMessageTF Then
 					If $tStatusUpdateText5 = "" Then
 						$tStatusUpdateText5 = $tMsg
@@ -3329,10 +3360,10 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 						$tStatusUpdateText5 &= @CRLF & $tMsg
 					EndIf
 				Else
-					If ($tSendMessageType = 2 And $tWB = 5) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH2URL, $tMsg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
+					If ($tSendMessageType = 2 And $tWB = 5) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
 				EndIf
 			EndIf
-			If StringInStr($sDiscordStatusCrashWHSel, "3") And $aMsg3Sent = False Then
+			If StringInStr($sDiscordStatusCrashWHSel, "2") And $aMsg2Sent = False Then
 				If $tBufferMessageTF Then
 					If $tStatusUpdateText6 = "" Then
 						$tStatusUpdateText6 = $tMsg
@@ -3340,7 +3371,29 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 						$tStatusUpdateText6 &= @CRLF & $tMsg
 					EndIf
 				Else
-					If ($tSendMessageType = 2 And $tWB = 6) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+					If ($tSendMessageType = 2 And $tWB = 6) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH2URL, $tMsg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
+				EndIf
+			EndIf
+			If StringInStr($sDiscordStatusCrashWHSel, "3") And $aMsg3Sent = False Then
+				If $tBufferMessageTF Then
+					If $tStatusUpdateText7 = "" Then
+						$tStatusUpdateText7 = $tMsg
+					Else
+						$tStatusUpdateText7 &= @CRLF & $tMsg
+					EndIf
+				Else
+					If ($tSendMessageType = 2 And $tWB = 7) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+				EndIf
+			EndIf
+			If StringInStr($sDiscordStatusCrashWHSel, "4") And $aMsg4Sent = False Then
+				If $tBufferMessageTF Then
+					If $tStatusUpdateText8 = "" Then
+						$tStatusUpdateText8 = $tMsg
+					Else
+						$tStatusUpdateText8 &= @CRLF & $tMsg
+					EndIf
+				Else
+					If ($tSendMessageType = 2 And $tWB = 8) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 				EndIf
 			EndIf
 			If $sInGameAnnounce = "yes" And $sInGameSendCrashYN = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $tMsg)
@@ -4243,6 +4296,8 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sUseDiscordBotFirstAnnouncement = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first ANNOUNCEMENT only? (reduces bot spam)(yes/no) ###", $iniCheck)
 	Global $sUseDiscordBotSkipYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $iniCheck)
 	Global $sDiscordReadyStatusDelay = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $iniCheck)
+	Global $sUseDiscordBotPlayersYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $iniCheck)
+
 	;Global $sUseDiscordBotAppendServer - IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Append server name to beginning of messages? (yes/no) ###", $iniCheck)
 	Global $sDiscordDailyMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
 	Global $sDiscordDailyZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $iniCheck)
@@ -4259,16 +4314,20 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sDiscordModListUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
 	Global $sDiscordServersUpMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $iniCheck)
 	Global $sDiscordSkipRestartMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
-	Global $sDiscordWH1URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 Main URL ###", $iniCheck)
-	Global $sDiscordWH2URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 Grid Status Message URL (optional) ###", $iniCheck)
+	Global $sDiscordPlayersMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $iniCheck)
+	Global $sDiscordWH1URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $iniCheck)
+	Global $sDiscordWH2URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $iniCheck)
 	Global $sDiscordWH3URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $iniCheck)
-	Global $sDiscordMainWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send GENERAL Messages to (Comma separated. ex. For WH 1 & 3, use 1,3. Blank for none) ###", $iniCheck)
-	Global $sDiscordStatusAllWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL GRID STATUS messages to (Comma separated ex. For WH 1, 2 & 3, use 1,2,3. Blank for none) ###", $iniCheck)
-	Global $sDiscordStatusCrashWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send CRASHED GRID STATUS Messages to (Comma separated ex. For WH 1, use 1, Blank for none) ###", $iniCheck)
-	Global $sDiscordLogWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL LOG traffic to (Comma separated ex. For WH 3, use 3, Blank for none) ###", $iniCheck)
-	Global $sDiscordBot1Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Main Name ###", $iniCheck)
-	Global $sDiscordBot2Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Server Status Name ###", $iniCheck)
+	Global $sDiscordWH4URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $iniCheck)
+	Global $sDiscordMainWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordStatusAllWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordStatusCrashWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordLogWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordPlayersWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordBot1Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $iniCheck)
+	Global $sDiscordBot2Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $iniCheck)
 	Global $sDiscordBot3Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $iniCheck)
+	Global $sDiscordBot4Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $iniCheck)
 	Global $bDiscordBotUseTTS = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $iniCheck)
 	Global $sDiscordBotAvatar = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $iniCheck)
 	;
@@ -5206,6 +5265,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordSkipRestartMessage, "
 	EndIf
+	If $iniCheck = $sDiscordPlayersMessage Then
+		$sDiscordPlayersMessage = "Players Online: **\o / \m**"
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordPlayersMessage, "
+	EndIf
 	If $iniCheck = $sGridStatusMessage Then
 		$sGridStatusMessage = "(\g) Grid server status: \s"
 		$iIniFail += 1
@@ -5363,11 +5427,16 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	If $iniCheck = $sDiscordReadyStatusDelay Then
 		$sDiscordReadyStatusDelay = "0"
 		$iIniFail += 1
-		$iIniError = $iIniError & "sDiscordReadyStatusDelay, "
+		$iIniError = $iIniError & "DiscordReadyStatusDelay, "
 	ElseIf $sDiscordReadyStatusDelay < 0 Then
 		$sDiscordReadyStatusDelay = 0
 	ElseIf $sDiscordReadyStatusDelay > 999 Then
 		$sDiscordReadyStatusDelay = 999
+	EndIf
+	If $iniCheck = $sUseDiscordBotPlayersYN Then
+		$sUseDiscordBotPlayersYN = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "UseDiscordBotPlayersYN, "
 	EndIf
 	If $iniCheck = $sDiscordWH1URL Then
 		$sDiscordWH1URL = "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde"
@@ -5383,6 +5452,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$sDiscordWH3URL = "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde"
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordWebhook3URL, "
+	EndIf
+	If $iniCheck = $sDiscordWH4URL Then
+		$sDiscordWH4URL = "https://discordapp.com/api/webhooks/012345678901234567/abcdefghijklmnopqrstuvwxyz01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcde"
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordWebhook4URL, "
 	EndIf
 	If $iniCheck = $sDiscordMainWHSel Then
 		$sDiscordMainWHSel = ""
@@ -5404,20 +5478,30 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordLogWHSel, "
 	EndIf
-	If $iniCheck = $sDiscordBot1Name Then
-		$sDiscordBot1Name = $aGameName & " Server"
+	If $iniCheck = $sDiscordPlayersWHSel Then
+		$sDiscordPlayersWHSel = ""
 		$iIniFail += 1
-		$iIniError = $iIniError & "DiscordBotName, "
+		$iIniError = $iIniError & "DiscordPlayersWHSel, "
 	EndIf
-	If $iniCheck = $sDiscordBot3Name Then
-		$sDiscordBot3Name = $aGameName & " Server"
+	If $iniCheck = $sDiscordBot1Name Then
+		$sDiscordBot1Name = $aGameName & " Bot"
 		$iIniFail += 1
-		$iIniError = $iIniError & "DiscordBot3Name, "
+		$iIniError = $iIniError & "DiscordBot1Name, "
 	EndIf
 	If $iniCheck = $sDiscordBot2Name Then
 		$sDiscordBot2Name = $aGameName & " Server Status Bot"
 		$iIniFail += 1
-		$iIniError = $iIniError & "DiscordErrorBotName, "
+		$iIniError = $iIniError & "DiscordBot2Name, "
+	EndIf
+	If $iniCheck = $sDiscordBot3Name Then
+		$sDiscordBot3Name = $aGameName & " Bot"
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordBot3Name, "
+	EndIf
+	If $iniCheck = $sDiscordBot4Name Then
+		$sDiscordBot4Name = $aGameName & " Bot"
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordBot4Name, "
 	EndIf
 	If $iniCheck = $bDiscordBotUseTTS Then
 		$bDiscordBotUseTTS = "yes"
@@ -6117,6 +6201,7 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseDiscordBotFirstAnnouncement)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $sUseDiscordBotSkipYN)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $sDiscordReadyStatusDelay)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $sUseDiscordBotPlayersYN)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sDiscordDailyMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $sDiscordDailyZeroMessage)
@@ -6133,17 +6218,22 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sDiscordModListUpdateMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $sDiscordServersUpMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sDiscordSkipRestartMessage)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $sDiscordPlayersMessage)
 	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 Main URL ###", $sDiscordWH1URL)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 Grid Status Message URL (optional) ###", $sDiscordWH2URL)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $sDiscordWH1URL)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $sDiscordWH2URL)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $sDiscordWH3URL)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send GENERAL Messages to (Comma separated. ex. For WH 1 & 3, use 1,3. Blank for none) ###", $sDiscordMainWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL GRID STATUS messages to (Comma separated ex. For WH 1, 2 & 3, use 1,2,3. Blank for none) ###", $sDiscordStatusAllWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send CRASHED GRID STATUS Messages to (Comma separated ex. For WH 1, use 1, Blank for none) ###", $sDiscordStatusCrashWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook to send ALL LOG traffic to (Comma separated ex. For WH 3, use 3, Blank for none) ###", $sDiscordLogWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Main Name ###", $sDiscordBot1Name)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Server Status Name ###", $sDiscordBot2Name)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $sDiscordWH4URL)
+	FileWriteLine($sIniFile, " For WebHook to send Messages, Enter WH number(2) or blank for none.  ie. For WH 1&3, use 1,3.  For WH1, use 1. For Wh 1&2&3, use 1,2,3")
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $sDiscordMainWHSel)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $sDiscordStatusAllWHSel)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $sDiscordStatusCrashWHSel)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $sDiscordLogWHSel)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $sDiscordPlayersWHSel)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $sDiscordBot1Name)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $sDiscordBot2Name)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $sDiscordBot3Name)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $sDiscordBot4Name)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $bDiscordBotUseTTS)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $sDiscordBotAvatar)
 	FileWriteLine($sIniFile, @CRLF)
@@ -7732,15 +7822,26 @@ EndFunc   ;==>KeepUtilAliveCounter
 #Region ;**** Function to Send Message to Discord ****
 
 Func SendDiscordGeneralMsg($tMsg)
-	If StringInStr($sDiscordMainWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+	If StringInStr($sDiscordMainWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
 	If StringInStr($sDiscordMainWHSel, "2") Then SendDiscordMsg($sDiscordWH2URL, $tMsg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
 	If StringInStr($sDiscordMainWHSel, "3") Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+	If StringInStr($sDiscordMainWHSel, "4") Then SendDiscordMsg($sDiscordWH4URL, $tMsg, $sDiscordBot4Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 EndFunc   ;==>SendDiscordGeneralMsg
 Func SendDiscordCrashMsg($tMsg)
-	If StringInStr($aCrashDiscordWH, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+	If StringInStr($aCrashDiscordWH, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
 	If StringInStr($aCrashDiscordWH, "2") Then SendDiscordMsg($sDiscordWH2URL, $tMsg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
 	If StringInStr($aCrashDiscordWH, "3") Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+	If StringInStr($aCrashDiscordWH, "4") Then SendDiscordMsg($sDiscordWH4URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 EndFunc   ;==>SendDiscordCrashMsg
+Func SendDiscordPlayerMsg($tMsg, $tPlayer)
+	Local $tMsg1 = StringReplace($tMsg, "\o", $tPlayer)
+	$tMsg1 = StringReplace($tMsg1, "\m", $aServerMaxPlayers)
+	$tMsg1 = StringReplace($tMsg1, @CRLF, "")
+	If StringInStr($sDiscordPlayersWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg1, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
+	If StringInStr($sDiscordPlayersWHSel, "2") Then SendDiscordMsg($sDiscordWH2URL, $tMsg1, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
+	If StringInStr($sDiscordPlayersWHSel, "3") Then SendDiscordMsg($sDiscordWH3URL, $tMsg1, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+	If StringInStr($sDiscordPlayersWHSel, "4") Then SendDiscordMsg($sDiscordWH4URL, $tMsg1, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
+EndFunc   ;==>SendDiscordPlayerMsg
 
 Func SendDiscordMsg($sHookURL, $sBotMessage, $sBotName = "", $sBotTTS = False, $sBotAvatar = "", $aServerPID = "0", $tWH = 1)
 	Local $tErr = True
@@ -9312,9 +9413,10 @@ Func LogWrite($Msg, $msgdebug = -1, $tSendDiscord = True)
 	EndIf
 	If $aGUIReady = True And $tSendDiscord And $Msg <> "" Then
 		$Msg = StringRegExpReplace($Msg, '"', "")
-		If StringInStr($sDiscordLogWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $Msg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
+		If StringInStr($sDiscordLogWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $Msg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
 		If StringInStr($sDiscordLogWHSel, "2") Then SendDiscordMsg($sDiscordWH2URL, $Msg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
 		If StringInStr($sDiscordLogWHSel, "3") Then SendDiscordMsg($sDiscordWH3URL, $Msg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+		If StringInStr($sDiscordLogWHSel, "4") Then SendDiscordMsg($sDiscordWH4URL, $Msg, $sDiscordBot4Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 ;~ 		If $sDiscordLogWHSel = 0 Then
 ;~ 		ElseIf $sDiscordLogWHSel = 1 Then
 ;~ 			SendDiscordMsg($sDiscordWH1URL, $Msg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar)
@@ -9786,23 +9888,30 @@ Func GetLatestModUpdateTime($sMod, $sShow)
 	If $aReturn[1] Then
 		$aReturn[4] = _ArrayToString(_StringBetween($aAppInfo1[0], "Update: ", "</di"))     ; Last Update Date & Time
 		$aReturn[4] = StringReplace($aReturn[4], @TAB, "")
-		$aReturn[5] = StringReplace(_ArrayToString(_StringBetween($aAppInfo1[0], "<p id=", "</p")), "<br>", @CRLF)     ; Update Notes
-		Local $tTmp = StringSplit($aReturn[5], '"')
-		If $tTmp[0] > 2 Then
-;~ 			$aReturn[2] = $tTmp[2]
-			$aReturn[5] = StringTrimLeft($tTmp[3], 1)     ; Update Notes
-			$aReturn[5] = StringLeft($aReturn[5], 1750)
-			If $aReturn[5] = "" Then $aReturn[5] = "[No Update Notes]"
-		Else
-;~ 			$aReturn[2] = -1
-			$aReturn[5] = "[No Update Notes]"
-		EndIf
+		$aReturn[5] = _ModUpdateTextReplace($aAppInfo1[0])     ; Update Notes
 	Else
 		$aReturn[4] = "[No Date]"
 		$aReturn[5] = "[No Notes]"
 	EndIf
 	Return $aReturn
 EndFunc   ;==>GetLatestModUpdateTime
+
+Func _ModUpdateTextReplace($tTxt7)
+	Local $tArray = _StringBetween($tTxt7, "<p id=", "</p")
+	Local $tReturn7 = $tArray[0]
+	$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
+	$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
+	$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
+	Local $tTmp = StringSplit($tReturn7, '"')
+	If $tTmp[0] > 2 Then
+		$tReturn7 = StringTrimLeft($tTmp[3], 1)     ; Update Notes
+		$tReturn7 = StringLeft($tReturn7, 1750)
+		If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
+	Else
+		$tReturn7 = "[No Update Notes]"
+	EndIf
+	Return $tReturn7
+EndFunc   ;==>_ModUpdateTextReplace
 
 Func _InetGetErrorText($iErrorCode, $iInfoLevel = 1)
 	; PeteW, last updated: 16.01.12
@@ -14049,6 +14158,8 @@ Func GUIUpdateQuick()
 	$tStatusUpdateText4 = ""
 	$tStatusUpdateText5 = ""
 	$tStatusUpdateText6 = ""
+	$tStatusUpdateText7 = ""
+	$tStatusUpdateText8 = ""
 	If $aDisableMemCPUYN = "no" Then
 		Local $MemStats = MemGetStats()
 		GUICtrlSetData($MemPercent, $MemStats[$MEM_LOAD] & "%")
@@ -14303,21 +14414,17 @@ Func GUIUpdateQuick()
 		BatchFilesCreate()
 	EndIf
 
-	$aTotalPlayersOnline = $tTotalPlayers
-;~ 	SetStatusBusy("Server process check in progress...", "Updating: Placing Icons")
-;~ 	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
-;~ 		If $xLocalGrid[$i] = "yes" Then
-;~ 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 4)
-;~ 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 3, 6)
-;~ 		Else
-;~ 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 3, 5)
-;~ 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 6)
-;~ 		EndIf
-;~ 	Next
 	SetStatusBusy("Server process check in progress...", "Updating: Online Players")
-
+	$aTotalPlayersOnline = $tTotalPlayers
 	If $tTotalPlayerError Then $aTotalPlayersOnline = "--"
 	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers) ; Players Edit Window
+	If $sUseDiscordBotPlayersYN = "yes" Then
+		Local $tLastPlayerCount = IniRead($aIniFile, "CFG", "aPlayerCount", "0")
+		If $tLastPlayerCount <> $tTotalPlayers Then
+			IniWrite($aIniFile, "CFG", "aPlayerCount", $tTotalPlayers)
+			SendDiscordPlayerMsg($sDiscordPlayersMessage, $tTotalPlayers)
+		EndIf
+	EndIf
 	If $tUtilUpdateAvailableTF Then
 		GUICtrlSetImage($IconUpdate, $aIconFile, 216)
 		GUICtrlSetTip($IconUpdate, $aUtilName & " update available")
@@ -14398,9 +14505,11 @@ Func GUIUpdateQuick()
 	If $tStatusUpdateText1 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText1, False, 2, 1) ; Send Buffered Discord Messages
 	If $tStatusUpdateText2 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText2, False, 2, 2)
 	If $tStatusUpdateText3 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText3, False, 2, 3)
-	If $tStatusUpdateText4 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText4, True, 2, 4)
+	If $tStatusUpdateText4 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText4, False, 2, 4)
 	If $tStatusUpdateText5 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText5, True, 2, 5)
 	If $tStatusUpdateText6 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText6, True, 2, 6)
+	If $tStatusUpdateText7 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText7, True, 2, 7)
+	If $tStatusUpdateText8 Not = "" Then _SendStatusUpdate(0, $tStatusUpdateText8, True, 2, 8)
 EndFunc   ;==>GUIUpdateQuick
 Func _GUIUpdateStatus($tGridToChange, $tText)
 	If WinExists($wGUIMainWindow) Then
@@ -15507,12 +15616,20 @@ Func GUI_W2_Last_Tab($tTab)
 	EndIf
 
 	If $aGUI_W2_LastTab = 2 Then
-		If GUICtrlRead($W2_T3_R_Import) = 4 Then
+		If GUICtrlRead($W2_T3_R_Import) = $GUI_CHECKED Then ; Import RCON Port from GUS.ini
+			$aServerRCONImport = "yes"
+		ElseIf GUICtrlRead($W2_T3_R_Method1) = $GUI_CHECKED Then ; Direct Entry of RCON Ports
 			$aServerRCONImport = "no"
-			IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $aServerRCONImport)
 			$aServerRCONPort = GUICtrlRead($W2_T3_I_RCONPorts)
-			IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $aServerRCONPort)
+		ElseIf GUICtrlRead($W2_T3_R_Method2) = $GUI_CHECKED Then ; Custom 2: One at a time
+			$aServerRCONImport = "no"
+			$aServerRCONPort = GUICtrlRead($W2_T3_I_RCONPorts2)
+		ElseIf GUICtrlRead($W2_T3_R_Method3) = $GUI_CHECKED Then ; Custom 3: Auto-Increment
+			$aServerRCONImport = "no"
+			$aServerRCONPort = GUICtrlRead($W2_T3_I_Method3Ports)
 		EndIf
+		IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $aServerRCONImport)
+		IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $aServerRCONPort)
 		Sleep(250)
 	EndIf
 
