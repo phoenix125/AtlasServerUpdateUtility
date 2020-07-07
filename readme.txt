@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.1 (2020-05-03)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.2 (2020-07-06)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,25 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.2 (2020-07-06) Added Players Online Discord announcement and minor bug fixes.
+- Added: Players online Discord announcement
+- Added: 4th Discord Webhook
+- Fixed: Mod Update Discord Announcements: If update description contained special HTML code, it could cause improper formatting or cutting off text. (Thanks to @Infiniti and @Doublee for reporting)
+- Fixed: Mod Update Discord Announcements: Found another bug and zapped it.
+- Fixed: Line 36057 error. Occurred when there was an error getting PID of a Remote Restart instance. (Thanks to @Darrok for reporting)
+- Fixed: Setup Wizard: Custom Method 3 was getting overwritten if selected.
+- Fixed: The inital online player check was not showing at program start.
+
+[ Config Parameters Changes ]
+Added: 
+	DISCORD INTEGRATION -> WebHook 4 URL ###
+	DISCORD INTEGRATION -> Bot 4 Name ###
+	DISCORD INTEGRATION -> PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###
+	DISCORD INTEGRATION -> Send Discord message when players join or leave? (yes/no) ###
+	DISCORD INTEGRATION -> Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###
+Changed:	
+	DISCORD INTEGRATION -> Changed WebHook 1 to 3 URL descriptions
+
 v2.2.1 (2020-05-03) New! User-Defined Windows Defender Port Blocking Delay. Minor Bug Fixes.
 - Added: Firewall Delay. Optionally block Windows Firewall ports after select grids started for user-defined seconds. Useful to prevent crashes when players connect while stacking mods are still processing. (Thanks to Infiniti for requesting)
 - Added: Log Window: "Open File" to all files in the log file window.

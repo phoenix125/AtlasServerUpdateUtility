@@ -1,11 +1,7 @@
-v2.2.1^v2.2.1 New! User-Defined Windows Defender Port Blocking Delay. Minor Bug Fixes.
-- Added: Firewall Delay. Optionally block Windows Firewall ports after select grids started for user-defined seconds. Useful to prevent crashes when players connect while stacking mods are still processing.
-- Added: Log Window: "Open File" to all files in the log file window.
-- Fixed: Grid Configurator: Fixed editor window sizes to fit main window
-- Fixed: Server Updates: When polling remote servers, ASUU would sometimes start countdown but not update/restart on first attempt.
-- Fixed: Parameter: Changed bAutoGenerateIslandSpawnRegions to AutoGenerateIslandSpawnRegions (removed the 'b')
-- Fixed: Grid Configurator: "Stop Server" button now uses new stop window.
-- Fixed: When stopping a grid with no online players, the Discord announcement was using old default instead of replacing /g with grid(s).
-- Fixed: Discord Status Updates: ASUU was not sending status updates if first grid was disabled
-- Fixed: Discord Status Updates: If more than one webhook was selected for status updates, duplicate messages were sent.
-
+v2.2.2^v2.2.2 Added Players Online Discord announcement and minor bug fixes.
+- Added: Players online Discord announcement
+- Added: 4th Discord Webhook
+- Fixed: Mod Update Discord Announcements didn't format correctly sometimes
+- Fixed: Line 36057 error.
+- Fixed: Setup Wizard: Custom Method 3 was getting overwritten if selected.
+- Fixed: The inital online player check was not showing at program start.
