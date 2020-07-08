@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.2 (2020-07-06)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.3 (2020-07-07)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,9 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.3 (2020-07-07) Bug Fix
+- Fixed: Line 43203 Error when mod updates did not have notes. (Thanks to @AceMan for reporting)
+
 v2.2.2 (2020-07-06) Added Players Online Discord announcement and minor bug fixes.
 - Added: Players online Discord announcement
 - Added: 4th Discord Webhook

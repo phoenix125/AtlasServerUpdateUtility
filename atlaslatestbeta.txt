@@ -1,4 +1,6 @@
-v2.2.2^v2.2.2 Added Players Online Discord announcement and minor bug fixes.
+v2.2.3^v2.2.3 Bug Fix: Line 43203 Error
+
+v2.2.2 Added Players Online Discord announcement and minor bug fixes.
 - Added: Players online Discord announcement
 - Added: 4th Discord Webhook
 - Fixed: Mod Update Discord Announcements didn't format correctly sometimes
