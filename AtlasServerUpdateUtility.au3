@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.2.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.2_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.3.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.3_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.2.0
+#AutoIt3Wrapper_Res_Fileversion=2.2.3.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.2
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.3
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -93,8 +93,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.2" ; (2020-07-06)
-Local $aUtilVerBeta = "v2.2.2" ; (2020-07-06)
+Local $aUtilVerStable = "v2.2.3" ; (2020-07-07)
+Local $aUtilVerBeta = "v2.2.3" ; (2020-07-07)
 Global $aUtilVerNumber = 46 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -142,7 +142,7 @@ Global $aUtilVerNumber = 46 ; New number assigned for each config file change. U
 ;43 = v2.1.6/7/8/9
 ;44 = v2.2.0
 ;45 = v2.2.1
-;46 = v2.2.2
+;46 = v2.2.2/3
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -8329,7 +8329,7 @@ Func GetInstalledVersion($sGameDir)
 		$aReturn[0] = True
 		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
-
+		
 			If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '"buildid"', 1)
 			EndIf
@@ -8343,7 +8343,7 @@ Func GetInstalledVersion($sGameDir)
 			$aReturn[0] = True
 			$aReturn[1] = $aAppInfo[2]
 			EndIf
-
+		
 			If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
 			EndIf
@@ -9898,17 +9898,21 @@ EndFunc   ;==>GetLatestModUpdateTime
 
 Func _ModUpdateTextReplace($tTxt7)
 	Local $tArray = _StringBetween($tTxt7, "<p id=", "</p")
-	Local $tReturn7 = $tArray[0]
-	$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
-	$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
-	$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
-	Local $tTmp = StringSplit($tReturn7, '"')
-	If $tTmp[0] > 2 Then
-		$tReturn7 = StringTrimLeft($tTmp[3], 1)     ; Update Notes
-		$tReturn7 = StringLeft($tReturn7, 1750)
-		If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
-	Else
+	If @error Or $tArray = -1 Or StringLen($tArray) < 4 Then
 		$tReturn7 = "[No Update Notes]"
+	Else
+		Local $tReturn7 = $tArray[0]
+		$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
+		$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
+		$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
+		Local $tTmp = StringSplit($tReturn7, '"')
+		If $tTmp[0] > 2 Then
+			$tReturn7 = StringTrimLeft($tTmp[3], 1) ; Update Notes
+			$tReturn7 = StringLeft($tReturn7, 1750)
+			If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
+		Else
+			$tReturn7 = "[No Update Notes]"
+		EndIf
 	EndIf
 	Return $tReturn7
 EndFunc   ;==>_ModUpdateTextReplace
