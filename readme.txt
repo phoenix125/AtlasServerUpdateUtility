@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.3 (2020-07-07)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.5 (2020-09-07)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,50 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.5 (2020-09-07) Added Discord Players Join/Leave, Fixed Mod Update Notes, Several Bug Fixes
+- Added: Discord: Customizable players join/leave and online players list.
+- Fixed: Discord: Mod Update Notes once again show. (Thanks to @Dastrip for reporting)
+- Added: Discord: Mod Update Subsequent announcement to prevent entire mod update being posted multiple times. (Thanks to Doublee for requesting)
+- Fixed: Blackwood: If ActiveMods was not in the GUS.ini file, ASUU would not add it. (Thanks to @Steve B for reporting)
+- Fixed: Any new parameter was not being inserted into the config files. (Thanks to @Steve B for reporting)
+- Fixed: Update_Atlas_Validate.bat files were getting duplicate entries.
+- Added: When announcement time = 1 minute, substitutes minute(s) and minutes with minute. When announcement time = 0, substitutes in 0 minute(s) and in 0 minutes with now.
+- Added: ModID change detection in ServerGrid.json: Requires changes to be present in 2 consecutive checks to prevent false update triggers. (Thanks to @Nyt for reporting)
+- Added: Optionally disable ModID list change detection. (Thanks to @AceMan for requesting)
+- Changed: Increased restart util "wait for program to close" timer from 5 seconds to 7 seconds. (Thanks to @AceMan for reporting: when changing custom scheduled commands)
+- Fixed: If >64 cores and assigning CPU affinity, ASUU did not detect existing servers if grid naming scheme was NOT 00 01. (Thanks to AceMan & Majesticwalker for reporting)
+
+[ New Config Parameters/Changes ]
+Added:
+	GAME SERVER CONFIGURATION->Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###=yes
+	DISCORD INTEGRATION->Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###=(previous message)
+	DISCORD INTEGRATION->Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###=Mod \i \n released an update!. Server is restarting in \m minute(s).
+	DISCORD INTEGRATION->Online Player Message (see above for substitutions) ###
+	DISCORD INTEGRATION->Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###
+	DISCORD INTEGRATION->Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###
+	DISCORD INTEGRATION->Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###
+	DISCORD INTEGRATION->Announcement Online Player separator (Use ; for [space]) ###
+Changed:
+	DISCORD INTEGRATION->Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###
+
+v2.2.4 (2020-08-07) Accurate total player count, bug fixes, & improvements.
+- Fixed: Total Online Player Count should be accurate now. Duplicates now removed. Each grid's count unchanged, though.
+- Changed: Max player count for Discord is now Max players per grid multiplied by number of grids.
+- Changed: Checks for running grid before starting a new one.. even when "Allow multiple instances of ASUU" is enabled. (Thanks to @AceMan for inspiring)
+- Fixed: Watchdog timers pause while checking online players (RCON check) & server startup sequence to prevent false crash reports when player check and/or startup takes longer than watchdog timer. (Thanks to @AceMan & @Infiniti for reporting)
+- Fixed: When assigning CPU Affinity, ASUU would sometimes restart the grids, causing duplicate starts (Thanks to @AceMan for troubleshooting)
+- Changed: GridParameters.csv: Added AutoDestroyOldStructuresMultiplier (Thanks @Norlinri) and changed CompanyMaxIslandPointsPlayer to CompanyMaxIslandPointsPlayers (Thanks @JesterSuave)
+- Fixed: Line 40553 Variable not declared errored (Thanks to @AceMan for reporting)
+- Fixed: Wipe Server: Waits for redis to completely shut down before running clearall.bat and deleting redis_atlasdb.rdb
+- Changed: ASUU now logs every RCON command sent in the Full log.
+- Fixed: Discord Status updates: WH4 was being sent to WH3. (Thanks to @AceMan for reporting)
+- Fixed: Purge Backups button in Grid Configurator range is now 1-100. 0 does not work. (Thanks to @McK1llin for reporting)
+- Changed: Discord: Changed crash watchdog WH range to 1-4. (Thanks for @AceMan for reporting)
+- Added: Sorts and removes duplicates in the announcement minutes in config.
+- Changed: Renamed "Map Name ###" in config to "Map Name (ex. ocean, blackwood)###" for clarity.
+- Fixed: Line 55179 error if grid configurator opened prior to all servers ready the first time. (Thanks to @Dastrip for reporting)
+- Fixed: Line 36985 Subscript used on non-accessible variable. (Thanks to @Doublee for reporting)
+
 v2.2.3 (2020-07-07) Bug Fix
 - Fixed: Line 43203 Error when mod updates did not have notes. (Thanks to @AceMan for reporting)
 

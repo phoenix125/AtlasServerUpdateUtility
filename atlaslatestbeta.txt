@@ -1,9 +1,12 @@
-v2.2.3^v2.2.3 Bug Fix: Line 43203 Error
-
-v2.2.2 Added Players Online Discord announcement and minor bug fixes.
-- Added: Players online Discord announcement
-- Added: 4th Discord Webhook
-- Fixed: Mod Update Discord Announcements didn't format correctly sometimes
-- Fixed: Line 36057 error.
-- Fixed: Setup Wizard: Custom Method 3 was getting overwritten if selected.
-- Fixed: The inital online player check was not showing at program start.
+v2.2.5^v2.2.5 Added Discord Players Join/Leave, Fixed Mod Update Notes, Several Bug Fixes
+- Added: Discord: Customizable players join/leave and online players list.
+- Fixed: Discord: Mod Update Notes once again show.
+- Added: Discord: Mod Update Subsequent announcement to prevent entire mod update being posted multiple times.
+- Fixed: Blackwood: If ActiveMods was not in the GUS.ini file, ASUU would not add it.
+- Fixed: Any new parameter was not being inserted into the config files.
+- Fixed: Update_Atlas_Validate.bat files were getting duplicate entries.
+- Added: When announcement time = 1 minute, substitutes minute(s) and minutes with minute. When announcement time = 0, substitutes in 0 minute(s) and in 0 minutes with now.
+- Added: ModID change detection in ServerGrid.json: Requires changes to be present in 2 consecutive checks to prevent false update triggers.
+- Added: Optionally disable ModID list change detection.
+- Changed: Increased restart util "wait for program to close" timer from 5 seconds to 7 seconds.
+- Fixed: If >64 cores and assigning CPU affinity, ASUU did not detect existing servers if grid naming scheme was NOT 00 01.

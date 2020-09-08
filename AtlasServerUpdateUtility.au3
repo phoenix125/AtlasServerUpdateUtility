@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.3.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.3_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.5.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.5_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.3.0
+#AutoIt3Wrapper_Res_Fileversion=2.2.5.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.3
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.5
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -69,6 +69,7 @@ _GUIListViewEx_Globals() ; #include "GUIListViewEx.au3"  by Melba23 ; https://ww
 #include <StringConstants.au3>
 #include <String.au3>
 #include <StaticConstants.au3>
+#include <Timers.au3>
 #include <TrayConstants.au3>
 #include <WindowsConstants.au3>
 #include <WinAPI.au3>
@@ -93,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.3" ; (2020-07-07)
-Local $aUtilVerBeta = "v2.2.3" ; (2020-07-07)
-Global $aUtilVerNumber = 46 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.2.5" ; (2020-09-07)
+Local $aUtilVerBeta = "v2.2.5" ; (2020-09-07)
+Global $aUtilVerNumber = 48 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -143,6 +144,8 @@ Global $aUtilVerNumber = 46 ; New number assigned for each config file change. U
 ;44 = v2.2.0
 ;45 = v2.2.1
 ;46 = v2.2.2/3
+;47 = v2.2.4
+;48 = v2.2.5
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -185,6 +188,7 @@ Global $aFirstModBoot = True
 Global $iIniErrorCRLF = ""
 Global $aModMsgInGame[10]
 Global $aModMsgDiscord[10]
+Global $aModMsgSubDiscord[10]
 Global $aModMsgTwitch[10]
 Global $xModsToUpdate[1]
 $xModsToUpdate[0] = "Mods To Update"
@@ -248,6 +252,7 @@ Global $xServerAltSaveDir
 Global $aServerWorldAtlasId = 0
 Global $xGridsToRestart
 Global $xGridsToClose
+Global $tModListChangeCount = 0
 Global $tServNo = -1
 Global $tUtilUpdateAvailableTF = False ; Indicates whether a there is a new util update is available
 Global $IconReady = 0 ; To prevent undeclared variable
@@ -290,6 +295,10 @@ Global $tStatusUpdateText5 = ""
 Global $tStatusUpdateText6 = ""
 Global $tStatusUpdateText7 = ""
 Global $tStatusUpdateText8 = ""
+Global $xPlayersJoined[1]
+$xPlayersJoined[0] = ""
+Global $xPlayersLeft[1]
+$xPlayersLeft[0] = ""
 
 Global $aCPUOverallTracker, $fPercent
 Global $aCPUOverallTracker = _CPUOverallUsageTracker_Create()
@@ -415,7 +424,6 @@ $aServerVer = "0"
 $aServerIP = "127.0.0.1"
 
 #Region ;**** Global Variables ****
-
 Global $aLogFile = $aFolderLog & $aUtilName & "_Log_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt"
 Global $aLogDebugFile = $aFolderLog & $aUtilName & "_LogFull_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt"
 Global $aOnlinePlayerFile = $aFolderLog & $aUtilName & "_OnlineUserLog_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt"
@@ -433,9 +441,13 @@ Global $aUpdateVerify = "no"
 Global $aFailCount = 0
 Global $aShutdown = 0
 Global $aAnnounceCount1 = 0
-Global $aErrorShutdown = 0
+;~ Global $aErrorShutdown = 0
 Global $aIniForceWrite = False ; Forces a rewrite of the config.ini file : used after auto-updating config with util updates
-
+Global $aTotalPlayersUnique = 0
+Global $aPlayersJoined = ""
+Global $aPlayersLeft = ""
+Global $aPlayersName = ""
+Global $xOnlinePlayers[0]
 #EndRegion ;**** Global Variables ****
 ;~ #cs
 ; Error handling for Discord announcements ; https://www.autoitscript.com/forum/topic/196243-winhttpwinhttprequest51-certificate-error/
@@ -1441,6 +1453,51 @@ If $aCFGLastVerNumber < 46 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", "Players Online: **\o / \m**")
 	$aIniForceWrite = True
 EndIf
+If $aCFGLastVerNumber < 47 And $aIniExist Then
+	If FileExists($aParametersFile) Then
+		$tResult = 0
+		Local $xArray
+		_FileReadToArray($aParametersFile, $xArray, 0)
+		For $i = 0 To (UBound($xArray) - 1)
+			If StringInStr($xArray[$i], ",CompanyMaxIslandPointsPlayer,") Then
+				$xArray[$i] = StringReplace($xArray[$i], "CompanyMaxIslandPointsPlayer", "CompanyMaxIslandPointsPlayers")
+				LogWrite(" [Param] Replaced CompanyMaxIslandPointsPlayer with CompanyMaxIslandPointsPlayers")
+			EndIf
+			If StringInStr($xArray[$i], ",alwaysNotifyPlayerLeft,") Then
+				$tResult = _ArrayInsert($xArray, ($i + 1), 'FALSE,AutoDestroyOldStructuresMultiplier,1,2,[ServerSettings],"This value is based on PvEStructureDecayPeriodMultiplier! these values are rounded, so not really exact to the second - neither here nor ingame."')
+				LogWrite(" [Param] Added AutoDestroyOldStructuresMultiplier")
+			EndIf
+		Next
+		$tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
+		$tFileSave = $aParametersFile & "_" & $tTime & ".bak"
+		FileMove($aParametersFile, $tFileSave)
+		FileDelete($aParametersFile)
+		_FileWriteFromArray($aParametersFile, $xArray)
+	EndIf
+	$aServerMapName = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name ###", "ocean")
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
+	Global $aCrashDiscordWH = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###", "")
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $aCrashDiscordWH)
+EndIf
+If $aCFGLastVerNumber < 48 And $aIniExist Then
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", "yes")
+	Global $sDiscordModUpdateMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", _
+			">>> :exclamation:Mod \i __**\n released an update!**__\l\t```css\l\d```Server is restarting in \m minute(s).")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", _
+			"Mod \i \n released an update. Server is restarting in \m minute(s).")
+		$sDiscordPlayersMsg = 'Players Online: **\o / \m**   :anchor:  \a\n\j  \l'
+		$sDiscordPlayerJoinMsg = ':white_check_mark: Joined: ***\p***'
+		$sDiscordPlayerLeftMsg = ':x: Left: ***\p***'
+		$sDiscordPlayerOnlineMsg = '**\p**'
+		$aPlayerSeparator = ';;.;;'
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $sDiscordPlayersMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $sDiscordPlayerJoinMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $sDiscordPlayerLeftMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $sDiscordPlayerOnlineMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $aPlayerSeparator)
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -1459,7 +1516,6 @@ If Not @Compiled Then FileCopy($aPreviousVersionsFolder & "\AtlasServerUpdateUti
 
 Global $aAllowMultipleUtilsYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", "no")
 $aUtilBetaYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", 0)
-
 If $aAllowMultipleUtilsYN = "no" Then
 	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for another instance of ASUU.")
 	Local $tProcessList = ProcessList()
@@ -1600,6 +1656,7 @@ Global $aConfigServerOnly = $aServerDirLocal & "\ShooterGame\ServerGrid.ServerOn
 Global $aDefaultGame = $aServerDirLocal & "\ShooterGame\Config\DefaultGame.ini"
 Global $aDefaultGUS = $aServerDirLocal & "\ShooterGame\Config\DefaultGameUserSettings.ini"
 Global $aDefaultEngine = $aServerDirLocal & "\ShooterGame\Config\DefaultEngine.ini"
+Global $aServerDirFull = $aServerDirLocal & "\ShooterGame\Binaries\Win64"
 
 ; ----------- Temporary until enough time has passed for most users to have updated: Needed if files were edited with util because _GUICtrlRichEdit_GetText returns a @CR instead of @CRLF
 If ($aCFGLastVersion = "v1.5.0(beta15)") Then
@@ -1783,7 +1840,7 @@ If Not $aServerMultiHomeIP = "" Then
 Else
 	$aServerMultiHomeFull = ""
 EndIf
-$aServerDirFull = $aServerDirLocal & "\ShooterGame\Binaries\Win64"
+;~ $aServerDirFull = $aServerDirLocal & "\ShooterGame\Binaries\Win64"
 
 If $aServerModYN = "yes" Then
 	$aServerModCMD = " -manualmanagedmods"
@@ -2580,6 +2637,8 @@ While True ;**** Loop Until Closed ****
 		; ------------------------------
 		Local $tFirstGrid = True
 		If $aCrashPIDDisableYN <> "yes" Then
+			Local $tAnyGridStarted = False
+			Local $tTimer2 = _Timer_Init()
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xStartGrid[$i] = "yes" And $xServerIsHomeServer[$i] Then
 					SetStatusBusy("Server process check in progress...", "Check: Server " & _ServerNamingScheme($i, $aNamingScheme))
@@ -2598,6 +2657,7 @@ While True ;**** Loop Until Closed ****
 								Sleep(1000)
 							EndIf
 							_StartServer($i)
+							$tAnyGridStarted = True
 						EndIf
 					EndIf
 				EndIf
@@ -2620,10 +2680,19 @@ While True ;**** Loop Until Closed ****
 								Sleep(1000)
 							EndIf
 							_StartServer($i)
+							$tAnyGridStarted = True
 						EndIf
 					EndIf
 				EndIf
 			Next
+			If $tAnyGridStarted Then
+				Local $tTimer2Diff = TimerDiff($tTimer2)
+				For $i = 0 To ($aServerGridTotal - 1)
+					$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i])
+					Local $tDiff = _DateDiff('s', $xGridRCONLastReply[$i], _NowCalc())
+					If $tDiff < 0 Then $xGridRCONLastReply[$i] = _NowCalc()
+				Next
+			EndIf
 		EndIf
 		If UBound($xGridStarted) <> $aServerGridTotal Then ReDim $xGridStarted[$aServerGridTotal]
 		For $i = 0 To ($aServerGridTotal - 1)
@@ -2665,7 +2734,8 @@ While True ;**** Loop Until Closed ****
 			EndIf
 			If ((_DateDiff('s', $aTimeCheck8, _NowCalc())) >= $aServerOnlinePlayerSec) Then
 				SetStatusBusy("Server process check in progress...", "Check: Online Players")
-				$aOnlinePlayers = GetPlayerCount(0, False)
+				$tTimerDiff = GetPlayerCount(0, False)
+
 				ShowOnlinePlayersGUI()
 				If $aAllServersReadyTF Then
 					Local $aAnyGridsStartedTF = False
@@ -3144,7 +3214,7 @@ While True ;**** Loop Until Closed ****
 							If $aModTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aModMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotUpdate = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
-							If $aModTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aModMsgDiscord[$aAnnounceCount1])
+							If $aModTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aModMsgSubDiscord[$aAnnounceCount1])
 						EndIf
 						If $sUseTwitchBotUpdate = "yes" And ($sUseTwitchFirstAnnouncement = "no") Then
 							If $aModTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aModMsgTwitch[$aAnnounceCount1])
@@ -3393,7 +3463,7 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 						$tStatusUpdateText8 &= @CRLF & $tMsg
 					EndIf
 				Else
-					If ($tSendMessageType = 2 And $tWB = 8) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
+					If ($tSendMessageType = 2 And $tWB = 8) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH4URL, $tMsg, $sDiscordBot4Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 				EndIf
 			EndIf
 			If $sInGameAnnounce = "yes" And $sInGameSendCrashYN = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $tMsg)
@@ -4118,6 +4188,7 @@ EndFunc   ;==>StartGrids
 #Region ;**** INI Settings - User Variables ****
 
 Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
+	LogWrite(" [Util] Importing settings from " & $aUtilName & ".ini.")
 	Global $iIniError = ""
 	Global $iIniFail = 0
 	$iIniRead = True
@@ -4141,7 +4212,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $aServerAdminPass = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
 	Global $aServerMaxPlayers = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $iniCheck)
 	Global $aServerReservedSlots = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $iniCheck)
-	Global $aServerMapName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name ###", $iniCheck)
+	Global $aServerMapName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $iniCheck)
 	Global $aStartWithWindowsYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $iniCheck)
 	Global $aServerRCONImport = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $iniCheck)
 	Global $aServerRCONIP = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $iniCheck)
@@ -4151,6 +4222,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $aServerModYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $iniCheck)
 	Global $aServerModTimeoutMin = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $iniCheck)
 	Global $aServerModDoNotInstallYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $iniCheck)
+	Global $aServerModDetectChangesYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $iniCheck)
 	;	Global $aServerModList = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $iniCheck)
 	Global $aServerOnlinePlayerYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $iniCheck)
 	Global $aServerOnlinePlayerSec = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players every _ seconds (30-600) ###", $iniCheck)
@@ -4185,7 +4257,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $aCrashInGameYN = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
 	Global $aCrashInGameMessage = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
 	Global $aCrashDiscordYN = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
-	Global $aCrashDiscordWH = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###", $iniCheck)
+	Global $aCrashDiscordWH = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $iniCheck)
 	Global $aCrashDiscordMessage = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
 	;
 	Global $aBackupYN = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $iniCheck)
@@ -4309,12 +4381,20 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $sDiscordStopServerZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $iniCheck)
 	Global $sDiscordRestartGridsMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
 	Global $sDiscordRestartGridsZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $iniCheck)
-	Global $sDiscordModUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sDiscordModUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sDiscordModUpdateSubsequentMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
 	Global $sDiscordModUpdateZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $iniCheck)
 	Global $sDiscordModListUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
 	Global $sDiscordServersUpMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $iniCheck)
 	Global $sDiscordSkipRestartMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
-	Global $sDiscordPlayersMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $iniCheck)
+
+;~ 	Global $sDiscordPlayersMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $iniCheck)
+	Global $sDiscordPlayersMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $iniCheck)
+	Global $sDiscordPlayerJoinMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $iniCheck)
+	Global $sDiscordPlayerLeftMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $iniCheck)
+	Global $sDiscordPlayerOnlineMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $iniCheck)
+	Global $aPlayerSeparator = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $iniCheck)
+
 	Global $sDiscordWH1URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $iniCheck)
 	Global $sDiscordWH2URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $iniCheck)
 	Global $sDiscordWH3URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $iniCheck)
@@ -4549,6 +4629,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$aServerModDoNotInstallYN = "no"
 		$iIniFail += 1
 		$iIniError = $iIniError & "ServerModDoNotInstallYN, "
+	EndIf
+	If $iniCheck = $aServerModDetectChangesYN Then
+		$aServerModDetectChangesYN = "yes"
+		$iIniFail += 1
+		$iIniError = $iIniError & "ServerModDetectChangesYN, "
 	EndIf
 	If $iniCheck = $aServerOnlinePlayerYN Then
 		$aServerOnlinePlayerYN = "yes"
@@ -5240,6 +5325,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordModUpdateMessage, "
 	EndIf
+	If $iniCheck = $sDiscordModUpdateSubsequentMessage Then
+		$sDiscordModUpdateSubsequentMessage = "Mod \i \n released an update. Server is restarting in \m minute(s)."
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordModUpdateSubsequentMessage, "
+	EndIf
 	If $iniCheck = $sDiscordModListUpdateMessage Then
 		$sDiscordModListUpdateMessage = "Server Mod List changed. \i. Server is restarting in \m minute(s)."
 		$iIniFail += 1
@@ -5265,11 +5355,41 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "DiscordSkipRestartMessage, "
 	EndIf
-	If $iniCheck = $sDiscordPlayersMessage Then
-		$sDiscordPlayersMessage = "Players Online: **\o / \m**"
+
+
+	If $iniCheck = $sDiscordPlayersMsg Then
+		$sDiscordPlayersMsg = 'Players Online: **\o / \m**   :anchor:  \a\n\j  \l'
 		$iIniFail += 1
-		$iIniError = $iIniError & "DiscordPlayersMessage, "
+		$iIniError = $iIniError & "DiscordPlayersMsg, "
 	EndIf
+	If $iniCheck = $sDiscordPlayerJoinMsg Then
+		$sDiscordPlayerJoinMsg = ':white_check_mark: Joined: ***\p***'
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordPlayerJoinedMsg, "
+	EndIf
+	If $iniCheck = $sDiscordPlayerLeftMsg Then
+		$sDiscordPlayerLeftMsg = ':x: Left: ***\p***'
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordPlayerLeftMsg, "
+	EndIf
+	If $iniCheck = $sDiscordPlayerOnlineMsg Then
+		$sDiscordPlayerOnlineMsg = '**\p**'
+		$iIniFail += 1
+		$iIniError = $iIniError & "DiscordPlayerOnlineMsg, "
+	EndIf
+	If $iniCheck = $aPlayerSeparator Then
+		$aPlayerSeparator = ';;.;;'
+		$iIniFail += 1
+		$iIniError = $iIniError & "PlayerSeparator, "
+	EndIf
+;~ 	If $iniCheck = $sDiscordPlayersMessage Then
+;~ 		$sDiscordPlayersMessage = "Players Online: **\o / \m**"
+;~ 		$iIniFail += 1
+;~ 		$iIniError = $iIniError & "DiscordPlayersMessage, "
+;~ 	EndIf
+
+
+
 	If $iniCheck = $sGridStatusMessage Then
 		$sGridStatusMessage = "(\g) Grid server status: \s"
 		$iIniFail += 1
@@ -5858,7 +5978,34 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
 		$aDelayShutdownTime = $sAnnounceNotifyDaily
 	EndIf
-	LogWrite(" [Util] Importing settings from " & $aUtilName & ".ini.")
+
+	$tTxt = _SortString($sAnnounceNotifyDaily)
+	If $tTxt <> $sAnnounceNotifyDaily Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyDaily = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyUpdate)
+	If $tTxt <> $sAnnounceNotifyUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyUpdate = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyRemote)
+	If $tTxt <> $sAnnounceNotifyRemote Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyRemote = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyStopServer)
+	If $tTxt <> $sAnnounceNotifyStopServer Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyStopServer = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyRestartGrids)
+	If $tTxt <> $sAnnounceNotifyRestartGrids Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyRestartGrids = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyModUpdate)
+	If $tTxt <> $sAnnounceNotifyModUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyModUpdate = $tTxt
+
+	$tTxt = _SortString($sAnnounceNotifyModListUpdate)
+	If $tTxt <> $sAnnounceNotifyModListUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $tTxt)
+	$sAnnounceNotifyModListUpdate = $tTxt
 
 	$aServerRCONPort = StringReplace($aServerRCONPort, ".", ",")
 	$aServerAltSaveDir = StringReplace($aServerAltSaveDir, ".", ",")
@@ -5935,6 +6082,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 
 	Global $sModMsgInGame = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sInGameModUpdateMessage)
 	Global $sModMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sDiscordModUpdateMessage)
+	Global $sModMsgSubDiscord = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sDiscordModUpdateSubsequentMessage)
 	Global $sModMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyModUpdate, $sTwitchModUpdateMessage)
 	Global $aModTime = StringSplit($sAnnounceNotifyModUpdate, ",")
 	Global $aModCnt = Int($aModTime[0])
@@ -5955,7 +6103,6 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $aModListZeroMsgDiscord = AnnounceReplaceModID($sDiscordModUpdateZeroMessage, "0", "")
 	Global $aModListZeroMsgInGame = AnnounceReplaceModID($sDiscordModUpdateZeroMessage, "0", "")
 	Global $aModListZeroMsgTwitch = AnnounceReplaceModID($sTwitchModUpdateZeroMessage, "0", "")
-
 
 	EventsCreateCalendarAndOffset()
 	If $sUseTwitchBotModUpdate = "yes" Or $sUseDiscordBotModUpdate = "yes" Or $sUseDiscordBotRemoteRestart = "yes" Or $sUseDiscordBotDaily = "yes" Or $sUseDiscordBotUpdate = "yes" Or _
@@ -6051,7 +6198,7 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $aServerAdminPass)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $aServerMaxPlayers)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $aServerReservedSlots)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name ###", $aServerMapName)
+	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $aNamingScheme)
@@ -6069,6 +6216,7 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $aServerModYN)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $aServerModTimeoutMin)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $aServerModDoNotInstallYN)
+	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $aServerModDetectChangesYN)
 	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $aServerModList)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $aServerOnlinePlayerYN)
@@ -6104,7 +6252,7 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $aCrashInGameYN)
 	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashInGameMessage)
 	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $aCrashDiscordYN)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-3) ###", $aCrashDiscordWH)
+	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $aCrashDiscordWH)
 	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashDiscordMessage)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $aBackupYN)
@@ -6213,12 +6361,20 @@ Func UpdateIni($sIniFile)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $sDiscordStopServerZeroMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sDiscordRestartGridsMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $sDiscordRestartGridsZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateSubsequentMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $sDiscordModUpdateZeroMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sDiscordModListUpdateMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $sDiscordServersUpMessage)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sDiscordSkipRestartMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $sDiscordPlayersMessage)
+;~ 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $sDiscordPlayersMessage)
+	FileWriteLine($sIniFile, @CRLF)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "__ Online Player message substitutions (\o Online Player Count, \m Max Players, \j Joined Sub-Msg, \l Left Sub-Msn, \a Online Players Sub-Msg) \n Next Line) __", "")
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $sDiscordPlayersMsg)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $sDiscordPlayerJoinMsg)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $sDiscordPlayerLeftMsg)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $sDiscordPlayerOnlineMsg)
+	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $aPlayerSeparator)
 	FileWriteLine($sIniFile, @CRLF)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $sDiscordWH1URL)
 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $sDiscordWH2URL)
@@ -6827,8 +6983,8 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 	EndIf
 	ControlSetText($aSplashCloseServer, "", "Static1", "Ensuring all game saves started.")
 	_StopGrid_CompareSaveGameTime($tGridsToShutDown, $tStartGameSaveTime, $tStartGameSaveTime)     ; Making sure that game save started
+	Local $tGridsNotStartedSavingText = ""
 	If UBound($_StopGrid_GridsSame) > 0 Then
-		Local $tGridsNotStartedSavingText = ""
 		For $i = 0 To (UBound($_StopGrid_GridsSame) - 1)
 			$tGridsNotStartedSavingText &= _ServerNamingScheme($_StopGrid_GridsSame[$i], $aNamingScheme) & " "
 		Next
@@ -7024,7 +7180,7 @@ Func _StopGrid_1SecWait($tWait, $tTime, $tCountDown, $tType = "")
 	If $tDelay < 0 Then $tDelay = 0
 	Sleep($tDelay)
 	If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
-	$aErrorShutdown = 0
+;~ 	$aErrorShutdown = 0
 EndFunc   ;==>_StopGrid_1SecWait
 Func _StopGrid_RCONDoExit($tGrid)
 	$xCrashNoRCONReadyOnceTF[$tGrid] = False
@@ -7043,7 +7199,7 @@ Func _StopGrid_RCONDoExit($tGrid)
 EndFunc   ;==>_StopGrid_RCONDoExit
 Func _StopGrid_AltF4($tGrid)
 	$xCrashNoRCONReadyOnceTF[$tGrid] = False
-	$aErrorShutdown = 1
+;~ 	$aErrorShutdown = 1
 	SendAltF4($aServerPID[$tGrid], $tGrid)
 	$xGridReadyTF[$tGrid] = False
 	$xServerPlayerCount[$tGrid] = -1
@@ -7068,6 +7224,19 @@ Func _StopGrid_CheckIfAnyGridsRunning($tGrids, $tShutDownCounter = 1, $tType = "
 	Next
 	Return $tGridsRunning
 EndFunc   ;==>_StopGrid_CheckIfAnyGridsRunning
+Func _SortString($tString, $tOpt = "ND") ; $tOpt N=IsNumber, D=Remove Duplicates
+	Local $tArray4 = StringSplit($tString, ",", 2)
+	If StringInStr($tOpt, "N") Then
+		For $t2 = 0 To (UBound($tArray4) - 1)
+			$tArray4[$t2] = Number($tArray4[$t2])
+		Next
+	EndIf
+	_ArraySort($tArray4)
+	If StringInStr($tOpt, "D") Then $tArray4 = _ArrayUnique($tArray4, 0, 0, 0, 0)
+	$tString = _ArrayToString($tArray4, ",")
+	If StringLeft($tString, 2) = "0," Then $tString = StringTrimLeft($tString, 2)
+	Return $tString
+EndFunc   ;==>_SortString
 ; -----------------------------------------------------------------------------------------------------------------------
 #Region ;****  Get data from ServerGrid.json ****
 Func ImportConfig($tServerDirLocal, $tConfigFile, $tFromNewWizard = False, $tSplash = 0)
@@ -7249,7 +7418,7 @@ Func ImportConfig($tServerDirLocal, $tConfigFile, $tFromNewWizard = False, $tSpl
 EndFunc   ;==>ImportConfig
 #EndRegion ;****  Get data from ServerGrid.json ****
 Func CheckModList($tSplash = 0)
-	If $aServerModYN = "yes" Then
+	If $aServerModYN = "yes" And $aServerModDetectChangesYN = "yes" Then
 		If $tSplash > 0 Then ControlSetText($tSplash, "", "Static1", $aStartText & "Checking for mod list changes.")
 		If $aServerMapName = "Blackwood" Then
 			Local $xGUS
@@ -7272,68 +7441,76 @@ Func CheckModList($tSplash = 0)
 		If StringLen($tServerModList) < 4 Then $tServerModList = ""
 		Local $aModsBefore = StringSplit($tServerModList, ",", 2)
 		If $aServerModList <> $tServerModList Then
-			Local $aMods = StringSplit($aServerModList, ",")
-			If $aServerModList = "" Then
-				Local $tMods = 0
-			Else
-				Local $tMods = $aServerModList
-			EndIf
-			IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
-			If $aServerMapName = "Blackwood" Then _ReplaceParamInServerGrid("ModIDs", $aServerModList)
-			CheckModUpdate($aServerModList, $aSteamCMDDir, $aServerDirLocal, $tSplash, False)
-			Local $tNewMods = _ArrayCompare($aModsBefore, $xServerModList)
-			Local $tRemovedMods = _ArrayCompare($xServerModList, $aModsBefore)
-			Local $tModsUpdated = ""
-			Local $tModsAdded = ""
-			Local $tModsRemoved = ""
-			Local $tTxt1 = ""
-			If UBound($tNewMods) > 0 And $tNewMods[0] <> "" Then
-				$tModsAdded = "Added "
-				For $i = 0 To (UBound($tNewMods) - 1)
-					Local $aLatestTime = GetLatestModUpdateTime($tNewMods[$i], False)
-					If $aLatestTime[3] = -1 Then $aLatestTime[3] = "[Name Not Found]"
-					$tModsAdded &= $tNewMods[$i] & " " & $aLatestTime[3] & " "
-				Next
-			EndIf
-			If UBound($tRemovedMods) > 0 And $tRemovedMods[0] <> "" Then
-				$tModsRemoved = "Removed "
-				For $i = 0 To (UBound($tRemovedMods) - 1)
-					Local $aLatestTime = GetLatestModUpdateTime($tRemovedMods[$i], False)
-					If $aLatestTime[3] = -1 Then $aLatestTime[3] = "[Name Not Found]"
-					$tModsRemoved &= $tRemovedMods[$i] & " " & $aLatestTime[3] & " "
-				Next
-			EndIf
-			If $tModsAdded <> "" Then
+			If $tModListChangeCount > 0 Then
+				$tModListChangeCount = 0
+				Local $aMods = StringSplit($aServerModList, ",")
+				If $aServerModList = "" Then
+					Local $tMods = 0
+				Else
+					Local $tMods = $aServerModList
+				EndIf
+				IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
+				If $aServerMapName = "Blackwood" Then _ReplaceParamInServerGrid("ModIDs", $aServerModList)
+				CheckModUpdate($aServerModList, $aSteamCMDDir, $aServerDirLocal, $tSplash, False)
+				Local $tNewMods = _ArrayCompare($aModsBefore, $xServerModList)
+				Local $tRemovedMods = _ArrayCompare($xServerModList, $aModsBefore)
+				Local $tModsUpdated = ""
+				Local $tModsAdded = ""
+				Local $tModsRemoved = ""
+				Local $tTxt1 = ""
+				If UBound($tNewMods) > 0 And $tNewMods[0] <> "" Then
+					$tModsAdded = "Added "
+					For $i = 0 To (UBound($tNewMods) - 1)
+						Local $aLatestTime = GetLatestModUpdateTime($tNewMods[$i], False)
+						If $aLatestTime[3] = -1 Then $aLatestTime[3] = "[Name Not Found]"
+						$tModsAdded &= $tNewMods[$i] & " " & $aLatestTime[3] & " "
+					Next
+				EndIf
+				If UBound($tRemovedMods) > 0 And $tRemovedMods[0] <> "" Then
+					$tModsRemoved = "Removed "
+					For $i = 0 To (UBound($tRemovedMods) - 1)
+						Local $aLatestTime = GetLatestModUpdateTime($tRemovedMods[$i], False)
+						If $aLatestTime[3] = -1 Then $aLatestTime[3] = "[Name Not Found]"
+						$tModsRemoved &= $tRemovedMods[$i] & " " & $aLatestTime[3] & " "
+					Next
+				EndIf
+				If $tModsAdded <> "" Then
+					RunExternalScriptMod()
+					$tModsUpdated = StringTrimRight($tModsAdded, 1)
+					If $tModsRemoved <> "" Then
+						$tModsUpdated &= " & " & StringTrimRight($tModsRemoved, 1)
+					EndIf
+				Else
+					If $tModsRemoved <> "" Then
+						$tModsUpdated = StringTrimRight($tModsRemoved, 1)
+						$tTxt1 = " Notice! Files of mods removed from list are not deleted, but " & $aGameName & " will ignore them."
+					EndIf
+				EndIf
+				$aModListMsgInGame = AnnounceReplaceModID($sModListMsgInGame, $sAnnounceNotifyModListUpdate, $tModsUpdated)
+				$aModListMsgDiscord = AnnounceReplaceModID($sModListMsgDiscord, $sAnnounceNotifyModListUpdate, $tModsUpdated)
+				$aModListMsgTwitch = AnnounceReplaceModID($sModListMsgTwitch, $sAnnounceNotifyModListUpdate, $tModsUpdated)
+				$aModListZeroMsgDiscord = StringReplace($sDiscordModListUpdateMessage, "\i", $tModsUpdated)
+				$aModListZeroMsgDiscord = StringReplace($aModListZeroMsgDiscord, "\m", "0")
+				$aModListZeroMsgInGame = StringReplace($sInGameModUpdateMessage, "\i", $tModsUpdated)
+				$aModListZeroMsgInGame = StringReplace($aModListZeroMsgInGame, "\m", "0")
+				$aModListZeroMsgTwitch = StringReplace($sTwitchModListUpdateMessage, "\i", $tModsUpdated)
+				$aModListZeroMsgTwitch = StringReplace($aModListZeroMsgTwitch, "\m", "0")
+				$aRebootReason = "modlist"
+				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				RunExternalScriptMod()
-				$tModsUpdated = StringTrimRight($tModsAdded, 1)
-				If $tModsRemoved <> "" Then
-					$tModsUpdated &= " & " & StringTrimRight($tModsRemoved, 1)
+				LogWrite(" [Mod] ModID list changed in " & $aConfigFile & " file. " & $tModsUpdated & ". Restarting " & $aGameName & " Servers to implement changes." & $tTxt1)
+				If $tSplash = 0 Then
+					_Splash("ModID list changed in " & $aConfigFile & " file." & @CRLF & $tModsUpdated & @CRLF & "Restarting " & $aGameName & " Servers to implement changes.", 5000, 650)
+				Else
+					ControlSetText($tSplash, "", "Static1", "ModID list changed in " & $aConfigFile & " file." & @CRLF & $tModsUpdated & @CRLF & "Restarting " & $aGameName & " Servers to implement changes.")
+					Sleep(5000)
 				EndIf
 			Else
-				If $tModsRemoved <> "" Then
-					$tModsUpdated = StringTrimRight($tModsRemoved, 1)
-					$tTxt1 = " Notice! Files of mods removed from list are not deleted, but " & $aGameName & " will ignore them."
-				EndIf
+				$tModListChangeCount += 1
+				LogWrite(" [MOD] ModList Change detected. To prevent false positives, will check again. Old:[" & $tServerModList & "], New:[" & $aServerModList & "]")
 			EndIf
-			$aModListMsgInGame = AnnounceReplaceModID($sModListMsgInGame, $sAnnounceNotifyModListUpdate, $tModsUpdated)
-			$aModListMsgDiscord = AnnounceReplaceModID($sModListMsgDiscord, $sAnnounceNotifyModListUpdate, $tModsUpdated)
-			$aModListMsgTwitch = AnnounceReplaceModID($sModListMsgTwitch, $sAnnounceNotifyModListUpdate, $tModsUpdated)
-			$aModListZeroMsgDiscord = StringReplace($sDiscordModListUpdateMessage, "\i", $tModsUpdated)
-			$aModListZeroMsgDiscord = StringReplace($aModListZeroMsgDiscord, "\m", "0")
-			$aModListZeroMsgInGame = StringReplace($sInGameModUpdateMessage, "\i", $tModsUpdated)
-			$aModListZeroMsgInGame = StringReplace($aModListZeroMsgInGame, "\m", "0")
-			$aModListZeroMsgTwitch = StringReplace($sTwitchModListUpdateMessage, "\i", $tModsUpdated)
-			$aModListZeroMsgTwitch = StringReplace($aModListZeroMsgTwitch, "\m", "0")
-			$aRebootReason = "modlist"
-			If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-			RunExternalScriptMod()
-			LogWrite(" [Mod] ModID list changed in " & $aConfigFile & " file. " & $tModsUpdated & ". Restarting " & $aGameName & " Servers to implement changes." & $tTxt1)
-			If $tSplash = 0 Then
-				_Splash("ModID list changed in " & $aConfigFile & " file." & @CRLF & $tModsUpdated & @CRLF & "Restarting " & $aGameName & " Servers to implement changes.", 5000, 650)
-			Else
-				ControlSetText($tSplash, "", "Static1", "ModID list changed in " & $aConfigFile & " file." & @CRLF & $tModsUpdated & @CRLF & "Restarting " & $aGameName & " Servers to implement changes.")
-				Sleep(5000)
-			EndIf
+		Else
+			$tModListChangeCount = 0
 		EndIf
 	EndIf
 EndFunc   ;==>CheckModList
@@ -7833,15 +8010,66 @@ Func SendDiscordCrashMsg($tMsg)
 	If StringInStr($aCrashDiscordWH, "3") Then SendDiscordMsg($sDiscordWH3URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
 	If StringInStr($aCrashDiscordWH, "4") Then SendDiscordMsg($sDiscordWH4URL, $tMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 EndFunc   ;==>SendDiscordCrashMsg
-Func SendDiscordPlayerMsg($tMsg, $tPlayer)
-	Local $tMsg1 = StringReplace($tMsg, "\o", $tPlayer)
-	$tMsg1 = StringReplace($tMsg1, "\m", $aServerMaxPlayers)
-	$tMsg1 = StringReplace($tMsg1, @CRLF, "")
-	If StringInStr($sDiscordPlayersWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $tMsg1, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
-	If StringInStr($sDiscordPlayersWHSel, "2") Then SendDiscordMsg($sDiscordWH2URL, $tMsg1, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
-	If StringInStr($sDiscordPlayersWHSel, "3") Then SendDiscordMsg($sDiscordWH3URL, $tMsg1, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
-	If StringInStr($sDiscordPlayersWHSel, "4") Then SendDiscordMsg($sDiscordWH4URL, $tMsg1, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
+Func SendDiscordPlayerMsg()
+	Local $tDiscordPlayersMsg = StringReplace($sDiscordPlayersMsg, "\o", $aTotalPlayersOnline)
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, @CRLF, "")
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, "\m", $aServerMaxPlayers * $aServerGridTotal)
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, "\j", _DiscordPlayersJoined())
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, "\l", _DiscordPlayersLeft())
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, "\a", _DiscordPlayersOnline())
+	$tDiscordPlayersMsg = StringReplace($tDiscordPlayersMsg, "\n", @CRLF)
+	If StringInStr($sDiscordPlayersWHSel, "1") Then SendDiscordMsg($sDiscordWH1URL, $tDiscordPlayersMsg, $sDiscordBot1Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 1)
+	If StringInStr($sDiscordPlayersWHSel, "2") Then SendDiscordMsg($sDiscordWH2URL, $tDiscordPlayersMsg, $sDiscordBot2Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 2)
+	If StringInStr($sDiscordPlayersWHSel, "3") Then SendDiscordMsg($sDiscordWH3URL, $tDiscordPlayersMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 3)
+	If StringInStr($sDiscordPlayersWHSel, "4") Then SendDiscordMsg($sDiscordWH4URL, $tDiscordPlayersMsg, $sDiscordBot3Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 EndFunc   ;==>SendDiscordPlayerMsg
+Func _DiscordPlayersJoined()
+	Local $tReturn = ""
+	$xPlayersJoined = ResizeArray($xPlayersJoined)
+	If UBound($xPlayersJoined) = 0 Then
+	ElseIf UBound($xPlayersJoined) = 1 Then
+		If $xPlayersJoined[0] = "" Then
+		Else
+			$tReturn = StringReplace($sDiscordPlayerJoinMsg, "\p", $xPlayersJoined[0])
+		EndIf
+	Else
+		$tReturn = StringReplace($sDiscordPlayerJoinMsg, "\p", _ArrayToString($xPlayersJoined, StringReplace($aPlayerSeparator, ";", " ")))
+	EndIf
+	Global $xPlayersJoined[1]
+	$xPlayersJoined[0] = ""
+	Return $tReturn
+EndFunc   ;==>_DiscordPlayersJoined
+Func _DiscordPlayersLeft()
+	Local $tReturn = ""
+	$xPlayersLeft = ResizeArray($xPlayersLeft)
+	If UBound($xPlayersLeft) = 0 Then
+	ElseIf UBound($xPlayersLeft) = 1 Then
+		If $xPlayersLeft[0] = "" Then
+		Else
+			$tReturn = StringReplace($sDiscordPlayerLeftMsg, "\p", $xPlayersLeft[0])
+		EndIf
+	Else
+		$tReturn = StringReplace($sDiscordPlayerLeftMsg, "\p", _ArrayToString($xPlayersLeft, StringReplace($aPlayerSeparator, ";", " ")))
+	EndIf
+	Global $xPlayersLeft[1]
+	$xPlayersLeft[0] = ""
+	Return $tReturn
+EndFunc   ;==>_DiscordPlayersLeft
+Func _DiscordPlayersOnline()
+	Local $tTxt = "[None]"
+	If UBound($xOnlinePlayers) = 0 Then ReDim $xOnlinePlayers[1]
+	$xOnlinePlayers = ResizeArray($xOnlinePlayers) ;kim125er!
+	If UBound($xOnlinePlayers) = 0 Then
+	ElseIf UBound($xOnlinePlayers) = 1 Then
+		If $xOnlinePlayers[0] = "" Then
+		Else
+			$tTxt = $xOnlinePlayers[0]
+		EndIf
+	Else
+		$tTxt = _ArrayToString($xOnlinePlayers, StringReplace($aPlayerSeparator, ";", " "))
+	EndIf
+	Return StringReplace($sDiscordPlayerOnlineMsg, "\p", $tTxt)
+EndFunc   ;==>_DiscordPlayersOnline
 
 Func SendDiscordMsg($sHookURL, $sBotMessage, $sBotName = "", $sBotTTS = False, $sBotAvatar = "", $aServerPID = "0", $tWH = 1)
 	Local $tErr = True
@@ -7995,10 +8223,10 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 	EndIf
 	If $aServerRCONIP = "" Then
 ;~ 		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
+		Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
 	Else
 ;~ 		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $aServerRCONIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -H ' & $aServerRCONIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
+		Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $aServerRCONIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
 	EndIf
 	If $mWaitms > 0 Then
 		Local $mOut = Run($aMCRCONcmd, @ScriptDir, @SW_HIDE, $STDOUT_CHILD)
@@ -8011,19 +8239,19 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 		Local $tcrcatch = StdoutRead($mOut)
 		StdioClose($mOut)
 		If ProcessExists($mOut) Then ProcessClose($mOut)
-		If $aErrorShutdown = 0 Then
-			If $mLogYN = "yes" Then
-				If $aServerRCONIP = "" Then
-					LogWrite(" [RCON] IP: " & $mIP & ". Port:" & $mPort & ". Command:" & $mCommand, " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
-				Else
-					LogWrite(" [RCON] IP: " & $aServerRCONIP & ". Port:" & $mPort & ". Command:" & $mCommand, " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
-				EndIf
-			ElseIf $mLogYN = "players" Then
-				If $aRCONError = True Then LogWrite("", " [RCON] ERROR! " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
+		If $tcrcatch = "" Or StringInStr($tcrcatch, "Error: connection failed") Then $aRCONError = True
+		If $mLogYN = "yes" Then
+			If $aServerRCONIP = "" Then
+				LogWrite(" [RCON] IP: " & $mIP & ". Port:" & $mPort & ". Command:" & $mCommand, " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
 			Else
-				LogWrite("", " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
+				LogWrite(" [RCON] IP: " & $aServerRCONIP & ". Port:" & $mPort & ". Command:" & $mCommand, " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
 			EndIf
+		ElseIf $mLogYN = "players" Then
+			If $aRCONError Then LogWrite("", " [RCON] ERROR! " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
+		Else
+			LogWrite("", " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
 		EndIf
+;~ 		EndIf
 		Return $tcrcatch
 	Else
 		Local $mOut = Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
@@ -8033,6 +8261,8 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 			Else
 				LogWrite(" [RCON] IP: " & $aServerRCONIP & ". Port:" & $mPort & ". Command:" & $mCommand, " [RCON] " & $aMCRCONcmd)
 			EndIf
+		Else
+			LogWrite("", " [RCON] " & $aMCRCONcmd)
 		EndIf
 		Return "Did not wait for response."
 	EndIf
@@ -8329,7 +8559,7 @@ Func GetInstalledVersion($sGameDir)
 		$aReturn[0] = True
 		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
-		
+
 			If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '"buildid"', 1)
 			EndIf
@@ -8343,7 +8573,7 @@ Func GetInstalledVersion($sGameDir)
 			$aReturn[0] = True
 			$aReturn[1] = $aAppInfo[2]
 			EndIf
-		
+
 			If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
 			EndIf
@@ -8998,6 +9228,18 @@ Func AnnounceReplaceTime($tTime0 = 0, $tMsg0 = 0, $tZero = False)
 			For $tTime2 = 1 To $tTime3[0]
 				$tTime1 = StringStripWS($tTime3[$tTime2], 8) - 1
 				$tMsg1[$tTime2] = StringReplace($tMsg0, "\m", $tTime3[$tTime2])
+				If $tTime3[$tTime2] = Number("1") Then
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minutes", "minute")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minute(s)", "minute")
+				EndIf
+				If $tTime3[$tTime2] = Number("0") Then
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minutes", "now")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute(s)", "now")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute", "now")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minutes", "now")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute(s)", "now")
+					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute", "now")
+				EndIf
 			Next
 			Return $tMsg1
 		EndIf
@@ -9796,6 +10038,7 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 				$tModsUpdated = StringTrimRight($tModsUpdated, 2)
 				If $sInGameAnnounce = "yes" Then $aModMsgInGame = AnnounceReplaceModID($sModMsgInGame, $sAnnounceNotifyModUpdate, $tModsUpdated)
 				If $sUseDiscordBotModUpdate = "yes" Then $aModMsgDiscord = AnnounceReplaceModID($sModMsgDiscord, $sAnnounceNotifyModUpdate, $tModsUpdated)
+				If $sUseDiscordBotModUpdate = "yes" Then $aModMsgSubDiscord = AnnounceReplaceModID($sModMsgSubDiscord, $sAnnounceNotifyModUpdate, $tModsUpdated)
 				If $sUseTwitchBotModUpdate = "yes" Then $aModMsgTwitch = AnnounceReplaceModID($sModMsgTwitch, $sAnnounceNotifyModUpdate, $tModsUpdated)
 				If $sInGameAnnounce = "yes" Then $aModZeroMsgInGame = AnnounceReplaceModID($sDiscordModUpdateZeroMessage, "0", $tModsUpdated)
 				If $sUseDiscordBotModUpdate = "yes" Then $aModZeroMsgDiscord = AnnounceReplaceModID($sDiscordModUpdateZeroMessage, "0", $tModsUpdated)
@@ -9898,20 +10141,27 @@ EndFunc   ;==>GetLatestModUpdateTime
 
 Func _ModUpdateTextReplace($tTxt7)
 	Local $tArray = _StringBetween($tTxt7, "<p id=", "</p")
-	If @error Or $tArray = -1 Or StringLen($tArray) < 4 Then
+	If @error Or $tArray = -1 Then
 		$tReturn7 = "[No Update Notes]"
 	Else
-		Local $tReturn7 = $tArray[0]
-		$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
-		$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
-		$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
-		Local $tTmp = StringSplit($tReturn7, '"')
-		If $tTmp[0] > 2 Then
-			$tReturn7 = StringTrimLeft($tTmp[3], 1) ; Update Notes
-			$tReturn7 = StringLeft($tReturn7, 1750)
-			If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
-		Else
-			$tReturn7 = "[No Update Notes]"
+		If IsArray($tArray) And UBound($tArray) > 0 Then
+			If StringLen($tArray[0]) < 4 Then
+				$tReturn7 = "[No Update Notes]"
+			Else
+				Local $tReturn7 = $tArray[0]
+				Local $tTmp = StringSplit($tReturn7, '"')
+				If $tTmp[0] > 2 Then
+					$tReturn7 = StringTrimLeft($tTmp[3], 1) ; Update Notes
+					$tReturn7 = StringLeft($tReturn7, 1750)
+					$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
+					$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
+					$tReturn7 = StringReplace($tReturn7, "<ul class=", "")
+					$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
+					If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
+				Else
+					$tReturn7 = "[No Update Notes]"
+				EndIf
+			EndIf
 		EndIf
 	EndIf
 	Return $tReturn7
@@ -10208,12 +10458,7 @@ EndFunc   ;==>_InetGetErrorText
 
 Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	Local $aReturn[3] = [False, False, ""]
-	;	Local Const $sFilePath = $sServerDir & "\steamapps\workshop\appworkshop_440900.acf"
-;~ 	If $aFirstModCheck Then
-	If $sShow Then
-;~ 		SplashTextOn($aUtilName, $aUtilName & " " & $aUtilVersion & " started." & @CRLF & @CRLF & "Checking for installed version of mod" & @CRLF & $sMod & " " & $sModName, 400, 110, -1, -1, $DLG_MOVEABLE, "")
-		ControlSetText($aSplashMod, "", "Static1", $aStartText & "Checking for mod updates" & @CRLF & $sMod & " " & $sModName)
-	EndIf
+	If $sShow Then ControlSetText($aSplashMod, "", "Static1", $aStartText & "Checking for mod updates" & @CRLF & $sMod & " " & $sModName)
 	Local Const $sFilePath = $aFolderTemp & "mod_" & $sMod & "_appworkshop.tmp"
 	Local $hFileOpen = FileOpen($sFilePath, 0)
 	If $hFileOpen = -1 Then
@@ -10243,34 +10488,6 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	Return $aReturn
 EndFunc   ;==>GetInstalledModUpdateTime
 
-;Func WriteModList($sServerDir)
-;	Local $sModFile = $sServerDir & "\ConanSandbox\Mods\modlist.txt"
-;	FileMove($sModFile, $sModFile & ".BAK", 9)
-;	Local $aMods = StringSplit($g_sMods, ",")
-;	Local $sModName = ""
-;	For $i = 1 To $aMods[0]
-;		$aMods[$i] = StringStripWS($aMods[$i], 8)
-;		$sModName = IniRead($g_c_sMODIDFile, "MODID2MODNAME", $aMods[$i], $aMods[$i])
-;		If $aMods[$i] = $sModName Then
-;			LogWrite("Could not find Mod name for " & $aMods[$i] & " in " & $g_c_sMODIDFile & " Please refer to README and manually update list.")
-;		Else
-;			FileWriteLine($sModFile, $sModName)
-;		EndIf
-;	Next
-;EndFunc   ;==>WriteModList
-
-;Func UpdateModNameList($sSteamCmdDir, $sMod)
-;	Local $hSearch = FileFindFirstFile($sSteamCmdDir & "\steamapps\workshop\content\440900\" & $sMod & "\*.pak")
-;	If $hSearch = -1 Then
-;		LogWrite("Error: No Mod Files Found.")
-;		Return False
-;	Else
-;		Local $sFileName = FileFindNextFile($hSearch)
-;		IniWrite($g_c_sMODIDFile, "MODID2MODNAME", $sMod, $sFileName)
-;	EndIf
-;	FileClose($hSearch)
-;EndFunc   ;==>UpdateModNameList
-
 Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 	GUICtrlSetBkColor($UpdateMods, $cButtonDefaultBackground)
 	GUICtrlSetTip(-1, "Check for Mod Updates")
@@ -10279,15 +10496,8 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 	Local $tSplash = _Splash(" Mod " & $sMod & " " & $sModName & @CRLF & " update released or new mod." & @CRLF & "Downloading and installing mod update.", 0, 500, 140)
 	Local $aModScript = @ScriptDir & "\AtlasModDownloader.exe  --modids " & $sMod & " --steamcmd """ & $sSteamCmdDir & """ --workingdir """ & $sServerDir & """"
 	LogWrite(" [Mod] Mod " & $sMod & " " & $sModName & " update released or new mod found. Downloading and installing mod.", " [Mod] Mod " & $sMod & " " & $sModName & " update released or new mod found. Downloading and installing mod:" & $aModScript)
-;~ 	$aModMsgInGame = AnnounceReplaceModID($sMod, $sModMsgInGame, $sAnnounceNotifyModUpdate, $sModNo)
-;~ 	$aModMsgDiscord = AnnounceReplaceModID($sMod, $sModMsgDiscord, $sAnnounceNotifyModUpdate, $sModNo)
-;~ 	$aModMsgTwitch = AnnounceReplaceModID($sMod, $sModMsgTwitch, $sAnnounceNotifyModUpdate, $sModNo)
 	$Timer = TimerInit()
-;~ 	If $aServerMinimizedYN = "no" Then
 	Local $tPID = Run($aModScript)
-;~ 	Else
-;~ 		Local $tPID = Run($aModScript, "", @SW_MINIMIZE)
-;~ 	EndIf
 	If $aServerModTimeoutMin > 0 Then
 		Do
 			If Not ProcessExists($tPID) Then ExitLoop
@@ -10303,9 +10513,6 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 	If FileExists($sSteamCmdDir & "\steamapps\workshop\" & $aModAppWorkshop) Then
 		FileMove($sSteamCmdDir & "\steamapps\workshop\" & $aModAppWorkshop, $aFolderTemp & "mod_" & $sMod & "_appworkshop.tmp", 1)
 	EndIf
-;~ 	$aRebootReason = "mod"
-;~ 	$aBeginDelayedShutdown = 1
-;~ 	RunExternalScriptMod()
 	SplashOff()
 	Return $bReturn
 EndFunc   ;==>UpdateMod
@@ -10993,9 +11200,9 @@ Func _RestartUtil($fQuickRebootTF = True, $tAdmin = False)     ; Thanks Yashied!
 	Local $xArray[13]
 	$xArray[0] = '@echo off'
 	$xArray[1] = 'echo --------------------------------------------'
-	$xArray[2] = 'echo  Waiting 5 seconds for shutdown to complete'
+	$xArray[2] = 'echo  Waiting 7 seconds for shutdown to complete'
 	$xArray[3] = 'echo --------------------------------------------'
-	$xArray[4] = 'timeout 5'
+	$xArray[4] = 'timeout 7'
 	$xArray[5] = 'start "Starting AtlasServerUpdateUtility" "' & $aServerBatchFile & '"'
 	$xArray[6] = 'echo --------------------------------------------'
 	$xArray[7] = 'echo  AtlasServerUpdateUtility started . . .'
@@ -11010,7 +11217,8 @@ Func _RestartUtil($fQuickRebootTF = True, $tAdmin = False)     ; Thanks Yashied!
 			If $tAdmin Then
 				ShellExecute($tBatFile, "", "", "runas")
 			Else
-				$Pid = Run($tBatFile, "", @SW_HIDE)
+;~ 				$Pid = Run($tBatFile, "", @SW_HIDE)
+				$Pid = Run($tBatFile, "")
 			EndIf
 		Else
 			If $tAdmin Then
@@ -12572,24 +12780,34 @@ Func _CheckIfRedisRunning()
 		$aServerPIDRedis = -1
 	EndIf
 EndFunc   ;==>_CheckIfRedisRunning
+Func _ProcessGetLocation($iPID)
+	Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
+	If $aProc[0] = 0 Then Return SetError(1, 0, '')
+	Local $vStruct = DllStructCreate('int[1024]')
+	DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int_ptr', 0)
+	Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
+	If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
+	Return $aReturn[3]
+EndFunc   ;==>_ProcessGetLocation
+
 Func _CheckIfGridAlreadyRunning($i)
-	Local $tReturn = True
-	If $aAllowMultipleUtilsYN = "no" Then
-		Local $tProcess = ProcessList($aServerEXE)
-		For $x = 1 To $tProcess[0][0]
-			Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x][1]))
-			Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
-			If $tGrid = $xServerAltSaveDir[$i] Then
+	Local $tReturn = 0
+	Local $tProcess = ProcessList($aServerEXE)
+	For $x = 1 To $tProcess[0][0]
+		Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x][1]))
+		Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
+		If $tGrid = $xServerAltSaveDir[$i] Then
+			Local $tProcessFolder = _ProcessGetLocation($tProcess[$x][1])
+			If $tProcessFolder = $aServerDirFull & "\" & $aServerEXE Then
+				$tReturn2 = $tProcess[$x][1]
 				$aServerPID[$i] = ProcessExists($tProcess[$x][1])
 				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") found via Auto Detect.")
 				$xGridReadyTF[$i] = True
 				$aGridStartedSinceLastAllServersOnlineAnnouncementTF[$i] = False
-				$tReturn = False
+				$tReturn = $aServerPID[$i]
 			EndIf
-		Next
-	Else
-		$tReturn = True
-	EndIf
+		EndIf
+	Next
 	Return $tReturn
 EndFunc   ;==>_CheckIfGridAlreadyRunning
 Func _StartServer($i)
@@ -12615,17 +12833,17 @@ Func _StartServer($i)
 					Local $tStartMin = "/min "
 				EndIf
 				Local $tNodeInfo = _CPUAffinityNodeSplit(_CPUAffinityHexToBin($i), 0, $i)
-				$tStartText = @ComSpec & ' /c ' & 'start ' & $tStartMin & '/node ' & $tNodeInfo[4] & ' "ShooterGameServer.exe v100.0 (Rev. 100000) [AltSaveDIR=' & _ServerNamingScheme($i, 2) & ']" ' & $tStartText
+				$tStartText = @ComSpec & ' /c ' & 'start ' & $tStartMin & '/node ' & $tNodeInfo[4] & ' "ShooterGameServer.exe v100.0 (Rev. 100000) [AltSaveDIR=' & _ServerNamingScheme($i, $aNamingScheme) & ']" ' & $tStartText
 			EndIf
 		EndIf
 		If $aServerMinimizedYN = "no" Then
-			If _CheckIfGridAlreadyRunning($i) Then
+			If _CheckIfGridAlreadyRunning($i) = 0 Then
 				$aServerPID[$i] = Run($tStartText)
 				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID ( " & $aServerPID[$i] & ") started.", _
 						" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") started. " & $tStartText)
 			EndIf
 		Else
-			If _CheckIfGridAlreadyRunning($i) Then
+			If _CheckIfGridAlreadyRunning($i) = 0 Then
 				$aServerPID[$i] = Run($tStartText, "", @SW_MINIMIZE)
 				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID ( " & $aServerPID[$i] & ") started.", _
 						" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") started. " & $tStartText)
@@ -12795,24 +13013,19 @@ Func PIDReadServer($tFile, $tSplash = 0)
 		EndIf
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
-				Local $tPID = ProcessExists($tReturn[$i])
+				$tPID = ProcessExists($tReturn[$i])
 				If $tPID = 0 Then
-					For $x = 1 To $tProcess[0][0]
-						Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x][1]))
-						Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
-						If $tGrid = $xServerAltSaveDir[$i] Then
-							$tReturn[$i] = ProcessExists($tProcess[$x][1])
-							LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID [" & $tReturn[$i] & "] found via Auto Detect.")
-;~ 							MsgBox(0, "Kim", "Name:" & $tProcessName & @CRLF & "Grid:" & $tGrid & @CRLF & "Dir:" & $xServerAltSaveDir[$i] & @CRLF & "PID:" & $tReturn[$i])
-							$tFoundText &= $tReturn[$i] & ","
-							$tFound += 1
-							If $xStartGrid[$i] = "no" Then
-								LogWrite(" [Config] In GridStartSelect.ini, Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") was changed to start .")
-								$xStartGrid[$i] = "yes"
-								IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "yes")
-							EndIf
+					Local $tPID = _CheckIfGridAlreadyRunning($i)
+					If $tPID > 0 Then
+						$tFoundText &= $tPID & ","
+						$tFound += 1
+						$tReturn[$i] = $tPID
+						If $xStartGrid[$i] = "no" Then
+							LogWrite(" [Config] In GridStartSelect.ini, Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") was changed to start .")
+							$xStartGrid[$i] = "yes"
+							IniWrite($aGridSelectFile, $aGridIniTitle[0], "Start Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", "yes")
 						EndIf
-					Next
+					EndIf
 				EndIf
 			EndIf
 		Next
@@ -12907,9 +13120,9 @@ Func BatchFilesCreate($tSplash = 0, $tFolder = "0")
 			"+quit"
 	FileDelete($tFolder & "\Install_Atlas.bat")
 	FileWrite($tFolder & "\Install_Atlas.bat", $tTxtValY)
-	FileDelete($tFolder & "\Update_Atlas.bat")
+	FileDelete($tFolder & "\Update_Atlas_Validate_Yes.bat")
 	FileWrite($tFolder & "\Update_Atlas_Validate_Yes.bat", $tTxtValY)
-	FileDelete($tFolder & "\Update_Atlas.bat")
+	FileDelete($tFolder & "\Update_Atlas_Validate_No.bat")
 	FileWrite($tFolder & "\Update_Atlas_Validate_No.bat", $tTxtValN)
 
 	If FileExists($tFolder & "\Launch_Atlas All.bat") Then FileDelete($aBatFolder & "\Launch_Atlas All.bat")
@@ -12993,6 +13206,7 @@ Func _ArraySum(ByRef $a_array, $i_lbound1 = 0, $i_lbound2 = 0)
 EndFunc   ;==>_ArraySum
 
 Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If True, uses startup splash text. If False, uses standard text.
+	Local $tTimer2 = _Timer_Init()
 	If ((_DateDiff('s', $aTimeCheck6, _NowCalc())) < 300) Then
 		Local $tServerStartDelayDoneTF = False     ; False = Servers Startup Delay time has not lapsed
 	Else
@@ -13155,6 +13369,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 	Local $tUserLog[$aServerGridTotal]
 	Local $tUserMsg[$aServerGridTotal]
 	Local $tUserNoSteam[$aServerGridTotal]
+	Global $xOnlinePlayers[0]
 	FileDelete($aOnlinePlayerTempFile)
 	FileWriteLine($aOnlinePlayerTempFile, "Grid, GridID, PlayersName, PlayersSteamID")
 	If $aOnlinePlayersUseRedisYN = "yes" Then
@@ -13182,6 +13397,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 						$tUserLog[$i] &= $xPlayerRedisOnline[$x][2] & "." & $xPlayerRedisOnline[$x][1] & "|"
 						$tUserMsg[$i] &= $xPlayerRedisOnline[$x][2] & " [" & $xPlayerRedisOnline[$x][1] & "] "
 						$tUserNoSteam[$i] &= $xPlayerRedisOnline[$x][2] & " "
+						_ArrayAdd($xOnlinePlayers, $xPlayerRedisOnline[$x][2])
 					EndIf
 				Next
 			EndIf
@@ -13212,14 +13428,25 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 						$tUserLog[$i] &= $tUserAll[$x] & "." & $tSteamAll[$x] & "|"
 						$tUserMsg[$i] &= $tUserAll[$x] & " [" & $tSteamAll[$x] & "] "
 						$tUserNoSteam[$i] &= $tUserAll[$x] & " "
+						_ArrayAdd($xOnlinePlayers, $tUserAll[$x])
 						FileWriteLine($aOnlinePlayerTempFile, _ServerNamingScheme($i, $aNamingScheme) & "," & $i & "," & $tUserAll[$x] & "," & $tSteamAll[$x])
 					Next
 				EndIf
 			EndIf
 		Next
 	EndIf
-
+	Local $tPlayersBefore1 = IniRead($aUtilCFGFile, "CFG", "xPlayersOnline", $xOnlinePlayers)
+	Local $tPlayersBefore = StringSplit($tPlayersBefore1, ":", 2)
 	Global $aOnlinePlayersPerGrid[$aServerGridTotal]
+	If UBound($xOnlinePlayers) = 0 Then ReDim $xOnlinePlayers[1]
+	If UBound($tPlayersBefore) = 0 Then ReDim $tPlayersBefore[1]
+	_ArraySort($xOnlinePlayers)
+	$xOnlinePlayers = _ArrayUnique($xOnlinePlayers, 0, 0, 0, 0)
+	Global $xPlayersJoined = _ArrayCompare($tPlayersBefore, $xOnlinePlayers)
+	Global $xPlayersLeft = _ArrayCompare($xOnlinePlayers, $tPlayersBefore)
+	IniWrite($aUtilCFGFile, "CFG", "xPlayersOnline", _ArrayToString($xOnlinePlayers, ":"))
+
+	$aTotalPlayersUnique = UBound($xOnlinePlayers)
 	For $i = 0 To ($aServerGridTotal - 1)
 		If $xServerPlayerCount[$i] < 1 Then
 			$aOnlinePlayersPerGrid[$i] = _ServerNamingScheme($i, $aNamingScheme) & " Online Players: 0"
@@ -13334,7 +13561,14 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 		EndIf
 		FileWrite($aOnlinePlayerWebFile, $tOnlinePlayers[3])
 	EndIf
+	Local $tTimer2Diff = TimerDiff($tTimer2)
+	For $i = 0 To ($aServerGridTotal - 1)
+		$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i])
+		Local $tDiff = _DateDiff('s', $xGridRCONLastReply[$i], _NowCalc())
+		If $tDiff < 0 Then $xGridRCONLastReply[$i] = _NowCalc()
+	Next
 	SetStatusIdle()
+	Return $tTimer2Diff
 EndFunc   ;==>GetPlayerCount
 
 Func F_ShowPlayerCount()
@@ -13356,7 +13590,6 @@ Func F_ShowPlayerCount()
 	;		ShowPlayerCount()
 	;EndIf
 EndFunc   ;==>F_ShowPlayerCount
-
 Func WriteOnlineLog($aMsg)
 	FileWriteLine($aFolderLog & $aUtilName & "_OnlineUserLog_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt", _NowCalc() & " " & $aMsg & " ")
 EndFunc   ;==>WriteOnlineLog
@@ -13871,7 +14104,7 @@ Func ShowMainGUI($tSplash = 0)
 	If UBound($aMainLVW, 1) <> $aServerGridTotal Then ReDim $aMainLVW[$aServerGridTotal][12]
 
 	If $aServerOnlinePlayerYN = "yes" Then
-		$aOnlinePlayers = GetPlayerCount($tSplash, True)
+		GetPlayerCount($tSplash, True)
 		GUICtrlSetData($LabelUtilReadyStatus, "Idle")
 	EndIf
 	$aStartText = $aUtilName & " " & $aUtilVersion & " started." & @CRLF & @CRLF
@@ -14194,26 +14427,24 @@ Func GUIUpdateQuick()
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $aServerPID[$i] = 999999 And $xStartGrid[$i] = "yes" Then
 				Local $tNodeInfo = _CPUAffinityNodeSplit(_CPUAffinityHexToBin($i), 0, $i)
-				Local $tProcess = ProcessList($aServerEXE)
-				For $x5 = 1 To $tProcess[0][0]
-					Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x5][1]))
-					Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
-					If $tGrid = $xServerAltSaveDir[$i] Then
-						$aServerPID[$i] = ProcessExists($tProcess[$x5][1])
-						LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") found via Auto Detect. Assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
-					EndIf
-				Next
+;~ 				$tPID = ProcessExists($aServerPID[$i])
+;~ 				If $tPID = 0 Then
+				Local $tPID = _CheckIfGridAlreadyRunning($i)
+				If $tPID > 0 Then
+					LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
+					$aServerPID[$i] = $tPID
+				EndIf
+;~ 				EndIf
 				If $aServerPID[$i] = 999999 Then
 					Sleep(4000)
-					Local $tProcess = ProcessList($aServerEXE)
-					For $x5 = 1 To $tProcess[0][0]
-						Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x5][1]))
-						Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
-						If $tGrid = $xServerAltSaveDir[$i] Then
-							$aServerPID[$i] = ProcessExists($tProcess[$x5][1])
-							LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") found via Auto Detect. Assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
+					$tPID = ProcessExists($aServerPID[$i])
+					If $tPID = 0 Then
+						Local $tPID = _CheckIfGridAlreadyRunning($i)
+						If $tPID > 0 Then
+							LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
+							$aServerPID[$i] = $tPID
 						EndIf
-					Next
+					EndIf
 				EndIf
 				$hProc = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, False, $aServerPID[$i])
 				_WinAPI_SetProcessAffinityMask($hProc, "0x" & _RemoveLeadingZeros($tNodeInfo[7]))
@@ -14419,14 +14650,23 @@ Func GUIUpdateQuick()
 	EndIf
 
 	SetStatusBusy("Server process check in progress...", "Updating: Online Players")
-	$aTotalPlayersOnline = $tTotalPlayers
+	If $tTotalPlayers > $aTotalPlayersUnique Then
+		$aTotalPlayersOnline = $aTotalPlayersUnique
+	Else
+		$aTotalPlayersOnline = $tTotalPlayers
+	EndIf
 	If $tTotalPlayerError Then $aTotalPlayersOnline = "--"
 	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers) ; Players Edit Window
+	Local $tChange = False
+	If UBound($xPlayersJoined) = 0 Then ReDim $xPlayersJoined[1]
+	If UBound($xPlayersLeft) = 0 Then ReDim $xPlayersLeft[1]
+	If $xPlayersJoined[0] <> "" Then $tChange = True
+	If $xPlayersLeft[0] <> "" Then $tChange = True
 	If $sUseDiscordBotPlayersYN = "yes" Then
 		Local $tLastPlayerCount = IniRead($aIniFile, "CFG", "aPlayerCount", "0")
-		If $tLastPlayerCount <> $tTotalPlayers Then
-			IniWrite($aIniFile, "CFG", "aPlayerCount", $tTotalPlayers)
-			SendDiscordPlayerMsg($sDiscordPlayersMessage, $tTotalPlayers)
+		If $tLastPlayerCount <> $aTotalPlayersOnline Or $tChange Then
+			IniWrite($aIniFile, "CFG", "aPlayerCount", $aTotalPlayersOnline)
+			SendDiscordPlayerMsg()
 		EndIf
 	EndIf
 	If $tUtilUpdateAvailableTF Then
@@ -16550,7 +16790,7 @@ Func W4_I_ModList()
 	Else
 		Local $tMods = $aServerModList
 	EndIf
-	IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
+;~ 	IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
 	_ReplaceParamInIni("ActiveMods", $aServerModList)
 	_ReplaceParamInServerGrid("ModIDs", $aServerModList)
 	If $aServerModList = "" Then
@@ -16825,7 +17065,7 @@ Func W4_CovertToBlackwood($tRestart = True)
 	Local $tServerGameport = $xServergameport[0]
 	_BackupFile($aIniFile, "", False)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
-	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name ###", $aServerMapName)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $aServerAltSaveSelect)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $aServerAltSaveDir)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", "no")
@@ -16934,7 +17174,7 @@ Func _ReplaceParamInServerGrid($tParName, $tParValue)
 	EndIf
 EndFunc   ;==>_ReplaceParamInServerGrid
 Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $tFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\GameUserSettings.ini")
-	Local $xFile, $tPos = -1, $tPos1 = -1, $tBefore, $tPre, $tNewFileTF = False
+	Local $xFile, $tPos = -1, $tPos1 = -1, $tBefore, $tPre, $tNewFileTF = False, $tWrite = False
 	Local $tError = _FileReadToArray($tFile, $xFile, 0)
 	If $tError = 0 Then     ; File Not Exist
 		_ArrayInsert($xFile, 0)
@@ -16967,6 +17207,8 @@ Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $
 			Next
 			If $tPos1 = -1 Then
 				_ArrayInsert($xFile, $tPos + 1, $tParName & "=" & $tParValue)     ; No Parameter found
+				$tWrite = True
+;~ 				$tNewFileTF = True
 				If $tParName = "RCONPort" Then _ArrayInsert($xFile, $tPos + 1, "RCONEnabled=True")
 			EndIf
 		EndIf
@@ -16974,7 +17216,7 @@ Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $
 	If $tNewFileTF Then
 		_BackupFile($tFile, $xFile, False, True)     ;File, Text to write, Show Splash, IsArray?
 	Else
-		If $tBefore <> $xFile[$i] Then
+		If $tBefore <> $xFile[$i] Or $tWrite Then
 			If $tError > 0 Then LogWrite("", " [Param] Parameter [" & $tParName & "] in " & $aConfigFile & " changed from [" & $tBefore & "] to [" & $xFile[$i] & "]")
 			_BackupFile($tFile, $xFile, False, True)     ;File, Text to write, Show Splash, IsArray?
 		EndIf
@@ -17549,10 +17791,15 @@ Func GUI_Wipe_B_Wipe()
 	If $aServerUseRedis = "yes" Then
 		ControlSetText($tSplashWipe, "", "Static1", "Wipe Server in process" & @CRLF & @CRLF & "Closing redis...")
 		If $aServerPIDRedis < 1 Then $aServerPIDRedis = -1
-		If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
-			LogWrite(" [Wipe Server] Redis (PID: " & $aServerPIDRedis & ") Killing Process")
-			ProcessClose($aServerPIDRedis)
-		EndIf
+		For $i = 0 To 20
+			If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
+				LogWrite(" [Wipe Server] Redis (PID: " & $aServerPIDRedis & ") Killing Process")
+				ProcessClose($aServerPIDRedis)
+				Sleep(500)
+			Else
+				ExitLoop
+			EndIf
+		Next
 		FileDelete($aPIDRedisFile)
 		If $aBackupRedisFolder = "" Then
 			If $aServerRedisFolder = "" Then
@@ -20063,7 +20310,7 @@ Func G_T1_B_ServerGrid()
 	ShellExecute($aServerDirLocal & "\ShooterGame\")
 EndFunc   ;==>G_T1_B_ServerGrid
 Func G_T1_B_PurgeBackups()
-	Local $tBackupsToKeep = Number(Int(InputBox($aUtilName, "Number of recent backups to keep? (0-100)", 10, "", -1, 125, Default, Default, 60)))
+	Local $tBackupsToKeep = Number(Int(InputBox($aUtilName, "Number of recent backups to keep? (1-100)", 10, "", -1, 125, Default, Default, 60)))
 	If $tBackupsToKeep < 1 Or $tBackupsToKeep > 100 Then
 		_Splash("You must enter a valid number")
 	Else
@@ -20133,6 +20380,7 @@ Func G_W_ParamNumLabelClicked()
 	Next
 EndFunc   ;==>G_W_ParamNumLabelClicked
 Func G_T1_B_StartStopServUpdate()
+	Sleep(500)
 	If ProcessExists($aServerPID[$tGridActive]) And $xLocalGrid[$tGridActive] = "yes" Then
 		GUICtrlSetBkColor($G_T1_B_StartStopServer, 0xFF5858)         ; Red
 		GUICtrlSetData($G_T1_B_StartStopServer, "Stop Server")
@@ -20359,7 +20607,7 @@ Func G_T1_I_ModIDs()
 	Else
 		Local $tMods = $aServerModList
 	EndIf
-	IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
+;~ 	IniWrite($aUtilCFGFile, "CFG", "aServerModList", $tMods)
 	_ReplaceParamInIni("ActiveMods", $aServerModList)
 	_ReplaceParamInServerGrid("ModIDs", $aServerModList)
 	If $aServerModList = "" Then
@@ -22160,7 +22408,7 @@ Func _ParamSortReference()
 	_ParamFileImport("", True, $xFile)
 EndFunc   ;==>_ParamSortReference
 Func _ParamFileDefault()
-	Local $xArray[158]
+	Local $xArray[159]
 	$xArray[0] = '------------------------------------------,,,,,'
 	$xArray[1] = ' AtlasServerUpdateUtility Grid Parameters,,,,,'
 	$xArray[2] = '------------------------------------------,,,,,'
@@ -22182,141 +22430,142 @@ Func _ParamFileDefault()
 	$xArray[18] = 'FALSE,AllowThirdPersonPlayer,TRUE,2,[ServerSettings],Enables 3rd Person view'
 	$xArray[19] = 'FALSE,alwaysNotifyPlayerJoined,FALSE,2,[ServerSettings],Players will always get notified if someone joins the server'
 	$xArray[20] = 'FALSE,alwaysNotifyPlayerLeft,FALSE,2,[ServerSettings],Players will always get notified if someone leaves the server'
-	$xArray[21] = 'FALSE,AutoDestroyWildDinosInterval,259200,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero wild dinos will be automatically destroyed and respawned at this interval if the server has been live this long to help keep wild dino populations correct. Only recommend using this if bAllowSavingWildDinos=false from the ServerSettings section '
-	$xArray[22] = 'FALSE,AutoGenerateIslandSpawnRegions,TRUE,2,[ServerSettings],When true players will be automatically given the option to select any of the islands on a homeserver as a spawn point'
-	$xArray[23] = 'FALSE,AutoIslandPointSizePower,0.6f,3,[/Script/ShooterGame.ShooterGameMode],a power to apply to this calculation'
-	$xArray[24] = 'FALSE,AutoIslandPointSizeScale,0.000015f,3,[/Script/ShooterGame.ShooterGameMode],a scale to this calculation'
-	$xArray[25] = 'FALSE,AutoIslandPointsMax,100,3,[/Script/ShooterGame.ShooterGameMode],a  maximum clamp on this calculation '
-	$xArray[26] = 'FALSE,AutoIslandPointsMin,1,3,[/Script/ShooterGame.ShooterGameMode],a minimum clamp on this calculation'
-	$xArray[27] = 'FALSE,AutoSavePeriodMinutes,10,2,[ServerSettings],Set interval for automatic saves'
-	$xArray[28] = 'FALSE,BabyMatureSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for baby dino to mature'
-	$xArray[29] = 'FALSE,bAllowSavingWildDinos,FALSE,2,[ServerSettings],By default now wild dinos are not saved in order to increase server savegame speed. set this back to true if you want to have wild dinos save.'
-	$xArray[30] = 'FALSE,bAllowUnlimitedRespecs,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Set to true to allow more than one usage of Mindwipe Tonic per level'
-	$xArray[31] = 'FALSE,bAllowWeaponEnemyTargetingCursor,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Enables gun crosshair color change'
-	$xArray[32] = 'FALSE,bAutoCalculateIslandPoints,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true for settlement mode the island points will automatically be calculated by the island`s size on the map for any islands that are set to 1 point '
-	$xArray[33] = 'FALSE,bClampHomeServerXP,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Remove Level cap on Freeport / Home servers'
-	$xArray[34] = 'FALSE,bDestroyInvalidSettlementClaimFlags,FALSE,3,[/Script/ShooterGame.ShooterGameMode],This can be used to destroy all invalid claim flags please be advised that this cannot be reversed once done.'
-	$xArray[35] = 'FALSE,bDisableFogOfWar,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true the fog & shrowd of war will be disabled '
-	$xArray[36] = 'FALSE,bDisableStructureDecayPvE,FALSE,2,[ServerSettings],Disable the gradual (7 days) decay of player structures'
-	$xArray[37] = 'FALSE,bDisableStructurePlacementCollision,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If `true` allows for structures to clip into the terrain.'
-	$xArray[38] = 'FALSE,bDisplayTopCompanies,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true and NOT playing settlement mode the list of top 10 companies will be displayed on the map '
-	$xArray[39] = 'FALSE,bDontRequireClaimFlagsForBuilding, False,3,[/Script/ShooterGame.ShooterGameMode],If true you can place all structures without claim flags. We strongly recommend setting this to true if you`re using the settlement mode'
-	$xArray[40] = 'FALSE,bDontRequireLargeCannonsToSnapOnShips,TRUE,3,[/Script/ShooterGame.ShooterGameMode],This allows large cannons to not require a snap on the ship'
-	$xArray[41] = 'FALSE,bDontUseClaimFlags,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Turning off Claim Flags will turn your Server Lawless and Structures will decay.'
-	$xArray[42] = 'FALSE,bForceRequireClaimFlagsForBuildingCannons,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true you are still required to have a claim flag to place cannons even if bDontRequireClaimFlagsForBuilding is true. We strongly recommend setting this to true if you`re using the settlement mode '
-	$xArray[43] = 'FALSE,bHomeServerDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true player characters on homeservers will disappear when logged out '
-	$xArray[44] = 'FALSE,bIsLawlessHomeServer,FALSE,3,[/Script/ShooterGame.ShooterGameMode],'
-	$xArray[45] = 'FALSE,bPvEAllowNonAlignedShipBasing,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true `enemies` will be allowed to stand on your ship in PvE '
-	$xArray[46] = 'FALSE,bPvEDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true and the server is in PvE configuration player characters will disappear when logged out '
-	$xArray[47] = 'FALSE,bSeatedNPCIgnoreGunDamage,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Stationed NPCs (on boats and land) no longer take damage from guns on Official Servers.'
-	$xArray[48] = 'FALSE,bUseCorpseLocator,FALSE,2,[ServerSettings],"if set to true, you will see a green lightbeam at the location of your death"'
-	$xArray[49] = 'FALSE,bUseNewStructureFoundationSupportChecks,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true foundation/supports will be more correctly required for horizontal structure building improving server performance but consequently limiting certain kinds of architectural builds. '
-	$xArray[50] = 'FALSE,bUseSettlementClaims,TRUE,3,[/Script/ShooterGame.ShooterGameMode],"Set this to true to use the new ""Colonies"" island settlement system "'
-	$xArray[51] = 'FALSE,bUseStaticCharacterAge,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Supposed to freeze your current age. You need to die if you want the setting to take effect.'
-	$xArray[52] = 'FALSE,ClampHomeServerXPLevel,8,3,[/Script/ShooterGame.ShooterGameMode],Level cap on Freeport / Home servers'
-	$xArray[53] = 'FALSE,ClampResourceHarvestDamage,FALSE,2,[ServerSettings],Limit the damage caused by a dino to a resource for harvesting.'
-	$xArray[54] = 'FALSE,CompanyMaxIslandPointsAmounts,150,3,[/Script/ShooterGame.ShooterGameMode],Maximum number of points for a company.'
-	$xArray[55] = 'FALSE,CompanyMaxIslandPointsPlayer,50,3,[/Script/ShooterGame.ShooterGameMode],The number of players that a Company will hit max number of points.'
-	$xArray[56] = 'FALSE,CompanyMinIslandPointsAmounts,30,3,[/Script/ShooterGame.ShooterGameMode],Minimum number of points for a company.'
-	$xArray[57] = 'FALSE,CompanyMinIslandPointsPlayers,1,3,[/Script/ShooterGame.ShooterGameMode],A company with only 1 player will have the minimum number of points.'
-	$xArray[58] = 'FALSE,CompanySoloIslandPointsAmount,30,3,[/Script/ShooterGame.ShooterGameMode],A Solo company will have this many points.'
-	$xArray[59] = 'FALSE,CraftXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for crafting'
-	$xArray[60] = 'FALSE,DayCycleSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK, controlling how often day changes to night and night changes to day. The default value 1 provides the same cycle speed as the singleplayer experience (and the official public servers). Values lower than 1 slow down the cycle; higher values accelerate it. Base time when value is 1 appears to be 1 minute real time equals approx. 28 minutes game time. Thus, for an approximate 24 hour day/night cycle in game, use .035 for the value."'
-	$xArray[61] = 'FALSE,DayTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during the day. This value determines the length of each day, relative to the length of each night (as specified by NightTimeSpeedScale. Lowering this value increases the length of each day."'
-	$xArray[62] = 'FALSE,DestroyDeadShipsIntervalTime,0,3,[/Script/ShooterGame.ShooterGameMode],Sunken ships will always destroy after 5 days on Official Servers. This will clear the icon from your maps too as long the area where the boats were sunk have been revisited.'
-	$xArray[63] = 'FALSE,DestroyUntaggedShipsInterval,0,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero ships that have not had any of that team logged-in nearby will be destroyed after that amount of time '
-	$xArray[64] = 'FALSE,DifficultyOffset,0,2,[ServerSettings],Specifies the difficulty level.'
-	$xArray[65] = 'FALSE,DinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` food consumption. Higher values increase food consumption (dinosaurs get hungry faster). It also affects the taming-times.'
-	$xArray[66] = 'FALSE,DinoCharacterHealthRecoveryMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` health recovery. Higher values increase the recovery rate (dinosaurs heal faster).'
-	$xArray[67] = 'FALSE,DinoCharacterStaminaDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` stamina consumption. Higher values increase stamina consumption (dinosaurs get tired faster).'
-	$xArray[68] = 'FALSE,DinoCountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur spawns. Higher values increase the number of dinosaurs spawned throughout the ARK.'
-	$xArray[69] = 'FALSE,DinoDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage dinosaurs deal with their attacks. The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
-	$xArray[70] = 'FALSE,DinoResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage dinosaurs receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a dino taking half damage while a value of 2.0 would result in a dino taking double normal damage."'
-	$xArray[71] = 'FALSE,DisableDinoDecayPvE,FALSE,2,[ServerSettings],"Disable the gradual (7 days) decay of dinosaur ownership. Without this set to true, every dinosaur can be claimed by any player."'
-	$xArray[72] = 'FALSE,DisablePvEGamma,FALSE,2,[ServerSettings],"Prevents use of console command ""gamma"" in PvE mode"'
-	$xArray[73] = 'FALSE,DisableStructurePreventionVolumes,FALSE,2,[ServerSettings],This setting disables Structure Prevention Volumes (ie the Ice Cave island blocks building without this enabled)'
-	$xArray[74] = 'FALSE,EggHatchSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for fertilized egg to hatch'
-	$xArray[75] = 'FALSE,EnableHealthbars,TRUE,2,[ServerSettings],No description.'
-	$xArray[76] = 'FALSE,EnablePvPGamma,FALSE,2,[ServerSettings],"Allow use of console command ""gamma"" in PvP mode"'
-	$xArray[77] = 'FALSE,EnemyBuildPreventionRadiusMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales the enemy build prevention radius '
-	$xArray[78] = 'FALSE,ForceAllStructureLocking,FALSE,2,[ServerSettings],Enabling this will default lock all structures'
-	$xArray[79] = 'FALSE,GenericXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for generic XP (automatic over time)'
-	$xArray[80] = 'FALSE,globalVoiceChat,FALSE,2,[ServerSettings],Voice chat turns global'
-	$xArray[81] = 'FALSE,HarvestAmountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for yields from all harvesting activities (chopping down trees picking berries carving carcasses mining rocks etc.). Higher values increase the amount of materials harvested with each strike.'
-	$xArray[82] = 'FALSE,HarvestHealthMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the health"" of items that can be harvested (trees rocks carcasses etc.). Higher values increase the amount of damage (i.e. ""number of strikes"") such objects can withstand before being destroyed which results in higher overall harvest yields."""'
-	$xArray[83] = 'FALSE,KickIdlePlayersPeriod,3600,2,[ServerSettings],Time after which characters that have not moved or interacted will be kicked (if -EnableIdlePlayerKick as command line parameter is set).'
-	$xArray[84] = 'FALSE,KillXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for a kill'
-	$xArray[85] = 'FALSE,ListenServerTetherDistanceMultiplier,1,2,[ServerSettings],No description.'
-	$xArray[86] = 'FALSE,MaximumCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config option is used to cap the crafting skill bonus at 60%'
-	$xArray[87] = 'FALSE,MaxPlatformSaddleStructureLimit,,2,[ServerSettings],Changes the maximum number of platformed-creatures/rafts allowed on the ARK (a potential performance cost)'
-	$xArray[88] = 'FALSE,MaxPlayers,,2, [/script/engine.gamesession],Specifies the maximum number of players that can play on the server simultaneously. Must be placed under [/script/engine.gamesession] in GameUserSettings.ini to function when not used in the command line.'
-	$xArray[89] = 'FALSE,MaxSettlementFlagZ,999999,3,[/Script/ShooterGame.ShooterGameMode],Islands on the Official Network now have a maximum z-value for how high Claim Flags can be placed unique to the island. These are based on the highest terrain points before considering mountains large rock formations or steep pillars.'
-	$xArray[90] = 'FALSE,MaxSettlementWarTimeOffset,345600,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the maximum amount of time in the future that a war can be scheduled '
-	$xArray[91] = 'FALSE,MaxTamedDinos,4000,2,[ServerSettings],"Sets the maximum number of tamed Dinos on a Server, this is a global cap."'
-	$xArray[92] = 'FALSE,Message,Welcome to your favorite Atlas server!,3,[MessageOfTheDay],Set message of the day (MOTD)'
-	$xArray[93] = 'FALSE,MinimumSettlementWarCooldownInterval,432000,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the amount of time after a war ends before a new war can be declared '
-	$xArray[94] = 'FALSE,MinPointsPerDiscoveryZone,3,3,[/Script/ShooterGame.ShooterGameMode],Acts as a minimum value for how many points you`ll get from any single discovery zone '
-	$xArray[95] = 'FALSE,MinSettlementWarTimeOffset,172800,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the minimum amount of time in the future that a war can be scheduled '
-	$xArray[96] = 'FALSE,NetServerMaxTickRate,15,4,[/script/onlinesubsystemutils.ipnetdriver],Frequency with which the server updates the game state (in Hertz).'
-	$xArray[97] = 'FALSE,NightTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during night time. This value determines the length of each night, relative to the length of each day (as specified by DayTimeSpeedScale. Lowering this value increases the length of each night."'
-	$xArray[98] = 'FALSE,NoBattlEye,TRUE,0,n/a,Run server without BattleEye'
-	$xArray[99] = 'FALSE,NoClaimFlagDecayPeriodMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Set this value to scale-up the auto decay of any structures not within a claim flag'
-	$xArray[100] = 'FALSE,NoCrashDialog,TRUE,0,n/a,Prevents the big white error windows and allows the utility to restart crashed servers.'
-	$xArray[101] = 'FALSE,NonShipTurretInitializationTimeScale,0,3,[/Script/ShooterGame.ShooterGameMode],Scales how long before newly-placed land cannons are allowed to fire. set it to zero to remove this feature. '
-	$xArray[102] = 'FALSE,NoSeamlessServer,FALSE,0,n/a,Use this if running a DLC map (ie. Blackwood) or other NonSeamless server.'
-	$xArray[103] = 'FALSE,noTributeDownloads,FALSE,2,[ServerSettings],Disables downloading characters from other servers'
-	$xArray[104] = 'FALSE,OldPlayerDataMaxXP,2956920,3,[/Script/ShooterGame.ShooterGameMode],This config is to reduce player max experience on load'
-	$xArray[105] = 'FALSE,OverrideMaxExperiencePointsDino,200655010,3,[/Script/ShooterGame.ShooterGameMode],Max ship level (200655010 equals lvl 150)'
-	$xArray[106] = 'FALSE,OverrideMaxExperiencePointsPlayer,200655010,3,[/Script/ShooterGame.ShooterGameMode],Max player level (200655010 equals lvl 150)'
-	$xArray[107] = 'FALSE,OxygenSwimSpeedStatMultiplier,1,2,[ServerSettings],Use this to set how swim speed is multiplied by level spent in oxygen. '
-	$xArray[108] = 'FALSE,PerPlatformMaxStructuresMultiplier,1,2,[ServerSettings],Higher number increases (on a percentage scale) max number of items place-able on saddles and raft'
-	$xArray[109] = 'FALSE,PlayerCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` food consumption. Higher values increase food consumption (player characters get hungry faster).'
-	$xArray[110] = 'FALSE,PlayerCharacterHealthRecoveryMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` health recovery. Higher values increase the recovery rate (player characters heal faster)'
-	$xArray[111] = 'FALSE,PlayerCharacterStaminaDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` stamina consumption. Higher values increase stamina consumption (player characters get tired faster).'
-	$xArray[112] = 'FALSE,PlayerCharacterWaterDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` water consumption. Higher values increase water consumption (player characters get thirsty faster).'
-	$xArray[113] = 'FALSE,PlayerDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage players deal with their attacks. The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
-	$xArray[114] = 'FALSE,PlayerDefaultNoDiscoveriesMaxLevelUps,50,3,[/Script/ShooterGame.ShooterGameMode],How many level ups to allow players to achieve before discovery zone points are required (all remaining levelups up to the xp ramp limit are subdivided by the discoverzone points)'
-	$xArray[115] = 'FALSE,PlayerResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage players receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a player taking half damage while a value of 2.0 would result in taking double normal damage."'
-	$xArray[116] = 'FALSE,PlayerShopGoldUpkeepMultiplier,0.08,3,[/Script/ShooterGame.ShooterGameMode],This server config value is used to scale the player shop upkeep cost'
-	$xArray[117] = 'FALSE,PreventOfflinePvP,FALSE,2,[ServerSettings],Use this to enable the offline raiding prevention option.'
-	$xArray[118] = 'FALSE,PreventOfflinePvPInterval,14400,2,[ServerSettings],That would be a 15 min wait before a tribe/players dinos/structures become invulnerable/inactive after they log off. (if Tribe requires ALL Tribe members logged off!)'
-	$xArray[119] = 'FALSE,proximityChat,FALSE,2,[ServerSettings],Only players near each other can see their chat messages'
-	$xArray[120] = 'FALSE,ProximityRadius,8500,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Normal voice mode'
-	$xArray[121] = 'FALSE,PvEDinoDecayPeriodMultiplier,1,2,[ServerSettings],Dino PvE Auto-Claim time multiplier'
-	$xArray[122] = 'FALSE,PvEStructureDecayDestructionPeriod,0,2,[ServerSettings],Specifies the time required for player structures to decay in PvE mode. The specific effect(s) of this option and its range of valid values are unknown as of this writing.[1]'
-	$xArray[123] = 'FALSE,PvEStructureDecayPeriodMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the decay rate of player structures in PvE mode. The specific effect(s) of this option and its range of valid values are unknown as of this writing.[1]'
-	$xArray[124] = 'FALSE,PvPStructureDecay,TRUE,2,[ServerSettings],Set to true to prevent structure from decaying while the Offline Raiding Prevention is active.'
-	$xArray[125] = 'FALSE,RaidDinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],No description.'
-	$xArray[126] = 'FALSE,RCONServerGameLogBuffer,600,2,[ServerSettings],Determines how many lines of gamelogs are send over RCON'
-	$xArray[127] = 'FALSE,RemoveItemsOverCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config is used to destroy any items over the crafting skill bonus.'
-	$xArray[128] = 'FALSE,ResourcesRespawnPeriodMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the respawn rate for resource nodes (trees, rocks, bushes, etc.). Lower values cause nodes to respawn more frequently."'
-	$xArray[129] = 'FALSE,ServerAdminPassword,None,2,[ServerSettings],"If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server."'
-	$xArray[130] = 'FALSE,ServerCrosshair,TRUE,2,[ServerSettings],Use this to disable the Crosshair on your Server'
-	$xArray[131] = 'FALSE,serverForceNoHud,FALSE,2,[ServerSettings],HUD always disabled'
-	$xArray[132] = 'FALSE,ServerGameLog,TRUE,0,n/a,Enable Server Admin Logs (including RCON support) use RCON command ?getgamelog? to print 100 entries at a time also outputs to dated file in in ?\Logs? adjust max length of RCON buffer with commandline: ??RCONServerGameLogBuffer=600?'
-	$xArray[133] = 'FALSE,serverHardcore,FALSE,2,[ServerSettings],Enables hardcore mode (player characters revert to level 1 upon death)'
-	$xArray[134] = 'FALSE,ServerPassword,None,2,[ServerSettings],"If specified, players must provide this password to join the server. Only use this setting on Blackwood maps - Ocean puts the password in the .json"'
-	$xArray[135] = 'FALSE,serverPVE,FALSE,2,[ServerSettings],"Disables PvP, enables PvE"'
-	$xArray[136] = 'FALSE,SettlementCombatPhaseLengthSeconds,32400,3,[/Script/ShooterGame.ShooterGameMode],The length of the settlement mode`s combat phase '
-	$xArray[137] = 'FALSE,SettlementFlagResourceUpkeepMultiplier,2,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this will scale the amount of upkeep resources necessary in the claim flags. you can set it to 0 to remove the upkeep entirely. '
-	$xArray[138] = 'FALSE,SettlementOwnerAllowForceDemolishStructureInterval,8640,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode the period of time that a settlement owner is able to instantly demolish any other settler team`s structures during peacetime '
-	$xArray[139] = 'FALSE,SettlementWarInterval,86400,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is how long a war lasts '
-	$xArray[140] = 'FALSE,ShowFloatingDamageText,TRUE,2,[ServerSettings],Use this to enable RPG-style popup text stat mode.'
-	$xArray[141] = 'FALSE,ShowMapPlayerLocation,TRUE,2,[ServerSettings],Show each player their own precise position when they view their map'
-	$xArray[142] = 'FALSE,SpecialXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for SpecialEvents'
-	$xArray[143] = 'FALSE,SpectatorPassword,None,2,[ServerSettings],"To use non-admin spectator, the server must specify a spectator password. Then any client can use these console commands: requestspectator <password> and stopspectating. See patch 191.0 for more information and hotkeys."'
-	$xArray[144] = 'FALSE,StructureDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage structures deal with their attacks (i.e. spiked walls). The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
-	$xArray[145] = 'FALSE,StructurePreventResourceRadiusMultiplier,1,2,[ServerSettings],How close or far things respawn from a structure '
-	$xArray[146] = 'FALSE,StructureResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage structures receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a structure taking half damage while a value of 2.0 would result in a structure taking double normal damage."'
-	$xArray[147] = 'FALSE,TamingSpeedMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur taming speed. Higher values make taming faster.'
-	$xArray[148] = 'FALSE,TheMaxStructuresInRange,10500,2,[ServerSettings],Specifies the maximum number of structures that can be constructed within a certain (currently hard-coded) range.'
-	$xArray[149] = 'FALSE,TreasureGoldMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales how much gold you get from treasure maps '
-	$xArray[150] = 'FALSE,TribeJoinInterval,10,2,[ServerSettings],No description.'
-	$xArray[151] = 'FALSE,TribeNameChangeCooldown,300,2,[ServerSettings],Cooldown in minutes in between tribe name changes'
-	$xArray[152] = 'FALSE,WaterClaimsMaximumDistanceFromShore,0,3,[/Script/ShooterGame.ShooterGameMode],For non-settlement mode the distance away from shore that water claims are allowed to be placed (0 means no limit) '
-	$xArray[153] = 'FALSE,WhisperRadius,2000,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Whispering voice mode.'
-	$xArray[154] = 'FALSE,XPMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the experience received by players, tribes and dinosaurs for various actions. The default value 1 provides the same amounts of experience as in the singleplayer experience (and official public servers). Higher values increase XP amounts awarded for various actions; lower values decrease it."'
-	$xArray[155] = 'FALSE,YellingRadius,22000,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Yelling voice mode.'
+	$xArray[21] = 'FALSE,AutoDestroyOldStructuresMultiplier,1,2,[ServerSettings],"This value is based on PvEStructureDecayPeriodMultiplier! these values are rounded, so not really exact to the second - neither here nor ingame."'
+	$xArray[22] = 'FALSE,AutoDestroyWildDinosInterval,259200,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero wild dinos will be automatically destroyed and respawned at this interval if the server has been live this long to help keep wild dino populations correct. Only recommend using this if bAllowSavingWildDinos=false from the ServerSettings section '
+	$xArray[23] = 'FALSE,AutoGenerateIslandSpawnRegions,TRUE,2,[ServerSettings],When true players will be automatically given the option to select any of the islands on a homeserver as a spawn point'
+	$xArray[24] = 'FALSE,AutoIslandPointSizePower,0.6f,3,[/Script/ShooterGame.ShooterGameMode],a power to apply to this calculation'
+	$xArray[25] = 'FALSE,AutoIslandPointSizeScale,0.000015f,3,[/Script/ShooterGame.ShooterGameMode],a scale to this calculation'
+	$xArray[26] = 'FALSE,AutoIslandPointsMax,100,3,[/Script/ShooterGame.ShooterGameMode],a maximum clamp on this calculation '
+	$xArray[27] = 'FALSE,AutoIslandPointsMin,1,3,[/Script/ShooterGame.ShooterGameMode],a minimum clamp on this calculation'
+	$xArray[28] = 'FALSE,AutoSavePeriodMinutes,10,2,[ServerSettings],Set interval for automatic saves'
+	$xArray[29] = 'FALSE,BabyMatureSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for baby dino to mature'
+	$xArray[30] = 'FALSE,bAllowSavingWildDinos,FALSE,2,[ServerSettings],By default now wild dinos are not saved in order to increase server savegame speed. set this back to true if you want to have wild dinos save.'
+	$xArray[31] = 'FALSE,bAllowUnlimitedRespecs,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Set to true to allow more than one usage of Mindwipe Tonic per level'
+	$xArray[32] = 'FALSE,bAllowWeaponEnemyTargetingCursor,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Enables gun crosshair color change'
+	$xArray[33] = 'FALSE,bAutoCalculateIslandPoints,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true for settlement mode the island points will automatically be calculated by the island`s size on the map for any islands that are set to 1 point '
+	$xArray[34] = 'FALSE,bClampHomeServerXP,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Remove Level cap on Freeport / Home servers'
+	$xArray[35] = 'FALSE,bDestroyInvalidSettlementClaimFlags,FALSE,3,[/Script/ShooterGame.ShooterGameMode],This can be used to destroy all invalid claim flags please be advised that this cannot be reversed once done.'
+	$xArray[36] = 'FALSE,bDisableFogOfWar,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true the fog & shrowd of war will be disabled '
+	$xArray[37] = 'FALSE,bDisableStructureDecayPvE,FALSE,2,[ServerSettings],Disable the gradual (7 days) decay of player structures'
+	$xArray[38] = 'FALSE,bDisableStructurePlacementCollision,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If `true` allows for structures to clip into the terrain.'
+	$xArray[39] = 'FALSE,bDisplayTopCompanies,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true and NOT playing settlement mode the list of top 10 companies will be displayed on the map '
+	$xArray[40] = 'FALSE,bDontRequireClaimFlagsForBuilding, False,3,[/Script/ShooterGame.ShooterGameMode],If true you can place all structures without claim flags. We strongly recommend setting this to true if you`re using the settlement mode'
+	$xArray[41] = 'FALSE,bDontRequireLargeCannonsToSnapOnShips,TRUE,3,[/Script/ShooterGame.ShooterGameMode],This allows large cannons to not require a snap on the ship'
+	$xArray[42] = 'FALSE,bDontUseClaimFlags,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Turning off Claim Flags will turn your Server Lawless and Structures will decay.'
+	$xArray[43] = 'FALSE,bForceRequireClaimFlagsForBuildingCannons,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true you are still required to have a claim flag to place cannons even if bDontRequireClaimFlagsForBuilding is true. We strongly recommend setting this to true if you`re using the settlement mode '
+	$xArray[44] = 'FALSE,bHomeServerDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true player characters on homeservers will disappear when logged out '
+	$xArray[45] = 'FALSE,bIsLawlessHomeServer,FALSE,3,[/Script/ShooterGame.ShooterGameMode],'
+	$xArray[46] = 'FALSE,bPvEAllowNonAlignedShipBasing,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true `enemies` will be allowed to stand on your ship in PvE '
+	$xArray[47] = 'FALSE,bPvEDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true and the server is in PvE configuration player characters will disappear when logged out '
+	$xArray[48] = 'FALSE,bSeatedNPCIgnoreGunDamage,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Stationed NPCs (on boats and land) no longer take damage from guns on Official Servers.'
+	$xArray[49] = 'FALSE,bUseCorpseLocator,FALSE,2,[ServerSettings],"if set to true, you will see a green lightbeam at the location of your death"'
+	$xArray[50] = 'FALSE,bUseNewStructureFoundationSupportChecks,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true foundation/supports will be more correctly required for horizontal structure building improving server performance but consequently limiting certain kinds of architectural builds. '
+	$xArray[51] = 'FALSE,bUseSettlementClaims,TRUE,3,[/Script/ShooterGame.ShooterGameMode],"Set this to true to use the new ""Colonies"" island settlement system "'
+	$xArray[52] = 'FALSE,bUseStaticCharacterAge,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Supposed to freeze your current age. You need to die if you want the setting to take effect.'
+	$xArray[53] = 'FALSE,ClampHomeServerXPLevel,8,3,[/Script/ShooterGame.ShooterGameMode],Level cap on Freeport / Home servers'
+	$xArray[54] = 'FALSE,ClampResourceHarvestDamage,FALSE,2,[ServerSettings],Limit the damage caused by a dino to a resource for harvesting.'
+	$xArray[55] = 'FALSE,CompanyMaxIslandPointsAmounts,150,3,[/Script/ShooterGame.ShooterGameMode],Maximum number of points for a company.'
+	$xArray[56] = 'FALSE,CompanyMaxIslandPointsPlayers,50,3,[/Script/ShooterGame.ShooterGameMode],The number of players that a Company will hit max number of points.'
+	$xArray[57] = 'FALSE,CompanyMinIslandPointsAmounts,30,3,[/Script/ShooterGame.ShooterGameMode],Minimum number of points for a company.'
+	$xArray[58] = 'FALSE,CompanyMinIslandPointsPlayers,1,3,[/Script/ShooterGame.ShooterGameMode],A company with only 1 player will have the minimum number of points.'
+	$xArray[59] = 'FALSE,CompanySoloIslandPointsAmount,30,3,[/Script/ShooterGame.ShooterGameMode],A Solo company will have this many points.'
+	$xArray[60] = 'FALSE,CraftXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for crafting'
+	$xArray[61] = 'FALSE,DayCycleSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK, controlling how often day changes to night and night changes to day. The default value 1 provides the same cycle speed as the singleplayer experience (and the official public servers). Values lower than 1 slow down the cycle; higher values accelerate it. Base time when value is 1 appears to be 1 minute real time equals approx. 28 minutes game time. Thus, for an approximate 24 hour day/night cycle in game, use .035 for the value."'
+	$xArray[62] = 'FALSE,DayTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during the day. This value determines the length of each day, relative to the length of each night (as specified by NightTimeSpeedScale. Lowering this value increases the length of each day."'
+	$xArray[63] = 'FALSE,DestroyDeadShipsIntervalTime,0,3,[/Script/ShooterGame.ShooterGameMode],Sunken ships will always destroy after 5 days on Official Servers. This will clear the icon from your maps too as long the area where the boats were sunk have been revisited.'
+	$xArray[64] = 'FALSE,DestroyUntaggedShipsInterval,0,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero ships that have not had any of that team logged-in nearby will be destroyed after that amount of time '
+	$xArray[65] = 'FALSE,DifficultyOffset,0,2,[ServerSettings],Specifies the difficulty level.'
+	$xArray[66] = 'FALSE,DinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` food consumption. Higher values increase food consumption (dinosaurs get hungry faster). It also affects the taming-times.'
+	$xArray[67] = 'FALSE,DinoCharacterHealthRecoveryMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` health recovery. Higher values increase the recovery rate (dinosaurs heal faster).'
+	$xArray[68] = 'FALSE,DinoCharacterStaminaDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` stamina consumption. Higher values increase stamina consumption (dinosaurs get tired faster).'
+	$xArray[69] = 'FALSE,DinoCountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur spawns. Higher values increase the number of dinosaurs spawned throughout the ARK.'
+	$xArray[70] = 'FALSE,DinoDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage dinosaurs deal with their attacks. The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
+	$xArray[71] = 'FALSE,DinoResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage dinosaurs receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a dino taking half damage while a value of 2.0 would result in a dino taking double normal damage."'
+	$xArray[72] = 'FALSE,DisableDinoDecayPvE,FALSE,2,[ServerSettings],"Disable the gradual (7 days) decay of dinosaur ownership. Without this set to true, every dinosaur can be claimed by any player."'
+	$xArray[73] = 'FALSE,DisablePvEGamma,FALSE,2,[ServerSettings],"Prevents use of console command ""gamma"" in PvE mode"'
+	$xArray[74] = 'FALSE,DisableStructurePreventionVolumes,FALSE,2,[ServerSettings],This setting disables Structure Prevention Volumes (ie the Ice Cave island blocks building without this enabled)'
+	$xArray[75] = 'FALSE,EggHatchSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for fertilized egg to hatch'
+	$xArray[76] = 'FALSE,EnableHealthbars,TRUE,2,[ServerSettings],No description.'
+	$xArray[77] = 'FALSE,EnablePvPGamma,FALSE,2,[ServerSettings],"Allow use of console command ""gamma"" in PvP mode"'
+	$xArray[78] = 'FALSE,EnemyBuildPreventionRadiusMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales the enemy build prevention radius '
+	$xArray[79] = 'FALSE,ForceAllStructureLocking,FALSE,2,[ServerSettings],Enabling this will default lock all structures'
+	$xArray[80] = 'FALSE,GenericXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for generic XP (automatic over time)'
+	$xArray[81] = 'FALSE,globalVoiceChat,FALSE,2,[ServerSettings],Voice chat turns global'
+	$xArray[82] = 'FALSE,HarvestAmountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for yields from all harvesting activities (chopping down trees picking berries carving carcasses mining rocks etc.). Higher values increase the amount of materials harvested with each strike.'
+	$xArray[83] = 'FALSE,HarvestHealthMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the health"" of items that can be harvested (trees rocks carcasses etc.). Higher values increase the amount of damage (i.e. ""number of strikes"") such objects can withstand before being destroyed which results in higher overall harvest yields."""'
+	$xArray[84] = 'FALSE,KickIdlePlayersPeriod,3600,2,[ServerSettings],Time after which characters that have not moved or interacted will be kicked (if -EnableIdlePlayerKick as command line parameter is set).'
+	$xArray[85] = 'FALSE,KillXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for a kill'
+	$xArray[86] = 'FALSE,ListenServerTetherDistanceMultiplier,1,2,[ServerSettings],No description.'
+	$xArray[87] = 'FALSE,MaximumCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config option is used to cap the crafting skill bonus at 60%'
+	$xArray[88] = 'FALSE,MaxPlatformSaddleStructureLimit,,2,[ServerSettings],Changes the maximum number of platformed-creatures/rafts allowed on the ARK (a potential performance cost)'
+	$xArray[89] = 'FALSE,MaxPlayers,,2, [/script/engine.gamesession],Specifies the maximum number of players that can play on the server simultaneously. Must be placed under [/script/engine.gamesession] in GameUserSettings.ini to function when not used in the command line.'
+	$xArray[90] = 'FALSE,MaxSettlementFlagZ,999999,3,[/Script/ShooterGame.ShooterGameMode],Islands on the Official Network now have a maximum z-value for how high Claim Flags can be placed unique to the island. These are based on the highest terrain points before considering mountains large rock formations or steep pillars.'
+	$xArray[91] = 'FALSE,MaxSettlementWarTimeOffset,345600,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the maximum amount of time in the future that a war can be scheduled '
+	$xArray[92] = 'FALSE,MaxTamedDinos,4000,2,[ServerSettings],"Sets the maximum number of tamed Dinos on a Server, this is a global cap."'
+	$xArray[93] = 'FALSE,Message,Welcome to your favorite Atlas server!,3,[MessageOfTheDay],Set message of the day (MOTD)'
+	$xArray[94] = 'FALSE,MinimumSettlementWarCooldownInterval,432000,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the amount of time after a war ends before a new war can be declared '
+	$xArray[95] = 'FALSE,MinPointsPerDiscoveryZone,3,3,[/Script/ShooterGame.ShooterGameMode],Acts as a minimum value for how many points you`ll get from any single discovery zone '
+	$xArray[96] = 'FALSE,MinSettlementWarTimeOffset,172800,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the minimum amount of time in the future that a war can be scheduled '
+	$xArray[97] = 'FALSE,NetServerMaxTickRate,15,4,[/script/onlinesubsystemutils.ipnetdriver],Frequency with which the server updates the game state (in Hertz).'
+	$xArray[98] = 'FALSE,NightTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during night time. This value determines the length of each night, relative to the length of each day (as specified by DayTimeSpeedScale. Lowering this value increases the length of each night."'
+	$xArray[99] = 'FALSE,NoBattlEye,TRUE,0,n/a,Run server without BattleEye'
+	$xArray[100] = 'FALSE,NoClaimFlagDecayPeriodMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Set this value to scale-up the auto decay of any structures not within a claim flag'
+	$xArray[101] = 'FALSE,NoCrashDialog,TRUE,0,n/a,Prevents the big white error windows and allows the utility to restart crashed servers.'
+	$xArray[102] = 'FALSE,NonShipTurretInitializationTimeScale,0,3,[/Script/ShooterGame.ShooterGameMode],Scales how long before newly-placed land cannons are allowed to fire. set it to zero to remove this feature. '
+	$xArray[103] = 'FALSE,NoSeamlessServer,FALSE,0,n/a,Use this if running a DLC map (ie. Blackwood) or other NonSeamless server.'
+	$xArray[104] = 'FALSE,noTributeDownloads,FALSE,2,[ServerSettings],Disables downloading characters from other servers'
+	$xArray[105] = 'FALSE,OldPlayerDataMaxXP,2956920,3,[/Script/ShooterGame.ShooterGameMode],This config is to reduce player max experience on load'
+	$xArray[106] = 'FALSE,OverrideMaxExperiencePointsDino,200655010,3,[/Script/ShooterGame.ShooterGameMode],Max ship level (200655010 equals lvl 150)'
+	$xArray[107] = 'FALSE,OverrideMaxExperiencePointsPlayer,200655010,3,[/Script/ShooterGame.ShooterGameMode],Max player level (200655010 equals lvl 150)'
+	$xArray[108] = 'FALSE,OxygenSwimSpeedStatMultiplier,1,2,[ServerSettings],Use this to set how swim speed is multiplied by level spent in oxygen. '
+	$xArray[109] = 'FALSE,PerPlatformMaxStructuresMultiplier,1,2,[ServerSettings],Higher number increases (on a percentage scale) max number of items place-able on saddles and raft'
+	$xArray[110] = 'FALSE,PlayerCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` food consumption. Higher values increase food consumption (player characters get hungry faster).'
+	$xArray[111] = 'FALSE,PlayerCharacterHealthRecoveryMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` health recovery. Higher values increase the recovery rate (player characters heal faster)'
+	$xArray[112] = 'FALSE,PlayerCharacterStaminaDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` stamina consumption. Higher values increase stamina consumption (player characters get tired faster).'
+	$xArray[113] = 'FALSE,PlayerCharacterWaterDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for player characters` water consumption. Higher values increase water consumption (player characters get thirsty faster).'
+	$xArray[114] = 'FALSE,PlayerDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage players deal with their attacks. The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
+	$xArray[115] = 'FALSE,PlayerDefaultNoDiscoveriesMaxLevelUps,50,3,[/Script/ShooterGame.ShooterGameMode],How many level ups to allow players to achieve before discovery zone points are required (all remaining levelups up to the xp ramp limit are subdivided by the discoverzone points)'
+	$xArray[116] = 'FALSE,PlayerResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage players receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a player taking half damage while a value of 2.0 would result in taking double normal damage."'
+	$xArray[117] = 'FALSE,PlayerShopGoldUpkeepMultiplier,0.08,3,[/Script/ShooterGame.ShooterGameMode],This server config value is used to scale the player shop upkeep cost'
+	$xArray[118] = 'FALSE,PreventOfflinePvP,FALSE,2,[ServerSettings],Use this to enable the offline raiding prevention option.'
+	$xArray[119] = 'FALSE,PreventOfflinePvPInterval,14400,2,[ServerSettings],That would be a 15 min wait before a tribe/players dinos/structures become invulnerable/inactive after they log off. (if Tribe requires ALL Tribe members logged off!)'
+	$xArray[120] = 'FALSE,proximityChat,FALSE,2,[ServerSettings],Only players near each other can see their chat messages'
+	$xArray[121] = 'FALSE,ProximityRadius,8500,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Normal voice mode'
+	$xArray[122] = 'FALSE,PvEDinoDecayPeriodMultiplier,1,2,[ServerSettings],Dino PvE Auto-Claim time multiplier'
+	$xArray[123] = 'FALSE,PvEStructureDecayDestructionPeriod,0,2,[ServerSettings],Specifies the time required for player structures to decay in PvE mode. The specific effect(s) of this option and its range of valid values are unknown as of this writing.[1]'
+	$xArray[124] = 'FALSE,PvEStructureDecayPeriodMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the decay rate of player structures in PvE mode. The specific effect(s) of this option and its range of valid values are unknown as of this writing.[1]'
+	$xArray[125] = 'FALSE,PvPStructureDecay,TRUE,2,[ServerSettings],Set to true to prevent structure from decaying while the Offline Raiding Prevention is active.'
+	$xArray[126] = 'FALSE,RaidDinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],No description.'
+	$xArray[127] = 'FALSE,RCONServerGameLogBuffer,600,2,[ServerSettings],Determines how many lines of gamelogs are send over RCON'
+	$xArray[128] = 'FALSE,RemoveItemsOverCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config is used to destroy any items over the crafting skill bonus.'
+	$xArray[129] = 'FALSE,ResourcesRespawnPeriodMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the respawn rate for resource nodes (trees, rocks, bushes, etc.). Lower values cause nodes to respawn more frequently."'
+	$xArray[130] = 'FALSE,ServerAdminPassword,None,2,[ServerSettings],"If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server."'
+	$xArray[131] = 'FALSE,ServerCrosshair,TRUE,2,[ServerSettings],Use this to disable the Crosshair on your Server'
+	$xArray[132] = 'FALSE,serverForceNoHud,FALSE,2,[ServerSettings],HUD always disabled'
+	$xArray[133] = 'FALSE,ServerGameLog,TRUE,0,n/a,Enable Server Admin Logs (including RCON support) use RCON command ?getgamelog? to print 100 entries at a time also outputs to dated file in in ?\Logs? adjust max length of RCON buffer with commandline: ??RCONServerGameLogBuffer=600?'
+	$xArray[134] = 'FALSE,serverHardcore,FALSE,2,[ServerSettings],Enables hardcore mode (player characters revert to level 1 upon death)'
+	$xArray[135] = 'FALSE,ServerPassword,None,2,[ServerSettings],"If specified, players must provide this password to join the server. Only use this setting on Blackwood maps - Ocean puts the password in the .json"'
+	$xArray[136] = 'FALSE,serverPVE,FALSE,2,[ServerSettings],"Disables PvP, enables PvE"'
+	$xArray[137] = 'FALSE,SettlementCombatPhaseLengthSeconds,32400,3,[/Script/ShooterGame.ShooterGameMode],The length of the settlement mode`s combat phase '
+	$xArray[138] = 'FALSE,SettlementFlagResourceUpkeepMultiplier,2,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this will scale the amount of upkeep resources necessary in the claim flags. you can set it to 0 to remove the upkeep entirely. '
+	$xArray[139] = 'FALSE,SettlementOwnerAllowForceDemolishStructureInterval,8640,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode the period of time that a settlement owner is able to instantly demolish any other settler team`s structures during peacetime '
+	$xArray[140] = 'FALSE,SettlementWarInterval,86400,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is how long a war lasts '
+	$xArray[141] = 'FALSE,ShowFloatingDamageText,TRUE,2,[ServerSettings],Use this to enable RPG-style popup text stat mode.'
+	$xArray[142] = 'FALSE,ShowMapPlayerLocation,TRUE,2,[ServerSettings],Show each player their own precise position when they view their map'
+	$xArray[143] = 'FALSE,SpecialXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for SpecialEvents'
+	$xArray[144] = 'FALSE,SpectatorPassword,None,2,[ServerSettings],"To use non-admin spectator, the server must specify a spectator password. Then any client can use these console commands: requestspectator <password> and stopspectating. See patch 191.0 for more information and hotkeys."'
+	$xArray[145] = 'FALSE,StructureDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage structures deal with their attacks (i.e. spiked walls). The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
+	$xArray[146] = 'FALSE,StructurePreventResourceRadiusMultiplier,1,2,[ServerSettings],How close or far things respawn from a structure '
+	$xArray[147] = 'FALSE,StructureResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage structures receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a structure taking half damage while a value of 2.0 would result in a structure taking double normal damage."'
+	$xArray[148] = 'FALSE,TamingSpeedMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur taming speed. Higher values make taming faster.'
+	$xArray[149] = 'FALSE,TheMaxStructuresInRange,10500,2,[ServerSettings],Specifies the maximum number of structures that can be constructed within a certain (currently hard-coded) range.'
+	$xArray[150] = 'FALSE,TreasureGoldMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales how much gold you get from treasure maps '
+	$xArray[151] = 'FALSE,TribeJoinInterval,10,2,[ServerSettings],No description.'
+	$xArray[152] = 'FALSE,TribeNameChangeCooldown,300,2,[ServerSettings],Cooldown in minutes in between tribe name changes'
+	$xArray[153] = 'FALSE,WaterClaimsMaximumDistanceFromShore,0,3,[/Script/ShooterGame.ShooterGameMode],For non-settlement mode the distance away from shore that water claims are allowed to be placed (0 means no limit) '
+	$xArray[154] = 'FALSE,WhisperRadius,2000,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Whispering voice mode.'
+	$xArray[155] = 'FALSE,XPMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the experience received by players, tribes and dinosaurs for various actions. The default value 1 provides the same amounts of experience as in the singleplayer experience (and official public servers). Higher values increase XP amounts awarded for various actions; lower values decrease it."'
+	$xArray[156] = 'FALSE,YellingRadius,22000,3,[/Script/ShooterGame.ShooterGameMode], Server side config that allows you to alter the distance for the Yelling voice mode.'
 	_BackupFile($aParametersFile, $xArray, False, True)
 EndFunc   ;==>_ParamFileDefault
 Func _BlackwoodDefaultGUS($tCopyToGUSTF = True, $tOnlyCopyIfDoesNotExistTF = False)
@@ -22822,7 +23071,13 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 		Next
 	Else
 	EndIf
-	If $t_Pos > -1 Then $t_Array[$t_Pos] = $t_Param
+	If $t_Pos > -1 Then
+		If $t_Pos <= UBound($t_Array) Then
+			$t_Array[$t_Pos] = $t_Param
+		Else
+			ReDim $t_Array[$t_Pos]
+		EndIf
+	EndIf
 	If $t_OldParam <> $t_Param Then
 		LogWrite("", " [Param] Changed Parameter in Server " & _ServerNamingScheme($txGrid, $aNamingScheme) & " [" & $t_File & "] From:" & $t_OldParam & " to " & $t_Param)
 		Global $_ReplaceParamInArrayCount = 1
