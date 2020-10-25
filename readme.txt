@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.5 (2020-09-07)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.7 (2020-10-24)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,14 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.7 (2020-10-24) Bug Fixes for >64 Cores and CPU Affinity
+- Fixed: Line 37047 error which occured when a daily restart was starting while another restart was in process. (Thanks to @Fosh for reporting)
+- Fixed: When >64 cores and assigning CPU affinity and different save folder than naming scheme, ASUU's existing server detection would fail causing duplicate server starts. (Thanks to @Infiniti for reporting and troubleshooting)
+- Fixed: When >64 cores and assigning CPU affinity, the DLL ASUU used to detect existing servers failed when run in 64-bit mode in Windows Server. I found an updated DLL . (Thanks to @Infiniti for reporting and troubleshooting)
+
+v2.2.6 (2020-10-10) Updated AtlasModUpdater to accept newer ModIDs
+- Fixed: AtlasModUpdater now works with ModIDs >2147483648. This was due to a 32bit limitation in Python. Updated code. (Thanks to @Infiniti and @Fosh for reporting)
+
 v2.2.5 (2020-09-07) Added Discord Players Join/Leave, Fixed Mod Update Notes, Several Bug Fixes
 - Added: Discord: Customizable players join/leave and online players list.
 - Fixed: Discord: Mod Update Notes once again show. (Thanks to @Dastrip for reporting)

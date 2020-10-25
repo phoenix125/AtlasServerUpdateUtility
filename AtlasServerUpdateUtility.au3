@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.5.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.5_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.7.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.7_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.5.0
+#AutoIt3Wrapper_Res_Fileversion=2.2.7.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.5
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.7
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.5" ; (2020-09-07)
-Local $aUtilVerBeta = "v2.2.5" ; (2020-09-07)
-Global $aUtilVerNumber = 48 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.2.7" ; (2020-10-24)
+Local $aUtilVerBeta = "v2.2.7" ; (2020-10-24)
+Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -146,6 +146,7 @@ Global $aUtilVerNumber = 48 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
+;49 = v2.2.6/7
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -1486,17 +1487,20 @@ If $aCFGLastVerNumber < 48 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", _
 			"Mod \i \n released an update. Server is restarting in \m minute(s).")
-		$sDiscordPlayersMsg = 'Players Online: **\o / \m**   :anchor:  \a\n\j  \l'
-		$sDiscordPlayerJoinMsg = ':white_check_mark: Joined: ***\p***'
-		$sDiscordPlayerLeftMsg = ':x: Left: ***\p***'
-		$sDiscordPlayerOnlineMsg = '**\p**'
-		$aPlayerSeparator = ';;.;;'
+	$sDiscordPlayersMsg = 'Players Online: **\o / \m**   :anchor:  \a\n\j  \l'
+	$sDiscordPlayerJoinMsg = ':white_check_mark: Joined: ***\p***'
+	$sDiscordPlayerLeftMsg = ':x: Left: ***\p***'
+	$sDiscordPlayerOnlineMsg = '**\p**'
+	$aPlayerSeparator = ';;.;;'
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $sDiscordPlayersMsg)
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $sDiscordPlayerJoinMsg)
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $sDiscordPlayerLeftMsg)
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $sDiscordPlayerOnlineMsg)
 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $aPlayerSeparator)
 	$aIniForceWrite = True
+EndIf
+If $aCFGLastVerNumber < 49 And $aIniExist Then
+	FileDelete(@ScriptDir & "\AtlasModDownloader.exe")
 EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
@@ -2868,7 +2872,7 @@ While True ;**** Loop Until Closed ****
 							$aAnnounceCount1 = $aAnnounceCount1 + 1
 						Else
 							RunExternalScriptDaily()
-							CloseServer
+							CloseServer()
 							;$aTimeCheck0 = _NowCalc()
 							$aTimeCheck2 = _NowCalc()
 						EndIf
@@ -8058,7 +8062,7 @@ EndFunc   ;==>_DiscordPlayersLeft
 Func _DiscordPlayersOnline()
 	Local $tTxt = "[None]"
 	If UBound($xOnlinePlayers) = 0 Then ReDim $xOnlinePlayers[1]
-	$xOnlinePlayers = ResizeArray($xOnlinePlayers) ;kim125er!
+	$xOnlinePlayers = ResizeArray($xOnlinePlayers)
 	If UBound($xOnlinePlayers) = 0 Then
 	ElseIf UBound($xOnlinePlayers) = 1 Then
 		If $xOnlinePlayers[0] = "" Then
@@ -12780,27 +12784,18 @@ Func _CheckIfRedisRunning()
 		$aServerPIDRedis = -1
 	EndIf
 EndFunc   ;==>_CheckIfRedisRunning
-Func _ProcessGetLocation($iPID)
-	Local $aProc = DllCall('kernel32.dll', 'hwnd', 'OpenProcess', 'int', BitOR(0x0400, 0x0010), 'int', 0, 'int', $iPID)
-	If $aProc[0] = 0 Then Return SetError(1, 0, '')
-	Local $vStruct = DllStructCreate('int[1024]')
-	DllCall('psapi.dll', 'int', 'EnumProcessModules', 'hwnd', $aProc[0], 'ptr', DllStructGetPtr($vStruct), 'int', DllStructGetSize($vStruct), 'int_ptr', 0)
-	Local $aReturn = DllCall('psapi.dll', 'int', 'GetModuleFileNameEx', 'hwnd', $aProc[0], 'int', DllStructGetData($vStruct, 1), 'str', '', 'int', 2048)
-	If StringLen($aReturn[3]) = 0 Then Return SetError(2, 0, '')
-	Return $aReturn[3]
-EndFunc   ;==>_ProcessGetLocation
-
 Func _CheckIfGridAlreadyRunning($i)
 	Local $tReturn = 0
 	Local $tProcess = ProcessList($aServerEXE)
 	For $x = 1 To $tProcess[0][0]
-		Local $tProcessName = WinGetTitle(_WinGetByPID($tProcess[$x][1]))
+		Local $tTmpPID = Number($tProcess[$x][1])
+		Local $tProcessName = WinGetTitle(_WinGetByPID($tTmpPID))
 		Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
 		If $tGrid = $xServerAltSaveDir[$i] Then
-			Local $tProcessFolder = _ProcessGetLocation($tProcess[$x][1])
+			Local $tProcessFolder = _WinAPI_GetProcessFileName($tTmpPID)
 			If $tProcessFolder = $aServerDirFull & "\" & $aServerEXE Then
-				$tReturn2 = $tProcess[$x][1]
-				$aServerPID[$i] = ProcessExists($tProcess[$x][1])
+				$tReturn2 = $tTmpPID
+				$aServerPID[$i] = ProcessExists($tTmpPID)
 				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") found via Auto Detect.")
 				$xGridReadyTF[$i] = True
 				$aGridStartedSinceLastAllServersOnlineAnnouncementTF[$i] = False
@@ -12833,7 +12828,7 @@ Func _StartServer($i)
 					Local $tStartMin = "/min "
 				EndIf
 				Local $tNodeInfo = _CPUAffinityNodeSplit(_CPUAffinityHexToBin($i), 0, $i)
-				$tStartText = @ComSpec & ' /c ' & 'start ' & $tStartMin & '/node ' & $tNodeInfo[4] & ' "ShooterGameServer.exe v100.0 (Rev. 100000) [AltSaveDIR=' & _ServerNamingScheme($i, $aNamingScheme) & ']" ' & $tStartText
+				$tStartText = @ComSpec & ' /c ' & 'start ' & $tStartMin & '/node ' & $tNodeInfo[4] & ' "ShooterGameServer.exe v100.0 (Rev. 100000) [AltSaveDIR=' & $xServerAltSaveDir[$i] & ']" ' & $tStartText
 			EndIf
 		EndIf
 		If $aServerMinimizedYN = "no" Then
