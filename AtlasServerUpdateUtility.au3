@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.7.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.7_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.8.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.8_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.7.0
+#AutoIt3Wrapper_Res_Fileversion=2.2.8.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.7
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.8
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,8 +94,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.7" ; (2020-10-24)
-Local $aUtilVerBeta = "v2.2.7" ; (2020-10-24)
+Local $aUtilVerStable = "v2.2.8" ; (2020-12-04)
+Local $aUtilVerBeta = "v2.2.8" ; (2020-12-04)
 Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -146,7 +146,7 @@ Global $aUtilVerNumber = 49 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
-;49 = v2.2.6/7
+;49 = v2.2.6/7/8
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -162,7 +162,7 @@ Global $aRCONSaveGameCMD = "saveworld"
 Global $aRCONShutdownCMD = "DoExit"
 Global $aServerWorldFriendlyName = "temp"
 Global $aModAppWorkshop = "appworkshop_834910.acf"
-Global $aRebootReason = ""
+;~ Global $aRebootReason = ""
 Global $xCustomRCONRebootNumber = -1 ; Determines which Custom Schedule number requested the server reboot.
 Global $aServerName = $aGameName
 Global $aServerUpdateLinkVerStable = "http://www.phoenix125.com/share/atlas/atlaslatestver.txt"
@@ -191,8 +191,8 @@ Global $aModMsgInGame[10]
 Global $aModMsgDiscord[10]
 Global $aModMsgSubDiscord[10]
 Global $aModMsgTwitch[10]
-Global $xModsToUpdate[1]
-$xModsToUpdate[0] = "Mods To Update"
+;~ Global $xModsToUpdate[1]
+;~ $xModsToUpdate[0] = "Mods To Update"
 Global $aFirstBoot = True
 Global $tStuckGridNoticeSent = False
 Global $aFirstStartDiscordAnnounce = True
@@ -329,6 +329,7 @@ Global $aServersMax = 400
 Global $xTelnetCMD[$aServersMax]
 Global $xServerStart[$aServersMax]
 Global $aServerPID[$aServersMax]
+Global $xRCONIP[$aServersMax]
 Global $xServerModList[100]
 Global $aServerModList = ""
 ;~ Global $xServerNames[100]
@@ -1524,7 +1525,6 @@ If $aAllowMultipleUtilsYN = "no" Then
 	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for another instance of ASUU.")
 	Local $tProcessList = ProcessList()
 	Local $tProcessName = "Temp123"
-;~ 	Local $tPID3 = 0
 	Local $tPID3 = 0
 	For $i = 1 To $tProcessList[0][0]
 		If StringInStr($tProcessList[$i][0], "AtlasServerUpdateUtility_v") > 0 Then
@@ -2551,7 +2551,8 @@ While True ;**** Loop Until Closed ****
 					If $aBeginDelayedShutdown = 0 Then
 						LogWrite(" [" & $aServerName & "] " & $sRestart)
 						If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
-							$aRebootReason = "remoterestart"
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart")
+;~ 							$aRebootReason = "remoterestart"
 							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 							$aTimeCheck0 = _NowCalc()
 						Else
@@ -2758,6 +2759,7 @@ While True ;**** Loop Until Closed ****
 						If $tGridStartedSinceLastAllServersOnlineAnnouncementTF Then
 							If $sUseDiscordBotServersUpYN = "yes" Then
 								Local $aAnnounceCount3 = 0
+								$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
 								If $aRebootReason = "remoterestart" And $sUseDiscordBotRemoteRestart = "yes" Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
@@ -2811,7 +2813,7 @@ While True ;**** Loop Until Closed ****
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aFirstStartDiscordAnnounce = False
 								EndIf
-								$aRebootReason = ""
+;~ 								$aRebootReason = ""
 							Else
 								_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement NOT sent. Enable first announcement and/or daily, mod, update, remote restart annoucements in config if desired.", 0, 400, 200)
 								$xCustomRCONRebootNumber = -1
@@ -2866,7 +2868,8 @@ While True ;**** Loop Until Closed ****
 						LogWrite(" [" & $aServerName & "] Daily restart requested by " & $aUtilName & ".")
 						If $aDelayShutdownTime Not = 0 Then
 							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-							$aRebootReason = "daily"
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "daily")
+;~ 							$aRebootReason = "daily"
 							;$aTimeCheck0 = _NowCalc()
 							$aTimeCheck2 = _NowCalc()
 							$aAnnounceCount1 = $aAnnounceCount1 + 1
@@ -2884,7 +2887,7 @@ While True ;**** Loop Until Closed ****
 				Else
 					If $aServerOnlinePlayerYN = "yes" Then
 						If $sUseDiscordBotSkipYN = "yes" Then SendDiscordGeneralMsg($sDiscordSkipRestartMessage)
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $sInGameSkipRestartMessage)
+						If $sInGameAnnounce = "yes" Then SendInGame($sInGameSkipRestartMessage)
 						_Splash("Scheduled restart skipped because" & @CRLF & "servers last restarted " & Int(_DateDiff('n', $aSkipRestartTime, _NowCalc())) & " minutes ago.", 2000)
 						LogWrite(" [Util] Scheduled restart skipped because servers last restarted " & Int(_DateDiff('n', $aSkipRestartTime, _NowCalc())) & " minutes ago.")
 					EndIf
@@ -2916,6 +2919,11 @@ While True ;**** Loop Until Closed ****
 					If $tDateDiff <= 0 Then
 						$xEventTimePastTF[$t] = True
 						$i = $xEventRestartTimeAll[$t][1]
+						If $xCustomRCONRestartYN <> "yes" Then
+							If $xEventAnnounceInGame[$i] <> "" Then SendInGame($xEventAnnounceInGame[$i])
+							If $xEventAnnounceDiscord[$i] <> "" Then SendDiscordGeneralMsg($xEventAnnounceDiscord[$i])
+							If $xEventAnnounceTwitch[$i] <> "" Then TwitchMsgLog($xEventAnnounceTwitch[$i])
+						EndIf
 						If $xCustomRCONCmd[$i] <> "" Then
 							Local $xCustomRCONSplitCmd = StringSplit($xCustomRCONCmd[$i], "~", 2)
 							For $x = 0 To (UBound($xCustomRCONSplitCmd) - 1)
@@ -2933,7 +2941,8 @@ While True ;**** Loop Until Closed ****
 							Run($xEventFile[$i])
 						EndIf
 						If $xCustomRCONRestartYN[$i] = "yes" Then
-							$aRebootReason = "Custom"
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "Custom")
+;~ 							$aRebootReason = "Custom"
 							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 							$aTimeCheck0 = _NowCalc()
 							$xCustomRCONRebootNumber = $i
@@ -2979,6 +2988,7 @@ While True ;**** Loop Until Closed ****
 
 		#Region ;**** Announce to Twitch, In Game, Discord ****
 		If $aDelayShutdownTime Not = 0 Then
+			$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
 			If ($tTotalLocalPlayers > 0 Or $aServerOnlinePlayerYN = "no" Or $aSkipCountdownWhenNoOnlinePlayersYN = "no") And $aAnyGridRunning Then
 				If $aBeginDelayedShutdown = 1 Then
 					SetStatusBusy("Server process check in progress...", "Check: Restart Due")
@@ -2993,7 +3003,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aDailyTime[$aAnnounceCount0] - $aDailyTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDailyMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aDailyMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotDaily = "yes" Then SendDiscordGeneralMsg($aDailyMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotDaily = "yes" Then TwitchMsgLog($aDailyMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3008,7 +3018,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount0] - $aRemoteTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aRemoteMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aRemoteMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotRemoteRestart = "yes" Then SendDiscordGeneralMsg($aRemoteMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotRemoteRestart = "yes" Then TwitchMsgLog($aRemoteMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3022,7 +3032,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount0] - $aStopServerTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aStopServerMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aStopServerMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotStopServer = "yes" Then SendDiscordGeneralMsg($aStopServerMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotStopServer = "yes" Then TwitchMsgLog($aStopServerMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3036,7 +3046,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aRestartGridsTime[$aAnnounceCount0] - $aRestartGridsTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aRestartGridsMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aRestartGridsMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotRestartGrids = "yes" Then SendDiscordGeneralMsg($aRestartGridsMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotRestartGrids = "yes" Then TwitchMsgLog($aRestartGridsMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3050,7 +3060,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aUpdateTime[$aAnnounceCount0] - $aUpdateTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aUpdateMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aUpdateMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aUpdateMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aUpdateMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3064,7 +3074,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aModTime[$aAnnounceCount0] - $aModTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aModMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aModMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3078,7 +3088,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = $aModListTime[$aAnnounceCount0] - $aModListTime[$aAnnounceCount1]
 						EndIf
-						If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aModListMsgInGame[$aAnnounceCount0])
+						If $sInGameAnnounce = "yes" Then SendInGame($aModListMsgInGame[$aAnnounceCount0])
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModListMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModListMsgTwitch[$aAnnounceCount0])
 					EndIf
@@ -3092,7 +3102,7 @@ While True ;**** Loop Until Closed ****
 						Else
 							$aDelayShutdownTime = ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount0] - ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount1]
 						EndIf
-						If $xEventAnnounceInGame[$xCustomRCONRebootNumber] <> "" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, ($sCustomMsgInGame[$xCustomRCONRebootNumber])[$aAnnounceCount0])
+						If $xEventAnnounceInGame[$xCustomRCONRebootNumber] <> "" Then SendInGame(($sCustomMsgInGame[$xCustomRCONRebootNumber])[$aAnnounceCount0])
 						If $xEventAnnounceDiscord[$xCustomRCONRebootNumber] <> "" Then SendDiscordGeneralMsg(($sCustomMsgDiscord[$xCustomRCONRebootNumber])[$aAnnounceCount0])
 						If $xEventAnnounceTwitch[$xCustomRCONRebootNumber] <> "" Then TwitchMsgLog(($sCustomMsgTwitch[$xCustomRCONRebootNumber])[$aAnnounceCount0])
 					EndIf
@@ -3121,7 +3131,7 @@ While True ;**** Loop Until Closed ****
 						SplashTextOn($aUtilName & ": " & $aServerName, "Restart grids requested. " & @CRLF & "Restarting grids " & $tSelectServersTxt & ".", 600, 80, -1, -1, $DLG_MOVEABLE, "")
 					EndIf
 					If $sInGameAnnounce = "yes" Then
-						SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $sInGame10SecondMessage)
+						SendInGame($sInGame10SecondMessage)
 						Sleep(10000)
 					EndIf
 ;~ 					IniWrite($aUtilCFGFile, "CFG", "aCFGLastRestartTime", _NowCalc())
@@ -3135,7 +3145,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aDailyTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aDailyTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDailyMsgInGame[$aAnnounceCount1])
+							If $aDailyTime[($aAnnounceCount1)] > 0 Then SendInGame($aDailyMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotDaily = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aDailyTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aDailyMsgDiscord[$aAnnounceCount1])
@@ -3151,7 +3161,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aRemoteTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aRemoteMsgInGame[$aAnnounceCount1])
+							If $aRemoteTime[($aAnnounceCount1)] > 0 Then SendInGame($aRemoteMsgInGame[$aAnnounceCount1])
 						EndIf
 						If ($sUseDiscordBotRemoteRestart = "yes") And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aRemoteTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aRemoteMsgDiscord[$aAnnounceCount1])
@@ -3167,7 +3177,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aStopServerTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aStopServerMsgInGame[$aAnnounceCount1])
+							If $aStopServerTime[($aAnnounceCount1)] > 0 Then SendInGame($aStopServerMsgInGame[$aAnnounceCount1])
 						EndIf
 						If ($sUseDiscordBotStopServer = "yes") And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aStopServerTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aStopServerMsgDiscord[$aAnnounceCount1])
@@ -3183,7 +3193,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aRestartGridsTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aRestartGridsTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aRestartGridsMsgInGame[$aAnnounceCount1])
+							If $aRestartGridsTime[($aAnnounceCount1)] > 0 Then SendInGame($aRestartGridsMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotRestartGrids = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aRestartGridsTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aRestartGridsMsgDiscord[$aAnnounceCount1])
@@ -3199,7 +3209,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aUpdateTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aUpdateTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aUpdateMsgInGame[$aAnnounceCount1])
+							If $aUpdateTime[($aAnnounceCount1)] > 0 Then SendInGame($aUpdateMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotUpdate = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aUpdateTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aUpdateMsgDiscord[$aAnnounceCount1])
@@ -3215,7 +3225,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aModTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aModTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aModMsgInGame[$aAnnounceCount1])
+							If $aModTime[($aAnnounceCount1)] > 0 Then SendInGame($aModMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotUpdate = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aModTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aModMsgSubDiscord[$aAnnounceCount1])
@@ -3231,7 +3241,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = $aModListTime[$aAnnounceCount1]
 						EndIf
 						If $sInGameAnnounce = "yes" Then
-							If $aModTime[($aAnnounceCount1)] > 0 Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aModListMsgInGame[$aAnnounceCount1])
+							If $aModTime[($aAnnounceCount1)] > 0 Then SendInGame($aModListMsgInGame[$aAnnounceCount1])
 						EndIf
 						If $sUseDiscordBotUpdate = "yes" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							If $aModTime[($aAnnounceCount1)] > 0 Then SendDiscordGeneralMsg($aModListMsgDiscord[$aAnnounceCount1])
@@ -3247,7 +3257,7 @@ While True ;**** Loop Until Closed ****
 							$aDelayShutdownTime = ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount1]
 						EndIf
 						If $xEventAnnounceInGame[$xCustomRCONRebootNumber] <> "" Then
-							SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, ($sCustomMsgInGame[$xCustomRCONRebootNumber])[$aAnnounceCount1])
+							SendInGame(($sCustomMsgInGame[$xCustomRCONRebootNumber])[$aAnnounceCount1])
 						EndIf
 						If $xEventAnnounceDiscord[$xCustomRCONRebootNumber] <> "" And ($sUseDiscordBotFirstAnnouncement = "no") Then
 							SendDiscordGeneralMsg(($sCustomMsgDiscord[$xCustomRCONRebootNumber])[$aAnnounceCount1])
@@ -3470,7 +3480,7 @@ Func _SendStatusUpdate($tGrid, $tStatus, $tCrash = False, $tSendMessageType = 0,
 					If ($tSendMessageType = 2 And $tWB = 8) Or $tSendMessageType < 2 Then SendDiscordMsg($sDiscordWH4URL, $tMsg, $sDiscordBot4Name, $bDiscordBotUseTTS, $sDiscordBotAvatar, 0, 4)
 				EndIf
 			EndIf
-			If $sInGameAnnounce = "yes" And $sInGameSendCrashYN = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $tMsg)
+			If $sInGameAnnounce = "yes" And $sInGameSendCrashYN = "yes" Then SendInGame($tMsg)
 		EndIf
 		If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
 	EndIf
@@ -3650,18 +3660,20 @@ Func _SendInGameMessage($tMsg1, $tSel = "local", $tSplash1 = 0)     ; local or a
 			If $xStartGrid[$i] = "yes" Then
 				ControlSetText($tSplash1, "", "Static1", "Sending message to ALL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg1)
 				SetStatusBusy("Sending message.", "Send message to " & _ServerNamingScheme($i, $aNamingScheme))
-				Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg1, "no", $aRCONResponseWaitms)
+				Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg1, "no", $aRCONResponseWaitms)
 				If $aRCONError Then $tRCON = "[Time out error: No Response]"
 				$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
 			EndIf
 		Next
 	ElseIf $tSel = "all" Then
 		For $i = 0 To ($aServerGridTotal - 1)
-			ControlSetText($tSplash1, "", "Static1", "Sending message to ALL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg1)
-			SetStatusBusy("Sending message.", "Send message to " & _ServerNamingScheme($i, $aNamingScheme))
-			Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg1, "no", $aRCONResponseWaitms)
-			If $aRCONError Then $tRCON = "[Time out error: No Response]"
-			$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+			If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+				ControlSetText($tSplash1, "", "Static1", "Sending message to ALL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg1)
+				SetStatusBusy("Sending message.", "Send message to " & _ServerNamingScheme($i, $aNamingScheme))
+				Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg1, "no", $aRCONResponseWaitms)
+				If $aRCONError Then $tRCON = "[Time out error: No Response]"
+				$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+			EndIf
 		Next
 	EndIf
 	SetStatusIdle()
@@ -5245,7 +5257,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniError = $iIniError & "InGameRestartGridsMessage, "
 	EndIf
 	If $iniCheck = $sInGameModUpdateMessage Then
-		$sInGameModUpdateMessage = "Mod \i \n released an update.\l\t\l\d\lServer is restarting in \m minute(s)."
+		$sInGameModUpdateMessage = "Mod \i \n released an update.\l\t\lServer is restarting in \m minute(s)."
 		$iIniFail += 1
 		$iIniError = $iIniError & "InGameModUpdateMessage, "
 	EndIf
@@ -6951,6 +6963,7 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 	Else
 		Global $aSplashCloseServer = SplashTextOn($aUtilName & ": " & $aServerName, "Sending shutdown command to server(s) . . .", 550, 100, -1, -1, $DLG_MOVEABLE, "")
 	EndIf
+	$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
 	If $aRebootReason = "stopservers" Then
 		$tDisableServer = True
 		If $aSelectServers Then $tServNo = $xGridsToClose
@@ -7101,8 +7114,21 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 		If $t = 0 Then ExitLoop
 	Next
 	If $aSteamUpdateNow Then SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $aValidate)
+	$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
+	If $aRebootReason = "mod" Then
+		Local $tModIDsToUpdate = IniRead($aUtilCFGFile, "CFG", "xModIDsToUpdate", "Mods To Update")
+		Local $tModNamesToUpdate = IniRead($aUtilCFGFile, "CFG", "xModNamesToUpdate", "Mods To Update")
+		Local $xModIDsToUpdate = StringSplit($tModIDsToUpdate, "|", 2)
+		Local $xModNamesToUpdate = StringSplit($tModNamesToUpdate, "|", 2)
+		For $i = 1 To (UBound($xModIDsToUpdate) - 1)
+			UpdateMod($xModIDsToUpdate[$i], $xModNamesToUpdate[$i])
+		Next
+		IniWrite($aUtilCFGFile, "CFG", "xModsToUpdate", "Mods To Update")
+		IniWrite($aUtilCFGFile, "CFG", "xModIDsToUpdate", "Mods To Update")
+		IniWrite($aUtilCFGFile, "CFG", "xModNamesToUpdate", "Mods To Update")
+	EndIf
 	$aSelectServers = False
-	$aRebootReason = ""
+;~ 	$aRebootReason = ""
 	SplashOff()
 ;~ 	GUIUpdateQuick()
 EndFunc   ;==>CloseServer
@@ -7193,7 +7219,7 @@ Func _StopGrid_RCONDoExit($tGrid)
 	ControlSetText($aSplashCloseServer, "", "Static1", "Sending shutdown command to server: " & _ServerNamingScheme($tGrid, $aNamingScheme))
 	GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & _ServerNamingScheme($tGrid, $aNamingScheme))
 	LogWrite(" [Server] Sending shutdown " & $aRCONShutdownCMD & " command to server " & _ServerNamingScheme($tGrid, $aNamingScheme))
-	SendRCON($xServerIP[$tGrid], $xServerRCONPort[$tGrid + 1], $aServerAdminPass, $aRCONShutdownCMD, "yes", 0)
+	SendRCON($xRCONIP[$tGrid], $xServerRCONPort[$tGrid + 1], $aServerAdminPass, $aRCONShutdownCMD, "yes", 0)
 	Local $tDelay = $aServerShutdownDelay - (TimerDiff($tTime) / 1000)
 	If $tDelay < 0 Then $tDelay = 0
 	Sleep(1000 * $tDelay)
@@ -7499,7 +7525,8 @@ Func CheckModList($tSplash = 0)
 				$aModListZeroMsgInGame = StringReplace($aModListZeroMsgInGame, "\m", "0")
 				$aModListZeroMsgTwitch = StringReplace($sTwitchModListUpdateMessage, "\i", $tModsUpdated)
 				$aModListZeroMsgTwitch = StringReplace($aModListZeroMsgTwitch, "\m", "0")
-				$aRebootReason = "modlist"
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "modlist")
+;~ 				$aRebootReason = "modlist"
 				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				RunExternalScriptMod()
 				LogWrite(" [Mod] ModID list changed in " & $aConfigFile & " file. " & $tModsUpdated & ". Restarting " & $aGameName & " Servers to implement changes." & $tTxt1)
@@ -7785,7 +7812,7 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 	Global $xStartGrid[$aServerGridTotal + 1]
 	Global $xLocalGrid[$aServerGridTotal + 1]
 	Global $aGridSomeDisable = False
-	Global $aGridIniTitle[6]
+	Global $aGridIniTitle[7]
 	Local $tServerGridExtraCMD = False
 	$aGridIniTitle[0] = " --------------- RUN THE FOLLOWING GRID SERVER(S) (yes/no) --------------- "
 	$aGridIniTitle[1] = " --------------- LOCAL GRID SERVER(S) (yes-Local, no-Remote) (yes/no) --------------- "
@@ -7793,6 +7820,7 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 	$aGridIniTitle[3] = " --------------- ADDITIONAL STARTUP DELAY (in seconds) --------------- "
 	$aGridIniTitle[4] = " --------------- CPU AFFINITY (in Hexadecimal) --------------- "
 	$aGridIniTitle[5] = " --------------- FIREWALL DELAY (in Seconds) --------------- "
+	$aGridIniTitle[6] = " --------------- RCON IP --------------- "
 	Local $iIniError = ""
 	Local $iIniFail = 0
 	Local $iniCheck = ""
@@ -7884,11 +7912,15 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 		EndIf
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
-		$xFireWallUseYN[$i] = IniRead($sGridFile, $aGridIniTitle[5], "Firewall Block Use for Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", $iniCheck)
-		If $xFireWallUseYN[$i] <> "yes" Then $xFireWallUseYN[$i] = "no"
-		If $iniCheck = $xFireWallUseYN[$i] Then
+		$xRCONIP[$i] = IniRead($sGridFile, $aGridIniTitle[6], "RCON IP for Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ")", $iniCheck)
+		If $iniCheck = $xRCONIP[$i] Then
 			$sGridIniReWrite = True
-			$xFireWallUseYN[$i] = "no"
+			$xRCONIP[$i] = $aServerRCONIP
+			If $aServerRCONIP = "" Then
+				$xRCONIP[$i] = $xServerIP[$i]
+			Else
+				$xRCONIP[$i] = $aServerRCONIP
+			EndIf
 			$iIniFail += 1
 		EndIf
 	Next
@@ -7971,6 +8003,11 @@ Func UpdateGridSelectINI($sGridFile, $tDeleteFirst = False)
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
 		IniWrite($sGridFile, $aGridIniTitle[5], "Firewall Block Use for Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ") (yes/no)", $xFireWallUseYN[$i])
+	Next
+	FileWriteLine($sGridFile, @CRLF)
+	FileWriteLine($sGridFile, @CRLF)
+	For $i = 0 To ($aServerGridTotal - 1)
+		IniWrite($sGridFile, $aGridIniTitle[6], "RCON IP for Server (" & $xServergridx[$i] & "," & $xServergridy[$i] & ")", $xRCONIP[$i])
 	Next
 EndFunc   ;==>UpdateGridSelectINI
 #EndRegion ;**** Start Server Selection ****
@@ -8185,15 +8222,18 @@ EndFunc   ;==>SendDiscordMsg
 ; -----------------------------------------------------------------------------------------------------------------------
 
 #Region ;**** Send In-Game Message via MCRCON ****
-Func SendInGame($mIP, $mPort, $mPass, $mMessage)
-	If $aRebootReason = "restartgrids" And $aAnnounceAllorSelect = "select" Then
-;~ 		For $i = 1 To $xGridsToRestart[0]
+Func SendInGame($mMessage)
+	$mMessage = StringReplace($mMessage, @CRLF, "-")
+	$mMessage = StringReplace($mMessage, @CR, "-")
+	$mMessage = StringReplace($mMessage, @LF, "-")
+	If StringLen($mMessage) > 500 Then $mMessage = StringLeft($mMessage, 500)
+	If IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA") = "restartgrids" And $aAnnounceAllorSelect = "select" Then
 		For $i = 0 To (UBound($xGridsToRestart) - 1)
 			Local $ti = $xGridsToRestart[$i]
-			If $aServerRCONIP = "" Then
-				Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xServerIP[$ti] & ' -P ' & $xServerRCONPort[$ti + 1] & ' -p ' & $mPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
+			If $xRCONIP[$ti] = "" Then
+				Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xServerIP[$ti] & ' -P ' & $xServerRCONPort[$ti + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 			Else
-				Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $aServerRCONIP & ' -P ' & $xServerRCONPort[$ti + 1] & ' -p ' & $mPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
+				Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xRCONIP[$ti] & ' -P ' & $xServerRCONPort[$ti + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 			EndIf
 			LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($ti, $aNamingScheme) & ") " & $aMCRCONcmd)
 			Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
@@ -8201,10 +8241,10 @@ Func SendInGame($mIP, $mPort, $mPass, $mMessage)
 	Else
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ($xStartGrid[$i] = "yes") Then
-				If $aServerRCONIP = "" Then
-					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xServerIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $mPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
+				If $xRCONIP[$ti] = "" Then
+					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xServerIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 				Else
-					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $aServerRCONIP & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $mPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
+					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xRCONIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 				EndIf
 				LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") " & $aMCRCONcmd)
 				Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
@@ -8218,20 +8258,14 @@ EndFunc   ;==>SendInGame
 ; -----------------------------------------------------------------------------------------------------------------------
 
 #Region ;**** Send RCON Command via MCRCON ****
-Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
+Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500) ;kim125er!
 	$aRCONError = False
 	If StringInStr($mCommand, "broadcast") > 0 Then
 		Local $tTxt = StringTrimLeft($mCommand, 10)
 		Local $tTxt1 = SendMessageAddDuration($tTxt)
 		$mCommand = "broadcast " & $tTxt1
 	EndIf
-	If $aServerRCONIP = "" Then
-;~ 		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-		Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-	Else
-;~ 		Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $aServerRCONIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-		Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $aServerRCONIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
-	EndIf
+	Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
 	If $mWaitms > 0 Then
 		Local $mOut = Run($aMCRCONcmd, @ScriptDir, @SW_HIDE, $STDOUT_CHILD)
 		Local $tTimer1 = TimerInit()
@@ -8365,7 +8399,8 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 						RunExternalScriptUpdate()
 						$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 						If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-						$aRebootReason = "update"
+						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update")
+;~ 						$aRebootReason = "update"
 					Else
 						_Splash("Utility update check canceled by user." & @CRLF & "Resuming utility . . .")
 					EndIf
@@ -8386,7 +8421,8 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 					$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 					If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
 						If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-						$aRebootReason = "update"
+						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update")
+;~ 						$aRebootReason = "update"
 					Else
 						SteamcmdDelete($aSteamCMDDir)
 						CloseServer()
@@ -8635,7 +8671,7 @@ Func _BackupGame($tMinimizeTF = True, $tFullTF = False, $tRunWait = False)
 		LogWrite(" [Backup] In-Game Announcement sent: " & $aBackupInGame)
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ($xStartGrid[$i] = "yes") And ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-				SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aBackupInGame, "no", 0)
+				SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aBackupInGame, "no", 0)
 			EndIf
 		Next
 	EndIf
@@ -9257,6 +9293,8 @@ Func AnnounceReplaceModID($tMsg0, $tTime0, $tMsg)
 ;~ 	If $aFirstModBoot Then
 ;~ 		Return $tMsg0
 ;~ 	Else
+	Local $tModsToUpdate = IniRead($aUtilCFGFile, "CFG", "xModsToUpdate", "Mods To Update")
+	Local $xModsToUpdate = StringSplit($tModsToUpdate, "|", 2)
 	If $tTime0 = "0" Then
 		For $x1 = 1 To (UBound($xModsToUpdate) - 1)
 			If $x1 = 1 Then
@@ -9619,7 +9657,7 @@ Func RemoteRCON($tCmd, $tPWD, $vConnectedSocket, $sServIP, $sName)
 			LogWrite(" [Remote RCON] Correct password received. Sending RCON command to all servers:" & $zCMD[2])
 			For $i = 0 To ($aServerGridTotal - 1)
 				If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-					SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $zCMD[2], "yes", $aRCONResponseWaitms)
+					SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $zCMD[2], "yes", $aRCONResponseWaitms)
 				EndIf
 				Return False
 			Next
@@ -9646,15 +9684,17 @@ Func LogWrite($Msg, $msgdebug = -1, $tSendDiscord = True)
 		FileWriteLine($aLogFile, _NowCalc() & " Log File Split.  First file:" & $aFolderLog & $aUtilName & "_LogFull_" & @YEAR & "-" & @MON & "-" & @MDAY & "-Part1.txt")
 	EndIf
 	If $Msg <> "" Then
-		FileWriteLine($aLogFile, _NowCalc() & $Msg)
-		$aGUILogWindowText = _NowTime(5) & $Msg & @CRLF & StringLeft($aGUILogWindowText, 10000)
+		$Msg1 = StringRegExpReplace($Msg, @CRLF, "|")
+		FileWriteLine($aLogFile, _NowCalc() & $Msg1)
+		$aGUILogWindowText = _NowTime(5) & $Msg1 & @CRLF & StringLeft($aGUILogWindowText, 10000)
 		If $aGUIReady Then GUICtrlSetData($LogTicker, $aGUILogWindowText)
 	EndIf
 	If $msgdebug <> "no" Then
+		$msgdebug1 = StringRegExpReplace($msgdebug, @CRLF, "|")
 		If $msgdebug = -1 Then
-			FileWriteLine($aLogDebugFile, _NowCalc() & $Msg)
+			FileWriteLine($aLogDebugFile, _NowCalc() & $Msg1)
 		Else
-			FileWriteLine($aLogDebugFile, _NowCalc() & $msgdebug)
+			FileWriteLine($aLogDebugFile, _NowCalc() & $msgdebug1)
 		EndIf
 	EndIf
 	If $aGUIReady = True And $tSendDiscord And $Msg <> "" Then
@@ -9961,8 +10001,12 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 		Else
 			Local $tError = 0
 			Local $tModsUpdated = ""
-			Global $xModsToUpdate[1]
+			Local $xModsToUpdate[1]
 			$xModsToUpdate[0] = "Mods To Update"
+			Local $xModIDsToUpdate[1]
+			$xModIDsToUpdate[0] = "ModIDs To Update"
+			Local $xModNamesToUpdate[1]
+			$xModNamesToUpdate[0] = "ModNames To Update"
 			If UBound($aModName) <> ($aMods[0] + 1) Then ReDim $aModName[$aMods[0] + 1]
 			If UBound($aModID) <> ($aMods[0] + 1) Then ReDim $aModID[$aMods[0] + 1]
 			If UBound($aModDate) <> ($aMods[0] + 1) Then ReDim $aModDate[$aMods[0] + 1]
@@ -9979,8 +10023,9 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 					Local $aErrorMsg = "Something went wrong downloading update information for mod [" & $aMods[$i] & "] Check for valid ModID. " & _
 							"If running Windows Server, Disable ""IE Enhanced Security Configuration"" for Administrators (via Server Manager > Local Server > IE Enhanced Security Configuration)."
 ;~ 			LogWrite(" [Mod] " & $aErrorMsg)
-					$xError = True
-					$tError = 1
+;~ 					$xError = True
+;~ 					$tError = 1
+					LogWrite(" [Mod] " & $aErrorMsg)
 					SplashOff()
 					If $tShow Then
 						MsgBox($MB_OK, $aUtilityVer, $aErrorMsg, 5)
@@ -9997,9 +10042,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 							Else
 								$xError = True
 								$tError = 2
-								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest. Download First Mod
+;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest. Download First Mod
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
+								_ArrayAdd($xModIDsToUpdate, $aMods[$i])
+								_ArrayAdd($xModNamesToUpdate, StringReplace($aModName[$i], "|", "-"))
 							EndIf
 						ElseIf Not $aInstalledTime[1] Then
 							IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
@@ -10008,9 +10055,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 							Else
 								$xError = True
 								$tError = 3
-								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod does not exists. Download
+;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod does not exists. Download
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
+								_ArrayAdd($xModIDsToUpdate, $aMods[$i])
+								_ArrayAdd($xModNamesToUpdate, StringReplace($aModName[$i], "|", "-"))
 							EndIf
 						ElseIf $aInstalledTime[1] And (StringCompare($aLatestTime[2], $aInstalledTime[2]) <> 0) Then
 							IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
@@ -10019,9 +10068,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 							Else
 								$tError = 4
 								$xError = True
-								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod Out of Date. Update.
+;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod Out of Date. Update.
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
+								_ArrayAdd($xModIDsToUpdate, $aMods[$i])
+								_ArrayAdd($xModNamesToUpdate, StringReplace($aModName[$i], "|", "-"))
 							EndIf
 						EndIf
 					Else
@@ -10031,13 +10082,18 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 						Else
 							$xError = True
 							$tError = 2
-							$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest exist in Atlas Mods folder. Download First Mod
+;~ 							$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest exist in Atlas Mods folder. Download First Mod
 							$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 							_ArrayAdd($xModsToUpdate, $i)
+							_ArrayAdd($xModIDsToUpdate, $aMods[$i])
+							_ArrayAdd($xModNamesToUpdate, StringReplace($aModName[$i], "|", "-"))
 						EndIf
 					EndIf
 				EndIf
 			Next
+			IniWrite($aUtilCFGFile, "CFG", "xModsToUpdate", _ArrayToString($xModsToUpdate))
+			IniWrite($aUtilCFGFile, "CFG", "xModIDsToUpdate", _ArrayToString($xModIDsToUpdate))
+			IniWrite($aUtilCFGFile, "CFG", "xModNamesToUpdate", _ArrayToString($xModNamesToUpdate))
 			If $tError > 0 And ($aServerModDoNotInstallYN <> "yes" Or $tForceModUpdateInstallTF = True) Then
 				$tModsUpdated = StringTrimRight($tModsUpdated, 2)
 				If $sInGameAnnounce = "yes" Then $aModMsgInGame = AnnounceReplaceModID($sModMsgInGame, $sAnnounceNotifyModUpdate, $tModsUpdated)
@@ -10051,11 +10107,12 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 			If ($aBeginDelayedShutdown <> 1) And ($xError = False) And $aModsShowUpToDateLogYN = "yes" Then
 				LogWrite(" [Mod] Mods are Up to Date.")
 				IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "no")
-			ElseIf $tError = 1 Then
-				LogWrite(" [Mod] " & $aErrorMsg)
+;~ 			ElseIf $tError = 1 Then
+;~ 				LogWrite(" [Mod] " & $aErrorMsg)
 			ElseIf $aServerModDoNotInstallYN <> "yes" Or $tForceModUpdateInstallTF Then
-				LogWrite(" [Mod] Mod(s) Updated. Preparing for server restart.")
-				$aRebootReason = "mod"
+				LogWrite(" [Mod] New Mod(s) Update. Preparing for server restart.")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "mod")
+;~ 				$aRebootReason = "mod"
 				$aTimeCheck0 = _NowCalc()
 				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				RunExternalScriptMod()
@@ -10492,13 +10549,14 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	Return $aReturn
 EndFunc   ;==>GetInstalledModUpdateTime
 
-Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
+;~ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
+Func UpdateMod($sMod, $sModName)
 	GUICtrlSetBkColor($UpdateMods, $cButtonDefaultBackground)
 	GUICtrlSetTip(-1, "Check for Mod Updates")
 	Local $bReturn = False
 	;	Local $tModSpace = StringRegExpReplace($sMod, ",", " ")
 	Local $tSplash = _Splash(" Mod " & $sMod & " " & $sModName & @CRLF & " update released or new mod." & @CRLF & "Downloading and installing mod update.", 0, 500, 140)
-	Local $aModScript = @ScriptDir & "\AtlasModDownloader.exe  --modids " & $sMod & " --steamcmd """ & $sSteamCmdDir & """ --workingdir """ & $sServerDir & """"
+	Local $aModScript = @ScriptDir & "\AtlasModDownloader.exe  --modids " & $sMod & " --steamcmd """ & $aSteamCMDDir & """ --workingdir """ & $aServerDirLocal & """"
 	LogWrite(" [Mod] Mod " & $sMod & " " & $sModName & " update released or new mod found. Downloading and installing mod.", " [Mod] Mod " & $sMod & " " & $sModName & " update released or new mod found. Downloading and installing mod:" & $aModScript)
 	$Timer = TimerInit()
 	Local $tPID = Run($aModScript)
@@ -10510,13 +10568,9 @@ Func UpdateMod($sMod, $sModName, $sSteamCmdDir, $sServerDir, $iReason, $sModNo)
 			Sleep(950)
 			If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
 		Until TimerDiff($Timer) > (60000 * $aServerModTimeoutMin)     ; Wait X minutes for mod to finish downloading
-		If ProcessExists($tPID) Then
-			ProcessClose($tPID)
-		EndIf
+		If ProcessExists($tPID) Then ProcessClose($tPID)
 	EndIf
-	If FileExists($sSteamCmdDir & "\steamapps\workshop\" & $aModAppWorkshop) Then
-		FileMove($sSteamCmdDir & "\steamapps\workshop\" & $aModAppWorkshop, $aFolderTemp & "mod_" & $sMod & "_appworkshop.tmp", 1)
-	EndIf
+	If FileExists($aSteamCMDDir & "\steamapps\workshop\" & $aModAppWorkshop) Then FileMove($aSteamCMDDir & "\steamapps\workshop\" & $aModAppWorkshop, $aFolderTemp & "mod_" & $sMod & "_appworkshop.tmp", 1)
 	SplashOff()
 	Return $bReturn
 EndFunc   ;==>UpdateMod
@@ -11138,7 +11192,8 @@ Func F_RemoteRestart()
 			If $aBeginDelayedShutdown = 0 Then
 				LogWrite(" [Remote Restart] Remote Restart request initiated by user.")
 				If ($sUseDiscordBotRemoteRestart = "yes") Or ($sUseTwitchBotRemoteRestart = "yes") Or ($sInGameAnnounce = "yes") Then
-					$aRebootReason = "remoterestart"
+					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart"
+;~ 					$aRebootReason = "remoterestart"
 					If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 					$aTimeCheck0 = _NowCalc()
 				Else
@@ -11592,7 +11647,8 @@ Func R1_B_RestartGrids()
 			If ($sUseDiscordBotRestartGrids = "yes") Or ($sUseTwitchBotRestartGrids = "yes") Or ($sInGameAnnounce = "yes") Then
 				If GUICtrlRead($R1_R2_SendToAll) = $GUI_CHECKED Then $aAnnounceAllorSelect = "all"
 				If GUICtrlRead($R1_R2_SendToAll) = $GUI_UNCHECKED Then $aAnnounceAllorSelect = "select"
-				$aRebootReason = "restartgrids"
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+;~ 				$aRebootReason = "restartgrids"
 				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				$aTimeCheck0 = _NowCalc()
 				GUI_R1_RestartGrids_Close()
@@ -11610,7 +11666,8 @@ Func R1_B_RestartGrids()
 		EndIf
 	ElseIf GUICtrlRead($R1_R1_RestartNow) = $GUI_CHECKED Then
 		LogWrite(" [" & $aServerName & "] Restart grid(s) NOW with announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		$aRebootReason = "restartgrids"
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+;~ 		$aRebootReason = "restartgrids"
 		If GUICtrlRead($R1_R2_SendToAll) = $GUI_CHECKED Then
 			$aAnnounceAllorSelect = "all"
 		Else
@@ -11618,12 +11675,12 @@ Func R1_B_RestartGrids()
 		EndIf
 		If GUICtrlRead($R1_C1_SkipAnnounce) = $GUI_CHECKED Then
 			If ($tTotalLocalPlayers > 0 Or $aServerOnlinePlayerYN = "no" Or $aSkipCountdownWhenNoOnlinePlayersYN = "no") Then
-				If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDiscordRestartGridsZeroMessage)
+				If $sInGameAnnounce = "yes" Then SendInGame($aDiscordRestartGridsZeroMessage)
 				If $sUseDiscordBotRestartGrids = "yes" Then SendDiscordGeneralMsg($aDiscordRestartGridsZeroMessage)
 				If $sUseTwitchBotRestartGrids = "yes" Then TwitchMsgLog($aTwitchRestartGridsZeroMessage)
 			EndIf
 		Else
-			If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDiscordRestartGridsZeroMessage)
+			If $sInGameAnnounce = "yes" Then SendInGame($aDiscordRestartGridsZeroMessage)
 			If $sUseDiscordBotRestartGrids = "yes" Then SendDiscordGeneralMsg($aDiscordRestartGridsZeroMessage)
 			If $sUseTwitchBotRestartGrids = "yes" Then TwitchMsgLog($aTwitchRestartGridsZeroMessage)
 		EndIf
@@ -11633,7 +11690,8 @@ Func R1_B_RestartGrids()
 		GUIUpdateQuick()
 	Else
 		LogWrite(" [" & $aServerName & "] Restart grid(s) NOW with NO announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		$aRebootReason = "restartgrids"
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+;~ 		$aRebootReason = "restartgrids"
 		GUI_R1_RestartGrids_Close()
 		CloseServer()
 		SetStatusBusy("Server process check in progress...", "Updating Main Window")
@@ -11954,7 +12012,8 @@ Func S1_B_StopGrids()
 			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
 				If GUICtrlRead($S1_R2_SendToAll) = $GUI_CHECKED Then $aAnnounceAllorSelect = "all"
 				If GUICtrlRead($S1_R2_SendToAll) = $GUI_UNCHECKED Then $aAnnounceAllorSelect = "select"
-				$aRebootReason = "stopservers"
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+;~ 				$aRebootReason = "stopservers"
 				$aSelectServers = True
 				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				$aTimeCheck0 = _NowCalc()
@@ -11972,7 +12031,8 @@ Func S1_B_StopGrids()
 		EndIf
 	ElseIf GUICtrlRead($S1_S1_StopNow) = $GUI_CHECKED Then
 		LogWrite(" [" & $aServerName & "] Stop grid(s) NOW with announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		$aRebootReason = "stopservers"
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+;~ 		$aRebootReason = "stopservers"
 		If GUICtrlRead($S1_R2_SendToAll) = $GUI_CHECKED Then
 			$aAnnounceAllorSelect = "all"
 		Else
@@ -11980,12 +12040,12 @@ Func S1_B_StopGrids()
 		EndIf
 		If GUICtrlRead($S1_C1_SkipAnnounce) = $GUI_CHECKED Then
 			If ($tTotalLocalPlayers > 0 Or $aServerOnlinePlayerYN = "no" Or $aSkipCountdownWhenNoOnlinePlayersYN = "no") Then
-				If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDiscordStopGridsZeroMessage)
+				If $sInGameAnnounce = "yes" Then SendInGame($aDiscordStopGridsZeroMessage)
 				If $sUseDiscordBotStopServer = "yes" Then SendDiscordGeneralMsg($aDiscordStopGridsZeroMessage)
 				If $sUseTwitchBotStopServer = "yes" Then TwitchMsgLog($aTwitchStopGridsZeroMessage)
 			EndIf
 		Else
-			If $sInGameAnnounce = "yes" Then SendInGame($aServerIP, $aTelnetPort, $aTelnetPass, $aDiscordStopGridsZeroMessage)
+			If $sInGameAnnounce = "yes" Then SendInGame($aDiscordStopGridsZeroMessage)
 			If $sUseDiscordBotStopServer = "yes" Then SendDiscordGeneralMsg($aDiscordStopGridsZeroMessage)
 			If $sUseTwitchBotStopServer = "yes" Then TwitchMsgLog($aTwitchStopGridsZeroMessage)
 		EndIf
@@ -11995,7 +12055,8 @@ Func S1_B_StopGrids()
 		GUIUpdateQuick()
 	Else
 		LogWrite(" [" & $aServerName & "] Stop grid(s) NOW with NO announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		$aRebootReason = "stopservers"
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+;~ 		$aRebootReason = "stopservers"
 		GUI_S1_StopGrids_Close()
 		CloseServer(False, True, False, $xGridsToClose) ; TF Close redis | TF Disable servers | TF Skip "All Servers Online" Announcement | Grids to close
 		SetStatusBusy("Server process check in progress...", "Updating Main Window")
@@ -12065,7 +12126,8 @@ Func F_StopServer()
 				EndIf
 			EndIf
 			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
-				$aRebootReason = "stopservers"
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+;~ 				$aRebootReason = "stopservers"
 				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 				$aTimeCheck0 = _NowCalc()
 				_Splash("Stop Server with announcements initiated.", 2000)
@@ -12279,11 +12341,13 @@ Func F_SendMessage($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash =
 			If $aCancelTF = False Then
 				For $i = 0 To ($aServerGridTotal - 1)
 					If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
-						ControlSetText($tSplash, "", "Static1", "Sending message to selected servers: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
-						SetStatusBusy("Sending message.", "Send message to " & _ServerNamingScheme($i, $aNamingScheme))
-						Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
-						If $aRCONError Then $tRCON = "[Time out error: No Response]"
-						$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+						If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+							ControlSetText($tSplash, "", "Static1", "Sending message to selected servers: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
+							SetStatusBusy("Sending message.", "Send message to " & _ServerNamingScheme($i, $aNamingScheme))
+							Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+							If $aRCONError Then $tRCON = "[Time out error: No Response]"
+							$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+						EndIf
 					EndIf
 				Next
 				If $tMsgCmd = "" Then
@@ -12297,7 +12361,7 @@ Func F_SendMessage($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash =
 			$tMsg = "broadcast " & $tMsg
 			LogWrite(" [Remote RCON] Sending message to grid (" & _ServerNamingScheme($i, $aNamingScheme) & "):" & $tMsg)
 			SetStatusBusy("Send RCON. Sending message.", "Sending message to " & _ServerNamingScheme($i, $aNamingScheme))
-			Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+			Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
 			If $aRCONError Then $tRCON = "[Time out error: No Response]"
 			$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
 			_RCONMsgBox($tMsg, $tResponse, "Message")
@@ -12312,16 +12376,18 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 		Local $tResponse = ""
 		If $tAllorSel = "all" Then
 			For $i = 0 To ($aServerGridTotal - 1)
-				SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-				Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsgCmd, "no", $aRCONResponseWaitms)
-				If $aRCONError Then $tRCON = "[Time out error: No Response]"
-				$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+				If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+					SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
+					Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsgCmd, "no", $aRCONResponseWaitms)
+					If $aRCONError Then $tRCON = "[Time out error: No Response]"
+					$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+				EndIf
 			Next
 		ElseIf $tAllorSel = "local" Then
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
 					SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-					Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsgCmd, "no", $aRCONResponseWaitms)
+					Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsgCmd, "no", $aRCONResponseWaitms)
 					If $aRCONError Then $tRCON = "[Time out error: No Response]"
 					$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
 				EndIf
@@ -12363,11 +12429,13 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 						LogWrite(" [Remote RCON] Sending RCON command to ALL grids (Local and Remote):" & $tMsg)
 						$tSplash = _Splash("Sending RCON command to ALL grids: " & @CRLF & $tMsg)
 						For $i = 0 To ($aServerGridTotal - 1)
-							ControlSetText($tSplash, "", "Static1", "Sending RCON command to ALL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
-							SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-							Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
-							If $aRCONError Then $tRCON = "[Time out error: No Response]"
-							$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+							If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+								ControlSetText($tSplash, "", "Static1", "Sending RCON command to ALL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
+								SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
+								Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+								If $aRCONError Then $tRCON = "[Time out error: No Response]"
+								$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+							EndIf
 						Next
 						_RCONMsgBox($tMsg, $tResponse, "RCON")
 						SplashOff()
@@ -12378,7 +12446,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 							If $xStartGrid[$i] = "yes" Then
 								SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
 								ControlSetText($tSplash, "", "Static1", "Sending RCON command to all LOCAL grids: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
-								Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+								Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
 								If $aRCONError Then $tRCON = "[Time out error: No Response]"
 								$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
 							EndIf
@@ -12401,11 +12469,13 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 			EndIf
 			For $i = 0 To ($aServerGridTotal - 1)
 				If _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
-					ControlSetText($tSplash, "", "Static1", "Sending RCON command to selected servers: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
-					SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-					Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
-					If $aRCONError Then $tRCON = "[Time out error: No Response]"
-					$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+					If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+						ControlSetText($tSplash, "", "Static1", "Sending RCON command to selected servers: " & _ServerNamingScheme($i, $aNamingScheme) & @CRLF & $tMsg)
+						SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
+						Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+						If $aRCONError Then $tRCON = "[Time out error: No Response]"
+						$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+					EndIf
 				EndIf
 			Next
 			If $tMsgCmd = "" Then
@@ -12425,7 +12495,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xStartGrid[$i] = "yes" Then
 					SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-					Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+					Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
 					If $aRCONError Then $tRCON = "[Time out error: No Response]"
 					$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
 				EndIf
@@ -12438,10 +12508,12 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 			$tMsg = InputBox($aUtilName, "Enter RCON command to send to grid (" & _ServerNamingScheme($i, $aNamingScheme) & "):", "", "", 400, 125, Default, Default, 180)
 			LogWrite(" [Remote RCON] Sending RCON command to grid (" & _ServerNamingScheme($i, $aNamingScheme) & "):" & $tMsg)
 			SetStatusBusy("Send RCON. Sending RCON command.", "Sending RCON to " & _ServerNamingScheme($i, $aNamingScheme))
-			Local $tRCON = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
-			If $aRCONError Then $tRCON = "[Time out error: No Response]"
-			$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
-			_RCONMsgBox($tMsg, $tResponse, "RCON")
+			If $xStartGrid[$i] = "yes" Or $xLocalGrid[$i] = "no" Then
+				Local $tRCON = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $tMsg, "no", $aRCONResponseWaitms)
+				If $aRCONError Then $tRCON = "[Time out error: No Response]"
+				$tResponse &= "Server " & _ServerNamingScheme($i, $aNamingScheme) & ":" & ReplaceCRLF($tRCON) & @CRLF
+				_RCONMsgBox($tMsg, $tResponse, "RCON")
+			EndIf
 		EndIf
 	EndIf
 	SetStatusIdle()
@@ -12559,7 +12631,8 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 					EndIf
 				EndIf
 				If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
-					$aRebootReason = "stopservers"
+					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+;~ 					$aRebootReason = "stopservers"
 					$aSelectServers = True
 					If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
 					$aTimeCheck0 = _NowCalc()
@@ -12797,7 +12870,7 @@ Func _CheckIfGridAlreadyRunning($i)
 				$tReturn2 = $tTmpPID
 				$aServerPID[$i] = ProcessExists($tTmpPID)
 				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") found via Auto Detect.")
-				$xGridReadyTF[$i] = True
+;~ 				$xGridReadyTF[$i] = True
 				$aGridStartedSinceLastAllServersOnlineAnnouncementTF[$i] = False
 				$tReturn = $aServerPID[$i]
 			EndIf
@@ -13093,7 +13166,7 @@ Func DestroyWildDinos()
 	$aCMD = "destroywilddinos"
 	For $i = 0 To ($aServerGridTotal - 1)
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-			SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aCMD, "yes", $aRCONResponseWaitms)
+			SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aServerAdminPass, $aCMD, "yes", $aRCONResponseWaitms)
 		EndIf
 	Next
 EndFunc   ;==>DestroyWildDinos
@@ -13234,11 +13307,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 					ControlSetText($tSplash, "", "Static1", $tTxt)
 					GUICtrlSetData($LabelUtilReadyStatus, "Check: Players " & _ServerNamingScheme($i, $aNamingScheme))
 				EndIf
-				If $aServerRCONIP = "" Then
-					$mMsg = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
-				Else
-					$mMsg = SendRCON($aServerRCONIP, $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
-				EndIf
+				$mMsg = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
 				If StringInStr($mMsg, "No Players Connected") <> 0 Then
 					$xServerPlayerCount[$i] = 0
 					$xServerPlayerSteamNames[$i] = ""
@@ -13258,10 +13327,17 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 						$xServerPlayerSteamNames[$i] = $tUserAll
 						$xServerPlayerSteamID[$i] = $tSteamAll
 						If UBound($tSteamAll) <> UBound($tUserAll) Then ReDim $tSteamAll[$tUserAll]
-						For $x = 0 To (UBound($tUserAll) - 1)
-							_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
-							_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
-						Next
+						If UBound($tSteamAll) > 0 Then
+							For $x = 0 To (UBound($tUserAll) - 1)
+								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
+								_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
+							Next
+						Else
+							Local $tSteamAll[1]
+							Local $tUserAll[1]
+							$tSteamAll[0] = "1234567890"
+							$tUserAll[0] = "User"
+						EndIf
 						Local $tUsers = RemoveSpecialChars(_ArrayToString($tUserAll))
 						If $tUsers < 0 Then
 							If $xLocalGrid[$i] = "yes" Then
@@ -13302,11 +13378,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 						ControlSetText($tSplash, "", "Static1", $tTxt)
 						GUICtrlSetData($LabelUtilReadyStatus, "Recheck " & $x1 & ": Players " & _ServerNamingScheme($i, $aNamingScheme))
 					EndIf
-					If $aServerRCONIP = "" Then
-						$mMsg = SendRCON($xServerIP[$i], $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
-					Else
-						$mMsg = SendRCON($aServerRCONIP, $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
-					EndIf
+					$mMsg = SendRCON($xRCONIP[$i], $xServerRCONPort[$i + 1], $aTelnetPass, $aCMD, "players", $aOnlinePlayerWaitms)
 					If StringInStr($mMsg, "No Players Connected") <> 0 Then
 						$xServerPlayerCount[$i] = 0
 						$xServerPlayerSteamNames[$i] = ""
@@ -18849,12 +18921,20 @@ Func GridConfiguratorGUI($tGridClicked)
 		If $aServerAltSaveSelect <> 3 Then GUICtrlSetState(-1, $GUI_DISABLE)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		$gY1 = $gY1 + 24
-		Local $G_T1_L_2 = GUICtrlCreateLabel("IP Address", 49, $gY + $gY1, 55, 17, $SS_RIGHT)
+		Local $G_T1_L_2 = GUICtrlCreateLabel("Server IP", 49, $gY + $gY1, 55, 17, $SS_RIGHT)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, "IP Address for this grid. Must be a WAN (external) IP address")
-		Global $G_T1_I_IPAddress = GUICtrlCreateInput("", 108, $gY + $gY1 - 3, 305, 21)
+		Global $G_T1_I_IPAddress = GUICtrlCreateInput("", 108, $gY + $gY1 - 3, 90, 21)
 		GUICtrlSetOnEvent(-1, "G_T1_I_IPAddress")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
+
+		Local $G_T1_L_2 = GUICtrlCreateLabel("RCON IP", 276, $gY + $gY1, 45, 17, $SS_RIGHT) ;kim125er!
+		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
+		GUICtrlSetTip(-1, "RCON IP Address for this grid. Use Local IP or 127.0.0.1 for local grids. Use machine IP for remote grids.")
+		Global $G_T1_I_RCONIP = GUICtrlCreateInput("", 323, $gY + $gY1 - 3, 90, 21)
+		GUICtrlSetOnEvent(-1, "G_T1_I_RCONIP")
+		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
+
 		Local $G_T1_L_38 = GUICtrlCreateLabel("Game Port", 441, $gY + $gY1, 54, 17, $SS_RIGHT)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, 'Game Port ("Port" in command line) for this grid: executed in command line')
@@ -20096,6 +20176,7 @@ Func G_T1_UpdateTab()
 	GUICtrlSetData($G_T1_I_BaseDelay, $aServerStartDelay)
 	GUICtrlSetData($G_T1_I_ServerName, $xServerNames[$tGridActive])
 	GUICtrlSetData($G_T1_I_IPAddress, $xServerIP[$tGridActive])
+	GUICtrlSetData($G_T1_I_RCONIP, $xRCONIP[$tGridActive])
 	GUICtrlSetData($G_T1_I_AltSaveDIR, $xServerAltSaveDir[$tGridActive])
 	GUICtrlSetData($G_T1_I_QueryPort, $xServerport[$tGridActive])
 	GUICtrlSetData($G_T1_I_GamePort, $xServergameport[$tGridActive])
@@ -20497,6 +20578,14 @@ Func G_T1_I_IPAddress()
 	_UpdateCMD(False)
 	GUICtrlSetData($G_T1_I_CommandlineTotal, $xServerStart[$tGridActive])
 EndFunc   ;==>G_T1_I_IPAddress
+Func G_T1_I_RCONIP()
+	$xRCONIP[$tGridActive] = GUICtrlRead($G_T1_I_RCONIP)
+	IniWrite($aGridSelectFile, $aGridIniTitle[6], "RCON IP for Server (" & $xServergridx[$tGridActive] & "," & $xServergridy[$tGridActive] & ")", $xRCONIP[$tGridActive])
+	LogWrite("", " [RCON IP] RCON IP for " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " set to :" & $xRCONIP[$tGridActive])
+	GUICtrlSetData($G_T1_I_RCONIP, $xRCONIP[$tGridActive])
+	_UpdateCMD(False)
+	GUICtrlSetData($G_T1_I_CommandlineTotal, $xServerStart[$tGridActive])
+EndFunc   ;==>G_T1_I_RCONIP
 Func G_T1_I_AltSaveDIR()
 	Local $aTxtOld = $xServerAltSaveDir[$tGridActive]
 	$xServerAltSaveDir[$tGridActive] = GUICtrlRead($G_T1_I_AltSaveDIR)

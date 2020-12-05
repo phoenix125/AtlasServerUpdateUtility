@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.7 (2020-10-24)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.8 (2020-12-04)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,20 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.8 (2020-12-04) Critical bug fix! Mods updater now runs while grids are offline. Added RCON IP per-grid assignment. Other minor bug fixes.
+- Fixed: Mod Updater: Now runs while grids are offline to prevent file corruptions. (Thanks to @Infiniti & @Nyt for reporting issues)
+- Added: RCON IP can now be assigned per-grid. Useful for multiple-machine setups. (Thanks to @AceMan for requesting)
+- Fixed: Mod Updater: If ASUU was restarted while an update restart was pending, it would sometimes fail to restart or update.
+- Fixed: Mod Updater: If an invalid modID was last in the list, all other mod updates could fail.
+- Fixed: Erroneous CRASH/"Not ready" Status/Discord announcements during restarts (Thanks to @Infiniti for reporting)
+- Fixed: Event Scheduler: The In-Game/Discord/Twitch messages were originally just for restarts, but now they can be used for scheduled announcements.
+- Changed: In-Game messages: Now limited to 500 characters to prevent errors / failed messages. (Thanks to @Infiniti for reporting)
+- Changed: In-Game messages: Removed Line Breaks from announcements (Thanks to @Infiniti for reporting issues)
+- Changed: In-Game messages: Removed Mod info from default update message. (New installs only! For existing installs, remove \d\l from the Mod Update in-game announcement) (Thanks to @Doublee for suggesting)
+- Changed: All RCON messages will only atttempt to send to enabled local and remote grids. No more waiting for timeouts on disabled grids.
+- Changed: Log File: Changed New Line (CRLF) to |
+- Fixed: Line 46384 error due to error retrieving player SteamIDs. (Thanks to @NightHaven for reporting)
+
 v2.2.7 (2020-10-24) Bug Fixes for >64 Cores and CPU Affinity
 - Fixed: Line 37047 error which occured when a daily restart was starting while another restart was in process. (Thanks to @Fosh for reporting)
 - Fixed: When >64 cores and assigning CPU affinity and different save folder than naming scheme, ASUU's existing server detection would fail causing duplicate server starts. (Thanks to @Infiniti for reporting and troubleshooting)

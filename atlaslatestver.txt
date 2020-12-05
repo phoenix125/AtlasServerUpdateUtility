@@ -1,3 +1,11 @@
-v2.2.7^v2.2.7 Bug Fixes for >64 Cores & CPU Affinity
-- Fixed: When >64 cores and CPU affinity, 2 bugs found and fixed.
-- Fixed: Line 37047 error
+v2.2.8^v2.2.8 Critical bug fix! Mods updater now runs while grids are offline. Added RCON IP per-grid assignment. Other minor bug fixes.
+- Fixed: Mod Updater: Now runs while grids are offline.
+- Added: RCON IP can now be assigned per-grid.
+- Fixed: Erroneous CRASH/"Not ready" Status/Discord announcements during restarts.
+- Fixed: Event Scheduler: The In-Game/Discord/Twitch messages were originally just for restarts, but now they can be used for scheduled announcements.
+- Changed: In-Game messages: Now limited to 500 characters to prevent errors.
+- Changed: In-Game messages: Removed Line Breaks from announcements.
+- Changed: In-Game messages: Removed Mod info from default update message. (New installs only! For existing installs, remove \d\l from the Mod Update in-game announcement) (Thanks to @Doublee for suggesting)
+- Changed: All RCON messages will only atttempt to send to enabled local and remote grids.
+- Changed: Log File: Changed New Line (CRLF) to |
+- Fixed: Line 46384 error due to error retrieving player SteamIDs.
