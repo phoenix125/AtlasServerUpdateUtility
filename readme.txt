@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.8 (2020-12-04)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.2.9 (2020-12-04)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,9 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.2.9 (2020-12-04) Bug fix.
+- Fixed: Line Error fix.
+
 v2.2.8 (2020-12-04) Critical bug fix! Mods updater now runs while grids are offline. Added RCON IP per-grid assignment. Other minor bug fixes.
 - Fixed: Mod Updater: Now runs while grids are offline to prevent file corruptions. (Thanks to @Infiniti & @Nyt for reporting issues)
 - Added: RCON IP can now be assigned per-grid. Useful for multiple-machine setups. (Thanks to @AceMan for requesting)

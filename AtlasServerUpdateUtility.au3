@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.8.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.8_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.9.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.9_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.8.0
+#AutoIt3Wrapper_Res_Fileversion=2.2.9.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.8
+#AutoIt3Wrapper_Res_ProductVersion=v2.2.9
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,8 +94,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.8" ; (2020-12-04)
-Local $aUtilVerBeta = "v2.2.8" ; (2020-12-04)
+Local $aUtilVerStable = "v2.2.9" ; (2020-12-04)
+Local $aUtilVerBeta = "v2.2.9" ; (2020-12-04)
 Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -146,7 +146,7 @@ Global $aUtilVerNumber = 49 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
-;49 = v2.2.6/7/8
+;49 = v2.2.6/7/8/9
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -8241,7 +8241,7 @@ Func SendInGame($mMessage)
 	Else
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ($xStartGrid[$i] = "yes") Then
-				If $xRCONIP[$ti] = "" Then
+				If $xRCONIP[$i] = "" Then
 					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xServerIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 				Else
 					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xRCONIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"

@@ -1,4 +1,5 @@
-v2.2.8^v2.2.8 Critical bug fix! Mods updater now runs while grids are offline. Added RCON IP per-grid assignment. Other minor bug fixes.
+v2.2.9^v2.2.9 Line Error Fix.
+v2.2.8 Critical bug fix! Mods updater now runs while grids are offline. Added RCON IP per-grid assignment. Other minor bug fixes.
 - Fixed: Mod Updater: Now runs while grids are offline.
 - Added: RCON IP can now be assigned per-grid.
 - Fixed: Erroneous CRASH/"Not ready" Status/Discord announcements during restarts.
