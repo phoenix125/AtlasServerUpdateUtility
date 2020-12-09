@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.2.9.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.2.9_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.0.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.0_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.2.9.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.0.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.2.9
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.0
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,8 +94,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.2.9" ; (2020-12-04)
-Local $aUtilVerBeta = "v2.2.9" ; (2020-12-04)
+Local $aUtilVerStable = "v2.3.0" ; (2020-12-08)
+Local $aUtilVerBeta = "v2.3.0" ; (2020-12-08)
 Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -146,7 +146,7 @@ Global $aUtilVerNumber = 49 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
-;49 = v2.2.6/7/8/9
+;49 = v2.2.6/7/8/9/3.0/
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -8258,7 +8258,7 @@ EndFunc   ;==>SendInGame
 ; -----------------------------------------------------------------------------------------------------------------------
 
 #Region ;**** Send RCON Command via MCRCON ****
-Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500) ;kim125er!
+Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 	$aRCONError = False
 	If StringInStr($mCommand, "broadcast") > 0 Then
 		Local $tTxt = StringTrimLeft($mCommand, 10)
@@ -13491,10 +13491,12 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 					$tUserNoSteam[$i] = ""
 					Local $tUserAll = $xServerPlayerSteamNames[$i]
 					Local $tSteamAll = $xServerPlayerSteamID[$i]
+					ReDim $tUserAll[($xServerPlayerCount[$i])]
+					ReDim $tSteamAll[($xServerPlayerCount[$i])]
 					For $x = 0 To ($xServerPlayerCount[$i] - 1)
-						$tUserLog[$i] &= $tUserAll[$x] & "." & $tSteamAll[$x] & "|"
-						$tUserMsg[$i] &= $tUserAll[$x] & " [" & $tSteamAll[$x] & "] "
-						$tUserNoSteam[$i] &= $tUserAll[$x] & " "
+						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) And UBound($tSteamAll) < ($xServerPlayerCount[$i] - 1) Then $tUserLog[$i] &= $tUserAll[$x] & "." & $tSteamAll[$x] & "|"
+						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) And UBound($tSteamAll) < ($xServerPlayerCount[$i] - 1) Then $tUserMsg[$i] &= $tUserAll[$x] & " [" & $tSteamAll[$x] & "] "
+						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) Then $tUserNoSteam[$i] &= $tUserAll[$x] & " "
 						_ArrayAdd($xOnlinePlayers, $tUserAll[$x])
 						FileWriteLine($aOnlinePlayerTempFile, _ServerNamingScheme($i, $aNamingScheme) & "," & $i & "," & $tUserAll[$x] & "," & $tSteamAll[$x])
 					Next
@@ -18928,7 +18930,7 @@ Func GridConfiguratorGUI($tGridClicked)
 		GUICtrlSetOnEvent(-1, "G_T1_I_IPAddress")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 
-		Local $G_T1_L_2 = GUICtrlCreateLabel("RCON IP", 276, $gY + $gY1, 45, 17, $SS_RIGHT) ;kim125er!
+		Local $G_T1_L_2 = GUICtrlCreateLabel("RCON IP", 276, $gY + $gY1, 45, 17, $SS_RIGHT)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, "RCON IP Address for this grid. Use Local IP or 127.0.0.1 for local grids. Use machine IP for remote grids.")
 		Global $G_T1_I_RCONIP = GUICtrlCreateInput("", 323, $gY + $gY1 - 3, 90, 21)
