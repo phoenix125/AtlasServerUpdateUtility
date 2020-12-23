@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.0.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.0_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.3.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.3_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.0.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.3.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.0
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.3
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,8 +94,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.0" ; (2020-12-08)
-Local $aUtilVerBeta = "v2.3.0" ; (2020-12-08)
+Local $aUtilVerStable = "v2.3.3" ; (2020-12-18)
+Local $aUtilVerBeta = "v2.3.3" ; (2020-12-18)
 Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -146,7 +146,7 @@ Global $aUtilVerNumber = 49 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
-;49 = v2.2.6/7/8/9/3.0/
+;49 = v2.2.6/7/8/9/3.0/1/2
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -1745,21 +1745,21 @@ For $i = 0 To ($aServerGridTotal - 1)
 					"Click (NO) to disable Firewall Delay on all grids." & @CRLF & _
 					"Click (CANCEL) to continue. Firewall changes will NOT WORK."
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				_RestartUtil(True, True) ; Quick=True, Admin=Yes
-			ElseIf $tMB = 7 Then     ; NO
+			ElseIf $tMB = 7 Then ; NO
 				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
 				For $x = 0 To ($aServerGridTotal - 1)
 					$xFireWallUseYN[$x] = "no"
 					IniWrite($aGridSelectFile, $aGridIniTitle[5], "Firewall Block Use for Server (" & $xServergridx[$x] & "," & $xServergridy[$x] & ") (yes/no)", $xFireWallUseYN[$x])
 				Next
 				ExitLoop
-			ElseIf $tMB = 2 Then     ; CANCEL
+			ElseIf $tMB = 2 Then ; CANCEL
 				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
 				ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
 				Sleep(5000)
 				ExitLoop
-			ElseIf $tMB = -1 Then    ; TIMEOUT
+			ElseIf $tMB = -1 Then ; TIMEOUT
 				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
 				ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
 				Sleep(2000)
@@ -2633,7 +2633,10 @@ While True ;**** Loop Until Closed ****
 					EndIf
 				EndIf
 			Next
-			If UBound($tGrids) > 0 Then SelectServersStop($tGrids, False, False) ; ID, Do NOT Ask, Do NOT disable Grid
+			If UBound($tGrids) > 0 Then
+				IniWrite($aUtilCFGFile, "CFG", "aCrashedGridYN", "yes")
+				SelectServersStop($tGrids, False, False) ; ID, Do NOT Ask, Do NOT disable Grid
+			EndIf
 		EndIf
 		#Region ;**** Keep Server Alive Check. ****
 		SetStatusBusy("Server process check in progress...", "Check: Redis Running")
@@ -3634,11 +3637,11 @@ Func GUI_Main_B_BackupMenu()
 			"Click (CANCEL) to cancel backup."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-	If $tMB = 6 Then     ; YES
-		_BackupGame(False, False)     ; False: Run minimized, False: Perform FULL backup
+	If $tMB = 6 Then ; YES
+		_BackupGame(False, False) ; False: Run minimized, False: Perform FULL backup
 		_Splash("Backing up SAVE & Config files now.", 2000)
-	ElseIf $tMB = 7 Then     ; NO
-		_BackupGame(False, True)     ; False: Run minimized, True: Perform FULL backup
+	ElseIf $tMB = 7 Then ; NO
+		_BackupGame(False, True) ; False: Run minimized, True: Perform FULL backup
 		_Splash("Backing up FULL ATLAS FOLDER & Config files now.", 2000)
 		SplashOff()
 	EndIf
@@ -3653,7 +3656,7 @@ Func GUI_Main_B_EventScheduler()
 	MsgBox($MB_OK, $aUtilName, "Event Scheduler is unfinished.  It is fully functional, but a simpler entry method and an interactive calendar are coming soon!" & @CRLF & @CRLF & _
 			"See AtlasServerUpdateUtility.ini file (or click CONFIG) to edit scheduler.", 30)
 EndFunc   ;==>GUI_Main_B_EventScheduler
-Func _SendInGameMessage($tMsg1, $tSel = "local", $tSplash1 = 0)     ; local or all
+Func _SendInGameMessage($tMsg1, $tSel = "local", $tSplash1 = 0) ; local or all
 	Local $tResponse = ""
 	If $tSel = "local" Then
 		For $i = 0 To ($aServerGridTotal - 1)
@@ -3689,20 +3692,20 @@ Func GUI_Main_B_CancelRestart()
 				"Click (CANCEL) to allow restart to continue."
 		SplashOff()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-		If $tMB = 6 Then     ; YES
+		If $tMB = 6 Then ; YES
 			$tMsg = InputBox($aUtilName, "Enter message to send:", "Restart cancelled. Servers will not restart.", "", 400, 125, Default, Default, 360)
 			Local $aMsg = "Cancel restart. Send message to:" & @CRLF & _
 					"Click (YES) for local IN-GAME and DISCORD." & @CRLF & _
 					"Click (NO) for IN-GAME only." & @CRLF & _
 					"Click (CANCEL) to allow restart to continue."
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-			If $tMB = 6 Then     ; YES
+			If $tMB = 6 Then ; YES
 				$tResponse = _SendInGameMessage($tMsg, "local")
 				SendDiscordGeneralMsg($tMsg)
 				$aBeginDelayedShutdown = 0
 				$aTimeCheck0 = _NowCalc()
 				_Splash("Server Restart Cancelled.", 2000)
-			ElseIf $tMB = 7 Then     ; NO
+			ElseIf $tMB = 7 Then ; NO
 				$tResponse = _SendInGameMessage($tMsg, "local")
 				$aBeginDelayedShutdown = 0
 				$aTimeCheck0 = _NowCalc()
@@ -3710,7 +3713,7 @@ Func GUI_Main_B_CancelRestart()
 			Else
 				_Splash("Server Restart resumed.", 2000)
 			EndIf
-		ElseIf $tMB = 7 Then     ; NO
+		ElseIf $tMB = 7 Then ; NO
 			$aBeginDelayedShutdown = 0
 			$aTimeCheck0 = _NowCalc()
 			_Splash("Server Restart Cancelled.", 2000)
@@ -3734,11 +3737,11 @@ EndFunc   ;==>GUI_Main_B_UpdateUtil
 ;~ EndFunc   ;==>GUI_Main_B_AllRmtRestart
 Func GUI_Main_B_AllRestartNow()
 ;~ 	F_RestartNow()
-	R1_RestartGrids(-1)     ; -1 = ALL grids
+	R1_RestartGrids(-1) ; -1 = ALL grids
 	GUIUpdateQuick()
 EndFunc   ;==>GUI_Main_B_AllRestartNow
 Func GUI_Main_B_StopServerAll()
-	S1_StopGrids(-1)     ; -1 = ALL grids
+	S1_StopGrids(-1) ; -1 = ALL grids
 ;~ 	F_StopServer()
 	GUIUpdateQuick()
 EndFunc   ;==>GUI_Main_B_StopServerAll
@@ -4079,19 +4082,19 @@ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 	Switch $hWndFrom
 		Case $hWndListView
 			Switch $iCode
-				Case $LVN_COLUMNCLICK     ; A column was clicked
+				Case $LVN_COLUMNCLICK ; A column was clicked
 					$tInfo = DllStructCreate($tagNMLISTVIEW, $lParam)
 					$tClickType = "Header"
 					$tClickHead = DllStructGetData($tInfo, "SubItem")
 					$tClickRow = -1
 					$tClickCol = -1
-				Case $NM_CLICK     ; Sent by a list-view control when the user clicks an item with the left mouse button
+				Case $NM_CLICK ; Sent by a list-view control when the user clicks an item with the left mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "L1"
 					$tClickHead = -1
 					$tClickRow = DllStructGetData($tInfo, "Index")
 					$tClickCol = DllStructGetData($tInfo, "SubItem")
-				Case $NM_DBLCLK     ; Sent by a list-view control when the user double-clicks an item with the left mouse button
+				Case $NM_DBLCLK ; Sent by a list-view control when the user double-clicks an item with the left mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "L2"
 					$tClickHead = -1
@@ -4101,14 +4104,14 @@ Func WM_NOTIFY($hWnd, $iMsg, $wParam, $lParam)
 ;~ 					_DebugPrint("$NM_HOVER" & @CRLF & "--> hWndFrom:" & @TAB & $hWndFrom & @CRLF & _
 ;~ 							"-->IDFrom:" & @TAB & $iIDFrom & @CRLF & _
 ;~ 							"-->Code:" & @TAB & $iCode)
-				Case $NM_RCLICK     ; Sent by a list-view control when the user clicks an item with the right mouse button
+				Case $NM_RCLICK ; Sent by a list-view control when the user clicks an item with the right mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "R1"
 					$tClickHead = -1
 					$tClickRow = DllStructGetData($tInfo, "Index")
 					$tClickCol = DllStructGetData($tInfo, "SubItem")
 ;~ 					_Splash("Rt-Click" & @CRLF & "Row:" & $tClickRow & @CRLF & "Col:" & $tClickCol,1000)
-				Case $NM_RDBLCLK     ; Sent by a list-view control when the user double-clicks an item with the right mouse button
+				Case $NM_RDBLCLK ; Sent by a list-view control when the user double-clicks an item with the right mouse button
 					$tInfo = DllStructCreate($tagNMITEMACTIVATE, $lParam)
 					$tClickType = "R2"
 					$tClickHead = -1
@@ -4211,8 +4214,8 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	;	Global $aServerName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $iniCheck)
@@ -4984,7 +4987,7 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 				"Click (NO) Or (CANCEL) to continue running utility WITHOUT changes."
 		SplashOff()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-		If $tMB = 6 Then     ; YES
+		If $tMB = 6 Then ; YES
 			F_ExitCloseN(True)
 		EndIf
 	EndIf
@@ -6512,8 +6515,8 @@ Func ReadCFG($sIniFile)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	Global $aUtilReboot = IniRead($sIniFile, "CFG", "aUtilReboot", $iniCheck)
@@ -6851,11 +6854,11 @@ Func Gamercide()
 			SplashOff()
 			$Shutdown = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 60)
 			; ----------------------------------------------------------
-			If $Shutdown = 6 Then     ; YES
+			If $Shutdown = 6 Then ; YES
 				$tMB = MsgBox($MB_YESNO, $aUtilName, "Are you sure you want to shut down all servers?", 30)
 				If $tMB = 6 Then
 					LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
-					CloseServer(True)     ; Close Redis.
+					CloseServer(True) ; Close Redis.
 					SplashOff()
 					If $aServerPIDRedis < 1 Then $aServerPIDRedis = -1
 					If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
@@ -6875,7 +6878,7 @@ Func Gamercide()
 				EndIf
 				_ExitUtil()
 				; ----------------------------------------------------------
-			ElseIf $Shutdown = 7 Then     ; NO
+			ElseIf $Shutdown = 7 Then ; NO
 				$tMB = MsgBox($MB_YESNO, $aUtilName, "Are you sure you want to shut down all servers?", 30)
 				If $tMB = 6 Then
 					If $aServerUseRedis = "yes" Then
@@ -6902,7 +6905,7 @@ Func Gamercide()
 				EndIf
 				_ExitUtil()
 				; ----------------------------------------------------------
-			ElseIf $Shutdown = 2 Then     ; CANCEL
+			ElseIf $Shutdown = 2 Then ; CANCEL
 				LogWrite(" [" & $aServerName & "] Server Shutdown - Initiated by User when closing " & $aUtilityVer & " Script")
 				CloseTCP($aRemoteRestartIP, $aRemoteRestartPort, 0)
 				PIDSaveServer()
@@ -6957,18 +6960,23 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 	$aDiscordStopGridsZeroMessage = $sDiscordStopServerZeroMessage
 	$aTwitchStopGridsZeroMessage = $sTwitchStopServerZeroMessage
 
-	If $aServerMapName = "Blackwood" Then $tServNo = 0
 	If $aFirstBoot Then
 		Global $aSplashCloseServer = 0
 	Else
 		Global $aSplashCloseServer = SplashTextOn($aUtilName & ": " & $aServerName, "Sending shutdown command to server(s) . . .", 550, 100, -1, -1, $DLG_MOVEABLE, "")
 	EndIf
-	$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
-	If $aRebootReason = "stopservers" Then
-		$tDisableServer = True
-		If $aSelectServers Then $tServNo = $xGridsToClose
+	Local $tCrashedYN = IniRead($aUtilCFGFile, "CFG", "aCrashedGridYN", "no")
+	If $tCrashedYN = "yes" Then
+		IniWrite($aUtilCFGFile, "CFG", "aCrashedGridYN", "no")
+	Else
+		If $aServerMapName = "Blackwood" Then $tServNo = 0
+		$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
+		If $aRebootReason = "stopservers" Then
+			$tDisableServer = True
+			If $aSelectServers Then $tServNo = $xGridsToClose
+		EndIf
+		If $aRebootReason = "restartgrids" Then $tServNo = $xGridsToRestart
 	EndIf
-	If $aRebootReason = "restartgrids" Then $tServNo = $xGridsToRestart
 	Local $aErrorShutdownTF = False
 	If $tSkipServerReadyAnnouncement = True Then
 		$aServerReadyOnce = False
@@ -6999,7 +7007,7 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 		If TimerDiff($tTimer) < 4000 Then Sleep(4000 - TimerDiff($tTimer))
 	EndIf
 	ControlSetText($aSplashCloseServer, "", "Static1", "Ensuring all game saves started.")
-	_StopGrid_CompareSaveGameTime($tGridsToShutDown, $tStartGameSaveTime, $tStartGameSaveTime)     ; Making sure that game save started
+	_StopGrid_CompareSaveGameTime($tGridsToShutDown, $tStartGameSaveTime, $tStartGameSaveTime) ; Making sure that game save started
 	Local $tGridsNotStartedSavingText = ""
 	If UBound($_StopGrid_GridsSame) > 0 Then
 		For $i = 0 To (UBound($_StopGrid_GridsSame) - 1)
@@ -7434,7 +7442,7 @@ Func ImportConfig($tServerDirLocal, $tConfigFile, $tFromNewWizard = False, $tSpl
 							"Click (NO) or (CANCEL) to continue (Mod updater will error but continue to work)"
 					SplashOff()
 					$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
-					If $tMB = 6 Then     ; YES
+					If $tMB = 6 Then ; YES
 						ShellExecute($sConfigPath)
 						_ExitUtil()
 					Else
@@ -7642,7 +7650,7 @@ Func _ConfigCheckForDuplicates($tArray, $tParameter)
 	Return $tTxt
 EndFunc   ;==>_ConfigCheckForDuplicates
 
-Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False)     ; Modified version of Melba23's script: https://www.autoitscript.com/forum/topic/164666-get-duplicate-from-array/
+Func _ArrayDuplicates($aArray, $tAddCountToArrayZero = False) ; Modified version of Melba23's script: https://www.autoitscript.com/forum/topic/164666-get-duplicate-from-array/
 	Local $tObjErrFunc = $aObjErrFunc
 	$aObjErrFunc = "ArrayDuplicates"
 	Local $oDict = ObjCreate("Scripting.Dictionary")
@@ -7787,7 +7795,7 @@ Func ImportRCON($zServerDirLocal, $zServerAltSaveDir, $zServerGridTotal, $zStart
 						SplashOff()
 						$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, $aErrorMsg & @CRLF & @CRLF & "Click (OK) to enter Setup Wizard's RCON page" & @CRLF & _
 								"Click (CANCEL) to exit and manually add the RCON port yourself.", 45)
-						If $tMB = 1 Or $tMB = -1 Then     ; OK or Timeout
+						If $tMB = 1 Or $tMB = -1 Then ; OK or Timeout
 							WizardExisting(3)
 						Else
 							_ExitUtil()
@@ -7826,8 +7834,8 @@ Func GridStartSelect($sGridFile, $sLogFile, $tWizardTF = False)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
@@ -8017,7 +8025,7 @@ EndFunc   ;==>UpdateGridSelectINI
 #Region ;**** Fail Count Announce ****
 Func FailCountRun()
 	LogWrite(" [--== CRITICAL ERROR! ==-- ] The " & $aGameName & " Dedicated Server (" & $aServerEXE & ") failed to start at least twice within 1 minute. Please check " & $aGameName & " config files and " & $aUtilName & ".ini file")
-	CloseServer(True)     ; Close redis
+	CloseServer(True) ; Close redis
 	MsgBox($MB_OK, $aUtilityVer, "[CRITICAL ERROR!] The " & $aGameName & " Dedicated Server (" & $aServerEXE & ") failed to start at least twice within 1 minute. " & @CRLF & @CRLF & "Please check " & $aGameName & " config files and " & $aUtilName & ".ini file and restart " & $aUtilName & ".")
 	_ExitUtil()
 EndFunc   ;==>FailCountRun
@@ -8199,7 +8207,7 @@ Func SendDiscordMsg($sHookURL, $sBotMessage, $sBotName = "", $sBotTTS = False, $
 					Local $sJsonMessage = '{"content" : "' & $sBotMessage & '", "username" : "' & $sBotName & '", "tts" : "' & $sBotTTS & '", "avatar_url" : "' & $sBotAvatar & '"}'
 					Local $oHTTPOST = ObjCreate("WinHttp.WinHttpRequest.5.1")
 					$oHTTPOST.Open("POST", StringStripWS($sHookURL, 3) & "?wait=True", False)
-					$oHTTPOST.Option(4) = 0x3300     ; ignore all SSL errors
+					$oHTTPOST.Option(4) = 0x3300 ; ignore all SSL errors
 					$oHTTPOST.SetRequestHeader("Content-Type", "multipart/form-data")
 					$oHTTPOST.Send($sJsonMessage)
 					Local $oStatusCode = $oHTTPOST.Status
@@ -8251,7 +8259,7 @@ Func SendInGame($mMessage)
 			EndIf
 		Next
 	EndIf
-	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no")     ; "no" = do not write to debug log file
+	LogWrite(" [RCON In-Game Message Sent] " & $mMessage, "no") ; "no" = do not write to debug log file
 EndFunc   ;==>SendInGame
 #EndRegion ;**** Send In-Game Message via MCRCON ****
 
@@ -8383,7 +8391,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 					SplashOff()
 					$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
 					; ----------------------------------------------------------
-					If $tMB = 6 Then     ; YES
+					If $tMB = 6 Then ; YES
 						$bUpdateRequired = True
 						$aSteamUpdateNow = True
 						$aUpdateVerify = "yes"
@@ -8783,7 +8791,7 @@ Func SendTwitchMsg($sT_Nick, $sT_OAuth, $sT_Channels, $sT_Message)
 		TCPCloseSocket($sTwitchIRC)
 		Return $aTwitchReturn
 	Else
-		$aTwitchReturn[0] = True     ;Successfully Connected to irc
+		$aTwitchReturn[0] = True ;Successfully Connected to irc
 		TCPSend($sTwitchIRC, "PASS " & StringLower($sT_OAuth) & @CRLF)
 		TCPSend($sTwitchIRC, "NICK " & StringLower($sT_Nick) & @CRLF)
 		Local $sTwitchReceive = ""
@@ -8793,20 +8801,20 @@ Func SendTwitchMsg($sT_Nick, $sT_OAuth, $sT_Channels, $sT_Message)
 			If @error Then ExitLoop
 		WEnd
 		Local $aTwitchReceiveLines = StringSplit($sTwitchReceive, @CRLF, 1)
-		$aTwitchReturn[2] = $aTwitchReceiveLines[1]     ;Status Line. Accepted or Not
+		$aTwitchReturn[2] = $aTwitchReceiveLines[1] ;Status Line. Accepted or Not
 		If StringRegExp($aTwitchReceiveLines[$aTwitchReceiveLines[0] - 1], "(?i):tmi.twitch.tv 376 " & $sT_Nick & " :>") Then
-			$aTwitchReturn[1] = True     ;Username and OAuth was accepted. Ready for PRIVMSG
+			$aTwitchReturn[1] = True ;Username and OAuth was accepted. Ready for PRIVMSG
 			Local $aTwitchChannels = StringSplit($sT_Channels, ",")
 			For $i = 1 To $aTwitchChannels[0]
 				TCPSend($sTwitchIRC, "PRIVMSG #" & StringLower($aTwitchChannels[$i]) & " :" & $sT_Message & @CRLF)
 				If @error Then
 					TCPCloseSocket($sTwitchIRC)
-					$aTwitchReturn[3] = False     ;Check that all channels succeeded or none
+					$aTwitchReturn[3] = False ;Check that all channels succeeded or none
 					Return $aTwitchReturn
 					ExitLoop
 				Else
-					$aTwitchReturn[3] = True     ;Check that all channels succeeded or none
-					If $aTwitchChannels[0] > 17 Then     ;This is to make sure we don't break the rate limit
+					$aTwitchReturn[3] = True ;Check that all channels succeeded or none
+					If $aTwitchChannels[0] > 17 Then ;This is to make sure we don't break the rate limit
 						Sleep(1600)
 					Else
 						Sleep(100)
@@ -9217,7 +9225,7 @@ Func DailyRestartOffset($bHour0, $sMin, $sTime)
 EndFunc   ;==>DailyRestartOffset
 #EndRegion ;**** Adjust restart time for announcement delay ****
 
-Func _DateChange($tType, $tDiff, $tDateBefore)     ; By Phoenix125.com
+Func _DateChange($tType, $tDiff, $tDateBefore) ; By Phoenix125.com
 	#cs
 		Time interval to be used:
 		D - Add/subtract days to/from the specified date
@@ -9253,37 +9261,39 @@ EndFunc   ;==>_DateChange
 
 #Region ;**** Replace "\m" with minutes in announcement ****
 Func AnnounceReplaceTime($tTime0 = 0, $tMsg0 = 0, $tZero = False)
-	If $tZero Then
-		If StringInStr($tMsg0, "\m") = "0" Then
-		Else
-			$tMsg1 = StringReplace($tMsg0, "\m", "0")
-			Return $tMsg1
+;~ 	If $tZero Then
+;~ 		If StringInStr($tMsg0, "\m") = "0" Then
+;~ 			Return $tMsg0
+;~ 		Else
+;~ 			$tMsg1 = StringReplace($tMsg0, "\m", "0")
+;~ 			Return $tMsg1
+;~ 		EndIf
+;~ 	Else
+;~ 		If StringInStr($tMsg0, "\m") = "0" Then
+;~ 			Return $tMsg0
+;~ 		Else
+	Local $tTime2 = -1
+	Local $tTime3 = StringSplit($tTime0, ",")
+	Local $tMsg1 = $tTime3
+	For $tTime2 = 1 To $tTime3[0]
+		$tTime1 = StringStripWS($tTime3[$tTime2], 8) - 1
+		$tMsg1[$tTime2] = StringReplace($tMsg0, "\m", $tTime3[$tTime2])
+		If $tTime3[$tTime2] = Number("1") Then
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minutes", "minute")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minute(s)", "minute")
 		EndIf
-	Else
-		If StringInStr($tMsg0, "\m") = "0" Then
-		Else
-			Local $tTime2 = -1
-			Local $tTime3 = StringSplit($tTime0, ",")
-			Local $tMsg1 = $tTime3
-			For $tTime2 = 1 To $tTime3[0]
-				$tTime1 = StringStripWS($tTime3[$tTime2], 8) - 1
-				$tMsg1[$tTime2] = StringReplace($tMsg0, "\m", $tTime3[$tTime2])
-				If $tTime3[$tTime2] = Number("1") Then
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minutes", "minute")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "minute(s)", "minute")
-				EndIf
-				If $tTime3[$tTime2] = Number("0") Then
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minutes", "now")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute(s)", "now")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute", "now")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minutes", "now")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute(s)", "now")
-					$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute", "now")
-				EndIf
-			Next
-			Return $tMsg1
+		If $tTime3[$tTime2] = Number("0") Then
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minutes", "now")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute(s)", "now")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "in 0 minute", "now")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minutes", "now")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute(s)", "now")
+			$tMsg1[$tTime2] = StringReplace($tMsg1[$tTime2], "0 minute", "now")
 		EndIf
-	EndIf
+	Next
+	Return $tMsg1
+;~ 		EndIf
+;~ 	EndIf
 EndFunc   ;==>AnnounceReplaceTime
 #EndRegion ;**** Replace "\m" with minutes in announcement ****
 
@@ -9459,7 +9469,7 @@ EndFunc   ;==>CloseTCP
 ;
 ;==========================================================================================
 
-Func PassCheck($sPass, $sPassString)     ;**** PassCheck - Checks if received password matches any of the known passwords ****
+Func PassCheck($sPass, $sPassString) ;**** PassCheck - Checks if received password matches any of the known passwords ****
 	Local $aPassReturn[3] = [False, "", ""]
 	Local $aPasswords = StringSplit($sPassString, ",")
 	For $i = 1 To $aPasswords[0]
@@ -9480,7 +9490,7 @@ Func PassCheck($sPass, $sPassString)     ;**** PassCheck - Checks if received pa
 	Return $aPassReturn
 EndFunc   ;==>PassCheck
 
-Func ObfPass($sObfPassString)     ;**** ObfPass - Obfuscates password string for logging
+Func ObfPass($sObfPassString) ;**** ObfPass - Obfuscates password string for logging
 	Local $sObfPass = ""
 	For $i = 1 To (StringLen($sObfPassString) - 3)
 		If $i <> 4 Then
@@ -9492,7 +9502,7 @@ Func ObfPass($sObfPassString)     ;**** ObfPass - Obfuscates password string for
 	Return $sObfPass
 EndFunc   ;==>ObfPass
 
-Func _TCP_Server_ClientIP($hSocket)     ;**** Function to get IP from Restart Client ****
+Func _TCP_Server_ClientIP($hSocket) ;**** Function to get IP from Restart Client ****
 	Local $pSocketAddress, $aReturn
 	$pSocketAddress = DllStructCreate("short;ushort;uint;char[8]")
 	$aReturn = DllCall("ws2_32.dll", "int", "getpeername", "int", $hSocket, "ptr", DllStructGetPtr($pSocketAddress), "int*", DllStructGetSize($pSocketAddress))
@@ -9503,7 +9513,7 @@ Func _TCP_Server_ClientIP($hSocket)     ;**** Function to get IP from Restart Cl
 	Return $aReturn[0]
 EndFunc   ;==>_TCP_Server_ClientIP
 
-Func CheckHTTPReq($sRequest, $sKey = "restart")     ;**** Function to Check Request from Browser and return restart string if request is valid****
+Func CheckHTTPReq($sRequest, $sKey = "restart") ;**** Function to Check Request from Browser and return restart string if request is valid****
 	If IsString($sRequest) Then
 		Local $aRequest = StringRegExp($sRequest, '^GET[[:blank:]]\/\?(?i)' & $sKey & '(?-i)=(\S+)[[:blank:]]HTTP\/\d.\d\R', 2)
 		If Not @error Then
@@ -9518,7 +9528,7 @@ Func CheckHTTPReq($sRequest, $sKey = "restart")     ;**** Function to Check Requ
 	EndIf
 EndFunc   ;==>CheckHTTPReq
 
-Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)     ;**** Function to Check for Multiple Password Failures****
+Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False) ;**** Function to Check for Multiple Password Failures****
 	Local $aPassFailure[1][3] = [[0, 0, 0]]
 	For $i = 1 To UBound($aPassFailure, 1) - 1
 		If StringCompare($aPassFailure[$i][0], $sRemoteIP) = 0 Then
@@ -9545,7 +9555,7 @@ Func MultipleAttempts($sRemoteIP, $bFailure = False, $bSuccess = False)     ;***
 	Return SetError(0, 0, "IP Added to List")
 EndFunc   ;==>MultipleAttempts
 
-Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True)     ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
+Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $bDebug = True) ;**** Uses other Functions to check connection, verify request is valid, verify restart code is correct, gather IP, and send proper message back to User depending on request received****
 	Local $vConnectedSocket = TCPAccept($vMSocket)
 	If $vConnectedSocket >= 0 Then
 		Local $sRecvIP = _TCP_Server_ClientIP($vConnectedSocket)
@@ -9622,7 +9632,7 @@ Func _RemoteRestart($vMSocket, $sCodes, $sKey, $sHideCodes, $sServIP, $sName, $b
 EndFunc   ;==>_RemoteRestart
 #EndRegion ;**** _RemoteRestart ****
 
-Func RotateFile($sFile, $sBackupQty, $bDelOrig = True)     ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
+Func RotateFile($sFile, $sBackupQty, $bDelOrig = True) ;Pass File to Rotate and Quantity of Files to Keep for backup. Optionally Keep Original.
 	Local $hCreateTime = @YEAR & @MON & @MDAY
 	For $i = $sBackupQty To 1 Step -1
 		If FileExists($sFile & $i) Then
@@ -9757,12 +9767,12 @@ Func _ExtractZipAll($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 	Do
 		$i += 1
 		$sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
-	Until Not FileExists($sTempZipFolder)     ; this folder will be created during extraction
+	Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
 
 	Local $oShell = ObjCreate("Shell.Application")
 
 	If Not IsObj($oShell) Then
-		Return SetError(1, 0, 0)     ; highly unlikely but could happen
+		Return SetError(1, 0, 0) ; highly unlikely but could happen
 	EndIf
 
 	Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
@@ -9771,23 +9781,23 @@ Func _ExtractZipAll($sZipFile, $sDestinationFolder, $sFolderStructure = "")
 ;~         Return SetError(2, 0, 0) ; unavailable destionation location
 	EndIf
 
-	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure)     ; FolderStructure is overstatement because of the available depth
+	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
 	If Not IsObj($oOriginFolder) Then
-		Return SetError(3, 0, 0)     ; unavailable location
+		Return SetError(3, 0, 0) ; unavailable location
 	EndIf
 
-	Local $oOriginFile = $oOriginFolder.Items()     ;get all items
+	Local $oOriginFile = $oOriginFolder.Items() ;get all items
 	If Not IsObj($oOriginFile) Then
-		Return SetError(4, 0, 0)     ; no such file in ZIP file
+		Return SetError(4, 0, 0) ; no such file in ZIP file
 	EndIf
 
 	; copy content of origin to destination
-	$oDestinationFolder.CopyHere($oOriginFile, 20)     ; 20 means 4 and 16, replaces files if asked
+	$oDestinationFolder.CopyHere($oOriginFile, 20) ; 20 means 4 and 16, replaces files if asked
 
-	DirRemove($sTempZipFolder, 1)     ; clean temp dir
+	DirRemove($sTempZipFolder, 1) ; clean temp dir
 	$aObjErrFunc = $tObjErrFunc
 
-	Return 1     ; All OK!
+	Return 1 ; All OK!
 
 EndFunc   ;==>_ExtractZipAll
 
@@ -9818,35 +9828,35 @@ Func _ExtractZip($sZipFile, $sFolderStructure, $sFile, $sDestinationFolder)
 	Do
 		$i += 1
 		$sTempZipFolder = @TempDir & "\Temporary Directory " & $i & " for " & StringRegExpReplace($sZipFile, ".*\\", "")
-	Until Not FileExists($sTempZipFolder)     ; this folder will be created during extraction
+	Until Not FileExists($sTempZipFolder) ; this folder will be created during extraction
 
 	Local $oShell = ObjCreate("Shell.Application")
 
 	If Not IsObj($oShell) Then
-		Return SetError(1, 0, 0)     ; highly unlikely but could happen
+		Return SetError(1, 0, 0) ; highly unlikely but could happen
 	EndIf
 
 	Local $oDestinationFolder = $oShell.NameSpace($sDestinationFolder)
 	If Not IsObj($oDestinationFolder) Then
-		Return SetError(2, 0, 0)     ; unavailable destionation location
+		Return SetError(2, 0, 0) ; unavailable destionation location
 	EndIf
 
-	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure)     ; FolderStructure is overstatement because of the available depth
+	Local $oOriginFolder = $oShell.NameSpace($sZipFile & "\" & $sFolderStructure) ; FolderStructure is overstatement because of the available depth
 	If Not IsObj($oOriginFolder) Then
-		Return SetError(3, 0, 0)     ; unavailable location
+		Return SetError(3, 0, 0) ; unavailable location
 	EndIf
 
 	Local $oOriginFile = $oOriginFolder.ParseName($sFile)
 	If Not IsObj($oOriginFile) Then
-		Return SetError(4, 0, 0)     ; no such file in ZIP file
+		Return SetError(4, 0, 0) ; no such file in ZIP file
 	EndIf
 
 	; copy content of origin to destination
-	$oDestinationFolder.CopyHere($oOriginFile, 4)     ; 4 means "do not display a progress dialog box", but apparently doesn't work
+	$oDestinationFolder.CopyHere($oOriginFile, 4) ; 4 means "do not display a progress dialog box", but apparently doesn't work
 
-	DirRemove($sTempZipFolder, 1)     ; clean temp dir
+	DirRemove($sTempZipFolder, 1) ; clean temp dir
 
-	Return 1     ; All OK!
+	Return 1 ; All OK!
 
 EndFunc   ;==>_ExtractZip
 #EndRegion ;**** UnZip Function by trancexx ****
@@ -9905,14 +9915,14 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 		Else
 			_Splash($aStartText & "Downloading " & $tFileName & ".exe.", 0, 475)
 		EndIf
-		DirCreate($tFolder)     ; to extract to
+		DirCreate($tFolder) ; to extract to
 		InetGet($tURL1, $tFolder & "\" & $tFileName & ".zip", 1)
 		If Not FileExists($tFolder & "\" & $tFileName & ".zip") Then
-			SetError(1, 1)     ; Failed to download from source 1
+			SetError(1, 1) ; Failed to download from source 1
 			LogWrite(" [Util] Error downloading " & $tFileName & " from Source1: " & $tURL1)
 			InetGet($tURL2, $tFolder & "\" & $tFileName & ".zip", 1)
 			If Not FileExists($tFolder & "\" & $tFileName & ".zip") Then
-				SetError(1, 2)     ; Failed to download from source 2
+				SetError(1, 2) ; Failed to download from source 2
 				LogWrite(" [Util] Error downloading " & $tFileName & " from Source2: " & $tURL2)
 				SplashOff()
 				MsgBox($MB_OK, $aUtilName, "ERROR!!!  " & $tFileName & ".zip download failed.")
@@ -9920,7 +9930,7 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 				Return
 			EndIf
 		EndIf
-		DirCreate($tFolder)     ; to extract to
+		DirCreate($tFolder) ; to extract to
 		_ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFileName & ".exe", $tFolder)
 		If $tFile2 <> 0 Then _ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFile2, $tFolder)
 		If $tFile3 <> 0 Then _ExtractZip($tFolder & "\" & $tFileName & ".zip", "", $tFile3, $tFolder)
@@ -9930,16 +9940,16 @@ Func _DownloadAndExtractFile($tFileName, $tURL1, $tURL2 = "", $tSplash = 0, $tFo
 			LogWrite(" [Util] Downloaded and installed " & $tFileName & ".")
 		Else
 			LogWrite(" [Util] Error extracting " & $tFileName & ".exe from " & $tFileName & ".zip")
-			SetError(1, 3)     ; Failed to extract file
+			SetError(1, 3) ; Failed to extract file
 			SplashOff()
 			MsgBox($MB_OK, $aUtilName, "ERROR!!! Extracting " & $tFileName & ".exe from " & $tFileName & ".zip failed.")
 			$aSplashStartUp = _Splash($aStartText, 0, 475)
 			Return
 		EndIf
 		FileDelete($tFolder & "\" & $tFileName & ".zip")
-		Return True     ; Downloaded and installed file
+		Return True ; Downloaded and installed file
 	Else
-		Return False     ; File existed
+		Return False ; File existed
 	EndIf
 EndFunc   ;==>_DownloadAndExtractFile
 
@@ -10127,7 +10137,7 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 EndFunc   ;==>CheckModUpdate
 
 Func GetLatestModUpdateTime($sMod, $sShow)
-	Local $aReturn[6] = [False, False, "", "", "", ""]     ; 0=???, 1=Update TF, 2=Update ID, 3=Mod Name, 4=Mod Update Date & Time, 5=Mod Update Description
+	Local $aReturn[6] = [False, False, "", "", "", ""] ; 0=???, 1=Update TF, 2=Update ID, 3=Mod Name, 4=Mod Update Date & Time, 5=Mod Update Description
 	$aReturn[1] = True
 	Local $zModName = ""
 	Local $sFilePath = $aFolderTemp & "mod_" & $sMod & "_latest_ver.tmp"
@@ -10190,9 +10200,9 @@ Func GetLatestModUpdateTime($sMod, $sShow)
 		ControlSetText($aSplashMod, "", "Static1", $aStartText & "Checking for mod " & $sMod & @CRLF & $zModName & " update or new mod.")
 	EndIf
 	If $aReturn[1] Then
-		$aReturn[4] = _ArrayToString(_StringBetween($aAppInfo1[0], "Update: ", "</di"))     ; Last Update Date & Time
+		$aReturn[4] = _ArrayToString(_StringBetween($aAppInfo1[0], "Update: ", "</di")) ; Last Update Date & Time
 		$aReturn[4] = StringReplace($aReturn[4], @TAB, "")
-		$aReturn[5] = _ModUpdateTextReplace($aAppInfo1[0])     ; Update Notes
+		$aReturn[5] = _ModUpdateTextReplace($aAppInfo1[0]) ; Update Notes
 	Else
 		$aReturn[4] = "[No Date]"
 		$aReturn[5] = "[No Notes]"
@@ -10525,7 +10535,7 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 	If $hFileOpen = -1 Then
 		$aReturn[0] = False
 	Else
-		$aReturn[0] = True     ;File Exists
+		$aReturn[0] = True ;File Exists
 		Local $sFileRead = FileRead($hFileOpen, 100000000)
 		Local $aAppInfo = StringSplit($sFileRead, '"WorkshopItemDetails"', 1)
 		If UBound($aAppInfo) >= 3 Then
@@ -10538,8 +10548,8 @@ Func GetInstalledModUpdateTime($sServerDir, $sMod, $sModName, $sShow)
 			$aAppInfo = StringSplit($aAppInfo[1], '"', 1)
 		EndIf
 		If UBound($aAppInfo) >= 9 And StringRegExp($aAppInfo[8], '^\d+$') Then
-			$aReturn[1] = True     ;Successfully Read numerical value at positition expected
-			$aReturn[2] = $aAppInfo[8]     ;Return Value Read
+			$aReturn[1] = True ;Successfully Read numerical value at positition expected
+			$aReturn[2] = $aAppInfo[8] ;Return Value Read
 		EndIf
 		If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
@@ -10567,7 +10577,7 @@ Func UpdateMod($sMod, $sModName)
 					"Timeout Countdown:" & Int($aServerModTimeoutMin * 60 - (TimerDiff($Timer) / 1000)))
 			Sleep(950)
 			If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
-		Until TimerDiff($Timer) > (60000 * $aServerModTimeoutMin)     ; Wait X minutes for mod to finish downloading
+		Until TimerDiff($Timer) > (60000 * $aServerModTimeoutMin) ; Wait X minutes for mod to finish downloading
 		If ProcessExists($tPID) Then ProcessClose($tPID)
 	EndIf
 	If FileExists($aSteamCMDDir & "\steamapps\workshop\" & $aModAppWorkshop) Then FileMove($aSteamCMDDir & "\steamapps\workshop\" & $aModAppWorkshop, $aFolderTemp & "mod_" & $sMod & "_appworkshop.tmp", 1)
@@ -10611,14 +10621,14 @@ Func _InetGetMulti($tCnt, $tFile, $tLink1, $tLink2 = "0")
 			If $tLink2 <> "0" Then
 				$hFileRead = _INetGetSource($tLink2)
 				If @error Then
-					Return "Error"     ; Error
+					Return "Error" ; Error
 				Else
 					FileClose($hFileOpen)
 					FileDelete($tFile)
 					FileWrite($tFile, $hFileRead)
 				EndIf
 			Else
-				Return True     ; Error
+				Return True ; Error
 			EndIf
 		Else
 			FileClose($hFileOpen)
@@ -10628,7 +10638,7 @@ Func _InetGetMulti($tCnt, $tFile, $tLink1, $tLink2 = "0")
 	Else
 		FileClose($hFileOpen)
 	EndIf
-	Return $hFileRead     ; No error
+	Return $hFileRead ; No error
 EndFunc   ;==>_InetGetMulti
 
 #Region ;**** Check for Server Utility Update ****
@@ -10727,11 +10737,11 @@ Func UtilUpdate($tLink, $tDL, $tUtil, $tUtilName, $tSplash = 0, $tUpdate = "show
 						SplashOff()
 						If ($tUpdate = "Auto") And ($aUpdateAutoUtil = "yes") Then
 							$tMB = MsgBox($MB_OKCANCEL, $aUtilityVer, "Auto utility update download complete. . . " & @CRLF & @CRLF & "Click (OK) to run new version or wait 60 seconds (servers will remain running) OR" & @CRLF & "Click (CANCEL) to resume current version.", 60)
-							If $tMB = 1 Then     ; OK
+							If $tMB = 1 Then ; OK
 
 							ElseIf $tMB = -1 Then
-								$tMB = 1     ; OK
-							ElseIf $tMB = 2 Then     ; CANCEL
+								$tMB = 1 ; OK
+							ElseIf $tMB = 2 Then ; CANCEL
 
 							EndIf
 						Else
@@ -10807,11 +10817,11 @@ Func ReplaceSpace($tMsg0)
 ;~ 	EndIf
 EndFunc   ;==>ReplaceSpace
 
-Func ReplaceCRwithCRLF($sString)     ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
-	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF)     ; Idea by Ascend4nt
+Func ReplaceCRwithCRLF($sString) ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
+	Return StringRegExpReplace($sString, '(*BSR_ANYCRLF)\R', @CRLF) ; Idea by Ascend4nt
 EndFunc   ;==>ReplaceCRwithCRLF
 
-Func ReplaceVerticalBarCRwithSlash($sString)     ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
+Func ReplaceVerticalBarCRwithSlash($sString) ; Initial Regular expression by Melba23 with a new suggestion by Ascend4nt and modified By guinness.
 	Return StringReplace($sString, "|", "/")
 EndFunc   ;==>ReplaceVerticalBarCRwithSlash
 
@@ -11048,10 +11058,10 @@ Func F_ExitCloseY($tRestart = False)
 ;~ 			"Click (YES) to Shutdown all servers and exit." & @CRLF & _
 ;~ 			"Click (NO) or (CANCEL) to cancel.", 15)
 		SetStatusBusy("Util Shutdown Initiated.")
-		If $tMB = 6 Then     ; (YES)
+		If $tMB = 6 Then ; (YES)
 			$tMB = MsgBox($MB_YESNO, $aUtilName, "Are you sure you want to shut down all servers?", 30)
 			If $tMB = 6 Then
-				CloseServer(True)     ; Close redis
+				CloseServer(True) ; Close redis
 				SplashOff()
 				If $aServerPIDRedis < 1 Then $aServerPIDRedis = -1
 				If ProcessExists($aServerPIDRedis) And $aServerUseRedis = "yes" Then
@@ -11082,7 +11092,7 @@ Func F_ExitCloseY($tRestart = False)
 			EndIf
 			_ExitUtil()
 			; ----------------------------------------------------------
-		ElseIf $tMB = 7 Then     ; NO
+		ElseIf $tMB = 7 Then ; NO
 			$tMB = MsgBox($MB_YESNO, $aUtilName, "Are you sure you want to shut down all servers?", 30)
 			If $tMB = 6 Then
 
@@ -11134,7 +11144,7 @@ Func F_RestartNow($tAsk = True)
 	Else
 		$tMB = 6
 	EndIf
-	If $tMB = 6 Then     ; (YES)
+	If $tMB = 6 Then ; (YES)
 		$tMsg = InputBox("Send Discord Message", "Enter message to send to Discord:", "", "", 400, 125, Default, Default, 120)
 		If $tMsg = "" Then
 			_Splash("Send Discord message cancelled. Restarting servers.", 2000)
@@ -11146,7 +11156,7 @@ Func F_RestartNow($tAsk = True)
 		CloseServer()
 		SetStatusBusy("Server process check in progress...", "Updating Main Window")
 		GUIUpdateQuick()
-	ElseIf $tMB = 7 Then     ; (NO)
+	ElseIf $tMB = 7 Then ; (NO)
 ;~ 		IniWrite($aUtilCFGFile, "CFG", "aCFGLastRestartTime", _NowCalc())
 		LogWrite(" [Server] Restart Server Now request initiated by user.")
 		CloseServer()
@@ -11170,7 +11180,7 @@ Func F_RemoteRestart()
 				"Would you like to enable it? (Port:" & $aRemoteRestartPort & ")" & @CRLF & _
 				"Click (YES) to enable Remote Restart. A utility restart will be required." & @CRLF & _
 				"Click (NO) or (CANCEL) to skip.", 15)
-		If $tMB = 6 Then     ; (YES)
+		If $tMB = 6 Then ; (YES)
 			LogWrite(" [Remote Restart] Remote Restart enabled in " & $aUtilName & ".ini per user request")
 			IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", "yes")
 			$aRemoteRestartUse = "yes"
@@ -11188,7 +11198,7 @@ Func F_RemoteRestart()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, "Do you wish to initiate Remote Restart (reboot all servers in " & $aRemoteTime[$aRemoteCnt] & "min)?" & @CRLF & @CRLF & _
 				"Click (YES) to Initiate Remote Restart." & @CRLF & _
 				"Click (NO) or (CANCEL) to cancel.", 15)
-		If $tMB = 6 Then     ; (YES)
+		If $tMB = 6 Then ; (YES)
 			If $aBeginDelayedShutdown = 0 Then
 				LogWrite(" [Remote Restart] Remote Restart request initiated by user.")
 				If ($sUseDiscordBotRemoteRestart = "yes") Or ($sUseTwitchBotRemoteRestart = "yes") Or ($sInGameAnnounce = "yes") Then
@@ -11211,7 +11221,7 @@ Func F_RemoteRestart()
 ;~ 	EndIf
 	SetStatusIdle()
 EndFunc   ;==>F_RemoteRestart
-Func GetCPUCount()     ; Return 0 = Cores, 1 = Logical Processors
+Func GetCPUCount() ; Return 0 = Cores, 1 = Logical Processors
 	Local $tReturn[2]
 	$colItems = ObjGet("winmgmts:\\localhost\").ExecQuery("SELECT * FROM Win32_Processor", "WQL", 0x10 + 0x20)
 	If IsObj($colItems) Then
@@ -11246,7 +11256,7 @@ Func _ShowLoginLogo()
 		_WinAPI_SetLayeredWindowAttributes($hGUI_LoginLogo, 0xFFFFFF)
 	EndIf
 EndFunc   ;==>_ShowLoginLogo
-Func _RestartUtil($fQuickRebootTF = True, $tAdmin = False)     ; Thanks Yashied!  https://www.autoitscript.com/forum/topic/111215-restart-udf/
+Func _RestartUtil($fQuickRebootTF = True, $tAdmin = False) ; Thanks Yashied!  https://www.autoitscript.com/forum/topic/111215-restart-udf/
 	$fExit = 1
 	KeepAliveSetToClose()
 	_Splash("Restarting utility. . .", 2500)
@@ -11369,95 +11379,95 @@ Func R1_RestartGrids($tServNo = -1) ; Grids to close: -1 all, -2 Check marked, A
 ;~ 			LogWrite(" [Server] Restart grid(s) (" & $tSelectServersTxt & ") requested by user.")
 ;~ 		EndIf
 
-		Local $tGUIGapY = 28     ; Lower all but Restart Grids group by this amount
-		Local $tGUIGapRestartY = 28     ; Lower Restart Grids group content by this amount
+		Local $tGUIGapY = 28 ; Lower all but Restart Grids group by this amount
+		Local $tGUIGapRestartY = 28 ; Lower Restart Grids group content by this amount
 		Global $R1_RestartGrids = GUICreate("AtlasServerUpdateUtility Tools", 906, 555, -1, -1, BitOR($GUI_SS_DEFAULT_GUI, $WS_SIZEBOX, $WS_THICKFRAME))
 		GUISetIcon($aIconFile, 99)
-		GUISetBkColor($cT1Background)     ; $cMWBackground, $cT1Background, $cFWBackground
+		GUISetBkColor($cT1Background) ; $cMWBackground, $cT1Background, $cFWBackground
 		GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_R1_RestartGrids_Close", $R1_RestartGrids)
 		GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKVCENTER)
 		_DisableCloseButton($R1_RestartGrids)
 		$Group2 = GUICtrlCreateGroup($R1_GroupName, 24, 24, 857, 505)
 		GUICtrlSetFont(-1, 12, 800, 0, "MS Sans Serif")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		$Group5 = GUICtrlCreateGroup("", 52, 56, 801, 265 + $tGUIGapRestartY)     ; 52, 56, 801, 265
+		$Group5 = GUICtrlCreateGroup("", 52, 56, 801, 265 + $tGUIGapRestartY) ; 52, 56, 801, 265
 		Local $tGUI1x = 73
 		Local $tGUI1y = 80
-		Global $R1_R1_RestartLater = GUICtrlCreateRadio("Restart grid(s) in __ minutes with announcement  (\m - minutes, \g - grids)", $tGUI1x, $tGUI1y, 701, 17)     ; 73, 91, 701, 17
+		Global $R1_R1_RestartLater = GUICtrlCreateRadio("Restart grid(s) in __ minutes with announcement  (\m - minutes, \g - grids)", $tGUI1x, $tGUI1y, 701, 17) ; 73, 91, 701, 17
 		GUICtrlSetOnEvent(-1, "R1_R1_RestartLater")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $R1_R1_RestartNow = GUICtrlCreateRadio("Restart grid(s) NOW with announcement  (\g - grids)", $tGUI1x, $tGUI1y + 100 + $tGUIGapRestartY, 757, 17)     ; 73, 203, 757, 17
+		Global $R1_R1_RestartNow = GUICtrlCreateRadio("Restart grid(s) NOW with announcement  (\g - grids)", $tGUI1x, $tGUI1y + 100 + $tGUIGapRestartY, 757, 17) ; 73, 203, 757, 17
 		GUICtrlSetOnEvent(-1, "R1_R1_RestartNow")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $R1_R1_RestartNoAnnounce = GUICtrlCreateRadio("Restart grid(s) NOW with NO announcement", $tGUI1x, $tGUI1y + 200 + $tGUIGapRestartY, 757, 17)     ; 73, 203, 757, 17
+		Global $R1_R1_RestartNoAnnounce = GUICtrlCreateRadio("Restart grid(s) NOW with NO announcement", $tGUI1x, $tGUI1y + 200 + $tGUIGapRestartY, 757, 17) ; 73, 203, 757, 17
 		GUICtrlSetOnEvent(-1, "R1_R1_RestartNoAnnounce")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUIStartGroup()
-		Global $R1_R3_MsgLaterDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 28 + $tGUIGapRestartY, 17, 17)     ; 104, 123, 17, 17
+		Global $R1_R3_MsgLaterDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 28 + $tGUIGapRestartY, 17, 17) ; 104, 123, 17, 17
 		GUICtrlSetOnEvent(-1, "R1_R3_MsgLaterDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $R1_R3_MsgLaterCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 56 + $tGUIGapRestartY, 13, 17)     ; 104, 151, 13, 17
+		Global $R1_R3_MsgLaterCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 56 + $tGUIGapRestartY, 13, 17) ; 104, 151, 13, 17
 		GUICtrlSetOnEvent(-1, "R1_R3_MsgLaterCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
 		Local $tGapL1 = 372
-		Local $R1_L_AnnounceNotifyRestartGrids = GUICtrlCreateLabel("Announcement __ minutes before RESTART GRIDS (comma separated 0-60)", 121, $tGUI1y + 28 + 1, $tGapL1 - 5, 21)     ; 121, 119, 713, 28
+		Local $R1_L_AnnounceNotifyRestartGrids = GUICtrlCreateLabel("Announcement __ minutes before RESTART GRIDS (comma separated 0-60)", 121, $tGUI1y + 28 + 1, $tGapL1 - 5, 21) ; 121, 119, 713, 28
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $R1_I3_AnnounceNotifyRestartGrids = GUICtrlCreateInput("", 121 + $tGapL1 + 5, $tGUI1y + 28 - 1, 713 - $tGapL1 - 5, 21)     ; 121, 119, 713, 28
+		Global $R1_I3_AnnounceNotifyRestartGrids = GUICtrlCreateInput("", 121 + $tGapL1 + 5, $tGUI1y + 28 - 1, 713 - $tGapL1 - 5, 21) ; 121, 119, 713, 28
 		GUICtrlSetOnEvent(-1, "R1_I3_AnnounceNotifyRestartGrids")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $R1_I1_MsgLaterDefault = GUICtrlCreateInput($sDiscordRestartGridsMessage, 121, $tGUI1y + 28 - 1 + $tGUIGapRestartY, 713, 21)     ; 121, 119, 713, 28
+		Global $R1_I1_MsgLaterDefault = GUICtrlCreateInput($sDiscordRestartGridsMessage, 121, $tGUI1y + 28 - 1 + $tGUIGapRestartY, 713, 21) ; 121, 119, 713, 28
 		GUICtrlSetOnEvent(-1, "R1_I1_MsgLaterDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_DISABLE)
-		Global $R1_I1_MsgLaterCustom = GUICtrlCreateInput("", 121, $tGUI1y + 56 - 1 + $tGUIGapRestartY, 713, 21)     ; 121, 147, 713, 28
+		Global $R1_I1_MsgLaterCustom = GUICtrlCreateInput("", 121, $tGUI1y + 56 - 1 + $tGUIGapRestartY, 713, 21) ; 121, 147, 713, 28
 		GUICtrlSetOnEvent(-1, "R1_I1_MsgLaterCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUIStartGroup()
-		Global $R1_R4_MsgNowDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 28 + $tGUIGapRestartY, 17, 17)     ; 102, 240, 17, 17
+		Global $R1_R4_MsgNowDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 28 + $tGUIGapRestartY, 17, 17) ; 102, 240, 17, 17
 		GUICtrlSetOnEvent(-1, "R1_R4_MsgNowDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $R1_R4_MsgNowCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 56 + $tGUIGapRestartY, 13, 17)     ; 102, 268, 13, 17
+		Global $R1_R4_MsgNowCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 56 + $tGUIGapRestartY, 13, 17) ; 102, 268, 13, 17
 		GUICtrlSetOnEvent(-1, "R1_R4_MsgNowCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
-		Global $R1_I2_MsgNowDefault = GUICtrlCreateInput($sDiscordRestartGridsZeroMessage, 121, $tGUI1y + 100 + 28 - 1 + $tGUIGapRestartY, 713, 21)     ; 122, 236, 713, 28
+		Global $R1_I2_MsgNowDefault = GUICtrlCreateInput($sDiscordRestartGridsZeroMessage, 121, $tGUI1y + 100 + 28 - 1 + $tGUIGapRestartY, 713, 21) ; 122, 236, 713, 28
 		GUICtrlSetOnEvent(-1, "R1_I2_MsgNowDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_DISABLE)
-		Global $R1_I2_MsgNowCustom = GUICtrlCreateInput("", 121, $tGUI1y + 100 + 56 - 1 + $tGUIGapRestartY, 713, 21)     ; 122, 264, 713, 28
+		Global $R1_I2_MsgNowCustom = GUICtrlCreateInput("", 121, $tGUI1y + 100 + 56 - 1 + $tGUIGapRestartY, 713, 21) ; 122, 264, 713, 28
 		GUICtrlSetOnEvent(-1, "R1_I2_MsgNowCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
-		Global $R1_R2_Group = GUICtrlCreateGroup("In Game Message", 48, 340 + $tGUIGapY, 341, 105)     ; 48, 340, 341, 105
-		Global $R1_R2_SendToAll = GUICtrlCreateRadio("Send to ALL local grids", 72, 372 + $tGUIGapY, 257, 17)     ; 72, 372, 257, 17
+		Global $R1_R2_Group = GUICtrlCreateGroup("In Game Message", 48, 340 + $tGUIGapY, 341, 105) ; 48, 340, 341, 105
+		Global $R1_R2_SendToAll = GUICtrlCreateRadio("Send to ALL local grids", 72, 372 + $tGUIGapY, 257, 17) ; 72, 372, 257, 17
 		GUICtrlSetOnEvent(-1, "R1_R2_SendToAll")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $R1_R2_SendToAffected = GUICtrlCreateRadio("Send to affected grids only", 72, 404 + $tGUIGapY, 269, 17)     ; 72, 404, 269, 17
+		Global $R1_R2_SendToAffected = GUICtrlCreateRadio("Send to affected grids only", 72, 404 + $tGUIGapY, 269, 17) ; 72, 404, 269, 17
 		GUICtrlSetOnEvent(-1, "R1_R2_SendToAffected")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
-		Global $R1_C1_SkipAnnounce = GUICtrlCreateCheckbox("Skip announcement if no one is online.", 448, 364 + $tGUIGapY, 301, 17)     ; 448, 364, 301, 17
+		Global $R1_C1_SkipAnnounce = GUICtrlCreateCheckbox("Skip announcement if no one is online.", 448, 364 + $tGUIGapY, 301, 17) ; 448, 364, 301, 17
 		GUICtrlSetOnEvent(-1, "R1_C1_SkipAnnounce")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $R1_C2_SendDiscord = GUICtrlCreateCheckbox("Send message to Discord", 448, 392 + $tGUIGapY, 301, 17)     ; 448, 392, 301, 17
+		Global $R1_C2_SendDiscord = GUICtrlCreateCheckbox("Send message to Discord", 448, 392 + $tGUIGapY, 301, 17) ; 448, 392, 301, 17
 		GUICtrlSetOnEvent(-1, "R1_C2_SendDiscord")
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $R1_C3_SendTwitch = GUICtrlCreateCheckbox("Send message to Twitch", 448, 420 + $tGUIGapY, 301, 17)     ; 448, 420, 301, 17
+		Global $R1_C3_SendTwitch = GUICtrlCreateCheckbox("Send message to Twitch", 448, 420 + $tGUIGapY, 301, 17) ; 448, 420, 301, 17
 		GUICtrlSetOnEvent(-1, "R1_C3_SendTwitch")
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $R1_B_RestartGrids = GUICtrlCreateButton("Restart Grids", 636, 480, 127, 25)     ; 636, 480, 127, 25
+		Global $R1_B_RestartGrids = GUICtrlCreateButton("Restart Grids", 636, 480, 127, 25) ; 636, 480, 127, 25
 		GUICtrlSetOnEvent(-1, "R1_B_RestartGrids")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetBkColor(-1, $cSWButtonStopServer)
-		Global $R1_B_Cancel = GUICtrlCreateButton("Cancel", 776, 480, 75, 25)     ; 776, 480, 75, 25
+		Global $R1_B_Cancel = GUICtrlCreateButton("Cancel", 776, 480, 75, 25) ; 776, 480, 75, 25
 		GUICtrlSetOnEvent(-1, "R1_B_Cancel")
 		GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
@@ -11474,8 +11484,8 @@ Func R1_UserRadiosRead()
 	GUICtrlSetData($R1_I3_AnnounceNotifyRestartGrids, $tR1_I3_AnnounceNotifyRestartGrids)
 	Global $tR1_I2_MsgNowCustom = IniRead($aUtilCFGFile, "CFG", "R1_I2_MsgNowCustom", "(\g) Grid(s) restarting for maintenance.")
 	GUICtrlSetData($R1_I2_MsgNowCustom, $tR1_I2_MsgNowCustom)
-	Global $tR1_UserRadioSettings = IniRead($aUtilCFGFile, "CFG", "$tR1_UserRadioSettings", "1acr")     ; 1-Restart in _ min, 2-Restart NOW with announcement, 3-Restart now NO announce, a-d
-	If StringInStr($tR1_UserRadioSettings, "!") = 0 Then     ;  First time Restart GUI has been run... set defaults
+	Global $tR1_UserRadioSettings = IniRead($aUtilCFGFile, "CFG", "$tR1_UserRadioSettings", "1acr") ; 1-Restart in _ min, 2-Restart NOW with announcement, 3-Restart now NO announce, a-d
+	If StringInStr($tR1_UserRadioSettings, "!") = 0 Then ;  First time Restart GUI has been run... set defaults
 		If $aSkipCountdownWhenNoOnlinePlayersYN = "yes" Then GUICtrlSetState($R1_C1_SkipAnnounce, $GUI_CHECKED)
 		If $sUseDiscordBotRestartGrids = "yes" Then GUICtrlSetState($R1_C2_SendDiscord, $GUI_CHECKED)
 		If $sUseTwitchBotRestartGrids = "yes" Then GUICtrlSetState($R1_C3_SendTwitch, $GUI_CHECKED)
@@ -11487,7 +11497,7 @@ Func R1_UserRadiosRead()
 	If StringInStr($tR1_UserRadioSettings, "b") Then GUICtrlSetState($R1_R3_MsgLaterCustom, $GUI_CHECKED)
 	If StringInStr($tR1_UserRadioSettings, "c") Then GUICtrlSetState($R1_R4_MsgNowDefault, $GUI_CHECKED)
 	If StringInStr($tR1_UserRadioSettings, "d") Then GUICtrlSetState($R1_R4_MsgNowCustom, $GUI_CHECKED)
-	If $tR1_AllGrids Then     ; ALL grids
+	If $tR1_AllGrids Then ; ALL grids
 		GUICtrlSetState($R1_R2_SendToAll, $GUI_CHECKED)
 		GUICtrlSetState($R1_R2_SendToAffected, $GUI_DISABLE)
 		GUICtrlSetState($R1_R2_Group, $GUI_DISABLE)
@@ -11625,14 +11635,19 @@ Func R1_B_RestartGrids()
 		$sTwitchRestartGridsMessage = GUICtrlRead($R1_I1_MsgLaterCustom)
 		$aRestartGridsTime = StringSplit($sAnnounceNotifyRestartGrids, ",")
 		$aRestartGridsCnt = Int($aRestartGridsTime[0])
+;~ 		MsgBox(0,"Kima", "[" & $sInGameRestartGridsMessage & "]" & @CRLF & "[" & $sAnnounceNotifyRestartGrids & "]") ;kim125er!
 	ElseIf (GUICtrlRead($R1_R4_MsgNowCustom) = $GUI_CHECKED) And (GUICtrlRead($R1_R1_RestartNow) = $GUI_CHECKED) Then
 		$sDiscordRestartGridsZeroMessage = GUICtrlRead($R1_I2_MsgNowCustom)
 		$sTwitchRestartGridsZeroMessage = GUICtrlRead($R1_I2_MsgNowCustom)
 	EndIf
 	$aRestartGridsMsgInGame = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sInGameRestartGridsMessage)
+;~ 	_ArrayDisplay($aRestartGridsMsgInGame) ;kim125er!
+;~ 	MsgBox(0,"Kimb", "[" & _ArrayToString($aRestartGridsMsgInGame) & "]") ;kim125er!
 	$aRestartGridsMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sDiscordRestartGridsMessage)
 	$aRestartGridsMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sTwitchRestartGridsMessage)
 	$aRestartGridsMsgInGame = AnnounceReplaceG_Grid($aRestartGridsMsgInGame, $tSelectServersTxt)
+;~ 	_ArrayDisplay($aRestartGridsMsgInGame) ;kim125er!
+;~ 	MsgBox(0,"Kimc", "[" & _ArrayToString($aRestartGridsMsgInGame) & "]") ;kim125er!
 	$aRestartGridsMsgDiscord = AnnounceReplaceG_Grid($aRestartGridsMsgDiscord, $tSelectServersTxt)
 	$aRestartGridsMsgTwitch = AnnounceReplaceG_Grid($aRestartGridsMsgTwitch, $tSelectServersTxt)
 	$aDiscordRestartGridsZeroMessage = StringRegExpReplace($sDiscordRestartGridsZeroMessage, "\\g", $tSelectServersTxt)
@@ -11734,95 +11749,95 @@ Func S1_StopGrids($tServNo = -1) ; Grids to close: -1 all, -2 Check marked, Arra
 				Global $tS1_AllGrids = False
 			EndIf
 		EndIf
-		Local $tGUIGapY = 28     ; Lower all but Stop Grids group by this amount
-		Local $tGUIGapStopY = 28     ; Lower Stop Grids group content by this amount
+		Local $tGUIGapY = 28 ; Lower all but Stop Grids group by this amount
+		Local $tGUIGapStopY = 28 ; Lower Stop Grids group content by this amount
 		Global $S1_StopGrids = GUICreate("AtlasServerUpdateUtility Tools", 906, 555, -1, -1, BitOR($GUI_SS_DEFAULT_GUI, $WS_SIZEBOX, $WS_THICKFRAME))
 		GUISetIcon($aIconFile, 99)
-		GUISetBkColor($cT1Background)     ; $cMWBackground, $cT1Background, $cFWBackground
+		GUISetBkColor($cT1Background) ; $cMWBackground, $cT1Background, $cFWBackground
 		GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_S1_StopGrids_Close", $S1_StopGrids)
 		GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKVCENTER)
 		_DisableCloseButton($S1_StopGrids)
 		$Group2 = GUICtrlCreateGroup($S1_GroupName, 24, 24, 857, 505)
 		GUICtrlSetFont(-1, 12, 800, 0, "MS Sans Serif")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		$Group5 = GUICtrlCreateGroup("", 52, 56, 801, 265 + $tGUIGapStopY)     ; 52, 56, 801, 265
+		$Group5 = GUICtrlCreateGroup("", 52, 56, 801, 265 + $tGUIGapStopY) ; 52, 56, 801, 265
 		Local $tGUI1x = 73
 		Local $tGUI1y = 80
-		Global $S1_S1_StopLater = GUICtrlCreateRadio("Stop grid(s) in __ minutes with announcement  (\m - minutes, \g - grids)", $tGUI1x, $tGUI1y, 701, 17)     ; 73, 91, 701, 17
+		Global $S1_S1_StopLater = GUICtrlCreateRadio("Stop grid(s) in __ minutes with announcement  (\m - minutes, \g - grids)", $tGUI1x, $tGUI1y, 701, 17) ; 73, 91, 701, 17
 		GUICtrlSetOnEvent(-1, "S1_S1_StopLater")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $S1_S1_StopNow = GUICtrlCreateRadio("Stop grid(s) NOW with announcement  (\g - grids)", $tGUI1x, $tGUI1y + 100 + $tGUIGapStopY, 757, 17)     ; 73, 203, 757, 17
+		Global $S1_S1_StopNow = GUICtrlCreateRadio("Stop grid(s) NOW with announcement  (\g - grids)", $tGUI1x, $tGUI1y + 100 + $tGUIGapStopY, 757, 17) ; 73, 203, 757, 17
 		GUICtrlSetOnEvent(-1, "S1_S1_StopNow")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $S1_S1_StopNoAnnounce = GUICtrlCreateRadio("Stop grid(s) NOW with NO announcement", $tGUI1x, $tGUI1y + 200 + $tGUIGapStopY, 757, 17)     ; 73, 203, 757, 17
+		Global $S1_S1_StopNoAnnounce = GUICtrlCreateRadio("Stop grid(s) NOW with NO announcement", $tGUI1x, $tGUI1y + 200 + $tGUIGapStopY, 757, 17) ; 73, 203, 757, 17
 		GUICtrlSetOnEvent(-1, "S1_S1_StopNoAnnounce")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUIStartGroup()
-		Global $S1_R3_MsgLaterDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 28 + $tGUIGapStopY, 17, 17)     ; 104, 123, 17, 17
+		Global $S1_R3_MsgLaterDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 28 + $tGUIGapStopY, 17, 17) ; 104, 123, 17, 17
 		GUICtrlSetOnEvent(-1, "S1_R3_MsgLaterDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $S1_R3_MsgLaterCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 56 + $tGUIGapStopY, 13, 17)     ; 104, 151, 13, 17
+		Global $S1_R3_MsgLaterCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 56 + $tGUIGapStopY, 13, 17) ; 104, 151, 13, 17
 		GUICtrlSetOnEvent(-1, "S1_R3_MsgLaterCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
 		Local $tGapL1 = 372
-		Local $S1_L_AnnounceNotifyStopGrids = GUICtrlCreateLabel("Announcement __ minutes before Stop GRIDS (comma separated 0-60)", 121, $tGUI1y + 28 + 1, $tGapL1 - 5, 21)     ; 121, 119, 713, 28
+		Local $S1_L_AnnounceNotifyStopGrids = GUICtrlCreateLabel("Announcement __ minutes before Stop GRIDS (comma separated 0-60)", 121, $tGUI1y + 28 + 1, $tGapL1 - 5, 21) ; 121, 119, 713, 28
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $S1_I3_AnnounceNotifyStopGrids = GUICtrlCreateInput("", 121 + $tGapL1 + 5, $tGUI1y + 28 - 1, 713 - $tGapL1 - 5, 21)     ; 121, 119, 713, 28
+		Global $S1_I3_AnnounceNotifyStopGrids = GUICtrlCreateInput("", 121 + $tGapL1 + 5, $tGUI1y + 28 - 1, 713 - $tGapL1 - 5, 21) ; 121, 119, 713, 28
 		GUICtrlSetOnEvent(-1, "S1_I3_AnnounceNotifyStopGrids")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $S1_I1_MsgLaterDefault = GUICtrlCreateInput($sDiscordStopServerMessage, 121, $tGUI1y + 28 - 1 + $tGUIGapStopY, 713, 21)     ; 121, 119, 713, 28
+		Global $S1_I1_MsgLaterDefault = GUICtrlCreateInput($sDiscordStopServerMessage, 121, $tGUI1y + 28 - 1 + $tGUIGapStopY, 713, 21) ; 121, 119, 713, 28
 		GUICtrlSetOnEvent(-1, "S1_I1_MsgLaterDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_DISABLE)
-		Global $S1_I1_MsgLaterCustom = GUICtrlCreateInput("", 121, $tGUI1y + 56 - 1 + $tGUIGapStopY, 713, 21)     ; 121, 147, 713, 28
+		Global $S1_I1_MsgLaterCustom = GUICtrlCreateInput("", 121, $tGUI1y + 56 - 1 + $tGUIGapStopY, 713, 21) ; 121, 147, 713, 28
 		GUICtrlSetOnEvent(-1, "S1_I1_MsgLaterCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUIStartGroup()
-		Global $S1_R4_MsgNowDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 28 + $tGUIGapStopY, 17, 17)     ; 102, 240, 17, 17
+		Global $S1_R4_MsgNowDefault = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 28 + $tGUIGapStopY, 17, 17) ; 102, 240, 17, 17
 		GUICtrlSetOnEvent(-1, "S1_R4_MsgNowDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_CHECKED)
-		Global $S1_R4_MsgNowCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 56 + $tGUIGapStopY, 13, 17)     ; 102, 268, 13, 17
+		Global $S1_R4_MsgNowCustom = GUICtrlCreateRadio("", 104, $tGUI1y + 100 + 56 + $tGUIGapStopY, 13, 17) ; 102, 268, 13, 17
 		GUICtrlSetOnEvent(-1, "S1_R4_MsgNowCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
-		Global $S1_I2_MsgNowDefault = GUICtrlCreateInput($sDiscordStopServerZeroMessage, 121, $tGUI1y + 100 + 28 - 1 + $tGUIGapStopY, 713, 21)     ; 122, 236, 713, 28
+		Global $S1_I2_MsgNowDefault = GUICtrlCreateInput($sDiscordStopServerZeroMessage, 121, $tGUI1y + 100 + 28 - 1 + $tGUIGapStopY, 713, 21) ; 122, 236, 713, 28
 		GUICtrlSetOnEvent(-1, "S1_I2_MsgNowDefault")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetState(-1, $GUI_DISABLE)
-		Global $S1_I2_MsgNowCustom = GUICtrlCreateInput("", 121, $tGUI1y + 100 + 56 - 1 + $tGUIGapStopY, 713, 21)     ; 122, 264, 713, 28
+		Global $S1_I2_MsgNowCustom = GUICtrlCreateInput("", 121, $tGUI1y + 100 + 56 - 1 + $tGUIGapStopY, 713, 21) ; 122, 264, 713, 28
 		GUICtrlSetOnEvent(-1, "S1_I2_MsgNowCustom")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlSetState(-1, $GUI_HIDE)
-		Global $S1_R2_Group = GUICtrlCreateGroup("In Game Message", 48, 340 + $tGUIGapY, 341, 105)     ; 48, 340, 341, 105
-		Global $S1_R2_SendToAll = GUICtrlCreateRadio("Send to ALL local grids", 72, 372 + $tGUIGapY, 257, 17)     ; 72, 372, 257, 17
+		Global $S1_R2_Group = GUICtrlCreateGroup("In Game Message", 48, 340 + $tGUIGapY, 341, 105) ; 48, 340, 341, 105
+		Global $S1_R2_SendToAll = GUICtrlCreateRadio("Send to ALL local grids", 72, 372 + $tGUIGapY, 257, 17) ; 72, 372, 257, 17
 		GUICtrlSetOnEvent(-1, "S1_R2_SendToAll")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $S1_R2_SendToAffected = GUICtrlCreateRadio("Send to affected grids only", 72, 404 + $tGUIGapY, 269, 17)     ; 72, 404, 269, 17
+		Global $S1_R2_SendToAffected = GUICtrlCreateRadio("Send to affected grids only", 72, 404 + $tGUIGapY, 269, 17) ; 72, 404, 269, 17
 		GUICtrlSetOnEvent(-1, "S1_R2_SendToAffected")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
-		Global $S1_C1_SkipAnnounce = GUICtrlCreateCheckbox("Skip announcement if no one is online.", 448, 364 + $tGUIGapY, 301, 17)     ; 448, 364, 301, 17
+		Global $S1_C1_SkipAnnounce = GUICtrlCreateCheckbox("Skip announcement if no one is online.", 448, 364 + $tGUIGapY, 301, 17) ; 448, 364, 301, 17
 		GUICtrlSetOnEvent(-1, "S1_C1_SkipAnnounce")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $S1_C2_SendDiscord = GUICtrlCreateCheckbox("Send message to Discord", 448, 392 + $tGUIGapY, 301, 17)     ; 448, 392, 301, 17
+		Global $S1_C2_SendDiscord = GUICtrlCreateCheckbox("Send message to Discord", 448, 392 + $tGUIGapY, 301, 17) ; 448, 392, 301, 17
 		GUICtrlSetOnEvent(-1, "S1_C2_SendDiscord")
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $S1_C3_SendTwitch = GUICtrlCreateCheckbox("Send message to Twitch", 448, 420 + $tGUIGapY, 301, 17)     ; 448, 420, 301, 17
+		Global $S1_C3_SendTwitch = GUICtrlCreateCheckbox("Send message to Twitch", 448, 420 + $tGUIGapY, 301, 17) ; 448, 420, 301, 17
 		GUICtrlSetOnEvent(-1, "S1_C3_SendTwitch")
 		GUICtrlSetFont(-1, 11, 800, 0, "MS Sans Serif")
-		Global $S1_B_StopGrids = GUICtrlCreateButton("Stop Grids", 636, 480, 127, 25)     ; 636, 480, 127, 25
+		Global $S1_B_StopGrids = GUICtrlCreateButton("Stop Grids", 636, 480, 127, 25) ; 636, 480, 127, 25
 		GUICtrlSetOnEvent(-1, "S1_B_StopGrids")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetBkColor(-1, $cSWButtonStopServer)
-		Global $S1_B_Cancel = GUICtrlCreateButton("Cancel", 776, 480, 75, 25)     ; 776, 480, 75, 25
+		Global $S1_B_Cancel = GUICtrlCreateButton("Cancel", 776, 480, 75, 25) ; 776, 480, 75, 25
 		GUICtrlSetOnEvent(-1, "S1_B_Cancel")
 		GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
@@ -11839,8 +11854,8 @@ Func S1_UserRadiosRead()
 	GUICtrlSetData($S1_I3_AnnounceNotifyStopGrids, $tS1_I3_AnnounceNotifyStopGrids)
 	Global $tS1_I2_MsgNowCustom = IniRead($aUtilCFGFile, "CFG", "S1_I2_MsgNowCustom", "(\g) Grid(s) Stoping for maintenance.")
 	GUICtrlSetData($S1_I2_MsgNowCustom, $tS1_I2_MsgNowCustom)
-	Global $tS1_UserRadioSettings = IniRead($aUtilCFGFile, "CFG", "$tS1_UserRadioSettings", "1acr")     ; 1-Stop in _ min, 2-Stop NOW with announcement, 3-Stop now NO announce, a-d
-	If StringInStr($tS1_UserRadioSettings, "!") = 0 Then     ;  First time Stop GUI has been run... set defaults
+	Global $tS1_UserRadioSettings = IniRead($aUtilCFGFile, "CFG", "$tS1_UserRadioSettings", "1acr") ; 1-Stop in _ min, 2-Stop NOW with announcement, 3-Stop now NO announce, a-d
+	If StringInStr($tS1_UserRadioSettings, "!") = 0 Then ;  First time Stop GUI has been run... set defaults
 		If $aSkipCountdownWhenNoOnlinePlayersYN = "yes" Then GUICtrlSetState($S1_C1_SkipAnnounce, $GUI_CHECKED)
 		If $sUseDiscordBotStopServer = "yes" Then GUICtrlSetState($S1_C2_SendDiscord, $GUI_CHECKED)
 		If $sUseTwitchBotStopServer = "yes" Then GUICtrlSetState($S1_C3_SendTwitch, $GUI_CHECKED)
@@ -11852,7 +11867,7 @@ Func S1_UserRadiosRead()
 	If StringInStr($tS1_UserRadioSettings, "b") Then GUICtrlSetState($S1_R3_MsgLaterCustom, $GUI_CHECKED)
 	If StringInStr($tS1_UserRadioSettings, "c") Then GUICtrlSetState($S1_R4_MsgNowDefault, $GUI_CHECKED)
 	If StringInStr($tS1_UserRadioSettings, "d") Then GUICtrlSetState($S1_R4_MsgNowCustom, $GUI_CHECKED)
-	If $tS1_AllGrids Then     ; ALL grids
+	If $tS1_AllGrids Then ; ALL grids
 		GUICtrlSetState($S1_R2_SendToAll, $GUI_CHECKED)
 		GUICtrlSetState($S1_R2_SendToAffected, $GUI_DISABLE)
 		GUICtrlSetState($S1_R2_Group, $GUI_DISABLE)
@@ -12082,7 +12097,7 @@ Func SetStatusBusy($tMsg0, $tMsg1 = "no")
 	If $tMsg1 = "no" Then $tMsg1 = $tMsg0
 	TraySetToolTip($tMsg0)
 	TraySetIcon($aIconFile, 201)
-	GUICtrlSetImage($IconReady, $aIconFile, 203)     ; Busy Icon
+	GUICtrlSetImage($IconReady, $aIconFile, 203) ; Busy Icon
 	GUICtrlSetData($LabelUtilReadyStatus, $tMsg1)
 EndFunc   ;==>SetStatusBusy
 
@@ -12104,7 +12119,7 @@ Func F_StopServer()
 	$tSelectServersTxt = ""
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 15)
 	; ----------------------------------------------------------
-	If $tMB = 6 Then     ; YES
+	If $tMB = 6 Then ; YES
 		If $aBeginDelayedShutdown = 0 Then
 			SetStatusBusy("Stop Server Started")
 			LogWrite(" [" & $aServerName & "] Stop Server request initiated by user.")
@@ -12114,7 +12129,7 @@ Func F_StopServer()
 						"Would you like to enable it?" & @CRLF & _
 						"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
 						"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
-				If $tMB1 = 6 Then     ; (YES)
+				If $tMB1 = 6 Then ; (YES)
 					LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
 					$sUseDiscordBotStopServer = "yes"
 					IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
@@ -12135,7 +12150,7 @@ Func F_StopServer()
 				LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
 				_Splash("Stop Server Discord, Twitch, and In-Game announcements are disabled." & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 0, 500, 150)
 				SetStatusBusy("Stopping Servers")
-				CloseServer(False, True, True)     ; Do NOT close redis, Disable servers, Skip "All Servers Online" Announcement
+				CloseServer(False, True, True) ; Do NOT close redis, Disable servers, Skip "All Servers Online" Announcement
 				SetStatusIdle()
 				SplashOff()
 			EndIf
@@ -12143,10 +12158,10 @@ Func F_StopServer()
 		; ----------------------------------------------------------
 	ElseIf $tMB = 7 Then
 		SetStatusBusy("Stopping Servers")
-		CloseServer(False, True, True)     ; Do NOT close redis, Disable servers, Skip "All Servers Online" Announcement
+		CloseServer(False, True, True) ; Do NOT close redis, Disable servers, Skip "All Servers Online" Announcement
 		SetStatusIdle()
 		; ----------------------------------------------------------
-	ElseIf $tMB = 2 Then     ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		SetStatusBusy("Canceled")
 		LogWrite(" [" & $aServerName & "] Stop Server request canceled by user.")
 		_Splash("Stop Server canceled. Resuming utility . . .", 2000)
@@ -12186,7 +12201,7 @@ Func F_StartServer()
 		EndIf
 	Next
 	For $i = 0 To ($aServerGridTotal - 1)
-		If ProcessExists($aServerPID[$i]) = 0 And $xLocalGrid[$i] = "yes" Then     ; And ($xStartGrid[$i] = "yes") Then
+		If ProcessExists($aServerPID[$i]) = 0 And $xLocalGrid[$i] = "yes" Then ; And ($xStartGrid[$i] = "yes") Then
 			If ($xLocalGrid[$i] = "yes") Then
 				_GUICtrlListView_SetItemChecked($wMainListViewWindow, $i, True)
 				If $tFirstGrid = False Then
@@ -12234,21 +12249,21 @@ Func F_UpdateServCheck()
 			"Click (CANCEL) to cancel update check."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-	If $tMB = 6 Then     ; YES
+	If $tMB = 6 Then ; YES
 		SplashOff()
 		_Splash("Checking for server updates.")
 		SetStatusBusy("Check: Server Update")
 		UpdateCheck(True)
 		SetStatusIdle()
 		SplashOff()
-	ElseIf $tMB = 7 Then     ; NO
+	ElseIf $tMB = 7 Then ; NO
 		Local $aMsg = "Check for " & $aGameName & " server updates." & @CRLF & @CRLF & _
 				"WARNING! Continuing will shut down all servers and perform a steamcmd update with -validate." & @CRLF & @CRLF & _
 				"Click (YES) to shut down servers and perform update." & @CRLF & _
 				"Click (NO) or (CANCEL) to cancel and resume utility."
 		SplashOff()
 		$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
-		If $tMB1 = 6 Then     ; YES
+		If $tMB1 = 6 Then ; YES
 			$bUpdateRequired = True
 			$aSteamUpdateNow = True
 			$aUpdateVerify = "yes"
@@ -12259,7 +12274,7 @@ Func F_UpdateServCheck()
 		Else
 			_Splash("Update check canceled. Resuming utility . . .", 2000)
 		EndIf
-	ElseIf $tMB = 2 Then     ; CANCEL
+	ElseIf $tMB = 2 Then ; CANCEL
 		_Splash("Update check canceled. Resuming utility . . .", 2000)
 	EndIf
 EndFunc   ;==>F_UpdateServCheck
@@ -12288,7 +12303,7 @@ Func F_SendMessage($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash =
 			Else
 				$tMB = 7
 			EndIf
-			If $tMB = 2 Or $tMB = -1 Then     ; CANCEL or TIMEOUT
+			If $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				LogWrite(" [Remote RCON] Send RCON command canceled by user.")
 				_Splash("Send RCON command canceled. Resuming utility . . .", 2000)
 			Else
@@ -12307,13 +12322,13 @@ Func F_SendMessage($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash =
 					_Splash("Broadcast Message canceled. Resuming utility . . .", 2000)
 				Else
 					$tMsg = "broadcast " & $tMsg
-					If $tMB = 6 Then     ; Yes
+					If $tMB = 6 Then ; Yes
 						LogWrite(" [Remote RCON] Sending message to ALL grids (Local and Remote):" & $tMsg)
 						$tSplash = _Splash("Sending message to ALL grids: " & @CRLF & $tMsg)
 						$tResponse = _SendInGameMessage($tMsg, "all", $tSplash)
 						_RCONMsgBox($tMsg, $tResponse, "Message")
 						SplashOff()
-					ElseIf $tMB = 7 Then     ; No
+					ElseIf $tMB = 7 Then ; No
 						LogWrite(" [Remote RCON] Sending message to local grids:" & $tMsg)
 						$tSplash = _Splash("Sending message to all LOCAL grids: " & @CRLF & $tMsg)
 						$tResponse = _SendInGameMessage($tMsg, "local", $tSplash)
@@ -12370,7 +12385,7 @@ Func F_SendMessage($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash =
 	SetStatusIdle()
 EndFunc   ;==>F_SendMessage
 
-Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)     ; "ask", "sel", "local", or Grid No.
+Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0) ; "ask", "sel", "local", or Grid No.
 	SetStatusBusy("Send RCON. Waiting for User Input.", "Waiting for User Input")
 	If $tAskTF = False Then
 		Local $tResponse = ""
@@ -12407,7 +12422,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 			Else
 				$tMB = 7
 			EndIf
-			If $tMB = 2 Or $tMB = -1 Then     ; CANCEL or TIMEOUT
+			If $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				LogWrite(" [Remote RCON] Send RCON command canceled by user.")
 				_Splash("Send RCON command canceled. Resuming utility . . .", 2000)
 			Else
@@ -12425,7 +12440,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 					LogWrite(" [Remote RCON] Send RCON command canceled by user.")
 					_Splash("Send RCON command canceled. Resuming utility . . .", 2000)
 				Else
-					If $tMB = 6 Then     ; Yes
+					If $tMB = 6 Then ; Yes
 						LogWrite(" [Remote RCON] Sending RCON command to ALL grids (Local and Remote):" & $tMsg)
 						$tSplash = _Splash("Sending RCON command to ALL grids: " & @CRLF & $tMsg)
 						For $i = 0 To ($aServerGridTotal - 1)
@@ -12439,7 +12454,7 @@ Func F_SendRCON($tAllorSel = "ask", $tMsgCmd = "", $tAskTF = True, $tSplash = 0)
 						Next
 						_RCONMsgBox($tMsg, $tResponse, "RCON")
 						SplashOff()
-					ElseIf $tMB = 7 Then     ; No
+					ElseIf $tMB = 7 Then ; No
 						LogWrite(" [Remote RCON] Sending RCON command to local grids:" & $tMsg)
 						$tSplash = _Splash("Sending RCON command to all LOCAL grids: " & @CRLF & $tMsg)
 						For $i = 0 To ($aServerGridTotal - 1)
@@ -12609,7 +12624,7 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 		SplashOff()
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 60)
 		; ----------------------------------------------------------
-		If $tMB = 6 Then     ; YES
+		If $tMB = 6 Then ; YES
 			If $aBeginDelayedShutdown = 0 Then
 				SetStatusBusy("Stop Server Started")
 				LogWrite(" [" & $aServerName & "] Stop Server request initiated by user. Servers: " & $tSelectServersTxt)
@@ -12619,7 +12634,7 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 							"Would you like to enable it?" & @CRLF & _
 							"Click (YES) to enable STOP SERVER Discord announcement" & @CRLF & _
 							"Click (NO) or (CANCEL) to keep STOP SERVER Discord announcement disabled.", 20)
-					If $tMB1 = 6 Then     ; (YES)
+					If $tMB1 = 6 Then ; (YES)
 						LogWrite(" [" & $aServerName & "] STOP SERVER Discord announcement enabled in " & $aUtilName & ".ini.")
 						$sUseDiscordBotStopServer = "yes"
 						IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", "yes")
@@ -12641,22 +12656,22 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 					LogWrite(" [" & $aServerName & "] Stop Server Discord, Twitch, and In-Game announcements are disabled in " & @CRLF & $aUtilName & ".ini.")
 					_Splash("Stop Server Discord, Twitch, and In-Game announcements are disabled" & @CRLF & @CRLF & "Stopping servers WITHOUT announcements", 0, 500, 150)
 					SetStatusBusy("Stopping Servers")
-					CloseServer(False, $tDisableGridTF, True, $xGridsToClose)     ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
+					CloseServer(False, $tDisableGridTF, True, $xGridsToClose) ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
 					SetStatusIdle()
 					SplashOff()
 				EndIf
 			EndIf
 			; ----------------------------------------------------------
-		ElseIf $tMB = 7 Then     ; NO
+		ElseIf $tMB = 7 Then ; NO
 			$tMsg1 = "Sending shutdown " & $aRCONShutdownCMD & " command to select servers."
 			$aSplash = _Splash($tMsg1, 0, 500)
 			SetStatusBusy("Stopping select server(s).", "Stop Server ")
 			$aServerReadyOnce = False
 			$aSelectServers = True
-			CloseServer(False, $tDisableGridTF, True, $xGridsToClose)     ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
+			CloseServer(False, $tDisableGridTF, True, $xGridsToClose) ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
 			GUICtrlSetData($LabelUtilReadyStatus, "Stop Server Complete")
 			_Splash("Select server(s) shutdown complete.", 2000)
-		ElseIf $tMB = 2 Then     ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			LogWrite(" [Remote RCON] Select server(s) shutdown CANCELED.")
 			GUICtrlSetData($LabelUtilReadyStatus, "Stop Server CANCELED")
 			_Splash("Select server(s) shutdown CANCELED.", 2000)
@@ -12664,7 +12679,7 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 	Else
 		GUICtrlSetData($LabelUtilReadyStatus, "Stop Server " & _ServerNamingScheme($tServNo, $aNamingScheme))
 		$aSelectServers = True
-		CloseServer(False, $tDisableGridTF, True, $tServNo)     ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
+		CloseServer(False, $tDisableGridTF, True, $tServNo) ; Do NOT close redis, Do NOT disable servers, Skip "All Servers Online" Announcement
 		GUICtrlSetData($LabelUtilReadyStatus, "Stop Server Complete")
 		_Splash("Select server(s) shutdown complete.", 2000)
 	EndIf
@@ -12762,7 +12777,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 	If $tTmp = -1 Then
 		$tReturn = "0"
 		LogWrite("", " [Redis] Lastpidredis.tmp file not found. Existing Redis Server NOT running")
-	ElseIf $tReturn = "" Then     ; Empty/Blank File
+	ElseIf $tReturn = "" Then ; Empty/Blank File
 		$tReturn = "0"
 		FileDelete($tFile)
 		LogWrite("", " [Redis] Lastpidredis.tmp file corrupt.")
@@ -12774,7 +12789,7 @@ Func PIDReadRedis($tFile, $tSplash = 0)
 		If $tTmp = -1 Then
 			$tReturn = "0"
 			LogWrite("", " [Redis] Lastpidredis.tmp.bak file not found. Existing Redis Server NOT running")
-		ElseIf $tReturn = "" Then     ; Empty/Blank File
+		ElseIf $tReturn = "" Then ; Empty/Blank File
 			$tReturn = "0"
 			FileDelete($tFile)
 			LogWrite("", " [Redis] Lastpidredis.tmp.bak file corrupt.")
@@ -12919,7 +12934,7 @@ Func _StartServer($i)
 		EndIf
 		$xGridStatus[$i] = "started"
 		$xStartGrid[$i] = "yes"
-		_GUIUpdateStatus($i, 0)     ; Change status to Starting
+		_GUIUpdateStatus($i, 0) ; Change status to Starting
 		RotateGridStart($i)
 		$xServerCPU[$i] = _ProcessUsageTracker_Create("", $aServerPID[$i])
 		If $aUseKeepAliveYN = "yes" Then KeepUtilAliveCounter()
@@ -12930,7 +12945,7 @@ Func _StartServer($i)
 		EndIf
 	EndIf
 EndFunc   ;==>_StartServer
-Func _SetAffinity($ti, $tAllCPUs = False)     ; True forces all CPU cores enabled, aka Disabling CPU Affinity
+Func _SetAffinity($ti, $tAllCPUs = False) ; True forces all CPU cores enabled, aka Disabling CPU Affinity
 	Local $txAffinity = StringRegExpReplace($xGridCPUAffinity[$ti], " [-1]", "-1")
 	If ($aCPUCoreCount < 65 And StringInStr($xGridCPUAffinity[$ti], "-1") = 0 And $xCPUAffinityUseYN[$ti] = "yes") Or $tAllCPUs Then
 		If $txAffinity = -1 Or $tAllCPUs Then
@@ -12966,22 +12981,22 @@ EndFunc   ;==>_RemoveLeadingZeros
 Func PIDReadServer($tFile, $tSplash = 0)
 	$aPIDServerReadYetTF = True
 	Local $tReturn[$aServersMax]
-	Local $tTmp1 = FileOpen($tFile)     ; Open existing ServerPID File
+	Local $tTmp1 = FileOpen($tFile) ; Open existing ServerPID File
 	Local $tReturn1 = FileRead($tTmp1, 100000000)
 	FileClose($tTmp1)
-	Local $tTmp2 = FileOpen($tFile & ".bak")     ; Open existing ServerPID.bak File
+	Local $tTmp2 = FileOpen($tFile & ".bak") ; Open existing ServerPID.bak File
 	Local $tReturn2 = FileRead($tTmp2, 100000000)
 	FileClose($tTmp2)
-	If $tTmp1 = -1 Then     ; ServerPID file not exist
+	If $tTmp1 = -1 Then ; ServerPID file not exist
 		LogWrite("", " [PID] Lastpidserver.tmp file not found.")
 		$tReturn1 = $tReturn2
 		$aNoExistingPID = True
-		If $tTmp2 = -1 Then     ; ServerPID.bak file not exist
+		If $tTmp2 = -1 Then ; ServerPID.bak file not exist
 			$tReturn[0] = "0"
 			LogWrite("", " [PID] Lastpidserver.tmp.bak file not found.")
 			$aNoExistingPID = True
 		Else
-			If $tReturn2 = "" Then     ; Empty/Blank File
+			If $tReturn2 = "" Then ; Empty/Blank File
 				$tReturn[0] = "0"
 				LogWrite("", " [PID] Lastpidserver.tmp.bak contained no server PID data.")
 				$aNoExistingPID = True
@@ -12990,15 +13005,15 @@ Func PIDReadServer($tFile, $tSplash = 0)
 		EndIf
 	Else
 		$aNoExistingPID = False
-		If $tReturn1 = "" Then     ; Empty/Blank File
+		If $tReturn1 = "" Then ; Empty/Blank File
 			LogWrite("", " [PID] Lastpidserver.tmp file contained no server PID data.")
 			$tReturn1 = $tReturn2
-			If $tTmp2 = -1 Then     ; File not exist
+			If $tTmp2 = -1 Then ; File not exist
 				$tReturn[0] = "0"
 				LogWrite("", " [PID] Lastpidserver.tmp.bak file not found.")
 				$aNoExistingPID = True
 			Else
-				If $tReturn2 = "" Then     ; Empty/Blank File
+				If $tReturn2 = "" Then ; Empty/Blank File
 					$tReturn[0] = "0"
 					LogWrite("", " [PID] Lastpidserver.tmp.bak contained no server PID data.")
 					$aNoExistingPID = True
@@ -13123,7 +13138,7 @@ Func SendAltF4($tPID, $tGrid)
 	WinClose($hWnd)
 EndFunc   ;==>SendAltF4
 
-Func _WinGetByPID($iPID, $iArray = 1)     ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
+Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
 	Local $aError[1] = [0], $aWinList, $sReturn
 	If IsString($iPID) Then
 		$iPID = ProcessExists($iPID)
@@ -13273,12 +13288,12 @@ Func _ArraySum(ByRef $a_array, $i_lbound1 = 0, $i_lbound2 = 0)
 	Return $i_add
 EndFunc   ;==>_ArraySum
 
-Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If True, uses startup splash text. If False, uses standard text.
+Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If True, uses startup splash text. If False, uses standard text.
 	Local $tTimer2 = _Timer_Init()
 	If ((_DateDiff('s', $aTimeCheck6, _NowCalc())) < 300) Then
-		Local $tServerStartDelayDoneTF = False     ; False = Servers Startup Delay time has not lapsed
+		Local $tServerStartDelayDoneTF = False ; False = Servers Startup Delay time has not lapsed
 	Else
-		Local $tServerStartDelayDoneTF = True     ; True = Servers Startup Delay time has lapsed
+		Local $tServerStartDelayDoneTF = True ; True = Servers Startup Delay time has lapsed
 	EndIf
 	Local $aCMD = "listplayers"
 	$tOnlinePlayerReady = True
@@ -13312,6 +13327,11 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 					$xServerPlayerCount[$i] = 0
 					$xServerPlayerSteamNames[$i] = ""
 					$xServerPlayerSteamID[$i] = ""
+				ElseIf StringInStr($mMsg, "Authentication failed") <> 0 Then
+					$xServerPlayerCount[$i] = 0
+					$xServerPlayerSteamNames[$i] = ""
+					$xServerPlayerSteamID[$i] = ""
+					LogWrite(' [ERROR] Online Player Count Error! Received "Authentication failed!" response to RCON command "players"}. Please check map name in config, etc.')
 				Else
 					If $aRCONError Then
 						If $xLocalGrid[$i] = "yes" Then
@@ -13416,7 +13436,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 				$xCrashNoRCONReadyOnceTF[$i] = True
 				$xCrashNoRCONCount[$i] = 0
 				$xGridReadyTF[$i] = True
-			ElseIf $xServerPlayerCount[$i] < 0 Then     ; Error getting online players
+			ElseIf $xServerPlayerCount[$i] < 0 Then ; Error getting online players
 ;~ 				If $aCrashRCONWaitMinutes > 0 And (_DateDiff('n', $xGridStartTime[$i][0], _NowCalc()) >= $aCrashRCONWaitMinutes) Then $xCrashNoRCONCount[$i] += 1
 				LogWrite("", " [Online Players] Error! No response received from ""ListPlayers"" RCON command to server (" & _ServerNamingScheme($i, $aNamingScheme) & ").")
 				$xGridReadyTF[$i] = False
@@ -13489,14 +13509,16 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 					$tUserLog[$i] = ""
 					$tUserMsg[$i] = ""
 					$tUserNoSteam[$i] = ""
+					$xServerPlayerSteamNames[$i] = _MakeArray($xServerPlayerSteamNames[$i])
+					$xServerPlayerSteamID[$i] = _MakeArray($xServerPlayerSteamID[$i])
 					Local $tUserAll = $xServerPlayerSteamNames[$i]
 					Local $tSteamAll = $xServerPlayerSteamID[$i]
 					ReDim $tUserAll[($xServerPlayerCount[$i])]
 					ReDim $tSteamAll[($xServerPlayerCount[$i])]
 					For $x = 0 To ($xServerPlayerCount[$i] - 1)
-						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) And UBound($tSteamAll) < ($xServerPlayerCount[$i] - 1) Then $tUserLog[$i] &= $tUserAll[$x] & "." & $tSteamAll[$x] & "|"
-						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) And UBound($tSteamAll) < ($xServerPlayerCount[$i] - 1) Then $tUserMsg[$i] &= $tUserAll[$x] & " [" & $tSteamAll[$x] & "] "
-						If UBound($tUserAll) < ($xServerPlayerCount[$i] - 1) Then $tUserNoSteam[$i] &= $tUserAll[$x] & " "
+						If UBound($tUserAll) = ($xServerPlayerCount[$i]) And UBound($tSteamAll) = ($xServerPlayerCount[$i]) Then $tUserLog[$i] &= $tUserAll[$x] & "." & $tSteamAll[$x] & "|"
+						If UBound($tUserAll) = ($xServerPlayerCount[$i]) And UBound($tSteamAll) = ($xServerPlayerCount[$i]) Then $tUserMsg[$i] &= $tUserAll[$x] & " [" & $tSteamAll[$x] & "] "
+						If UBound($tUserAll) = ($xServerPlayerCount[$i]) Then $tUserNoSteam[$i] &= $tUserAll[$x] & " "
 						_ArrayAdd($xOnlinePlayers, $tUserAll[$x])
 						FileWriteLine($aOnlinePlayerTempFile, _ServerNamingScheme($i, $aNamingScheme) & "," & $i & "," & $tUserAll[$x] & "," & $tSteamAll[$x])
 					Next
@@ -13559,7 +13581,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False)     ; $t
 				$tOnlinePlayers[2] = $tOnlinePlayers[2] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": " & $xServerPlayerCount[$i] & " " & $tUserMsg[$i] & @CRLF
 				$tOnlinePlayers[3] = $tOnlinePlayers[3] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": " & $xServerPlayerCount[$i] & " " & $tUserNoSteam[$i] & @CRLF
 				$tOnlinePlayers[4] = $tOnlinePlayers[4] & _ServerNamingScheme($i, $aNamingScheme) & "(" & $xServerPlayerCount[$i] & " " & $tUserNoSteam[$i] & ") "
-			ElseIf $xServerPlayerCount[$i] < 0 Then     ; Error getting online players
+			ElseIf $xServerPlayerCount[$i] < 0 Then ; Error getting online players
 				If $aCrashRCONWaitMinutes > 0 And (_DateDiff('n', $xGridStartTime[$i][0], _NowCalc()) >= $aCrashRCONWaitMinutes) Then $xCrashNoRCONCount[$i] += 1
 				$tOnlinePlayers[1] = $tOnlinePlayers[1] & _ServerNamingScheme($i, $aNamingScheme) & "(-) "
 				$tOnlinePlayers[2] = $tOnlinePlayers[2] & "Server " & _ServerNamingScheme($i, $aNamingScheme) & ": -" & @CRLF
@@ -13662,6 +13684,15 @@ EndFunc   ;==>F_ShowPlayerCount
 Func WriteOnlineLog($aMsg)
 	FileWriteLine($aFolderLog & $aUtilName & "_OnlineUserLog_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt", _NowCalc() & " " & $aMsg & " ")
 EndFunc   ;==>WriteOnlineLog
+Func _MakeArray($tTmp0)
+	If IsArray($tTmp0) = 0 Then
+		Local $tTmp1[0]
+		_ArrayAdd($tTmp1, $tTmp0)
+		Return $tTmp1
+	Else
+		Return $tTmp0
+	EndIf
+EndFunc   ;==>_MakeArray
 
 Func F_UpdateUtilPause()
 	SplashOff()
@@ -13696,8 +13727,8 @@ EndFunc   ;==>ShowPlayerCount
 
 Func _WM_SIZE($hWndGUI, $Msg1, $wParam1, $lParam1)
 	Local $iHeight2, $iWidth2
-	$iWidth2 = BitAND($lParam1, 0xFFFF)     ; _WinAPI_LoWord
-	$iHeight2 = BitShift($lParam1, 16)     ; _WinAPI_HiWord
+	$iWidth2 = BitAND($lParam1, 0xFFFF) ; _WinAPI_LoWord
+	$iHeight2 = BitShift($lParam1, 16) ; _WinAPI_HiWord
 	If ($hWndGUI = $wOnlinePlayers) Then
 		_WinAPI_MoveWindow($wOnlinePlayers, 10, 10, $iWidth2 - 20, $iHeight2 - 20)
 	ElseIf ($hWndGUI = $wGUIMainWindow) Then
@@ -13713,11 +13744,11 @@ Func ShowOnlinePlayersGUI()
 			If $aPlayerCountWindowTF = False Then
 				$gOnlinePlayerWindow = GUICreate($aUtilName & " Online Players", $aGUIW, $aGUIH, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX))
 				GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_OnlinePlayers_Close", $gOnlinePlayerWindow)
-				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY))     ; Horizontal Scroll, NO wrap text)
+				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY)) ; Horizontal Scroll, NO wrap text)
 				GUICtrlSetState($wOnlinePlayers, $GUI_FOCUS)
 				GUIRegisterMsg($WM_SIZE, "_WM_SIZE")
 				$aPlayerCountWindowTF = True
-				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow)     ;Shows the GUI window
+				GUISetState(@SW_SHOWNORMAL, $gOnlinePlayerWindow) ;Shows the GUI window
 			EndIf
 			_WinAPI_SetWindowPos($wOnlinePlayers, $HWND_TOPMOST, 0, 0, 0, 0, BitOR($SWP_NOACTIVATE, $SWP_NOMOVE, $SWP_NOSIZE))
 			_WinAPI_SetWindowPos($wOnlinePlayers, $HWND_NOTOPMOST, 0, 0, 0, 0, BitOR($SWP_NOACTIVATE, $SWP_NOMOVE, $SWP_NOSIZE))
@@ -13750,12 +13781,12 @@ Func TrayShowPlayerCheckUnPause()
 	$aServerOnlinePlayerYN = "yes"
 EndFunc   ;==>TrayShowPlayerCheckUnPause
 
-Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16)     ; By Phoenix125.com
+Func _ImageToGUIImageListResized($tGUICreate, $tFile, $tWidth = 16, $tHeight = 16) ; By Phoenix125.com
 	_GDIPlus_Startup()
 	Local $GDIpBmpLarge, $GDIpBmpResized, $GDIbmp, $tReturn
-	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile)     ;GDI+ image!
-	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight)     ;GDI+ image
-	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized)     ;GDI image!
+	$GDIpBmpLarge = _GDIPlus_ImageLoadFromFile($tFile) ;GDI+ image!
+	$GDIpBmpResized = _GDIPlus_ImageResize($GDIpBmpLarge, $tWidth, $tHeight) ;GDI+ image
+	$GDIbmp = _GDIPlus_BitmapCreateHBITMAPFromBitmap($GDIpBmpResized) ;GDI image!
 	$tReturn = _GUIImageList_Add($tGUICreate, $GDIbmp)
 	_GDIPlus_BitmapDispose($GDIpBmpLarge)
 	_GDIPlus_BitmapDispose($GDIpBmpResized)
@@ -13798,9 +13829,9 @@ Func ShowMainGUI($tSplash = 0)
 	GUISetBkColor($cMWBackground)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
-	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 112, 592, 873, 97)     ; Previous(8, 592, 985, 97)
+	Global $RestartAllGrids = GUICtrlCreateGroup("Log", 112, 592, 873, 97) ; Previous(8, 592, 985, 97)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
-	Global $LogTicker = GUICtrlCreateEdit("", 120, 608, 857, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL))     ; Previous(16, 608, 969, 73)
+	Global $LogTicker = GUICtrlCreateEdit("", 120, 608, 857, 73, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $WS_VSCROLL)) ; Previous(16, 608, 969, 73)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKHEIGHT)
 	GUICtrlSetState($LogTicker, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
@@ -13882,20 +13913,20 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 ;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 
-	Local $tX = 8, $tY = 54     ; Starting Location
-	Local $tGroupW = 89, $tButtonW = $tGroupW - 14, $tButtonH = 25, $tButtonGapY = 3     ; Default Group Dimensions
+	Local $tX = 8, $tY = 54 ; Starting Location
+	Local $tGroupW = 89, $tButtonW = $tGroupW - 14, $tButtonH = 25, $tButtonGapY = 3 ; Default Group Dimensions
 
 	Local $tButtons = 4, $tGroupH = (($tButtonH + $tButtonGapY) * $tButtons + 17)
-	Global $ShowWindows = GUICtrlCreateGroup("Show Window", $tX, $tY, $tGroupW, $tGroupH)     ; (8, 48, 89, 145)
+	Global $ShowWindows = GUICtrlCreateGroup("Show Window", $tX, $tY, $tGroupW, $tGroupH) ; (8, 48, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 16
-	Global $ServerInfo = GUICtrlCreateButton("Tools", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 64, 75, 25)
+	Global $ServerInfo = GUICtrlCreateButton("Tools", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 64, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_Tools")
 	GUICtrlSetTip(-1, "Open TOOLS window")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $Players = GUICtrlCreateButton("Players", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 96, 75, 25)
+	Global $Players = GUICtrlCreateButton("Players", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 96, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetState(-1, $GUI_ENABLE)
 ;~ 	If $aPlayerCountShowTF Then GUICtrlSetState(-1, $GUI_DISABLE)
@@ -13903,14 +13934,14 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetTip(-1, "Show Online Players Window")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $Config = GUICtrlCreateButton("CONFIG", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 128, 75, 25)
+	Global $Config = GUICtrlCreateButton("CONFIG", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 128, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_Config")
 	GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 	GUICtrlSetTip(-1, "Display Util Config Window")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 160, 75, 25)
+	Global $LogFile = GUICtrlCreateButton("Log/Ini Files", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 160, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_LogFile")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
@@ -13923,7 +13954,7 @@ Func ShowMainGUI($tSplash = 0)
 	Local $tButtons = 6, $tGroupH = (($tButtonH + $tButtonGapY) * $tButtons + 17)
 ;~ 	Local $tButtons = 6, $tGroupH = (32 * $tButtons + 17)
 	Global $aAllGridsEnableYN = IniRead($aUtilCFGFile, "CFG", "aAllGridsEnableYN", "yes")
-	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", $tX, $tY, $tGroupW, $tGroupH + 14)     ; Manual(8, 200, 89, 145)
+	Global $RestartAllGrid = GUICtrlCreateGroup("All Grids", $tX, $tY, $tGroupW, $tGroupH + 14) ; Manual(8, 200, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 12
 	Global $mGUI_Main_CB_AllGridsEnable = GUICtrlCreateCheckbox("Enable", $tX + 8, $tY)
@@ -13936,19 +13967,19 @@ Func ShowMainGUI($tSplash = 0)
 	EndIf
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 19
-	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(6, 216, 75, 25)
+	Global $SendRCONAll = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(6, 216, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendRCON")
 	GUICtrlSetTip(-1, "Send RCON Command to All Grids (Will ask Local and/or Remote grids)")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 248, 75, 25)
+	Global $SendMsgAll = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 248, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendMsg")
 	GUICtrlSetTip(-1, "Broadcast In Game Message to All Grids (Will ask Local and/or Remote grids)")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $SendMsgPresetAll = GUICtrlCreateButton("Preset Msg", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 248, 75, 25)
+	Global $SendMsgPresetAll = GUICtrlCreateButton("Preset Msg", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 248, 75, 25)
 	GUICtrlSetState($SendMsgPresetAll, $GUI_DISABLE)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllSendPresetMsg")
@@ -13961,19 +13992,19 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlSetTip(-1, "Initiate Remote Restart: Restart All LOCAL Grid Servers with Message and Delay")
 ;~ 	GUICtrlSetBkColor(-1, $cSWButtonStopServer)
 ;~ 	$tY += $tButtonH + $tButtonGapY
-	Global $RestartNowAll = GUICtrlCreateButton("Restart Grids", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 312, 75, 25)
+	Global $RestartNowAll = GUICtrlCreateButton("Restart Grids", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_AllRestartNow")
 	GUICtrlSetTip(-1, "Restart All LOCAL Grids")
 	GUICtrlSetBkColor(-1, $cSWButtonStopServer)
 	$tY += $tButtonH + $tButtonGapY
-	Global $StopServerAll = GUICtrlCreateButton("Stop Grids", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 312, 75, 25)
+	Global $StopServerAll = GUICtrlCreateButton("Stop Grids", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_StopServerAll")
 	GUICtrlSetTip(-1, "Stop All LOCAL Grids With or Without Announcement")
 	GUICtrlSetBkColor(-1, $cSWButtonStopServer)
 	$tY += $tButtonH + $tButtonGapY
-	Global $StartServerAll = GUICtrlCreateButton("Start Grids", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 312, 75, 25)
+	Global $StartServerAll = GUICtrlCreateButton("Start Grids", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 312, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_StartServerAll")
 	GUICtrlSetTip(-1, "Start All LOCAL Grids With or Without Announcement")
@@ -13983,16 +14014,16 @@ Func ShowMainGUI($tSplash = 0)
 
 	$tY += $tButtonH + $tButtonGapY + 8
 	Local $tButtons = 5, $tGroupH = (($tButtonH + $tButtonGapY) * $tButtons + 17)
-	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", $tX, $tY, $tGroupW, $tGroupH)     ; (8, 352, 89, 145)
+	Global $SelectedGrids = GUICtrlCreateGroup("Selected Grids", $tX, $tY, $tGroupW, $tGroupH) ; (8, 352, 89, 145)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	$tY += 16
-	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH)     ;(16, 368, 75, 25)
+	Global $SendRCONSel = GUICtrlCreateButton("Send RCON", $tX + 8, $tY, $tButtonW, $tButtonH) ;(16, 368, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendRCON")
 	GUICtrlSetTip(-1, "Send RCON Command to Selected Grids")
 	GUICtrlSetBkColor(-1, $cButtonDefaultBackground)
 	$tY += $tButtonH + $tButtonGapY
-	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 400, 75, 25)
+	Global $SendMsgSel = GUICtrlCreateButton("Send Msg", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 400, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendMsg")
 	GUICtrlSetTip(-1, "Send In Game Message to Selected Grids")
@@ -14004,19 +14035,19 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectSendPresetMsg")
 ;~ 	GUICtrlSetTip(-1, "Broadcast In Game User-Definable Preset Message to Selected Grids")
 ;~ 	$tY += $tButtonH + $tButtonGapY
-	Global $SendMsgPresetSelect = GUICtrlCreateButton("Restart Grids", $tX + 8, $tY, $tButtonW, $tButtonH)     ; Manual(16, 248, 75, 25)
+	Global $SendMsgPresetSelect = GUICtrlCreateButton("Restart Grids", $tX + 8, $tY, $tButtonW, $tButtonH) ; Manual(16, 248, 75, 25)
 	GUICtrlSetBkColor(-1, $cSWButtonStopServer)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectRestartGrids")
 	GUICtrlSetTip(-1, "Restart Selected Grids With or Without Announcement")
 	$tY += $tButtonH + $tButtonGapY
-	Global $StopServers = GUICtrlCreateButton("Stop Grid(s)", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 464, 75, 25)
+	Global $StopServers = GUICtrlCreateButton("Stop Grid(s)", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 464, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStopServers")
 	GUICtrlSetTip(-1, "Stop Selected Grids With or Without Announcement")
 	GUICtrlSetBkColor(-1, $cSWButtonStopServer)
 	$tY += $tButtonH + $tButtonGapY
-	Global $StartServers = GUICtrlCreateButton("Start Grid(s)", $tX + 8, $tY, $tButtonW, $tButtonH)     ; (16, 432, 75, 25)
+	Global $StartServers = GUICtrlCreateButton("Start Grid(s)", $tX + 8, $tY, $tButtonW, $tButtonH) ; (16, 432, 75, 25)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_B_SelectStartServers")
 	GUICtrlSetTip(-1, "Start Selected Grids")
@@ -14142,14 +14173,14 @@ Func ShowMainGUI($tSplash = 0)
 		_GUICtrlListView_JustifyColumn($wMainListViewWindow, $i, 2)
 	Next
 	Local $tW1 = 24, $tH1 = 16
-	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5)     ; Load ListView Icons into memory
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1)     ; 0 - Yes toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1)     ; 1 - No toggle 0
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1)     ; 2 - Red button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1)     ; 3 - Green button 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1)     ; 4 - Green checkmark 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1)     ; 5 - Gray checkmark 1
-	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_blank.png", $tW1, $tH1)     ; 6 - Blank
+	Global $hImage = _GUIImageList_Create($tW1, $tH1, 5) ; Load ListView Icons into memory
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_on_left0.png", $tW1, $tH1) ; 0 - Yes toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_toggle_off_left0.png", $tW1, $tH1) ; 1 - No toggle 0
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_green_left1.png", $tW1, $tH1) ; 2 - Red button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_button_red_left1.png", $tW1, $tH1) ; 3 - Green button 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_green_left1.png", $tW1, $tH1) ; 4 - Green checkmark 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_gray_left1.png", $tW1, $tH1) ; 5 - Gray checkmark 1
+	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_blank.png", $tW1, $tH1) ; 6 - Blank
 ;~ 	_ImageToGUIImageListResized($hImage, $aFolderTemp & "i_check_left2.png", $tW1, $tH1)		; 5 - Green checkmark 2
 ;~ 		_GUIImageList_AddIcon($hImage, @ScriptDir & "\AtlasUtilFiles\i_toggle_on.ico") 			; 0 - Yes slider
 ;~ 		_GUIImageList_AddIcon($hImage, $aIconFile, 17) 			; 0 - Yes slider
@@ -14182,23 +14213,23 @@ Func ShowMainGUI($tSplash = 0)
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
 				If $xGridReadyTF[$i] Then
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 				Else
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status Starting
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status Starting
 				EndIf
-			Else     ; Server Not running
+			Else ; Server Not running
 				$aServerPID[$i] = ""
-				If $xLocalGrid[$i] = "yes" Then     ; Local Server
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[4]     ; Status Disabled
-				Else     ; Remote Server
+				If $xLocalGrid[$i] = "yes" Then ; Local Server
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[4] ; Status Disabled
+				Else ; Remote Server
 					$aHasRemoteServersTF = True
-					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; Remote Server with Online Players
-						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
-					Else     ; Remote Server without ListPlayers response (offline)
+					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
+						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
+					Else ; Remote Server without ListPlayers response (offline)
 						If $aPollRemoteServersYN = "yes" Then
-							$aMainLVW[$i][11] = $xServerStatusLabelsMain[3]     ; Status Offline
+							$aMainLVW[$i][11] = $xServerStatusLabelsMain[3] ; Status Offline
 						Else
-							$aMainLVW[$i][11] = $xServerStatusLabelsMain[5]     ; Status Poll Off
+							$aMainLVW[$i][11] = $xServerStatusLabelsMain[5] ; Status Poll Off
 						EndIf
 					EndIf
 				EndIf
@@ -14208,28 +14239,28 @@ Func ShowMainGUI($tSplash = 0)
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
 				If $aServerOnlinePlayerYN = "no" Then
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 				EndIf
-			Else     ; Server Not running
+			Else ; Server Not running
 				$aServerPID[$i] = ""
 				If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
 					If $aServerOnlinePlayerYN = "no" Then
-						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 					Else
-						$aMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status Starting
+						$aMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status Starting
 					EndIf
 				Else
-					If $xLocalGrid[$i] = "yes" Then     ; Local Server
-						$aMainLVW[$i][11] = $xServerStatusLabelsMain[4]     ; Status Disabled
-					Else     ; Remote Server
+					If $xLocalGrid[$i] = "yes" Then ; Local Server
+						$aMainLVW[$i][11] = $xServerStatusLabelsMain[4] ; Status Disabled
+					Else ; Remote Server
 						$aHasRemoteServersTF = True
-						If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; Remote Server with Online Players
-							$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
-						Else     ; Remote Server without ListPlayers response (offline)
+						If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
+							$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
+						Else ; Remote Server without ListPlayers response (offline)
 							If $aPollRemoteServersYN = "yes" Then
-								$aMainLVW[$i][11] = $xServerStatusLabelsMain[3]     ; Status Offline
+								$aMainLVW[$i][11] = $xServerStatusLabelsMain[3] ; Status Offline
 							Else
-								$aMainLVW[$i][11] = $xServerStatusLabelsMain[5]     ; Status Poll Off
+								$aMainLVW[$i][11] = $xServerStatusLabelsMain[5] ; Status Poll Off
 							EndIf
 						EndIf
 					EndIf
@@ -14238,40 +14269,40 @@ Func ShowMainGUI($tSplash = 0)
 		Next
 	EndIf
 	For $i = 0 To ($aServerGridTotal - 1)
-		$aMainLVW[$i][0] = ""     ; $xStartGrid[$i] ; Checked YN
+		$aMainLVW[$i][0] = "" ; $xStartGrid[$i] ; Checked YN
 		If $xStartGrid[$i] <> "yes" Then
-			$aMainLVW[$i][1] = "--"     ; Local YN
+			$aMainLVW[$i][1] = "--" ; Local YN
 		Else
-			$aMainLVW[$i][1] = $xStartGrid[$i]     ; Local YN
+			$aMainLVW[$i][1] = $xStartGrid[$i] ; Local YN
 		EndIf
 		If $xLocalGrid[$i] <> "yes" Then
-			$aMainLVW[$i][2] = "yes"     ; Local YN
+			$aMainLVW[$i][2] = "yes" ; Local YN
 			$aMainLVW[$i][3] = "--"
 		Else
-			$aMainLVW[$i][2] = "--"     ; Local YN
+			$aMainLVW[$i][2] = "--" ; Local YN
 			$aMainLVW[$i][3] = "yes"
 		EndIf
-		$aMainLVW[$i][4] = $xServerNames[$i]     ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$aMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme)     ; Grid
+		$aMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$aMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme) ; Grid
 		If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) Then
-			$aMainLVW[$i][6] = $xServerPlayerCount[$i] & " / " & $aServerMaxPlayers     ; Online PLayers
+			$aMainLVW[$i][6] = $xServerPlayerCount[$i] & " / " & $aServerMaxPlayers ; Online PLayers
 		Else
-			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers     ; Online PLayers
+			$aMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
 		EndIf
 		If $xStartGrid[$i] = "yes" Then
-			$aMainLVW[$i][7] = "--"     ; CPU
+			$aMainLVW[$i][7] = "--" ; CPU
 			If $aDisableMemCPUYN = "no" Then
 				Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-				$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB"     ; Memory
+				$aMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) & " MB" ; Memory
 			Else
-				$aMainLVW[$i][8] = "--"     ; Memory
+				$aMainLVW[$i][8] = "--" ; Memory
 			EndIf
 		Else
-			$aMainLVW[$i][7] = ""     ; CPU
-			$aMainLVW[$i][8] = ""     ; Memory
+			$aMainLVW[$i][7] = "" ; CPU
+			$aMainLVW[$i][8] = "" ; Memory
 		EndIf
-		$aMainLVW[$i][9] = $xServerAltSaveDir[$i]     ; Folder
-		$aMainLVW[$i][10] = $aServerPID[$i]     ; PID
+		$aMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
+		$aMainLVW[$i][10] = $aServerPID[$i] ; PID
 		Local $aString = ""
 		For $x = 0 To 10
 			$aString &= $aMainLVW[$i][$x] & "|"
@@ -14283,14 +14314,14 @@ Func ShowMainGUI($tSplash = 0)
 		Next
 	Next
 
-	For $i = 0 To ($aServerGridTotal - 1)     ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
 		If $xStartGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 0)
 		Else
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 1, 1)
 		EndIf
 	Next
-	For $i = 0 To ($aServerGridTotal - 1)     ; Place icon for RUN column
+	For $i = 0 To ($aServerGridTotal - 1) ; Place icon for RUN column
 		If $xLocalGrid[$i] = "yes" Then
 			_GUICtrlListView_AddSubItem($wMainListViewWindow, $i, "", 2, 4)
 		Else
@@ -14301,7 +14332,7 @@ Func ShowMainGUI($tSplash = 0)
 	Global $aGUIListViewEX = _GUIListViewEx_Init($wMainListViewWindow, $aMainLVW, 0, 0, True, 32 + 1024)
 	;	Global $aGUIListViewEX = _GUIListViewEx_Init($wMainListViewWindow, $aMainLVW, 0, 0, True, 2 + 32 + 1024)
 	;	For $i = 0 To (UBound($aGUI_Main_Columns) - 1)
-	_GUIListViewEx_SetEditStatus($aGUIListViewEX, "*", 0)     ; 0 = Not editable
+	_GUIListViewEx_SetEditStatus($aGUIListViewEX, "*", 0) ; 0 = Not editable
 	;	Next
 	Local $aSelCol[4] = [Default, $cSWBackground, Default, Default]
 	_GUIListViewEx_SetDefColours($aGUIListViewEX, $aSelCol)
@@ -14322,19 +14353,19 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 				EndIf
 ;~ 			EndIf
 ;~ 		EndIf
-		If $aMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then     ; Offline
+		If $aMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then ; Offline
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $i, 11)
 			$xServerCrashed[$i] = False
-		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then     ; CRASHED
+		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then ; CRASHED
 			$xServerCrashed[$i] = True
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $i, 11)
-		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then     ; Running
+		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then ; Running
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $i, 11)
-		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then     ; Disabled
+		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then ; Disabled
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
-		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then     ; Starting
+		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then ; Starting
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWStarting & ";", $i, 11)
-		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsAnnounce[5] Then     ; Poll Off
+		ElseIf $aMainLVW[$i][11] = $xServerStatusLabelsAnnounce[5] Then ; Poll Off
 			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $i, 11)
 			$xServerCrashed[$i] = False
 		EndIf
@@ -14358,7 +14389,7 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetBkColor(-1, $cSWBackground)
 	GUICtrlSetTip(-1, "Seconds: 30-600")
 	$gY = 560
-	Global $IconRefreshPlayers = GUICtrlCreateIcon($aIconFile, 205, 558, $gY, 16, 16)     ; 567
+	Global $IconRefreshPlayers = GUICtrlCreateIcon($aIconFile, 205, 558, $gY, 16, 16) ; 567
 	GUICtrlSetResizing(-1, $GUI_DOCKRIGHT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	GUICtrlSetOnEvent(-1, "GUI_Main_I_IconRefreshPlayers")
 	GUICtrlSetTip(-1, "Check for Online Players")
@@ -14401,7 +14432,7 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	GUICtrlSetState($TotalPlayersEdit, $GUI_FOCUS)
 	DllCall('user32.dll', 'int', 'HideCaret', 'hwnd', '')
-	GUICtrlSetData(-1, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers)
+	GUICtrlSetData(-1, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers)
 	GUICtrlSetBkColor(-1, $cLWBackground)
 	GUICtrlSetTip(-1, "Total Players Online")
 	#EndRegion ### END Koda GUI section ###
@@ -14418,23 +14449,23 @@ Func ShowMainGUI($tSplash = 0)
 		For $i = 0 To ($aServerGridTotal - 1)
 			If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
 				If $xGridReadyTF[$i] Then
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 				Else
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status Starting
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status Starting
 				EndIf
-			Else     ; Server Not running
+			Else ; Server Not running
 				$aServerPID[$i] = ""
-				If $xLocalGrid[$i] = "yes" Then     ; Local Server
-					$aMainLVW[$i][11] = $xServerStatusLabelsMain[4]     ; Status Disabled
-				Else     ; Remote Server
+				If $xLocalGrid[$i] = "yes" Then ; Local Server
+					$aMainLVW[$i][11] = $xServerStatusLabelsMain[4] ; Status Disabled
+				Else ; Remote Server
 					$aHasRemoteServersTF = True
-					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; Remote Server with Online Players
-						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
-					Else     ; Remote Server without ListPlayers response (offline)
+					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
+						$aMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
+					Else ; Remote Server without ListPlayers response (offline)
 						If $aPollRemoteServersYN = "yes" Then
-							$aMainLVW[$i][11] = $xServerStatusLabelsMain[3]     ; Status Offline
+							$aMainLVW[$i][11] = $xServerStatusLabelsMain[3] ; Status Offline
 						Else
-							$aMainLVW[$i][11] = $xServerStatusLabelsMain[5]     ; Status Poll Off
+							$aMainLVW[$i][11] = $xServerStatusLabelsMain[5] ; Status Poll Off
 						EndIf
 					EndIf
 				EndIf
@@ -14523,70 +14554,70 @@ Func GUIUpdateQuick()
 	For $i = 0 To ($aServerGridTotal - 1)
 		SetStatusBusy("Server process check in progress...", "Updating: Data Grid " & _ServerNamingScheme($i, $aNamingScheme))
 		If $xStartGrid[$i] <> "yes" Then
-			$tMainLVW[$i][1] = "--"     ; Start YN
+			$tMainLVW[$i][1] = "--" ; Start YN
 		Else
-			$tMainLVW[$i][1] = $xStartGrid[$i]     ; Start YN
+			$tMainLVW[$i][1] = $xStartGrid[$i] ; Start YN
 		EndIf
 		If $xLocalGrid[$i] <> "yes" Then
-			$tMainLVW[$i][2] = "--"     ; Local YN (Remote)
+			$tMainLVW[$i][2] = "--" ; Local YN (Remote)
 			$tMainLVW[$i][3] = "yes"
 			$aGridSomeRemoteTF = True
 		Else
-			$tMainLVW[$i][2] = "yes"     ; Local YN (Local)
+			$tMainLVW[$i][2] = "yes" ; Local YN (Local)
 			$tMainLVW[$i][3] = "--"
 		EndIf
-		$tMainLVW[$i][4] = $xServerNames[$i]     ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
-		$tMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme)     ; Grid
+		$tMainLVW[$i][4] = $xServerNames[$i] ; "Server " & $xServergridx[$i] & $xServergridy[$i] ; Server Name
+		$tMainLVW[$i][5] = _ServerNamingScheme($i, $aNamingScheme) ; Grid
 		If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And $aServerOnlinePlayerYN = "yes" And $xGridReadyTF[$i] Then
-			$tMainLVW[$i][6] = $xServerPlayerCount[$i] & " / " & $aServerMaxPlayers     ; Online PLayers
+			$tMainLVW[$i][6] = $xServerPlayerCount[$i] & " / " & $aServerMaxPlayers ; Online PLayers
 		Else
-			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers     ; Online PLayers
+			$tMainLVW[$i][6] = "-- / " & $aServerMaxPlayers ; Online PLayers
 		EndIf
 		If $xStartGrid[$i] = "yes" Then
 			If $aDisableMemCPUYN = "no" Then
 				Local $tCPU = _ProcessUsageTracker_GetUsage($xServerCPU[$i])
-				$tMainLVW[$i][7] = Round($tCPU, 1) & "%"     ; CPU
+				$tMainLVW[$i][7] = Round($tCPU, 1) & "%" ; CPU
 				Local $aMemTmp = ($aServerMem[$i] / (1024 ^ 2))
-				$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp)     ; & " MB" ; Memory
+				$tMainLVW[$i][8] = _AddCommasDecimalNo($aMemTmp) ; & " MB" ; Memory
 			Else
 				$tMainLVW[$i][7] = "--"
 				$tMainLVW[$i][8] = "--"
 			EndIf
 		Else
-			$tMainLVW[$i][7] = ""     ; CPU
-			$tMainLVW[$i][8] = ""     ; Memory
+			$tMainLVW[$i][7] = "" ; CPU
+			$tMainLVW[$i][8] = "" ; Memory
 		EndIf
-		$tMainLVW[$i][9] = $xServerAltSaveDir[$i]     ; Folder
+		$tMainLVW[$i][9] = $xServerAltSaveDir[$i] ; Folder
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
 			$aAnyGridRunning = True
 			$xCloseServerTF[$i] = False
 			If $aServerOnlinePlayerYN = "no" Then
-				$tMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+				$tMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 			Else
 				If $xGridReadyTF[$i] Then
 					If $xFireWallUseYN[$i] = "yes" Then
-						If $xFireWallStatus[$i] = "Allowed" Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+						If $xFireWallStatus[$i] = "Allowed" Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 					Else
-						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 					EndIf
 				Else
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[6]     ; Status 6 No Response
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[5] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
-					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[6] Then     ; Status 6 No Response
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[6] ; Status 6 No Response
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[5] Then $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
+					If $aMainLVW[$i][11] = $xServerStatusLabelsMain[6] Then ; Status 6 No Response
 						If $xGridStartedNoReponseTF[$i] Then
-							$tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status 0 Starting
+							$tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status 0 Starting
 							$xGridStartedNoReponseTF[$i] = False
 						Else
-							$tMainLVW[$i][11] = $xServerStatusLabelsMain[6]     ; Status 6 No Response
+							$tMainLVW[$i][11] = $xServerStatusLabelsMain[6] ; Status 6 No Response
 						EndIf
 					EndIf
 				EndIf
 			EndIf
-		Else     ; Server Not running
+		Else ; Server Not running
 			If $xLocalGrid[$i] = "no" Then
 				$aServerPID[$i] = "Remote"
 			Else
@@ -14599,41 +14630,41 @@ Func GUIUpdateQuick()
 			If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
 				If $xCloseServerTF[$i] Then
 					If $aServerOnlinePlayerYN = "no" Then
-						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
+						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
 						$aAnyGridRunning = True
 					Else
-						$tMainLVW[$i][11] = $xServerStatusLabelsMain[0]     ; Status Starting
+						$tMainLVW[$i][11] = $xServerStatusLabelsMain[0] ; Status Starting
 						$aAnyGridRunning = True
 					EndIf
 				Else
-					$tMainLVW[$i][11] = $xServerStatusLabelsMain[2]     ; Status CRASHED
+					$tMainLVW[$i][11] = $xServerStatusLabelsMain[2] ; Status CRASHED
 					$xGridRestartCount[$i] += 1
 					If $xGridRestartCount[$i] < 2 Then $xGridCrashTime[$i] = _NowCalc()
 				EndIf
 			Else
-				If $xLocalGrid[$i] = "yes" Then     ; Local Server
-					$tMainLVW[$i][11] = $xServerStatusLabelsMain[4]     ; Status Disabled
-				Else     ; Remote Server
+				If $xLocalGrid[$i] = "yes" Then ; Local Server
+					$tMainLVW[$i][11] = $xServerStatusLabelsMain[4] ; Status Disabled
+				Else ; Remote Server
 					$aHasRemoteServersTF = True
-					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then     ; Remote Server with Online Players
-						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1]     ; Status Running
-					Else     ; Remote Server without ListPlayers response (offline)
+					If (UBound($xServerPlayerCount) = $aServerGridTotal) And ($xServerPlayerCount[$i] > -1) And ($aServerOnlinePlayerYN = "yes") Then ; Remote Server with Online Players
+						$tMainLVW[$i][11] = $xServerStatusLabelsMain[1] ; Status Running
+					Else ; Remote Server without ListPlayers response (offline)
 						If $aPollRemoteServersYN = "yes" Then
-							$tMainLVW[$i][11] = $xServerStatusLabelsMain[3]     ; Status Offline
+							$tMainLVW[$i][11] = $xServerStatusLabelsMain[3] ; Status Offline
 						Else
-							$tMainLVW[$i][11] = $xServerStatusLabelsMain[5]     ; Status Poll Off
+							$tMainLVW[$i][11] = $xServerStatusLabelsMain[5] ; Status Poll Off
 						EndIf
 					EndIf
 				EndIf
 			EndIf
 		EndIf
 		If $tMainLVW[$i][11] <> $aMainLVW[$i][11] Then
-			If $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then     ; Starting
+			If $tMainLVW[$i][11] = $xServerStatusLabelsMain[0] Then ; Starting
 				_GUIUpdateStatus($i, 0)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[0], $xServerCrashed[$i], 1)
 ;~ 				LogWrite(" [Status] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID [" & $aServerPID[$i] & "] """ & $xServerNames[$i] & """ starting.")
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then     ; Running
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[1] Then ; Running
 				_GUIUpdateStatus($i, 1)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				If $sDiscordReadyStatusDelay = 0 Then
@@ -14643,29 +14674,29 @@ Func GUIUpdateQuick()
 					$sDiscordReadyStatusDelaTimer[$i] = TimerInit()
 				EndIf
 				LogWrite(" [Status] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID [" & $aServerPID[$i] & "] """ & $xServerNames[$i] & """ running.")
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then     ; CRASHED
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[2] Then ; CRASHED
 				$xServerCrashed[$i] = True
 				_GUIUpdateStatus($i, 2)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[2], $xServerCrashed[$i], 1)
 				LogWrite(" [Status] WARNING!!! Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID [" & $aServerPID[$i] & "] """ & $xServerNames[$i] & """ CRASHED.")
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then     ; Offline
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[3] Then ; Offline
 				_GUIUpdateStatus($i, 3)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[3], $xServerCrashed[$i], 1)
 				LogWrite(" [Status] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") """ & $xServerNames[$i] & """ offline.")
 				$xServerCrashed[$i] = False
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then     ; Disabled
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[4] Then ; Disabled
 				_GUIUpdateStatus($i, 4)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[4], $xServerCrashed[$i], 1)
 				LogWrite(" [Status] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") """ & $xServerNames[$i] & """ disabled.")
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsAnnounce[5] Then     ; Poll Off
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsAnnounce[5] Then ; Poll Off
 				_GUIUpdateStatus($i, 5)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[5], $xServerCrashed[$i], 1)
 				$xServerCrashed[$i] = False
-			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[6] Then     ; No Response
+			ElseIf $tMainLVW[$i][11] = $xServerStatusLabelsMain[6] Then ; No Response
 				_GUIUpdateStatus($i, 6)
 				$aMainLVW[$i][11] = $tMainLVW[$i][11]
 				_SendStatusUpdate($i, $xServerStatusLabelsAnnounce[6], $xServerCrashed[$i], 1)
@@ -14673,7 +14704,7 @@ Func GUIUpdateQuick()
 			EndIf
 		EndIf
 
-		$tMainLVW[$i][10] = $aServerPID[$i]     ; PID
+		$tMainLVW[$i][10] = $aServerPID[$i] ; PID
 		If $xServerPlayerCount[$i] > -1 Then
 			$tTotalPlayers += $xServerPlayerCount[$i]
 			If $xLocalGrid[$i] And $xStartGrid[$i] Then $tTotalLocalPlayers += $xServerPlayerCount[$i]
@@ -14725,7 +14756,7 @@ Func GUIUpdateQuick()
 		$aTotalPlayersOnline = $tTotalPlayers
 	EndIf
 	If $tTotalPlayerError Then $aTotalPlayersOnline = "--"
-	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline)     ; & " / " & $aServerMaxPlayers) ; Players Edit Window
+	GUICtrlSetData($TotalPlayersEdit, $aTotalPlayersOnline) ; & " / " & $aServerMaxPlayers) ; Players Edit Window
 	Local $tChange = False
 	If UBound($xPlayersJoined) = 0 Then ReDim $xPlayersJoined[1]
 	If UBound($xPlayersLeft) = 0 Then ReDim $xPlayersLeft[1]
@@ -14828,19 +14859,19 @@ Func _GUIUpdateStatus($tGridToChange, $tText)
 	If WinExists($wGUIMainWindow) Then
 		_GUICtrlListView_SetItemText($wMainListViewWindow, $tGridToChange, $xServerStatusLabelsMain[$tText], 11)
 		If $tText = 0 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWStarting & ";", $tGridToChange, 11)     ; Offline
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWStarting & ";", $tGridToChange, 11) ; Offline
 		ElseIf $tText = 1 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $tGridToChange, 11)     ; Running
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWRunning & ";", $tGridToChange, 11) ; Running
 		ElseIf $tText = 2 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $tGridToChange, 11)     ; CRASHED
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWCrashed & ";", $tGridToChange, 11) ; CRASHED
 		ElseIf $tText = 3 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $tGridToChange, 11)     ; Starting
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWOffline & ";", $tGridToChange, 11) ; Starting
 		ElseIf $tText = 4 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $tGridToChange, 11)     ; Disabled
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $tGridToChange, 11) ; Disabled
 		ElseIf $tText = 5 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $tGridToChange, 11)     ; Poll Off
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWDisabled & ";", $tGridToChange, 11) ; Poll Off
 		ElseIf $tText = 6 Then
-			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWNoResponse & ";", $tGridToChange, 11)     ; No Response
+			_GUIListViewEx_SetColour($aGUIListViewEX, $cSWNoResponse & ";", $tGridToChange, 11) ; No Response
 		EndIf
 	EndIf
 EndFunc   ;==>_GUIUpdateStatus
@@ -14979,12 +15010,12 @@ Func LogWindow($lDefaultTabNo = 1)
 		_WinAPI_SetWindowPos($LogWindow, $HWND_NOTOPMOST, 0, 0, 0, 0, BitOR($SWP_NOACTIVATE, $SWP_NOMOVE, $SWP_NOSIZE))
 	Else
 		#Region ### START Koda GUI section ### Form=g:\game server files\autoit\atlasserverupdateutility\temp work files\atladkoda(log-b1).kxf
-		Local $lWidth = 1000, $lHeight = 600     ; 906 , 555
+		Local $lWidth = 1000, $lHeight = 600 ; 906 , 555
 		Global $LogWindow = GUICreate($aUtilityVer & " Logs & Full Config Files", $lWidth, $lHeight, -1, -1, BitOR($GUI_SS_DEFAULT_GUI, $WS_MAXIMIZEBOX, $WS_SIZEBOX, $WS_THICKFRAME, $WS_TABSTOP))
 		GUISetIcon($aIconFile, 99)
 		GUISetBkColor($cMWBackground)
 		GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Log_Close", $LogWindow)
-		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18))     ;  889, 537
+		$lLogTabWindow = GUICtrlCreateTab(8, 8, ($lWidth - 17), ($lHeight - 18)) ;  889, 537
 		GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKVCENTER)
 		; ------------------------------------------------------------------------------------------------------------
 		$lBasicTab = GUICtrlCreateTabItem("Basic Log")
@@ -15684,40 +15715,40 @@ Func WizardExisting($wDefaultTabNo = 1)
 		$Group2 = GUICtrlCreateGroup("RCON Ports", $gX, $gY, 753, 329)
 		$gX += 24
 		$gY += $gGapSm
-		$Label10 = GUICtrlCreateLabel("Please select the entry method for the RCON ports for each grid.", $gX, $gY, 422, 20)     ; 233
+		$Label10 = GUICtrlCreateLabel("Please select the entry method for the RCON ports for each grid.", $gX, $gY, 422, 20) ; 233
 		GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-		Global $W2_T3_R_Import = GUICtrlCreateRadio("Import RCON ports from each grid's GameUserSettings.ini file.", $gX, $gY + 25, 361, 17)     ; 281
+		Global $W2_T3_R_Import = GUICtrlCreateRadio("Import RCON ports from each grid's GameUserSettings.ini file.", $gX, $gY + 25, 361, 17) ; 281
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Import")
-		Global $W2_T3_R_Method1 = GUICtrlCreateRadio("Entry Method 1: Direct listing of RCON ports", $gX, $gY + $gGapSm * 1 + $gGapLg * 1, 233, 17)     ; 313
+		Global $W2_T3_R_Method1 = GUICtrlCreateRadio("Entry Method 1: Direct listing of RCON ports", $gX, $gY + $gGapSm * 1 + $gGapLg * 1, 233, 17) ; 313
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Method1")
-		Global $W2_T3_R_Method2 = GUICtrlCreateRadio("Custom Method 2: Enter RCON ports one-at-a-time using a new popup window for each grid.", $gX, $gY + $gGapSm * 1 + $gGapLg * 4, 600, 17)     ; 417
+		Global $W2_T3_R_Method2 = GUICtrlCreateRadio("Custom Method 2: Enter RCON ports one-at-a-time using a new popup window for each grid.", $gX, $gY + $gGapSm * 1 + $gGapLg * 4, 600, 17) ; 417
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Method2")
-		Global $W2_T3_R_Method3 = GUICtrlCreateRadio("Custom Method 3: Auto-Assign RCON ports. Enter starting port and increment below.", $gX, $gY + $gGapSm * 1 + $gGapLg * 6, 600, 17)     ; 417
+		Global $W2_T3_R_Method3 = GUICtrlCreateRadio("Custom Method 3: Auto-Assign RCON ports. Enter starting port and increment below.", $gX, $gY + $gGapSm * 1 + $gGapLg * 6, 600, 17) ; 417
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_R_Method3")
 		GUICtrlSetState(-1, $GUI_CHECKED)
 		$gY = $gY + $gGapSm * 2 + $gGapLg * 1
-		$Label9 = GUICtrlCreateLabel("Grid RCON ports (comma separated. Use same order as grids are listed in " & $aConfigFile & "", $gX + 16, $gY, 447, 17)     ; 337
+		$Label9 = GUICtrlCreateLabel("Grid RCON ports (comma separated. Use same order as grids are listed in " & $aConfigFile & "", $gX + 16, $gY, 447, 17) ; 337
 		$gY += $gGapSm
-		Global $W2_T3_I_RCONPorts = GUICtrlCreateInput($aServerRCONPort, $gX + 16, $gY, 657, 21)     ; 361
+		Global $W2_T3_I_RCONPorts = GUICtrlCreateInput($aServerRCONPort, $gX + 16, $gY, 657, 21) ; 361
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_I_RCONPorts")
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		$gY = $gY + $gGapSm * 1 + $gGapLg * 1 + 5
-		Global $W2_T3_B_Ports = GUICtrlCreateButton("Enter Ports", $gX + 16, $gY, 75, 25)     ; 441
+		Global $W2_T3_B_Ports = GUICtrlCreateButton("Enter Ports", $gX + 16, $gY, 75, 25) ; 441
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_B_Ports")
-		Global $W2_T3_I_RCONPorts2 = GUICtrlCreateInput($aServerRCONPort, $gX + 95, $gY + 2, 573, 21)     ; 443
+		Global $W2_T3_I_RCONPorts2 = GUICtrlCreateInput($aServerRCONPort, $gX + 95, $gY + 2, 573, 21) ; 443
 		GUICtrlSetState(-1, $GUI_DISABLE)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		$gY = $gY + $gGapSm * 1 + $gGapLg * 1 + 5
-		Global $W2_T3_B_StartPort = GUICtrlCreateButton("Start Port", $gX + 16, $gY, 75, 25)     ; 233
+		Global $W2_T3_B_StartPort = GUICtrlCreateButton("Start Port", $gX + 16, $gY, 75, 25) ; 233
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_B_StartPort")
-		Global $W2_T3_I_RCONPorts3 = GUICtrlCreateInput($aW2_T3_StartPort, $gX + 95, $gY + 2, 40, 21)     ; 443
+		Global $W2_T3_I_RCONPorts3 = GUICtrlCreateInput($aW2_T3_StartPort, $gX + 95, $gY + 2, 40, 21) ; 443
 		GUICtrlSetState(-1, $GUI_DISABLE)
-		Global $W2_T3_B_Increment = GUICtrlCreateButton("Increment", $gX + 155, $gY, 75, 25)     ; 233
+		Global $W2_T3_B_Increment = GUICtrlCreateButton("Increment", $gX + 155, $gY, 75, 25) ; 233
 		GUICtrlSetOnEvent(-1, "GUI_W2_T3_B_Increment")
-		Global $W2_T3_I_RCONIncrement = GUICtrlCreateInput("2", $gX + 234, $gY + 2, 25, 21)     ; 443
+		Global $W2_T3_I_RCONIncrement = GUICtrlCreateInput("2", $gX + 234, $gY + 2, 25, 21) ; 443
 		GUICtrlSetState(-1, $GUI_DISABLE)
 		$gY += $gGapSm + 8
-		Global $W2_T3_I_Method3Ports = GUICtrlCreateInput("", $gX + 16, $gY, 657, 21)     ; 443
+		Global $W2_T3_I_Method3Ports = GUICtrlCreateInput("", $gX + 16, $gY, 657, 21) ; 443
 		GUICtrlSetState(-1, $GUI_DISABLE)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		AutoSetRCON()
@@ -15853,9 +15884,9 @@ EndFunc   ;==>GUI_WizardExist_Close
 
 Func GUI_W2_On_Tab()
 	Switch GUICtrlRead($WizardTabWindow)
-		Case 0     ; Tab 1 Atlas Folder
+		Case 0 ; Tab 1 Atlas Folder
 			GUI_W2_Last_Tab(0)
-		Case 1     ; Tab 2 AltSaveDIR
+		Case 1 ; Tab 2 AltSaveDIR
 			GUI_W2_Last_Tab(1)
 			If $iIniRead Then
 				If $aServerAltSaveSelect = 1 Then GUICtrlSetState($W2_T2_R_Default00, $GUI_CHECKED)
@@ -15867,7 +15898,7 @@ Func GUI_W2_On_Tab()
 				If GUICtrlRead($W2_T2_I_AltSaveDIR1) <> $aServerAltSaveDir Then GUICtrlSetData($W2_T2_I_AltSaveDIR1, $aServerAltSaveDir)
 				If GUICtrlRead($W2_T2_I_AltSaveDIR2) <> $aServerAltSaveDir Then GUICtrlSetData($W2_T2_I_AltSaveDIR2, $aServerAltSaveDir)
 			EndIf
-		Case 2     ; Tab 3 RCON Ports
+		Case 2 ; Tab 3 RCON Ports
 			GUI_W2_Last_Tab(2)
 			If $aConfigSettingsImported Then
 				AutoSetRCON()
@@ -15876,7 +15907,7 @@ Func GUI_W2_On_Tab()
 				GUICtrlSetData($W2_T3_I_RCONPorts2, $aServerRCONPort)
 			EndIf
 			If $iIniRead And ($aServerRCONImport = "yes") Then GUICtrlSetState($W2_T3_R_Import, $GUI_CHECKED)
-		Case 3     ; Tab 4 Grid Start
+		Case 3 ; Tab 4 Grid Start
 			GUI_W2_Last_Tab(3)
 			If $aConfigSettingsImported Then
 ;~ 				If FileExists($aGridSelectFile) Then
@@ -15896,7 +15927,7 @@ Func GUI_W2_On_Tab()
 				MsgBox($MB_OK, $aUtilName, "Cannot create GridStartSelect.ini file until the " & $aConfigFile & " file has been imported.")
 				GUICtrlSetState($Tab1, $GUI_SHOW)
 			EndIf
-		Case 4     ; Tab 5 Priority Settings
+		Case 4 ; Tab 5 Priority Settings
 			GUI_W2_Last_Tab(4)
 			If $iIniRead Then
 				GUICtrlSetData($W2_T5_I_AdminPass, $aServerAdminPass)
@@ -15906,13 +15937,13 @@ Func GUI_W2_On_Tab()
 				GUICtrlSetData($W2_T5_I_SteamCMDExtraCMD, $aSteamExtraCMD)
 				GUICtrlSetData($W2_T5_I_UpdateInterval, $aUpdateCheckInterval)
 			EndIf
-		Case 5     ; Tab 6 Review All Settings
+		Case 5 ; Tab 6 Review All Settings
 			GUI_W2_Last_Tab(5)
 			Local $tFileOpen = FileOpen($aIniFile)
 			Local $tTxt = FileRead($tFileOpen, 100000000)
 			FileClose($tFileOpen)
 			GUICtrlSetData($W2_T6_E_Config, $tTxt)
-		Case 6     ; Tab 7 Finish
+		Case 6 ; Tab 7 Finish
 			GUI_W2_Last_Tab(6)
 	EndSwitch
 EndFunc   ;==>GUI_W2_On_Tab
@@ -15972,9 +16003,9 @@ Func GUI_W2_Last_Tab($tTab)
 				"Click (YES) to Save" & @CRLF & _
 				"Click (NO) to Skip" & @CRLF & _
 				"Click (CANCEL) to Reset.", 10)
-		If $tMB = 6 Then     ; YES
+		If $tMB = 6 Then ; YES
 			GUI_W2_T6_B_Save()
-		ElseIf $tMB = 2 Then     ; CANCEL
+		ElseIf $tMB = 2 Then ; CANCEL
 			GUI_W2_T6_B_Reset()
 		EndIf
 	EndIf
@@ -16489,13 +16520,13 @@ Func WizardBlackwood()
 		$Group2 = GUICtrlCreateGroup("", 4, 4, $gWinX - 8, $gWinY - 8)
 		GUICtrlSetFont(-1, 12, 800, 0, "MS Sans Serif")
 
-		$BlackWoodLogo = GUICtrlCreatePic($aFolderTemp & "i_Blackwood.jpg", 28, 28, 172, 92, BitOR($GUI_SS_DEFAULT_PIC, $WS_BORDER))     ; 28, 28, 172, 92
-		Local $W4_L_1 = GUICtrlCreateLabel("Blackwood Wizard", 316, 52, 285, 41)     ; 316, 52, 285, 41
+		$BlackWoodLogo = GUICtrlCreatePic($aFolderTemp & "i_Blackwood.jpg", 28, 28, 172, 92, BitOR($GUI_SS_DEFAULT_PIC, $WS_BORDER)) ; 28, 28, 172, 92
+		Local $W4_L_1 = GUICtrlCreateLabel("Blackwood Wizard", 316, 52, 285, 41) ; 316, 52, 285, 41
 		GUICtrlSetFont(-1, 24, 800, 0, "MS Sans Serif")
 		GUICtrlSetColor(-1, 0xFF0000)
 
 		Local $gStartY = 128, $gStartX = 25, $gX = 20, $gY = 0, $gGapY = 27, $gOptionsX = 3
-		$Group3 = GUICtrlCreateGroup("Server", $gStartX, $gStartY, $gWinX - ($gStartX * 2), $gOptionsX * $gGapY + 15)     ; 857, 73
+		$Group3 = GUICtrlCreateGroup("Server", $gStartX, $gStartY, $gWinX - ($gStartX * 2), $gOptionsX * $gGapY + 15) ; 857, 73
 		GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 		$gY += 17
 		Local $W4_L_2 = GUICtrlCreateLabel("Select Atlas Dedicated Server installation folder: ", $gStartX + $gX, $gStartY + $gY, 293, 20)
@@ -16528,95 +16559,95 @@ Func WizardBlackwood()
 		$Group4 = GUICtrlCreateGroup("RCON IP Address", $gStartX, $gStartY, 345, $gOptionsX * $gGapY + 10)
 		GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 		$gY += 17
-		Global $W4_R_UseServerIP = GUICtrlCreateRadio("Use Server IP (Requires port forwarding with router loopback)", $gStartX + $gX, $gStartY + $gY, 313, 17)     ; X,228,313,17
+		Global $W4_R_UseServerIP = GUICtrlCreateRadio("Use Server IP (Requires port forwarding with router loopback)", $gStartX + $gX, $gStartY + $gY, 313, 17) ; X,228,313,17
 		GUICtrlSetOnEvent(-1, "W4_R_UseServerIP")
 		GUICtrlSetState(-1, $GUI_CHECKED)
 		$gY += 20
-		Global $W4_R_CustomIP = GUICtrlCreateRadio("Custom IP", $gStartX + $gX, $gStartY + $gY, 65, 17)     ; 48,248,65,17
+		Global $W4_R_CustomIP = GUICtrlCreateRadio("Custom IP", $gStartX + $gX, $gStartY + $gY, 65, 17) ; 48,248,65,17
 		GUICtrlSetOnEvent(-1, "W4_R_CustomIP")
-		Global $W4_I_RCONIP = GUICtrlCreateInput("", $gStartX + $gX + 72, $gStartY + $gY - 2, 145, 21)     ; 120, 248,145,21
+		Global $W4_I_RCONIP = GUICtrlCreateInput("", $gStartX + $gX + 72, $gStartY + $gY - 2, 145, 21) ; 120, 248,145,21
 		GUICtrlSetOnEvent(-1, "W4_I_RCONIP")
-		Local $W4_L_4 = GUICtrlCreateLabel("(Ex: 127.0.0.1)", $gStartX + $gX + 220, $gStartY + $gY, 73, 17)     ; 268,252,73,17
+		Local $W4_L_4 = GUICtrlCreateLabel("(Ex: 127.0.0.1)", $gStartX + $gX + 220, $gStartY + $gY, 73, 17) ; 268,252,73,17
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 		Local $gStartX = 380, $gX = 20, $gY = 0, $gOptionsX = 2
-		$Group8 = GUICtrlCreateGroup("Util Config", $gStartX, $gStartY, 501, $gOptionsX * $gGapY + 10)     ; 380 - 28
+		$Group8 = GUICtrlCreateGroup("Util Config", $gStartX, $gStartY, 501, $gOptionsX * $gGapY + 10) ; 380 - 28
 		GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 		$gY += 17
-		Local $W4_L_5 = GUICtrlCreateLabel("Atlas server and mod update check interval", $gStartX + $gX, $gStartY + $gY, 209, 17, $SS_RIGHT)     ; 288,232,209,17
-		Global $W4_I_UpdateInterval = GUICtrlCreateInput("", $gStartX + $gX + 212, $gStartY + $gY - 3, 25, 21)     ;604,228,25,21
+		Local $W4_L_5 = GUICtrlCreateLabel("Atlas server and mod update check interval", $gStartX + $gX, $gStartY + $gY, 209, 17, $SS_RIGHT) ; 288,232,209,17
+		Global $W4_I_UpdateInterval = GUICtrlCreateInput("", $gStartX + $gX + 212, $gStartY + $gY - 3, 25, 21) ;604,228,25,21
 		GUICtrlSetOnEvent(-1, "W4_I_UpdateInterval")
-		Local $W4_L_6 = GUICtrlCreateLabel("minutes (05-59)", $gStartX + $gX + 240, $gStartY + $gY, 76, 17)     ;632,232,76,17
+		Local $W4_L_6 = GUICtrlCreateLabel("minutes (05-59)", $gStartX + $gX + 240, $gStartY + $gY, 76, 17) ;632,232,76,17
 		$gY += 20
-		Global $W4_C_StartWithWindows = GUICtrlCreateCheckbox("Start with Windows", $gStartX + $gX, $gStartY + $gY, 113, 17)     ;392,252,113,17
+		Global $W4_C_StartWithWindows = GUICtrlCreateCheckbox("Start with Windows", $gStartX + $gX, $gStartY + $gY, 113, 17) ;392,252,113,17
 		GUICtrlSetOnEvent(-1, "W4_C_StartWithWindows")
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 		$gStartY += $gY + $gGapLg - 5
 		Local $gStartX = 25, $gX = 20, $gY = 0, $gOptionsX = 2, $gGapY = 24, $gPosY = 0
-		$Group6 = GUICtrlCreateGroup("Server Config", $gStartX, $gStartY, 856, 155)     ; 28,284,857,177
+		$Group6 = GUICtrlCreateGroup("Server Config", $gStartX, $gStartY, 856, 155) ; 28,284,857,177
 		GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 		$gY += 17
-		Local $W4_L_7 = GUICtrlCreateLabel("Server Name", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ;60,312,66,17
-		Global $W4_I_ServerName = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 417, 21)     ;132, 308, 417, 21
+		Local $W4_L_7 = GUICtrlCreateLabel("Server Name", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ;60,312,66,17
+		Global $W4_I_ServerName = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 417, 21) ;132, 308, 417, 21
 		GUICtrlSetOnEvent(-1, "W4_I_ServerName")
 		$gPosY = 1
-		Local $W4_L_8 = GUICtrlCreateLabel("ModList", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ; 84, 340, 41, 17
-		Global $W4_I_ModList = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 417, 21)     ; 132, 336, 417, 21
+		Local $W4_L_8 = GUICtrlCreateLabel("ModList", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ; 84, 340, 41, 17
+		Global $W4_I_ModList = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 417, 21) ; 132, 336, 417, 21
 		GUICtrlSetOnEvent(-1, "W4_I_ModList")
 		$gPosY = 2
-		Local $W4_L_9 = GUICtrlCreateLabel("Server Password", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ; 40, 368, 84, 17
-		Global $W4_I_ServerPassword = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 161, 21)     ;132, 364, 161, 21
+		Local $W4_L_9 = GUICtrlCreateLabel("Server Password", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ; 40, 368, 84, 17
+		Global $W4_I_ServerPassword = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 161, 21) ;132, 364, 161, 21
 		GUICtrlSetOnEvent(-1, "W4_I_ServerPassword")
 		$gPosY = 3
-		Local $W4_L_10 = GUICtrlCreateLabel("Admin Password", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ; 44, 392, 82, 17
-		Global $W4_I_AdminPass = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 121, 21)     ; 132, 392, 121, 21
+		Local $W4_L_10 = GUICtrlCreateLabel("Admin Password", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ; 44, 392, 82, 17
+		Global $W4_I_AdminPass = GUICtrlCreateInput("", $gStartX + $gX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 121, 21) ; 132, 392, 121, 21
 		GUICtrlSetOnEvent(-1, "W4_I_AdminPass")
 		$gPosY = 4
-		Local $W4_L_11 = GUICtrlCreateLabel("Extra commandline parameters", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY) + 10, 148, 17, $SS_RIGHT)     ; 40, 428, 148, 17
-		Global $W4_I_ExtraCMD = GUICtrlCreateInput("", $gStartX + $gX + 151, $gStartY + $gY + ($gGapY * $gPosY) - 2 + 10, 677, 21)     ; 192, 428, 681, 21
+		Local $W4_L_11 = GUICtrlCreateLabel("Extra commandline parameters", $gStartX + $gX, $gStartY + $gY + ($gGapY * $gPosY) + 10, 148, 17, $SS_RIGHT) ; 40, 428, 148, 17
+		Global $W4_I_ExtraCMD = GUICtrlCreateInput("", $gStartX + $gX + 151, $gStartY + $gY + ($gGapY * $gPosY) - 2 + 10, 677, 21) ; 192, 428, 681, 21
 		GUICtrlSetOnEvent(-1, "W4_I_ExtraCMD")
 
 		$gPosY = 2
 		$gOffsetX = 323
-		Local $W4_L_12 = GUICtrlCreateLabel("IP Address", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 55, 17, $SS_RIGHT)     ; 368, 368, 55, 17
-		Global $W4_I_IPAddress = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 60, $gStartY + $gY + ($gGapY * $gPosY) - 2, 118, 21)     ; 428, 364, 121, 21
+		Local $W4_L_12 = GUICtrlCreateLabel("IP Address", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 55, 17, $SS_RIGHT) ; 368, 368, 55, 17
+		Global $W4_I_IPAddress = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 60, $gStartY + $gY + ($gGapY * $gPosY) - 2, 118, 21) ; 428, 364, 121, 21
 		GUICtrlSetOnEvent(-1, "W4_I_IPAddress")
 		$gPosY = 3
-		Local $W4_L_18 = GUICtrlCreateLabel("AltSaveDIR", $gStartX + $gX + $gOffsetX - 5, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT)     ; 368, 368, 55, 17
-		Global $W4_I_AltSaveDIR = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 60, $gStartY + $gY + ($gGapY * $gPosY) - 2, 118, 21)     ; 428, 364, 121, 21
+		Local $W4_L_18 = GUICtrlCreateLabel("AltSaveDIR", $gStartX + $gX + $gOffsetX - 5, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT) ; 368, 368, 55, 17
+		Global $W4_I_AltSaveDIR = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 60, $gStartY + $gY + ($gGapY * $gPosY) - 2, 118, 21) ; 428, 364, 121, 21
 		GUICtrlSetOnEvent(-1, "W4_I_AltSaveDIR")
 
-		$Group9 = GUICtrlCreateGroup("", $gStartX + $gX + 520, $gStartY + $gY - 8, 53, 57)     ; 568, 304, 53, 57
+		$Group9 = GUICtrlCreateGroup("", $gStartX + $gX + 520, $gStartY + $gY - 8, 53, 57) ; 568, 304, 53, 57
 		$gPosY = 0
-		Global $W4_R_PVP = GUICtrlCreateRadio("PVP", $gStartX + $gX + 527, $gStartY + $gY * 2 - 12 + ($gGapY * $gPosY), 45, 17)     ; 575, 318, 45, 17
+		Global $W4_R_PVP = GUICtrlCreateRadio("PVP", $gStartX + $gX + 527, $gStartY + $gY * 2 - 12 + ($gGapY * $gPosY), 45, 17) ; 575, 318, 45, 17
 		GUICtrlSetOnEvent(-1, "W4_R_PVP")
 		$gPosY = 1
-		Global $W4_R_PVE = GUICtrlCreateRadio("PVE", $gStartX + $gX + 527, $gStartY + $gY * 2 - 16 + ($gGapY * $gPosY), 45, 17)     ; 575, 338, 45, 17
+		Global $W4_R_PVE = GUICtrlCreateRadio("PVE", $gStartX + $gX + 527, $gStartY + $gY * 2 - 16 + ($gGapY * $gPosY), 45, 17) ; 575, 338, 45, 17
 		GUICtrlSetOnEvent(-1, "W4_R_PVE")
 
 		$gOffsetX = 583
 		$gPosY = 0
-		Local $W4_L_13 = GUICtrlCreateLabel("Max Players", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ; 648, 312, 61, 17
-		Global $W4_I_MaxPlayers = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 25, 21)     ; 716, 308, 25, 21
+		Local $W4_L_13 = GUICtrlCreateLabel("Max Players", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ; 648, 312, 61, 17
+		Global $W4_I_MaxPlayers = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 25, 21) ; 716, 308, 25, 21
 		GUICtrlSetOnEvent(-1, "W4_I_MaxPlayers")
 		$gPosY = 1
-		Local $W4_L_14 = GUICtrlCreateLabel("Reserved Slots", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT)     ; 636, 340, 76, 17
-		Global $W4_I_ReservedSlots = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 25, 21)     ; 716, 336, 25, 21
+		Local $W4_L_14 = GUICtrlCreateLabel("Reserved Slots", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 80, 17, $SS_RIGHT) ; 636, 340, 76, 17
+		Global $W4_I_ReservedSlots = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 84, $gStartY + $gY + ($gGapY * $gPosY) - 2, 25, 21) ; 716, 336, 25, 21
 		GUICtrlSetOnEvent(-1, "W4_I_ReservedSlots")
 
 		$gOffsetX = 713
 		$gPosY = 0
-		Local $W4_L_15 = GUICtrlCreateLabel("RCON Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT)     ; 764, 368, 57, 17
-		Global $W4_I_RCONPort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21)     ; 824, 364, 49, 21
+		Local $W4_L_15 = GUICtrlCreateLabel("RCON Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT) ; 764, 368, 57, 17
+		Global $W4_I_RCONPort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21) ; 824, 364, 49, 21
 		GUICtrlSetOnEvent(-1, "W4_I_RCONPort")
 		$gPosY = 1
-		Local $W4_L_16 = GUICtrlCreateLabel("Query Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT)     ; 764, 312, 54, 17
-		Global $W4_I_QueryPort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21)     ; 824, 308, 49, 21
+		Local $W4_L_16 = GUICtrlCreateLabel("Query Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT) ; 764, 312, 54, 17
+		Global $W4_I_QueryPort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21) ; 824, 308, 49, 21
 		GUICtrlSetOnEvent(-1, "W4_I_QueryPort")
 		$gPosY = 2
-		Local $W4_L_l7 = GUICtrlCreateLabel("Game Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT)     ; 764, 340, 54, 17
-		Global $W4_I_GamePort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21)     ; 824, 336, 49, 21
+		Local $W4_L_l7 = GUICtrlCreateLabel("Game Port", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 60, 17, $SS_RIGHT) ; 764, 340, 54, 17
+		Global $W4_I_GamePort = GUICtrlCreateInput("", $gStartX + $gX + $gOffsetX + 64, $gStartY + $gY + ($gGapY * $gPosY) - 2, 49, 21) ; 824, 336, 49, 21
 		GUICtrlSetOnEvent(-1, "W4_I_GamePort")
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -16624,21 +16655,21 @@ Func WizardBlackwood()
 		$gStartY += 162
 		$gOffsetX = 0
 		$gY = 17
-		$Group7 = GUICtrlCreateGroup("Finish", $gStartX + $gOffsetX, $gStartY, 856, 54)     ; 28, 468, 277, 61
+		$Group7 = GUICtrlCreateGroup("Finish", $gStartX + $gOffsetX, $gStartY, 856, 54) ; 28, 468, 277, 61
 		GUICtrlSetFont(-1, 9, 400, 0, "MS Sans Serif")
 		$gPosY = 0
-		Global $W4_B_RestartUtilOnly = GUICtrlCreateButton("Restart Util", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 150, 25)     ; 50,490,75,25
+		Global $W4_B_RestartUtilOnly = GUICtrlCreateButton("Restart Util", $gStartX + $gX + $gOffsetX, $gStartY + $gY + ($gGapY * $gPosY), 150, 25) ; 50,490,75,25
 		GUICtrlSetOnEvent(-1, "W4_B_RestartUtilOnly")
 		GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 		GUICtrlSetBkColor(-1, $cSWButtonRestartUtil)
-		Global $W4_B_RestartUtilServer = GUICtrlCreateButton("Restart Util && Server", $gStartX + $gX + $gOffsetX + 160, $gStartY + $gY + ($gGapY * $gPosY), 150, 25)     ; 142,491,147,25
+		Global $W4_B_RestartUtilServer = GUICtrlCreateButton("Restart Util && Server", $gStartX + $gX + $gOffsetX + 160, $gStartY + $gY + ($gGapY * $gPosY), 150, 25) ; 142,491,147,25
 		GUICtrlSetOnEvent(-1, "W4_B_RestartUtilServer")
 		GUICtrlSetBkColor(-1, $cSWButtonStopServer)
-		Global $W4_B_CloseWizard = GUICtrlCreateButton("Close Wizard", $gStartX + $gX + $gOffsetX + 320, $gStartY + $gY + ($gGapY * $gPosY), 150, 25)     ; 142,491,147,25
+		Global $W4_B_CloseWizard = GUICtrlCreateButton("Close Wizard", $gStartX + $gX + $gOffsetX + 320, $gStartY + $gY + ($gGapY * $gPosY), 150, 25) ; 142,491,147,25
 		GUICtrlSetOnEvent(-1, "W4_B_CloseWizard")
 		GUICtrlSetBkColor(-1, $cTextHighlight)
 
-		Global $W4_B_StartStopServer = GUICtrlCreateButton("", $gStartX + $gX + $gOffsetX + 650, $gStartY + $gY + ($gGapY * $gPosY), 150, 25)     ; 142,491,147,25
+		Global $W4_B_StartStopServer = GUICtrlCreateButton("", $gStartX + $gX + $gOffsetX + 650, $gStartY + $gY + ($gGapY * $gPosY), 150, 25) ; 142,491,147,25
 		GUICtrlSetOnEvent(-1, "W4_B_StartStopServer")
 		GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 
@@ -16652,7 +16683,7 @@ Func WizardBlackwood()
 		GUICtrlSetOnEvent(-1, "W4_L_Commandline")
 		GUICtrlSetTip(-1, "Click to Copy to Clipboard")
 ;~ 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $W4_I_CommandlineTotal = GUICtrlCreateEdit("", $gStartX + $gOffsetX + 68, $gStartY, 788, 46, BitOR($ES_MULTILINE, $ES_READONLY, $ES_AUTOVSCROLL))     ; 760
+		Global $W4_I_CommandlineTotal = GUICtrlCreateEdit("", $gStartX + $gOffsetX + 68, $gStartY, 788, 46, BitOR($ES_MULTILINE, $ES_READONLY, $ES_AUTOVSCROLL)) ; 760
 		GUICtrlSetState(-1, $GUI_DISABLE)
 ;~ 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUISetState(@SW_SHOW, $W4_Blackwood)
@@ -16671,7 +16702,7 @@ Func WizardBlackwood()
 					"(Your " & $aConfigFile & " will be backed up)" & @CRLF & @CRLF & _
 					"Click (YES) to change to Blackwood map" & @CRLF & _
 					"Click (NO) to make NO changes.", 30)
-			If $tMB = 6 Or $tMB = -1 Then     ; YES
+			If $tMB = 6 Or $tMB = -1 Then ; YES
 				Local $tMB = MsgBox($MB_YESNO, $aUtilName, "Are you sure you wish to change to a new Blackwood map?" & @CRLF & @CRLF & _
 						"Click (YES) to change to Blackwood map. ASUU will be restarted." & @CRLF & _
 						"Click (NO) to cancel.", 30)
@@ -16766,7 +16797,7 @@ Func W4_I_AtlasDIR()
 		FileCopy($aFolderTemp & $aConfigFile, $aConfigFull, 8)
 		LogWrite(" No " & $aConfigFile & " exists in server folder. Template copied to " & $aConfigFull)
 	EndIf
-	_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	_UpdateCMD(False, "Blackwood")
 	GUICtrlSetData($W4_I_CommandlineTotal, $xServerStart[0])
 EndFunc   ;==>W4_I_AtlasDIR
@@ -16774,13 +16805,13 @@ Func W4_B_InstallGame()
 	$tSplash = _Splash("Downloading and installing " & @CRLF & "SteamCMD and mcrcon.exe (if needed).", 0, 475)
 	FileExistsFunc($tSplash)
 	ControlSetText($tSplash, "", "Static1", "Downloading and installing " & @CRLF & $aUtilName & " dedicated server.")
-	_BlackwoodDefaultGUS()     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS() ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	SteamcmdDelete($aSteamCMDDir)
 	SteamInstallGame($tSplash)
 EndFunc   ;==>W4_B_InstallGame
 Func W4_ImportSettings()
 	_BlackwoodImportConfig(False, True)
-	_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	W4_UpdateWindow()
 EndFunc   ;==>W4_ImportSettings
 Func W4_ResetServer()
@@ -16790,10 +16821,10 @@ Func W4_ResetServer()
 			"Click (NO) or (CANCEL) to cancel"
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
-	If $tMB = 6 Then     ; YES
-		_BlackwoodDefaultGUS(True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
-		_BackupFile($aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\Game.ini", "", False)     ;File, Text to write, Show Splash, IsArray?
-		_BackupFile($aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\Engine.ini", "", False)     ;File, Text to write, Show Splash, IsArray?
+	If $tMB = 6 Then ; YES
+		_BlackwoodDefaultGUS(True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+		_BackupFile($aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\Game.ini", "", False) ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\Engine.ini", "", False) ;File, Text to write, Show Splash, IsArray?
 		_UpdateCMD(False, "Blackwood")
 		GUICtrlSetData($W4_I_CommandlineTotal, $xServerStart[0])
 	Else
@@ -16892,7 +16923,7 @@ Func W4_I_RCONPort()
 	Local $tBefore = "RCONPort=" & $aTxtOld
 	_ReplaceStringFile($aFile, $tBefore, $aTxtNew, -1, "RCON", False, 0)
 	LogWrite("", " [Param] Changed Parameter in Server " & _ServerNamingScheme(0, $aNamingScheme) & " [" & $aUtilName & ".ini] From:" & $aTxtOld & " to " & $aTxtNew)
-	_BackupFile($aIniFile, "", False)     ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aIniFile, "", False) ;File, Text to write, Show Splash, IsArray?
 	$aServerRCONPort = $xServerRCONPort[1]
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $aServerRCONPort)
 	_UpdateCMD(False, "Blackwood")
@@ -16960,7 +16991,7 @@ Func W4_C_StartWithWindows()
 	EndIf
 EndFunc   ;==>W4_C_StartWithWindows
 Func W4_B_CloseWizard()
-	_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	_BlackwoodSaveAll()
 	If WinExists($wGUIMainWindow) Then
 		GUIDelete($W4_Blackwood)
@@ -16969,7 +17000,7 @@ Func W4_B_CloseWizard()
 	EndIf
 EndFunc   ;==>W4_B_CloseWizard
 Func W4_B_RestartUtilOnly()
-	_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	_BlackwoodSaveAll()
 	If WinExists($wGUIMainWindow) Then
 		GUIDelete($W4_Blackwood)
@@ -16979,7 +17010,7 @@ Func W4_B_RestartUtilOnly()
 	F_ExitCloseN(True)
 EndFunc   ;==>W4_B_RestartUtilOnly
 Func W4_B_RestartUtilServer()
-	_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+	_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 	_BlackwoodSaveAll()
 ;~ 	F_RestartGrid(0, True)
 	R1_RestartGrids(0)
@@ -16989,7 +17020,7 @@ Func W4_B_StartStopServer()
 	_BlackwoodSaveAll()
 	W4_B_StartStopServUpdate()
 	If GUICtrlRead($W4_B_StartStopServer) = "Start Grid" Then
-		_BlackwoodDefaultGUS(True, True)     ; Copy To GUS Folder , Only Copy If GUS NOT Exist
+		_BlackwoodDefaultGUS(True, True) ; Copy To GUS Folder , Only Copy If GUS NOT Exist
 		SelectServersStart(0, True)
 	ElseIf GUICtrlRead($W4_B_StartStopServer) = "Stop Grid" Then
 		SelectServersStop(0)
@@ -17000,10 +17031,10 @@ EndFunc   ;==>W4_B_StartStopServer
 
 Func W4_B_StartStopServUpdate()
 	If ProcessExists($aServerPID[0]) And $xLocalGrid[0] = "yes" Then
-		GUICtrlSetBkColor($W4_B_StartStopServer, 0xFF5858)     ; Red
+		GUICtrlSetBkColor($W4_B_StartStopServer, 0xFF5858) ; Red
 		GUICtrlSetData($W4_B_StartStopServer, "Stop Grid")
 	Else
-		GUICtrlSetBkColor($W4_B_StartStopServer, $cButtonStart)     ; Green
+		GUICtrlSetBkColor($W4_B_StartStopServer, $cButtonStart) ; Green
 		GUICtrlSetData($W4_B_StartStopServer, "Start Grid")
 	EndIf
 EndFunc   ;==>W4_B_StartStopServUpdate
@@ -17245,25 +17276,25 @@ EndFunc   ;==>_ReplaceParamInServerGrid
 Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $tFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[0] & "\Config\WindowsServer\GameUserSettings.ini")
 	Local $xFile, $tPos = -1, $tPos1 = -1, $tBefore, $tPre, $tNewFileTF = False, $tWrite = False
 	Local $tError = _FileReadToArray($tFile, $xFile, 0)
-	If $tError = 0 Then     ; File Not Exist
+	If $tError = 0 Then ; File Not Exist
 		_ArrayInsert($xFile, 0)
 		_ArrayInsert($xFile, 0, $tParName & "=" & $tParValue)
 		_ArrayInsert($xFile, 0, $tHeading)
 		$tNewFileTF = True
-	Else     ; File Exists
-		For $i = 0 To (UBound($xFile) - 1)     ; Looking for Heading
+	Else ; File Exists
+		For $i = 0 To (UBound($xFile) - 1) ; Looking for Heading
 			If StringInStr($xFile[$i], $tHeading) = 0 Then
 			Else
 				$tPos = $i
 				ExitLoop
 			EndIf
 		Next
-		If $tPos = -1 Then     ; No Heading
+		If $tPos = -1 Then ; No Heading
 			_ArrayInsert($xFile, 0)
 			_ArrayInsert($xFile, 0, $tParName & "=" & $tParValue)
 			_ArrayInsert($xFile, 0, $tHeading)
 		Else
-			For $i = $tPos To (UBound($xFile) - 1)     ; Looking for Parameter
+			For $i = $tPos To (UBound($xFile) - 1) ; Looking for Parameter
 				$tPre = StringSplit($xFile[$i], "=", 2)
 ;~ 				If StringInStr($xfile[$i], $tParName) = 0 Then
 				If $tPre[0] = $tParName Then
@@ -17275,7 +17306,7 @@ Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $
 				EndIf
 			Next
 			If $tPos1 = -1 Then
-				_ArrayInsert($xFile, $tPos + 1, $tParName & "=" & $tParValue)     ; No Parameter found
+				_ArrayInsert($xFile, $tPos + 1, $tParName & "=" & $tParValue) ; No Parameter found
 				$tWrite = True
 ;~ 				$tNewFileTF = True
 				If $tParName = "RCONPort" Then _ArrayInsert($xFile, $tPos + 1, "RCONEnabled=True")
@@ -17283,11 +17314,11 @@ Func _ReplaceParamInIni($tParName, $tParValue, $tHeading = "[ServerSettings]", $
 		EndIf
 	EndIf
 	If $tNewFileTF Then
-		_BackupFile($tFile, $xFile, False, True)     ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFile, $xFile, False, True) ;File, Text to write, Show Splash, IsArray?
 	Else
 		If $tBefore <> $xFile[$i] Or $tWrite Then
 			If $tError > 0 Then LogWrite("", " [Param] Parameter [" & $tParName & "] in " & $aConfigFile & " changed from [" & $tBefore & "] to [" & $xFile[$i] & "]")
-			_BackupFile($tFile, $xFile, False, True)     ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFile, $xFile, False, True) ;File, Text to write, Show Splash, IsArray?
 		EndIf
 	EndIf
 EndFunc   ;==>_ReplaceParamInIni
@@ -17368,7 +17399,7 @@ Func ConfigEdit($tSplash = 0, $tWarn = False)
 	EndIf
 EndFunc   ;==>ConfigEdit
 
-Func _FirewallPortBlocker($tGrid1, $tAction = "Allow")     ; Allow, Block, Remove
+Func _FirewallPortBlocker($tGrid1, $tAction = "Allow") ; Allow, Block, Remove
 	Local $tFirewallStatus = IniRead($aUtilCFGFile, "FireWall", "Status(" & $tGrid1 & ")", "NotExist")
 	Local $tShellCMD = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe "
 	Local $tCommand = ""
@@ -17504,8 +17535,8 @@ Func ShowGUITools()
 ;~ 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		$Group2 = GUICtrlCreateGroup("AtlasServerUpdateUtility Tools", 10, 15, $tGUIw - 20, $tGUIh - 25)
 		GUICtrlSetFont(-1, 12, 800, 0, "MS Sans Serif")
-		Local $tButtonW = 155, $tButtonH = 33, $tLabelH = 20         ; Default Group Dimensions
-		Local $tButtonX = 30, $tButtonY = 50, $tLabelX = $tButtonX + 165, $tLabelY = $tButtonY + 7         ; Starting Location
+		Local $tButtonW = 155, $tButtonH = 33, $tLabelH = 20 ; Default Group Dimensions
+		Local $tButtonX = 30, $tButtonY = 50, $tLabelX = $tButtonX + 165, $tLabelY = $tButtonY + 7 ; Starting Location
 		; -----------------------------------
 		Global $T1_B_SetupWizard = GUICtrlCreateButton("Setup Wizard", $tButtonX, $tButtonY, $tButtonW, $tButtonH)
 		GUICtrlSetOnEvent(-1, "GUI_Tools_B_SetupWizard")
@@ -17554,7 +17585,7 @@ Func ShowGUITools()
 		If $aUtilBetaYN = 1 Then
 			$tButtonY += 43
 			$tLabelY += 43
-			Global $T1_B_RedisTest = GUICtrlCreateButton("Test Redis", $tButtonX, $tButtonY, $tButtonW, $tButtonH)         ; kim(redis)
+			Global $T1_B_RedisTest = GUICtrlCreateButton("Test Redis", $tButtonX, $tButtonY, $tButtonW, $tButtonH) ; kim(redis)
 			GUICtrlSetOnEvent(-1, "_Redis_Test")
 			GUICtrlSetFont(-1, 8, 800, 0, "MS Sans Serif")
 		EndIf
@@ -17851,11 +17882,11 @@ Func GUI_Wipe_B_Wipe()
 	ElseIf GUICtrlRead($GUI_Wipe_R1_BackupFull) = $GUI_CHECKED Then
 		ControlSetText($tSplashWipe, "", "Static1", "Wipe Server in process" & @CRLF & @CRLF & "Full backup in process...")
 		LogWrite(" [Wipe Server] Backup: Full backup initiated.")
-		_BackupGame(False, True, True)         ; False Minimize, True Full Backup , True RunWait
+		_BackupGame(False, True, True) ; False Minimize, True Full Backup , True RunWait
 	ElseIf GUICtrlRead($GUI_Wipe_R1_BackupSelect) = $GUI_CHECKED Then
 		ControlSetText($tSplashWipe, "", "Static1", "Wipe Server in process" & @CRLF & @CRLF & "Select backup in process...")
 		LogWrite(" [Wipe Server] Backup: Select files backup initiated.")
-		_BackupGame(False, False, True)         ; False Minimize, False Full Backup , True RunWait
+		_BackupGame(False, False, True) ; False Minimize, False Full Backup , True RunWait
 	EndIf
 	If $aServerUseRedis = "yes" Then
 		ControlSetText($tSplashWipe, "", "Static1", "Wipe Server in process" & @CRLF & @CRLF & "Closing redis...")
@@ -18089,7 +18120,7 @@ Func _DisableCloseButton($tHwd, $tTF = True)
 	EndIf
 	$aSysMenu = DllCall("User32.dll", "hwnd", "GetSystemMenu", "hwnd", $tHwd, "int", 0)
 	$hSysMenu = $aSysMenu[0]
-	DllCall("User32.dll", "int", "RemoveMenu", "hwnd", $hSysMenu, "int", 0xF060, "int", 0)         ; 0=Disable, 1=Enable, CLOSE = 0xF060, MOVE = 0xF010, MAXIMIZE = 0xF030, MINIMIZE = 0xF020, SIZE = 0xF000, RESTORE = 0xF120
+	DllCall("User32.dll", "int", "RemoveMenu", "hwnd", $hSysMenu, "int", 0xF060, "int", 0) ; 0=Disable, 1=Enable, CLOSE = 0xF060, MOVE = 0xF010, MAXIMIZE = 0xF030, MINIMIZE = 0xF020, SIZE = 0xF000, RESTORE = 0xF120
 	DllCall("User32.dll", "int", "DrawMenuBar", "hwnd", $tHwd)
 EndFunc   ;==>_DisableCloseButton
 Func IsEven($numner, $tnumner2 = 2)
@@ -18103,12 +18134,12 @@ Func _NumberOfLogicalCPUs()
 	$wbemFlagReturnImmediately = 0x10
 	$wbemFlagForwardOnly = 0x20
 	$colItems = ""
-	Dim $Obj_WMIService = ObjGet('winmgmts:{impersonationLevel=impersonate}!\\' & @ComputerName & '\root\cimv2')         ;
+	Dim $Obj_WMIService = ObjGet('winmgmts:{impersonationLevel=impersonate}!\\' & @ComputerName & '\root\cimv2') ;
 	$colItems = $Obj_WMIService.ExecQuery("SELECT * FROM Win32_Processor", "WQL", $wbemFlagReturnImmediately + $wbemFlagForwardOnly)
 	If IsObj($colItems) Then
 		For $objItem In $colItems
 ;~ 			Local $tPCPU = $objItem.NumberOfCores ; Physical Cores
-			Local $tLCPU = $objItem.NumberOfLogicalProcessors         ; Logical Cores
+			Local $tLCPU = $objItem.NumberOfLogicalProcessors ; Logical Cores
 		Next
 	Else
 		Local $tPCPU = -1, $tLCPU = -1
@@ -18116,7 +18147,7 @@ Func _NumberOfLogicalCPUs()
 	Return $tLCPU
 EndFunc   ;==>_NumberOfLogicalCPUs
 Func _NumberOfPhysicalCPUs()
-	Dim $Obj_WMIService = ObjGet('winmgmts:{impersonationLevel=impersonate}!\\' & @ComputerName & '\root\cimv2')         ;
+	Dim $Obj_WMIService = ObjGet('winmgmts:{impersonationLevel=impersonate}!\\' & @ComputerName & '\root\cimv2') ;
 	If (IsObj($Obj_WMIService)) And (Not @error) Then
 		Dim $Col_Items = $Obj_WMIService.ExecQuery('Select * from Win32_ComputerSystem')
 		Local $Obj_Items
@@ -18125,19 +18156,19 @@ Func _NumberOfPhysicalCPUs()
 		Next
 	EndIf
 EndFunc   ;==>_NumberOfPhysicalCPUs
-Func _NumberOfProcessors()         ; Returns Array [0] = Physical CPUs, [1] = Cores , [2] = Logical CPUs
+Func _NumberOfProcessors() ; Returns Array [0] = Physical CPUs, [1] = Cores , [2] = Logical CPUs
 	Local $tProc[3]
 	Dim $Obj_WMIService = ObjGet('winmgmts:{impersonationLevel=impersonate}!\\' & @ComputerName & '\root\cimv2')
 	If (IsObj($Obj_WMIService)) And (Not @error) Then
 		Local $Obj_Items, $objItem
 		Local $Col_Items = $Obj_WMIService.ExecQuery('Select * from Win32_ComputerSystem')
 		For $Obj_Items In $Col_Items
-			$tProc[0] = $Obj_Items.NumberOfProcessors         ; Physical CPUs
+			$tProc[0] = $Obj_Items.NumberOfProcessors ; Physical CPUs
 		Next
 		Local $colItems = $Obj_WMIService.ExecQuery('Select * from Win32_Processor')
 		For $objItem In $colItems
-			$tProc[1] = $objItem.NumberOfCores         ; Physical Cores
-			$tProc[2] = $objItem.NumberOfLogicalProcessors         ; Logical Cores
+			$tProc[1] = $objItem.NumberOfCores ; Physical Cores
+			$tProc[2] = $objItem.NumberOfLogicalProcessors ; Logical Cores
 		Next
 	EndIf
 	Return $tProc
@@ -18153,10 +18184,10 @@ Func G_T1_B_CPUCalculator()
 ;~ 		$xCPUs[2] = 20 ; kim125er!
 
 		Local $gCPUX = 8, $gCPUY = 8, $gCPUYMove
-		Local $gCPUW = 27, $gCPUH = 25, $gCPUGapX = 1, $gCPUGapY = 5, $gCPUinaRow = 14, $gCPUXstart = 8         ; Grid Tab Button Width, Height, and gaps between buttons
+		Local $gCPUW = 27, $gCPUH = 25, $gCPUGapX = 1, $gCPUGapY = 5, $gCPUinaRow = 14, $gCPUXstart = 8 ; Grid Tab Button Width, Height, and gaps between buttons
 		For $i = 0 To ($aCPUCoreCount - 1)
 ;~ 			If Mod($i + 1, $gCPUinaRow) = 0 Then $gCPUYMove += $gCPUH + $gCPUGapY + 4 * 8 ; Lowers tab window by number of grid tab rows.
-			If Mod($i + 1, $gCPUinaRow) = 0 Then $gCPUYMove += $gCPUH + $gCPUGapY + $xCPUs[0] * 8         ; Lowers tab window by number of grid tab rows.
+			If Mod($i + 1, $gCPUinaRow) = 0 Then $gCPUYMove += $gCPUH + $gCPUGapY + $xCPUs[0] * 8 ; Lowers tab window by number of grid tab rows.
 		Next
 		If $aCPUCoreCount > 64 Then $gCPUYMove += 140
 		Global $G_W_CPUWinX = 500
@@ -18187,44 +18218,44 @@ Func G_T1_B_CPUCalculator()
 			$G_W_B_SelectAll = GUICtrlCreateButton("Select ALL", $gCPUX, $gCPUY, $gCPUW + 50, $gCPUH)
 			GUICtrlSetOnEvent(-1, "G_W_B_SelectAll")
 			GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-			GUICtrlSetBkColor(-1, $cButtonStart)         ; Green
+			GUICtrlSetBkColor(-1, $cButtonStart) ; Green
 		Else
 			$G_W_B_SelectGroup0 = GUICtrlCreateButton("Select ALL Group 0", $gCPUX, $gCPUY, $gCPUW + 75, $gCPUH)
 			GUICtrlSetOnEvent(-1, "G_W_B_SelectGroup0")
 			GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-			GUICtrlSetBkColor(-1, $cButtonStart)         ; Green
+			GUICtrlSetBkColor(-1, $cButtonStart) ; Green
 			$G_W_B_SelectGroup1 = GUICtrlCreateButton("Select ALL Group 1", $gCPUX + 105, $gCPUY, $gCPUW + 75, $gCPUH)
 			GUICtrlSetOnEvent(-1, "G_W_B_SelectGroup1")
 			GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-			GUICtrlSetBkColor(-1, $cButtonStart)         ; Green
+			GUICtrlSetBkColor(-1, $cButtonStart) ; Green
 		EndIf
 		$G_W_B_ButtonGreen = GUICtrlCreateButton("0", $gCPUX + $gCPUX2 + 10, $gCPUY, $gCPUW, $gCPUH)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		GUICtrlSetBkColor(-1, $cButtonStart)         ; Green
+		GUICtrlSetBkColor(-1, $cButtonStart) ; Green
 		Local $G_CPU_L_Label = GUICtrlCreateLabel("Green = Use this CPU.", $gCPUX + $gCPUW + $gCPUX2 + 15, $gCPUY + 4, 150, 24)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		$gCPUY += $gCPUH + 5
 		$G_W_B_SelectNone = GUICtrlCreateButton("Select NONE", $gCPUX, $gCPUY, $gCPUW + 50, $gCPUH)
 		GUICtrlSetOnEvent(-1, "G_W_B_SelectNone")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		GUICtrlSetBkColor(-1, $cSWButtonStopServer)         ; Red
+		GUICtrlSetBkColor(-1, $cSWButtonStopServer) ; Red
 		$G_W_B_ButtonRed = GUICtrlCreateButton("0", $gCPUX + $gCPUX2 + 10, $gCPUY, $gCPUW, $gCPUH)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		GUICtrlSetBkColor(-1, $cSWButtonStopServer)         ; Red
+		GUICtrlSetBkColor(-1, $cSWButtonStopServer) ; Red
 		Local $G_CPU_L_Label = GUICtrlCreateLabel("Red = Do NOT use this CPU.", $gCPUX + $gCPUW + $gCPUX2 + 15, $gCPUY + 4, 150, 24)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		$gCPUY += $gCPUH + 25
 
-		Global $G_W_CPUButtons[$aCPUCoreCount]         ; $G_W_CPUButtonNumber[$aCPUCoreCount]
+		Global $G_W_CPUButtons[$aCPUCoreCount] ; $G_W_CPUButtonNumber[$aCPUCoreCount]
 		Local $gCPUXnow = $gCPUX, $gCPUYnow = $gCPUY, $tNode = 0, $tCol = 1, $tCPU = 0
 
 		If $aCPUCoreCount < 65 Then
 			For $i = 0 To ($aCPUCoreCount - 1)
 				If IsEven($i, $xCPUs[2]) Then
-					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10         ; Lowers tab window by number of grid tab rows.
+					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10 ; Lowers tab window by number of grid tab rows.
 					Local $G_CPU_L_Node = GUICtrlCreateLabel("CPU (Node):" & $tNode, $gCPUXstart, $gCPUYnow, 100, 24)
 					GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-					$gCPUYnow += $gCPUH + $gCPUGapY - 10         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY - 10 ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tNode += 1
 					$tCol = 1
@@ -18236,7 +18267,7 @@ Func G_T1_B_CPUCalculator()
 				GUICtrlSetOnEvent(-1, "G_W_CPUTabClicked")
 				$tCPU += 1
 				If Mod($tCol, $gCPUinaRow) = 0 Then
-					$gCPUYnow += $gCPUH + $gCPUGapY         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tCol = 1
 				Else
@@ -18264,10 +18295,10 @@ Func G_T1_B_CPUCalculator()
 			$gCPUYnow += $gCPUH + $gCPUGapY
 			For $i = 0 To (($aCPUCoreCount - 1) / 2)
 				If IsEven($i, $xCPUs[2]) Then
-					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10         ; Lowers tab window by number of grid tab rows.
+					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10 ; Lowers tab window by number of grid tab rows.
 					Local $G_CPU_L_Node = GUICtrlCreateLabel("CPU (Node):" & $tNode, $gCPUXstart, $gCPUYnow, 100, 24)
 					GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-					$gCPUYnow += $gCPUH + $gCPUGapY - 10         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY - 10 ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tNode += 2
 					$tCol = 1
@@ -18279,7 +18310,7 @@ Func G_T1_B_CPUCalculator()
 				GUICtrlSetOnEvent(-1, "G_W_CPUTabClicked")
 				$tCPU += 1
 				If Mod($tCol, $gCPUinaRow) = 0 Then
-					$gCPUYnow += $gCPUH + $gCPUGapY         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tCol = 1
 				Else
@@ -18304,10 +18335,10 @@ Func G_T1_B_CPUCalculator()
 			$gCPUYnow = $gCPUYnow - 10
 			For $i = (Int((($aCPUCoreCount - 1) / 2)) + 1) To ($aCPUCoreCount - 1)
 				If IsEven($i, $xCPUs[2]) Then
-					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10         ; Lowers tab window by number of grid tab rows.
+					If $tNode > 0 Then $gCPUYnow += $gCPUH + $gCPUGapY + 10 ; Lowers tab window by number of grid tab rows.
 					Local $G_CPU_L_Node = GUICtrlCreateLabel("CPU (Node):" & $tNode, $gCPUXstart, $gCPUYnow, 100, 24)
 					GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-					$gCPUYnow += $gCPUH + $gCPUGapY - 10         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY - 10 ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tNode += 2
 					$tCol = 1
@@ -18319,7 +18350,7 @@ Func G_T1_B_CPUCalculator()
 				GUICtrlSetOnEvent(-1, "G_W_CPUTabClicked")
 				$tCPU += 1
 				If Mod($tCol, $gCPUinaRow) = 0 Then
-					$gCPUYnow += $gCPUH + $gCPUGapY         ; Lowers tab window by number of grid tab rows.
+					$gCPUYnow += $gCPUH + $gCPUGapY ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
 					$tCol = 1
 				Else
@@ -18356,11 +18387,11 @@ Func G_T1_B_CPUCalculator()
 						"33-64 Threads in 64-bit only." & @CRLF & _
 						"Would you like to switch ASUU to 64-bit version?" & @CRLF & "(ASUU will restart and _start_ASUU.bat will be switched to 64-bit)"
 				$tMB = MsgBox($MB_YESNOCANCEL, "CPU Affinity Notice", $aMsg, 120)
-				If $tMB = 6 Then         ; YES
+				If $tMB = 6 Then ; YES
 					_Restart64Bit()
-				ElseIf $tMB = 7 Then         ; NO
-				ElseIf $tMB = 2 Then         ; CANCEL
-				ElseIf $tMB = -1 Then         ; TIMEOUT
+				ElseIf $tMB = 7 Then ; NO
+				ElseIf $tMB = 2 Then ; CANCEL
+				ElseIf $tMB = -1 Then ; TIMEOUT
 				EndIf
 			EndIf
 		EndIf
@@ -18385,7 +18416,7 @@ Func _CPUAffinityHexToBin($tGridNum)
 	EndIf
 	Return $tBin5
 EndFunc   ;==>_CPUAffinityHexToBin
-Func _CPUAffinityIsGroup1TF($ti)         ; Returns FALSE if >64 cores & CPU Affinity assigned to Process Group 2
+Func _CPUAffinityIsGroup1TF($ti) ; Returns FALSE if >64 cores & CPU Affinity assigned to Process Group 2
 	If $aCPUCoreCount > 64 Then
 		If $xGridCPUAffinity[$ti] > -1 Then
 			Local $tBin = _CPUAffinityHexToBin($ti)
@@ -18413,7 +18444,7 @@ Func GUI_CPUAffinity_Close()
 		$aCPUExitGUIG = False
 	EndIf
 EndFunc   ;==>GUI_CPUAffinity_Close
-Func _DecToBin($iInt, $iBase = 2)         ; for bases 2 to 9
+Func _DecToBin($iInt, $iBase = 2) ; for bases 2 to 9
 	Local $iRem, $sRet = ''
 	While $iInt > $iBase - 1
 		$iRem = Mod($iInt, $iBase)
@@ -18422,14 +18453,14 @@ Func _DecToBin($iInt, $iBase = 2)         ; for bases 2 to 9
 	WEnd
 	Return $iInt & $sRet
 EndFunc   ;==>_DecToBin
-Func _BinToDec($sInt, $iBase = 2)         ; bases 2 to 9 only
+Func _BinToDec($sInt, $iBase = 2) ; bases 2 to 9 only
 	Local $iRet = 0, $iLen = StringLen($sInt)
 	For $xi = 1 To $iLen
 		$iRet += StringMid($sInt, $xi, 1) * $iBase ^ ($iLen - $xi)
 	Next
 	Return $iRet
 EndFunc   ;==>_BinToDec
-Func _BinToHex($BinaryValue, $t2Count = 8)         ; ptrex https://www.autoitscript.com/forum/topic/70507-converter-dec-hex-bin/
+Func _BinToHex($BinaryValue, $t2Count = 8) ; ptrex https://www.autoitscript.com/forum/topic/70507-converter-dec-hex-bin/
 	Local $test, $Result = '', $numbytes, $nb
 	If StringRegExp($BinaryValue, '[0-1]') Then
 		If $BinaryValue = '' Then
@@ -18441,7 +18472,7 @@ Func _BinToHex($BinaryValue, $t2Count = 8)         ; ptrex https://www.autoitscr
 		$test = StringReplace($BinaryValue, '1', '')
 		$test = StringReplace($test, '0', '')
 		If $test <> '' Then
-			SetError(-1)         ;non binary character detected
+			SetError(-1) ;non binary character detected
 			Return
 		EndIf
 		While 1
@@ -18449,11 +18480,11 @@ Func _BinToHex($BinaryValue, $t2Count = 8)         ; ptrex https://www.autoitscr
 			If $nb = 0 Then ExitLoop
 			$BinaryValue = '0' & $BinaryValue
 		WEnd
-		$numbytes = Int(StringLen($BinaryValue) / 4)         ;the number of bytes
+		$numbytes = Int(StringLen($BinaryValue) / 4) ;the number of bytes
 		Dim $bytes[$numbytes], $Deci[$numbytes]
-		For $j = 0 To $numbytes - 1         ;for each byte
+		For $j = 0 To $numbytes - 1 ;for each byte
 			$bytes[$j] = StringMid($BinaryValue, 1 + 4 * $j, 4)
-			For $k = 0 To 15         ;for all the 16 possible hex values
+			For $k = 0 To 15 ;for all the 16 possible hex values
 				If $bytes[$j] = $bits[$k + 1] Then
 					$Deci[$j] = $k
 					ExitLoop
@@ -18464,12 +18495,12 @@ Func _BinToHex($BinaryValue, $t2Count = 8)         ; ptrex https://www.autoitscr
 		For $l = 0 To $numbytes - 1
 			$Result &= Hex($Deci[$l], 1)
 		Next
-		Return _AddLeadingZeros($Result, $t2Count, False)         ; False = Do not trim
+		Return _AddLeadingZeros($Result, $t2Count, False) ; False = Do not trim
 	Else
 		Return "-1"
 	EndIf
 EndFunc   ;==>_BinToHex
-Func _HexToBin($HexValue, $t3Count = 32)         ; ptrex https://www.autoitscript.com/forum/topic/70507-converter-dec-hex-bin/
+Func _HexToBin($HexValue, $t3Count = 32) ; ptrex https://www.autoitscript.com/forum/topic/70507-converter-dec-hex-bin/
 	For $tx2 = 1 To StringLen($HexValue)
 		If StringLeft($HexValue, 2) = "00" Then
 			$HexValue = StringTrimLeft($HexValue, 2)
@@ -18531,15 +18562,15 @@ Func GUI_CPU_UpdateFields()
 			$xGridCPUAffinity[$tGridActive] = _BinToHex($tBin1)
 			For $i = 0 To ($aCPUCoreCount - 1)
 				If StringMid($tBin1, $aCPUCoreCount - $i, 1) = "1" Then
-					GUICtrlSetBkColor($G_W_CPUButtons[$i], $cButtonStart)         ; Green
+					GUICtrlSetBkColor($G_W_CPUButtons[$i], $cButtonStart) ; Green
 				Else
-					GUICtrlSetBkColor($G_W_CPUButtons[$i], $cSWButtonStopServer)         ; Red
+					GUICtrlSetBkColor($G_W_CPUButtons[$i], $cSWButtonStopServer) ; Red
 				EndIf
 			Next
 		Else
 			For $x = 0 To ($aCPUCoreCount - 1)
 				$tBin1 &= "1"
-				GUICtrlSetBkColor($G_W_CPUButtons[$x], $cButtonStart)         ; Green
+				GUICtrlSetBkColor($G_W_CPUButtons[$x], $cButtonStart) ; Green
 			Next
 			$xGridCPUAffinity[$tGridActive] = _BinToHex($tBin1)
 		EndIf
@@ -18547,9 +18578,9 @@ Func GUI_CPU_UpdateFields()
 		$tBin1 = _HexToBin($xGridCPUAffinity[$tGridActive], $aCPUCoreCount)
 		For $i = 0 To ($aCPUCoreCount - 1)
 			If StringMid($tBin1, $aCPUCoreCount - $i, 1) = "1" Then
-				GUICtrlSetBkColor($G_W_CPUButtons[$i], $cButtonStart)         ; Green
+				GUICtrlSetBkColor($G_W_CPUButtons[$i], $cButtonStart) ; Green
 			Else
-				GUICtrlSetBkColor($G_W_CPUButtons[$i], $cSWButtonStopServer)         ; Red
+				GUICtrlSetBkColor($G_W_CPUButtons[$i], $cSWButtonStopServer) ; Red
 			EndIf
 		Next
 	EndIf
@@ -18594,13 +18625,13 @@ Func G_W_CPUTabClicked()
 		$tBin3 = StringMid($tBin2, 1, $tStLoc - 1) & "1" & StringMid($tBin2, $tStLoc + 1)
 	EndIf
 	If $aCPUCoreCount > 64 Then
-		Local $tReturn = _CPUAffinityNodeSplit($tBin3, $tCPUClicked)         ; Returns (0-3) Each Node BIN, (4) Node Number, (5) Node Hex, (6) Node Bin, (7) Group Hex, (8) Group Bin, (9) Full Hex, (10) Full Bin
+		Local $tReturn = _CPUAffinityNodeSplit($tBin3, $tCPUClicked) ; Returns (0-3) Each Node BIN, (4) Node Number, (5) Node Hex, (6) Node Bin, (7) Group Hex, (8) Group Bin, (9) Full Hex, (10) Full Bin
 		$tBin3 = $tReturn[10]
 	EndIf
 	$xGridCPUAffinity[$tGridActive] = _BinToHex($tBin3)
 	GUI_CPU_UpdateFields()
 EndFunc   ;==>G_W_CPUTabClicked
-Func _CPUAffinityNodeSplit($tBin4, $tCPUSelected, $tGridSelected = -1)         ; Returns (0-3) Each Node BIN, (4) Node Number, (5) Node Hex, (6) Node Bin, (7) Group Hex, (8) Group Bin, (9) Full Hex, (10) Full Bin
+Func _CPUAffinityNodeSplit($tBin4, $tCPUSelected, $tGridSelected = -1) ; Returns (0-3) Each Node BIN, (4) Node Number, (5) Node Hex, (6) Node Bin, (7) Group Hex, (8) Group Bin, (9) Full Hex, (10) Full Bin
 	Local $tReturn[11]
 	Local $tTemp[4]
 	Local $tSplitNum = Int(($aCPUCoreCount) / 4)
@@ -18752,9 +18783,9 @@ Func GridConfiguratorGUI($tGridClicked)
 		Global $tG_T6_EditClicked = False, $tG_T7_EditClicked = False, $tG_T8_EditClicked = False
 		Global $G_LastTab = 0, $aLastGridActive = 0, $aCancelTF = False
 		Local $gX = 0, $gY = 40
-		Local $gBW = 27, $gBH = 25, $gBGapX = 1, $gBGapY = 1, $gBinaRow = 30         ; Grid Tab Button Width, Height, and gaps between buttons
+		Local $gBW = 27, $gBH = 25, $gBGapX = 1, $gBGapY = 1, $gBinaRow = 30 ; Grid Tab Button Width, Height, and gaps between buttons
 		For $i = 0 To ($aServerGridTotal - 1)
-			If Mod($i + 1, $gBinaRow) = 0 Then $gY += $gBH + $gBGapY         ; Lowers tab window by number of grid tab rows.
+			If Mod($i + 1, $gBinaRow) = 0 Then $gY += $gBH + $gBGapY ; Lowers tab window by number of grid tab rows.
 		Next
 ;~ 		If $aServerGridTotal > 35 Then $gY += 30
 ;~ 		If $aServerGridTotal > 70 Then $gY += 30
@@ -18771,14 +18802,14 @@ Func GridConfiguratorGUI($tGridClicked)
 		Global $G_W_GridButtons[$aServerGridTotal]
 		Local $tNamingScheme = $aNamingScheme
 		If $tNamingScheme = 3 Then $tNamingScheme = 1
-		Local $gBXstart = 8, $gBYstart = 8         ; First button starting point
+		Local $gBXstart = 8, $gBYstart = 8 ; First button starting point
 		Local $gBXnow = $gBXstart, $gBYnow = $gBYstart
 		For $i = 0 To ($aServerGridTotal - 1)
 			$G_W_GridButtons[$i] = GUICtrlCreateButton(_ServerNamingScheme($i, $tNamingScheme), $gBXnow, $gBYnow, $gBW, $gBH)
 			GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 			GUICtrlSetOnEvent(-1, "G_W_GridTabClicked")
 			If Mod($i + 1, $gBinaRow) = 0 Then
-				$gBYnow += $gBH + $gBGapY         ; Lowers tab window by number of grid tab rows.
+				$gBYnow += $gBH + $gBGapY ; Lowers tab window by number of grid tab rows.
 				$gBXnow = $gBXstart
 			Else
 				$gBXnow += $gBW + $gBGapX
@@ -18831,19 +18862,19 @@ Func GridConfiguratorGUI($tGridClicked)
 ;~ 		$gX = $gX - $tButtonW - $tButtonGapY
 
 		Local $tX = 508, $tY = $gY + 57
-		Local $G_T1_G_LocalRemote = GUICtrlCreateGroup("", $tX, $tY, 115, 41)         ; 372/57
+		Local $G_T1_G_LocalRemote = GUICtrlCreateGroup("", $tX, $tY, 115, 41) ; 372/57
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $G_T1_R4_PVE = GUICtrlCreateRadio("PVE", $tX + 8, $tY + 16, 40, 17)         ; 380/73
+		Global $G_T1_R4_PVE = GUICtrlCreateRadio("PVE", $tX + 8, $tY + 16, 40, 17) ; 380/73
 		GUICtrlSetOnEvent(-1, "G_T1_R4_PVE")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, 'This grid only: PVE (Player vs Environment)')
-		Global $G_T1_R4_PVP = GUICtrlCreateRadio("PVP", $tX + 62, $tY + 16, 40, 17)         ; 436/73
+		Global $G_T1_R4_PVP = GUICtrlCreateRadio("PVP", $tX + 62, $tY + 16, 40, 17) ; 436/73
 		GUICtrlSetOnEvent(-1, "G_T1_R4_PVP")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, 'This grid only: PVP (Player vs Player)')
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 
-		Local $tX = 630, $tY = $gY + 57, $tW = 80         ; 615
+		Local $tX = 630, $tY = $gY + 57, $tW = 80 ; 615
 		Local $G_T1_G_HomeServer = GUICtrlCreateGroup("", $tX, $tY, 180, 41)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		$tX += 8
@@ -18893,7 +18924,7 @@ Func GridConfiguratorGUI($tGridClicked)
 		GUICtrlSetState(-1, $GUI_DISABLE)
 		GUICtrlSetState(-1, $GUI_HIDE)
 		Local $gY1 = 97
-		Local $G_T1_G_GridNameIP = GUICtrlCreateGroup("", 20, $gY + $gY1, 851, 134)         ; ("", 20, $gY + 105, 851, 122)
+		Local $G_T1_G_GridNameIP = GUICtrlCreateGroup("", 20, $gY + $gY1, 851, 134) ; ("", 20, $gY + 105, 851, 122)
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		$gY1 = $gY1 + 15
 		Local $G_T1_L_5 = GUICtrlCreateLabel("Server Name", 36, $gY + $gY1, 66, 17, $SS_RIGHT)
@@ -18971,18 +19002,18 @@ Func GridConfiguratorGUI($tGridClicked)
 		Local $tX = 438
 ;~ 		Local $G_T1_G_GridDelay = GUICtrlCreateGroup("", $tX, $gY + $gY1 - 9, 363, 37)     ; 508/57
 ;~ 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Local $G_T1_L_1 = GUICtrlCreateLabel("All Grids Startup Delay", $tX + 8, $gY + $gY1, 109, 17, $SS_RIGHT)         ; 516/73
+		Local $G_T1_L_1 = GUICtrlCreateLabel("All Grids Startup Delay", $tX + 8, $gY + $gY1, 109, 17, $SS_RIGHT) ; 516/73
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, 'Seconds to wait between grid starts: used to reduce CPU and hard drive load durig server startup')
-		Global $G_T1_I_BaseDelay = GUICtrlCreateInput("", $tX + 120, $gY + $gY1 - 3, 25, 21, BitOR($ES_CENTER, $ES_NUMBER))         ; 628/70
+		Global $G_T1_I_BaseDelay = GUICtrlCreateInput("", $tX + 120, $gY + $gY1 - 3, 25, 21, BitOR($ES_CENTER, $ES_NUMBER)) ; 628/70
 		GUICtrlSetOnEvent(-1, "G_T1_I_BaseDelay")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Local $G_T1_L_3 = GUICtrlCreateLabel("Additional delay this grid", $tX + 205, $gY + $gY1, 120, 17, $SS_RIGHT)         ; 716/73
+		Local $G_T1_L_3 = GUICtrlCreateLabel("Additional delay this grid", $tX + 205, $gY + $gY1, 120, 17, $SS_RIGHT) ; 716/73
 		GUICtrlSetTip(-1, 'Seconds, in addition to "All Grids Startup Delay", to wait before starting this grid')
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Local $G_T1_L_4 = GUICtrlCreateLabel("seconds", $tX + 152, $gY + $gY1, 44, 17)         ; 660/73
+		Local $G_T1_L_4 = GUICtrlCreateLabel("seconds", $tX + 152, $gY + $gY1, 44, 17) ; 660/73
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $G_T1_I_AddedDelayGrid = GUICtrlCreateInput("", $tX + 328, $gY + $gY1 - 3, 25, 21, BitOR($ES_CENTER, $ES_NUMBER))         ; 836/70
+		Global $G_T1_I_AddedDelayGrid = GUICtrlCreateInput("", $tX + 328, $gY + $gY1 - 3, 25, 21, BitOR($ES_CENTER, $ES_NUMBER)) ; 836/70
 		GUICtrlSetOnEvent(-1, "G_T1_I_AddedDelayGrid")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -18999,7 +19030,7 @@ Func GridConfiguratorGUI($tGridClicked)
 ;~ 		Global $G_T1_R_CPUCalculatorToggleY = $gY + $gY1 - 5
 ;~ 		Global $G_T1_R_CPUCalculatorToggleX = $tX
 ;~ 		If $xCPUAffinityUseYN[$tGridClicked] = "yes" Then
-		Global $G_T1_I_CPUAffinEnabledYN = GUICtrlCreateIcon($aIconFile, 214, $tX, $gY + $gY1 - 5, 24, 24)         ; x = $tX, y = $gY + $gY1 - 5
+		Global $G_T1_I_CPUAffinEnabledYN = GUICtrlCreateIcon($aIconFile, 214, $tX, $gY + $gY1 - 5, 24, 24) ; x = $tX, y = $gY + $gY1 - 5
 		GUICtrlSetOnEvent(-1, "G_T1_I_CPUAffinTF")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 		GUICtrlSetTip(-1, "Enable/Disable CPU Affinity for this grid")
@@ -19031,7 +19062,7 @@ Func GridConfiguratorGUI($tGridClicked)
 		GUICtrlSetOnEvent(-1, "G_T1_I_CommandlineTotal")
 		GUICtrlSetTip(-1, "Click to Copy to Clipboard")
 		GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
-		Global $G_T1_I_CommandlineTotal = GUICtrlCreateEdit("", 88, $gY + $gY1 + 1, 893, 46, BitOR($ES_MULTILINE, $ES_READONLY, $ES_AUTOVSCROLL))         ; 760
+		Global $G_T1_I_CommandlineTotal = GUICtrlCreateEdit("", 88, $gY + $gY1 + 1, 893, 46, BitOR($ES_MULTILINE, $ES_READONLY, $ES_AUTOVSCROLL)) ; 760
 ;~ 		GUICtrlSetOnEvent(-1, "G_T1_I_CommandlineTotal")
 ;~ 		GUICtrlSetTip(-1, "Click to Copy to Clipboard")
 		GUICtrlSetState(-1, $GUI_DISABLE)
@@ -19830,7 +19861,7 @@ Func GridConfiguratorGUI($tGridClicked)
 
 		Local $pW = $G_W_GridWinX - 41, $pH = 10 + (24 * $tParamTypeMax), $gScrollStartX = 10, $gScrollStartY = 10, $gParamInputBoxW = 60, $tButtonW = 110
 		Local $iScroll_Width = $pW - 20, $iScroll_Ht = $pH, $iH_Tight = 0, $iV_Tight = 0, $fBefore = True, $iRepeat = 0, $bRegisterMsg = True
-		$tY = $tY + 25         ; ($tY = Last Y pos)
+		$tY = $tY + 25 ; ($tY = Last Y pos)
 ;~ 		If (24 * $gParamTFMax) > 321 Then
 		If (24 * $gParamTFMax) > 321 Then
 ;~ 			$gScrollWindowH = 321 $G_W_GridWinY = $gY + 241
@@ -19844,8 +19875,8 @@ Func GridConfiguratorGUI($tGridClicked)
 		_GUIScrollbars_Generate($G_T1_G_Parameters, $iScroll_Width, $iScroll_Ht, $iH_Tight, $iV_Tight, $fBefore, $iRepeat, $bRegisterMsg)
 
 		Local $gParamBaseY = $gScrollStartY
-		Local $gParamColumn1x = $gScrollStartX         ; Sliders = 36, Labels = 68
-		Local $gParamColumn2x = Int(($pW - 20 - $gScrollStartX) / 2)         ; Slider = 324, Labels = 356
+		Local $gParamColumn1x = $gScrollStartX ; Sliders = 36, Labels = 68
+		Local $gParamColumn2x = Int(($pW - 20 - $gScrollStartX) / 2) ; Slider = 324, Labels = 356
 
 		Local $gParamY = $gParamBaseY
 		Local $gParamX = $gParamColumn1x
@@ -19874,8 +19905,8 @@ Func GridConfiguratorGUI($tGridClicked)
 		Global $gParamNumMax = UBound($gParamNumName)
 		Global $G_T1_L_ParametersEdit[$gParamNumMax]
 		Global $G_T1_I_ParametersEdit[$gParamNumMax]
-		Local $gParamEditColumn1x = $gParamColumn2x         ; Sliders = 36, Labels = 68
-		Local $gParamEditColumn2x = 60 + $gParamEditColumn1x         ; Slider = 324, Labels = 356
+		Local $gParamEditColumn1x = $gParamColumn2x ; Sliders = 36, Labels = 68
+		Local $gParamEditColumn2x = 60 + $gParamEditColumn1x ; Slider = 324, Labels = 356
 
 		Local $gParamY = $gParamBaseY
 		Local $gParamX1 = $gParamEditColumn1x
@@ -19937,35 +19968,35 @@ Func GUI_GridConfig_Close()
 EndFunc   ;==>GUI_GridConfig_Close
 Func G_On_Tab()
 	Switch GUICtrlRead($G_GridConfig_Tab)
-		Case 0         ; Tab 1 Main
+		Case 0 ; Tab 1 Main
 			G_T1_UpdateTab()
 			G_LastTab(0)
 			GUISetState(@SW_SHOW, $G_T1_G_Parameters)
-		Case 1         ; Tab 2 GameUserSettings.ini
+		Case 1 ; Tab 2 GameUserSettings.ini
 			G_T2_UpdateTab()
 			G_LastTab(1)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 2         ; Tab 3 Game.ini
+		Case 2 ; Tab 3 Game.ini
 			G_T3_UpdateTab()
 			G_LastTab(2)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 3         ; Tab 4 Engine.ini
+		Case 3 ; Tab 4 Engine.ini
 			G_T4_UpdateTab()
 			G_LastTab(3)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 4         ; Tab 5 ServerGrid.json
+		Case 4 ; Tab 5 ServerGrid.json
 			G_T5_UpdateTab()
 			G_LastTab(4)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 5         ; Tab 6 DefaultGUS.ini
+		Case 5 ; Tab 6 DefaultGUS.ini
 			G_T6_UpdateTab()
 			G_LastTab(5)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 6         ; Tab 7 DefaultGame.ini
+		Case 6 ; Tab 7 DefaultGame.ini
 			G_T7_UpdateTab()
 			G_LastTab(6)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
-		Case 7         ; Tab 8 DefaultEngine.ini
+		Case 7 ; Tab 8 DefaultEngine.ini
 			G_T8_UpdateTab()
 			G_LastTab(7)
 			GUISetState(@SW_HIDE, $G_T1_G_Parameters)
@@ -20013,22 +20044,22 @@ Func G_T1_L_ModIDs()
 	_Splash("Copied to clipboard", 1500)
 EndFunc   ;==>G_T1_L_ModIDs
 Func G_LastTab($tTab)
-	If $G_LastTab = 0 Then         ; Tab 1 Main
+	If $G_LastTab = 0 Then ; Tab 1 Main
 	EndIf
 	$aCancelTF = False
-	If $G_LastTab = 1 Then         ; Tab 2 GameUserSettings.ini
+	If $G_LastTab = 1 Then ; Tab 2 GameUserSettings.ini
 		If $tG_T2_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to GameUserSettings.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T2_B_Save()
 				$tG_T2_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T2_B_Reset()
 				$tG_T2_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T2_E_Edit)
 				GUICtrlSetState($G_T2_T_GUS, $GUI_SHOW)
 				GUICtrlSetData($G_T2_E_Edit, $tTxt)
@@ -20037,19 +20068,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 2 Then         ; Tab 3 Game.ini
+	If $G_LastTab = 2 Then ; Tab 3 Game.ini
 		If $tG_T3_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to Game.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T3_B_Save()
 				$tG_T3_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T3_B_Reset()
 				$tG_T3_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T3_E_Edit)
 				GUICtrlSetState($G_T3_T_Game, $GUI_SHOW)
 				GUICtrlSetData($G_T3_E_Edit, $tTxt)
@@ -20058,19 +20089,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 3 Then         ; Tab 4 Engine.ini
+	If $G_LastTab = 3 Then ; Tab 4 Engine.ini
 		If $tG_T4_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to Engine.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T4_B_Save()
 				$tG_T4_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T4_B_Reset()
 				$tG_T4_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T4_E_Edit)
 				GUICtrlSetState($G_T4_T_Engine, $GUI_SHOW)
 				GUICtrlSetData($G_T4_E_Edit, $tTxt)
@@ -20079,19 +20110,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 4 Then         ; Tab 5 ServerGrid.json
+	If $G_LastTab = 4 Then ; Tab 5 ServerGrid.json
 		If $tG_T5_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to " & $aConfigFile & "?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T5_B_Save()
 				$tG_T5_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T5_B_Reset()
 				$tG_T5_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T5_E_Edit)
 				GUICtrlSetState($G_T5_T_ServerGrid, $GUI_SHOW)
 				GUICtrlSetData($G_T5_E_Edit, $tTxt)
@@ -20100,19 +20131,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 5 Then         ; Tab 6 DefaultGUS.ini
+	If $G_LastTab = 5 Then ; Tab 6 DefaultGUS.ini
 		If $tG_T6_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultGameUserSettings.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T6_B_Save()
 				$tG_T6_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T6_B_Reset()
 				$tG_T6_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T6_E_Edit)
 				GUICtrlSetState($G_T6_T_Tab, $GUI_SHOW)
 				GUICtrlSetData($G_T6_E_Edit, $tTxt)
@@ -20121,19 +20152,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 6 Then         ; Tab 7 DefaultGame.ini
+	If $G_LastTab = 6 Then ; Tab 7 DefaultGame.ini
 		If $tG_T7_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultGame.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T7_B_Save()
 				$tG_T7_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T7_B_Reset()
 				$tG_T7_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T7_E_Edit)
 				GUICtrlSetState($G_T7_T_Tab, $GUI_SHOW)
 				GUICtrlSetData($G_T7_E_Edit, $tTxt)
@@ -20142,19 +20173,19 @@ Func G_LastTab($tTab)
 			EndIf
 		EndIf
 	EndIf
-	If $G_LastTab = 7 Then         ; Tab 8 DefaultEngine.ini
+	If $G_LastTab = 7 Then ; Tab 8 DefaultEngine.ini
 		If $tG_T8_EditClicked Then
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilityVer, "Do you wish to save changes to DefaultEngine.ini?" & @CRLF & @CRLF & _
 					"Click (YES) to save" & @CRLF & _
 					"Click (NO) to discarge changes" & @CRLF & _
 					"Click (CANCEL) to continue editing.", 10)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				G_T8_B_Save()
 				$tG_T8_EditClicked = False
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				G_T8_B_Reset()
 				$tG_T8_EditClicked = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TIMEOUT
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TIMEOUT
 				Local $tTxt = GUICtrlRead($G_T8_E_Edit)
 				GUICtrlSetState($G_T8_T_Tab, $GUI_SHOW)
 				GUICtrlSetData($G_T8_E_Edit, $tTxt)
@@ -20231,11 +20262,11 @@ Func G_T1_I_FireWallEnabledYN()
 				"Click (YES) to restart as Administrator" & @CRLF & _
 				"Click (NO) or (CANCEL) to continue without changes."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 60)
-		If $tMB = 6 Then             ; YES
-			_RestartUtil(True, True)     ; Quick=True, Admin=Yes
-		ElseIf $tMB = 7 Then         ; NO
-		ElseIf $tMB = 2 Then         ; CANCEL
-		ElseIf $tMB = -1 Then        ; TIMEOUT
+		If $tMB = 6 Then ; YES
+			_RestartUtil(True, True) ; Quick=True, Admin=Yes
+		ElseIf $tMB = 7 Then ; NO
+		ElseIf $tMB = 2 Then ; CANCEL
+		ElseIf $tMB = -1 Then ; TIMEOUT
 		EndIf
 	EndIf
 	IniWrite($aGridSelectFile, $aGridIniTitle[5], "Firewall Block Use for Server (" & $xServergridx[$tGridActive] & "," & $xServergridy[$tGridActive] & ") (yes/no)", $xFireWallUseYN[$tGridActive])
@@ -20251,7 +20282,7 @@ EndFunc   ;==>G_UpdateCPUAffinIcon
 Func G_T1_I_CPUAffinTF()
 	If $xCPUAffinityUseYN[$tGridActive] = "yes" Then
 		$xCPUAffinityUseYN[$tGridActive] = "no"
-		_SetAffinity($tGridActive, True)         ; True forces all CPU cores enabled, aka Disabling CPU Affinity
+		_SetAffinity($tGridActive, True) ; True forces all CPU cores enabled, aka Disabling CPU Affinity
 	Else
 		$xCPUAffinityUseYN[$tGridActive] = "yes"
 		_SetAffinity($tGridActive)
@@ -20359,14 +20390,14 @@ Func G_TA_B_RestartServers()
 			"Click (CANCEL) to cancel."
 	SplashOff()
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $bMsg, 30)
-	If $tMB = 6 Then         ; (YES)
+	If $tMB = 6 Then ; (YES)
 		F_RemoteRestart()
 	ElseIf $tMB = 7 Then
 		F_RestartNow(False)
 	ElseIf $tMB = 2 Then
 		LogWrite("", " [Server] Restart Server canceled by user.")
 		_Splash("Restart cancelled.", 2000)
-	ElseIf $tMB = -1 Then         ; Timeout
+	ElseIf $tMB = -1 Then ; Timeout
 		LogWrite("", " [Server] Restart Server canceled by user.")
 		_Splash("Restart cancelled.", 2000)
 	EndIf
@@ -20460,14 +20491,14 @@ EndFunc   ;==>G_W_ParamNumLabelClicked
 Func G_T1_B_StartStopServUpdate()
 	Sleep(500)
 	If ProcessExists($aServerPID[$tGridActive]) And $xLocalGrid[$tGridActive] = "yes" Then
-		GUICtrlSetBkColor($G_T1_B_StartStopServer, 0xFF5858)         ; Red
+		GUICtrlSetBkColor($G_T1_B_StartStopServer, 0xFF5858) ; Red
 		GUICtrlSetData($G_T1_B_StartStopServer, "Stop Server")
 	Else
 		If $xLocalGrid[$tGridActive] = "yes" Then
-			GUICtrlSetBkColor($G_T1_B_StartStopServer, $cButtonStart)         ; Green
+			GUICtrlSetBkColor($G_T1_B_StartStopServer, $cButtonStart) ; Green
 			GUICtrlSetData($G_T1_B_StartStopServer, "Start Server")
 		Else
-			GUICtrlSetBkColor($G_T1_B_StartStopServer, $cGGridButtonInactive)         ; Gray
+			GUICtrlSetBkColor($G_T1_B_StartStopServer, $cGGridButtonInactive) ; Gray
 			GUICtrlSetData($G_T1_B_StartStopServer, "Remote Server")
 		EndIf
 	EndIf
@@ -20526,7 +20557,7 @@ Func G_T1_I_AddedDelayGrid()
 		$xGridStartDelay[$tGridActive] = 600
 		GUICtrlSetData($G_T1_I_AddedDelayGrid, $xGridStartDelay[$tGridActive])
 	EndIf
-	_BackupFile($aGridSelectFile)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aGridSelectFile) ;File, Text to write, Show Splash, IsArray?
 	IniWrite($aGridSelectFile, $aGridIniTitle[3], "Additional startup delay Server (" & $xServergridx[$tGridActive] & "," & $xServergridy[$tGridActive] & ") (0-600)", $xGridStartDelay[$tGridActive])
 EndFunc   ;==>G_T1_I_AddedDelayGrid
 Func G_T1_L_FireWallDelaySec()
@@ -20551,7 +20582,7 @@ Func G_T1_I_BaseDelay()
 		$aServerStartDelay = 600
 		GUICtrlSetData($G_T1_I_BaseDelay, $aServerStartDelay)
 	EndIf
-	_BackupFile($aIniFile)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aIniFile) ;File, Text to write, Show Splash, IsArray?
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server starts (0-600) ###", $aServerStartDelay)
 EndFunc   ;==>G_T1_I_BaseDelay
 Func G_T1_I_ServerName()
@@ -20592,7 +20623,7 @@ Func G_T1_I_AltSaveDIR()
 	Local $aTxtOld = $xServerAltSaveDir[$tGridActive]
 	$xServerAltSaveDir[$tGridActive] = GUICtrlRead($G_T1_I_AltSaveDIR)
 	Local $aTxtNew = $xServerAltSaveDir[$tGridActive]
-	_BackupFile($aIniFile)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aIniFile) ;File, Text to write, Show Splash, IsArray?
 	$aServerAltSaveDir = StringReplace($aServerAltSaveDir, $aTxtOld, $aTxtNew)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $aServerAltSaveDir)
 	GUICtrlSetData($G_T1_I_AltSaveDIR, $xServerAltSaveDir[$tGridActive])
@@ -20651,7 +20682,7 @@ Func G_T1_I_RCONPort()
 		_ReplaceStringFile($aFile, $tBefore, $aTxtNew, -1, "RCON", False, $tGridActive)
 	Else
 		LogWrite("", " [Param] Changed Parameter in Server " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " [" & $aUtilName & ".ini] From:" & $aTxtOld & " to " & $aTxtNew)
-		_BackupFile($aIniFile)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($aIniFile) ;File, Text to write, Show Splash, IsArray?
 		Local $tRCON = ""
 		For $i = 1 To ($aServerGridTotal)
 			$tRCON = $tRCON & $xServerRCONPort[$i] & ","
@@ -20665,7 +20696,7 @@ Func G_T1_I_RCONPort()
 EndFunc   ;==>G_T1_I_RCONPort
 Func G_T1_I_CommandlineAllGrids()
 	$aServerExtraCMD = GUICtrlRead($G_T1_I_CommandlineAllGrids)
-	_BackupFile($aIniFile)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aIniFile) ;File, Text to write, Show Splash, IsArray?
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
 	_UpdateCMD(False)
 	GUICtrlSetData($G_T1_I_CommandlineTotal, $xServerStart[$tGridActive])
@@ -20675,7 +20706,7 @@ Func G_T1_I_CommandlineThisGridInput()
 EndFunc   ;==>G_T1_I_CommandlineThisGridInput
 Func G_T1_I_CommandlineThisGrid($tGrid = $tGridActive)
 	$xServerGridExtraCMD[$tGrid] = GUICtrlRead($G_T1_I_CommandlineThisGrid)
-	_BackupFile($aGridSelectFile, "", False, False, True)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aGridSelectFile, "", False, False, True) ;File, Text to write, Show Splash, IsArray?
 	IniWrite($aGridSelectFile, $aGridIniTitle[2], "Add to Commandline for Server (" & $xServergridx[$tGrid] & "," & $xServergridy[$tGrid] & ")", $xServerGridExtraCMD[$tGrid])
 	_UpdateCMD(False)
 	GUICtrlSetData($G_T1_I_CommandlineTotal, $xServerStart[$tGridActive])
@@ -20898,7 +20929,7 @@ Func G_T2_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T2_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -20936,25 +20967,25 @@ Func G_T2_B_CopyAllGrids()
 			"Click (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T2_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
-					If $tMB = 6 Then _Update_GUS_File($tFileTemp, $i)         ; NO (Copy AS IS)
+					If $tMB = 6 Then _Update_GUS_File($tFileTemp, $i) ; NO (Copy AS IS)
 				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T2_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -20980,25 +21011,25 @@ Func G_T2_B_CopySelectGrids()
 				"Click (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T2_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					If $i <> $tGridActive Then
 						ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-						_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+						_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 						FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 						If $tMB = 6 Then _Update_GUS_File($tFileTemp, $i)
 					EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T2_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21050,7 +21081,7 @@ Func G_T3_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T3_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21088,25 +21119,25 @@ Func G_T3_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T3_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 					If $tMB = 6 Then _Update_Game_File($tFileTemp, $i)
 				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T3_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -21131,25 +21162,25 @@ Func G_T3_B_CopySelectGrids()
 				"Click (NO) or (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T3_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					If $i <> $tGridActive Then
 						ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-						_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+						_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 						FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 					If $tMB = 6 Then _Update_Game_File($tFileTemp, $i)
 					EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T3_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21202,7 +21233,7 @@ Func G_T4_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T4_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21240,25 +21271,25 @@ Func G_T4_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T4_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 					If $tMB = 6 Then _Update_Engine_File($tFileTemp, $i)
 				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T4_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -21283,25 +21314,25 @@ Func G_T4_B_CopySelectGrids()
 				"Click (NO) or (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied from " & _ServerNamingScheme($tGridActive, $aNamingScheme) & " to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T4_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					If $i <> $tGridActive Then
 						ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 						$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\" & $tFileName
-						_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+						_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 						FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 					If $tMB = 6 Then _Update_Engine_File($tFileTemp, $i)
 					EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T4_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21354,7 +21385,7 @@ Func G_T5_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T5_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21365,7 +21396,7 @@ Func G_T5_B_Replace()
 		_Splash("Replace canceled.", 1500)
 	EndIf
 EndFunc   ;==>G_T5_B_Replace
-Func G_T5_B_Find()         ; Kim !!!
+Func G_T5_B_Find() ; Kim !!!
 	$tTxt = InputBox($aUtilName, "Enter text to find", "", "", -1, 125, Default, Default, 60)
 	If $tTxt = "" Then
 	Else
@@ -21439,7 +21470,7 @@ Func G_T6_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T6_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21476,25 +21507,25 @@ Func G_T6_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T6_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				;				If $i <> $tGridActive Then
 				ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\GameUserSettings.ini"
-				_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+				_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 				FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultGameUserSettings_File($tFileTemp, $i)
 				;				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T6_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -21519,25 +21550,25 @@ Func G_T6_B_CopySelectGrids()
 				"Click (NO) or (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T6_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					;				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\GameUserSettings.ini"
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultGameUserSettings_File($tFileTemp, $i)
 					;				EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T6_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21590,7 +21621,7 @@ Func G_T7_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T7_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21627,25 +21658,25 @@ Func G_T7_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T7_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				;				If $i <> $tGridActive Then
 				ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\Game.ini"
-				_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+				_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 				FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultGame_File($tFileTemp, $i)
 				;				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T7_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -21670,25 +21701,25 @@ Func G_T7_B_CopySelectGrids()
 				"Click (NO) or (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T7_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					;				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\Game.ini"
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultGame_File($tFileTemp, $i)
 					;				EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T7_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21741,7 +21772,7 @@ Func G_T8_B_Replace()
 	If $tTxtBefore = "" Then Return
 	Local $tTxtAfter = InputBox($aUtilName, "Enter text to replace with (after)", "", "", -1, 125, Default, Default, 120)
 	$tMB = MsgBox($MB_OKCANCEL, "REPLACE TEXT", "Replace:" & $tTxtBefore & @CRLF & "With:" & $tTxtAfter)
-	If $tMB = 1 Then         ; OK
+	If $tMB = 1 Then ; OK
 		Local $tTxt = GUICtrlRead($G_T8_E_Edit)
 		Local $tTxt1 = StringReplace($tTxt, $tTxtBefore, $tTxtAfter)
 		$tReplacements = @extended
@@ -21778,25 +21809,25 @@ Func G_T8_B_CopyAllGrids()
 			"Click (NO) or (CANCEL) to cancel."
 	$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 	; ----------------------------------------------------------
-	If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+	If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 		LogWrite(" [Util] " & $tFileName & " content copied to ALL LOCAL grids")
 		$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 		Local $tTxt = GUICtrlRead($G_T8_E_Edit)
-		_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $xLocalGrid[$i] = "yes" Then
 				;				If $i <> $tGridActive Then
 				ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 				$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\Engine.ini"
-				_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+				_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 				FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultEngine_File($tFileTemp, $i)
 				;				EndIf
 			EndIf
 		Next
 		ControlSetText($tSplash, "", "Static1", "Copying complete.")
-	ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+	ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 	EndIf
 	$tG_T8_EditClicked = False
 	SetStatusBusy("Copying Files", "Copying complete.")
@@ -21821,25 +21852,25 @@ Func G_T8_B_CopySelectGrids()
 				"Click (NO) or (CANCEL) to cancel."
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 30)
 		; ----------------------------------------------------------
-		If $tMB = 6 Or $tMB = 7 Then         ; YES (Add Grid-Specific settings)
+		If $tMB = 6 Or $tMB = 7 Then ; YES (Add Grid-Specific settings)
 			LogWrite(" [Util] " & $tFileName & " content copied to SELECT LOCAL grids")
 			$tSplash = _Splash("Backing up " & $tFileName & @CRLF & "for Grid")
 			Local $tTxt = GUICtrlRead($G_T8_E_Edit)
-			_BackupFile($tFileSource, $tTxt, False)         ;File, Text to write, Show Splash, IsArray?
+			_BackupFile($tFileSource, $tTxt, False) ;File, Text to write, Show Splash, IsArray?
 			For $i = 0 To ($aServerGridTotal - 1)
 				If $xLocalGrid[$i] = "yes" And _GUICtrlListView_GetItemChecked($wMainListViewWindow, $i) Then
 					;				If $i <> $tGridActive Then
 					ControlSetText($tSplash, "", "Static1", "Processing " & $tFileName & @CRLF & "for Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					SetStatusBusy("Copying Files", "Processing Grid " & _ServerNamingScheme($i, $aNamingScheme))
 					$tFileTemp = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$i] & "\Config\WindowsServer\Engine.ini"
-					_BackupFile($tFileTemp, "", False)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFileTemp, "", False) ;File, Text to write, Show Splash, IsArray?
 					FileCopy($tFileSource, $tFileTemp, $FC_OVERWRITE)
 ;~ 				If $tMB = 6 Then _Update_DefaultEngine_File($tFileTemp, $i)
 					;				EndIf
 				EndIf
 			Next
 			ControlSetText($tSplash, "", "Static1", "Copying complete.")
-		ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+		ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 		EndIf
 		$tG_T8_EditClicked = False
 		SetStatusBusy("Copying Files", "Copying complete.")
@@ -21873,13 +21904,13 @@ Func _AnySelGrid()
 	Next
 	Return False
 EndFunc   ;==>_AnySelGrid
-Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridx = -1, $tGridY = -1, $tFileLoad = -1, $tQuotesTF = -1, $tSplashTF = True)         ; (Par, TxtOld, TxtNew, X, Y, File, QuoteTF)
+Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridx = -1, $tGridY = -1, $tFileLoad = -1, $tQuotesTF = -1, $tSplashTF = True) ; (Par, TxtOld, TxtNew, X, Y, File, QuoteTF)
 	If $tGridx = -1 Then $tGridx = $xServergridx[$tGridActive]
 	If $tGridY = -1 Then $tGridY = $xServergridy[$tGridActive]
 	If $tFileLoad = -1 Then $tFileLoad = $aConfigFull
 	If $tQuotesTF = -1 Then $tQuotesTF = True
-	Local $tXFound = False, $tYFound = False, $tReturn = 0         ; (no error)
-	Local $xFile, $tXFound = False, $tYFound = False, $tReturn = 0         ; (no error)
+	Local $tXFound = False, $tYFound = False, $tReturn = 0 ; (no error)
+	Local $xFile, $tXFound = False, $tYFound = False, $tReturn = 0 ; (no error)
 	Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
 	Local $tFileSave = StringTrimRight($tFileLoad, 4) & $tTime & ".json"
 	_FileReadToArray($tFileLoad, $xFile, 0)
@@ -21904,13 +21935,13 @@ Func _ReplaceServerGrid($tParamter, $tTxtToReplace, $tTxtToReplaceWith, $tGridx 
 		Else
 			$xFile[$i] = "      """ & $tParamter & """: " & $tTxtToReplaceWith & ","
 		EndIf
-		_BackupFile($tFileLoad, $xFile, $tSplashTF, True)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($tFileLoad, $xFile, $tSplashTF, True) ;File, Text to write, Show Splash, IsArray?
 	EndIf
 	Return $tReturn
 EndFunc   ;==>_ReplaceServerGrid
 Func _ReplaceCommandLine($tGrid, $tCmd, $tAddTF)
 	Local $tCntTot = 0, $tCntChanged = 0, $tReturn[2]
-	If $tAddTF = True Then         ; Add parameter
+	If $tAddTF = True Then ; Add parameter
 		$tCntTot += 1
 		If StringInStr($xServerGridExtraCMD[$tGrid], $tCmd) = 0 Then
 			$xServerGridExtraCMD[$tGrid] &= " -" & $tCmd
@@ -21920,7 +21951,7 @@ Func _ReplaceCommandLine($tGrid, $tCmd, $tAddTF)
 			$tCntChanged += 1
 		Else
 		EndIf
-	Else         ; Remove Parameter
+	Else ; Remove Parameter
 		$tCntTot += 1
 		If StringInStr($xServerGridExtraCMD[$tGrid], $tCmd) = 0 Then
 		Else
@@ -21937,7 +21968,7 @@ Func _ReplaceCommandLine($tGrid, $tCmd, $tAddTF)
 	$tReturn[1] = $tCntChanged
 	Return $tReturn
 EndFunc   ;==>_ReplaceCommandLine
-Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, $tIgnoreReadOnly = False)         ;File, Text to write, Show Splash, IsArray?
+Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, $tIgnoreReadOnly = False) ;File, Text to write, Show Splash, IsArray?
 	; Creates backup with timstamp
 	Local $tTxt, $tPos, $tExt, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly, $tBefore, $tDiff = False
 	If $tNewTxt <> "" Then
@@ -22017,10 +22048,10 @@ Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, 
 	EndIf
 	Return $tFileSave
 EndFunc   ;==>_BackupFile
-Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum = -1, $tTForNum = "TF", $tSplashTF = True, $trGrid = $tGridActive)         ; $tSplashTF = Show Splash screen during _BackupFile function.
+Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum = -1, $tTForNum = "TF", $tSplashTF = True, $trGrid = $tGridActive) ; $tSplashTF = Show Splash screen during _BackupFile function.
 	; Takes $tTxtToReplace (RCON=5710) and changes it to $tTxtToReplaceWith (1234) to be RCON=1234
 	Local $tTxt, $tPos = -1, $tExt, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly
-	Local $xFile, $tXFound = False, $tYFound = False, $tReturn = 0, $tFoundTF = False, $tFoundTFPar = False         ; (no error)
+	Local $xFile, $tXFound = False, $tYFound = False, $tReturn = 0, $tFoundTF = False, $tFoundTFPar = False ; (no error)
 	For $tC = 1 To StringLen($tTxtToReplace)
 		$tTxt = StringRight($tTxtToReplace, $tC)
 		If StringInStr($tTxt, "=") = 0 Then
@@ -22078,7 +22109,7 @@ Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum =
 				For $i = 0 To (UBound($xFile) - 1)
 					If StringInStr($xFile[$i], $gParamTFSection[$tParamNum]) = 0 Then
 					Else
-						$tPos = $i + 1         ; Position of header
+						$tPos = $i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -22093,7 +22124,7 @@ Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum =
 				For $i = 0 To (UBound($xFile) - 1)
 					If StringInStr($xFile[$i], $gParamNumSection[$tParamNum]) = 0 Then
 					Else
-						$tPos = $i + 1         ; Position of header
+						$tPos = $i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -22119,7 +22150,7 @@ Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum =
 	Next
 	LogWrite("", " [Param] Changed Parameter in Server " & _ServerNamingScheme($trGrid, $aNamingScheme) & " [" & $tFileOnly & "] From:" & $tTxtToReplace & " to " & $tParameter & "=" & $tTxtToReplaceWith)
 	If $tPos > -1 Then $xFile[$tPos] = $tParameter & "=" & $tTxtToReplaceWith
-	_BackupFile($tFile, $xFile, $tSplashTF, True)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($tFile, $xFile, $tSplashTF, True) ;File, Text to write, Show Splash, IsArray?
 EndFunc   ;==>_ReplaceStringFile
 ;==>_ReplaceStringFile
 Func _Update_GUS_File($tFile, $tGrid)
@@ -22132,7 +22163,7 @@ Func _GUS_R_RCON($tGrid)
 	_ReplaceStringFile($aFile, $tBefore, $tRCON, -1, "RCON", False, $tGrid)
 EndFunc   ;==>_GUS_R_RCON
 Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
-	If $aTForNum = "TF" Then         ; A True/False Paramater
+	If $aTForNum = "TF" Then ; A True/False Paramater
 		If $gParamTFValue[$tX] = True Then
 			Local $aTxtOld = $gParamTFName[$tX] & "=False"
 			Local $aValueOld = False
@@ -22140,11 +22171,11 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 			Local $aTxtOld = $gParamTFName[$tX] & "=True"
 			Local $aValueOld = True
 		EndIf
-		If $gParamTFFile[$tX] = 0 Then         ; CommandLine
+		If $gParamTFFile[$tX] = 0 Then ; CommandLine
 			Local $tTxt = $gParamTFName[$tX]
 			Local $tAddorRemove = $gParamTFValue[$tX]
 			_ReplaceCommandLine($tGridActive, $tTxt, $tAddorRemove)
-		ElseIf $gParamTFFile[$tX] = 1 Then         ; ServerGrid.json
+		ElseIf $gParamTFFile[$tX] = 1 Then ; ServerGrid.json
 			Local $aTxtNew = $gParamTFValue[$tX]
 			Local $tParam = $gParamTFName[$tX]
 			Local $tLine = _ReplaceServerGrid($tParam, $aTxtOld, $aTxtNew, $xServergridx[$tGridActive], $xServergridy[$tGridActive], $aConfigFull, False, False)
@@ -22152,26 +22183,26 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 				$gParamTFValue[$tX] = $aValueOld
 				_Splash("ERROR! " & $gParamTFName[$tX] & " value not saved!" & @CRLF & @CRLF & "(Check if " & $aConfigFile & " file is read-only)", 5000)
 			EndIf
-		ElseIf $gParamTFFile[$tX] = 2 Then         ; GameUserSettings.ini
+		ElseIf $gParamTFFile[$tX] = 2 Then ; GameUserSettings.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\GameUserSettings.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False, $tGridActive)
-		ElseIf $gParamTFFile[$tX] = 3 Then         ; Game.ini
+		ElseIf $gParamTFFile[$tX] = 3 Then ; Game.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Game.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False, $tGridActive)
-		ElseIf $gParamTFFile[$tX] = 4 Then         ; Engine.ini
+		ElseIf $gParamTFFile[$tX] = 4 Then ; Engine.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Engine.ini"
 			Local $aTxtNew = $gParamTFValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "TF", False, $tGridActive)
 		EndIf
-	Else         ; A Numeric / Text Paramater
+	Else ; A Numeric / Text Paramater
 		Local $aTxtOld = $gParamNumName[$tX] & "=" & $aNumOldValue
-		If $gParamNumFile[$tX] = 0 Then         ; CommandLine
+		If $gParamNumFile[$tX] = 0 Then ; CommandLine
 			Local $tTxt = $gParamNumName[$tX]
 			Local $tAddorRemove = $gParamNumValue[$tX]
 			_ReplaceCommandLine($tGridActive, $tTxt, $tAddorRemove)
-		ElseIf $gParamNumFile[$tX] = 1 Then         ; ServerGrid.json
+		ElseIf $gParamNumFile[$tX] = 1 Then ; ServerGrid.json
 			Local $aTxtNew = $gParamNumValue[$tX]
 			Local $tParam = $gParamNumName[$tX]
 			Local $tLine = _ReplaceServerGrid($tParam, $aTxtOld, $aTxtNew, $xServergridx[$tGridActive], $xServergridy[$tGridActive], $aConfigFull, False, False)
@@ -22179,22 +22210,22 @@ Func _ParamClicked($tX, $aTForNum = "TF", $aNumOldValue = "")
 				$gParamNumValue[$tX] = $aNumOldValue
 				_Splash("ERROR! " & $gParamNumName[$tX] & " value not saved!" & @CRLF & @CRLF & "(Check if " & $aConfigFile & " file is read-only)", 5000)
 			EndIf
-		ElseIf $gParamNumFile[$tX] = 2 Then         ; GameUserSettings.ini
+		ElseIf $gParamNumFile[$tX] = 2 Then ; GameUserSettings.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\GameUserSettings.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False, $tGridActive)
-		ElseIf $gParamNumFile[$tX] = 3 Then         ; Game.ini
+		ElseIf $gParamNumFile[$tX] = 3 Then ; Game.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Game.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False, $tGridActive)
-		ElseIf $gParamNumFile[$tX] = 4 Then         ; Engine.ini
+		ElseIf $gParamNumFile[$tX] = 4 Then ; Engine.ini
 			Local $aFile = $aServerDirLocal & "\ShooterGame\Saved\" & $xServerAltSaveDir[$tGridActive] & "\Config\WindowsServer\Engine.ini"
 			Local $aTxtNew = $gParamNumValue[$tX]
 			_ReplaceStringFile($aFile, $aTxtOld, $aTxtNew, $tX, "Num", False, $tGridActive)
 		EndIf
 	EndIf
 EndFunc   ;==>_ParamClicked
-Func _ParamFileImport($tParamToImport = "", $tUseArrayTF = False, $tArray = "")         ; "" = Import all, "Value" = Default Values, "Highlight" = Default Highlight settings.
+Func _ParamFileImport($tParamToImport = "", $tUseArrayTF = False, $tArray = "") ; "" = Import all, "Value" = Default Values, "Highlight" = Default Highlight settings.
 	Local $xfileLoad
 	Local $gParamBegin = 0
 	If $tUseArrayTF Then
@@ -22336,7 +22367,7 @@ Func _ParamFileImport($tParamToImport = "", $tUseArrayTF = False, $tArray = "") 
 		Next
 	EndIf
 EndFunc   ;==>_ParamFileImport
-Func _ParamFileEdit($tParam = "na", $tPar = 0, $tInsertDelete = "na")         ; $tParam ("Param", "Highlight"), $tInsertDelete ("insert", "delete", "na")
+Func _ParamFileEdit($tParam = "na", $tPar = 0, $tInsertDelete = "na") ; $tParam ("Param", "Highlight"), $tInsertDelete ("insert", "delete", "na")
 	Local $xfileRead, $tCount = 0
 	Local $tFail = _FileReadToArray($aParametersFile, $xfileRead, 0)
 	Local $xFile = ResizeArray($xfileRead)
@@ -22889,10 +22920,10 @@ Func _BlackwoodDefaultGUS($tCopyToGUSTF = True, $tOnlyCopyIfDoesNotExistTF = Fal
 			If $tOnlyCopyIfDoesNotExistTF Then
 				If FileExists($tFile) Then
 				Else
-					_BackupFile($tFile, $xArray, False, True)         ;File, Text to write, Show Splash, IsArray?
+					_BackupFile($tFile, $xArray, False, True) ;File, Text to write, Show Splash, IsArray?
 				EndIf
 			Else
-				_BackupFile($tFile, $xArray, False, True)         ;File, Text to write, Show Splash, IsArray?
+				_BackupFile($tFile, $xArray, False, True) ;File, Text to write, Show Splash, IsArray?
 			EndIf
 		EndIf
 	EndIf
@@ -22940,7 +22971,7 @@ Func WriteRCONStartingStuck()
 	ShellExecute($aStuckGridFile)
 EndFunc   ;==>WriteRCONStartingStuck
 
-Func _ParamsSave($tAllorSel = "all", $tWhichFileToUse = "all", $tGrid = $tGridActive)         ; $tAllorSel: all,sel. $tWhichFileToUse:all,CommandLine,ServerGrid,GameUserSettings,Game,Engine
+Func _ParamsSave($tAllorSel = "all", $tWhichFileToUse = "all", $tGrid = $tGridActive) ; $tAllorSel: all,sel. $tWhichFileToUse:all,CommandLine,ServerGrid,GameUserSettings,Game,Engine
 	Local $tFile[5], $tFileRead[5], $tFileName[5], $tSplit, $tFound, $tPar, $tBound[5], $tArray, $tCountTotal = 0, $tCountReplaced = 0, $tRead[2]
 	$tFileName[0] = "Command Line"
 	$tFileName[1] = $aConfigFile
@@ -23009,7 +23040,7 @@ Func _ParamsSave($tAllorSel = "all", $tWhichFileToUse = "all", $tGrid = $tGridAc
 		EndIf
 	Next
 	For $i = 2 To 4
-		If StringInStr($tFilesChanged, $i) Then _BackupFile($tFile[$i], $tFileRead[$i], False, True)         ;File, Text to write, Show Splash, IsArray?
+		If StringInStr($tFilesChanged, $i) Then _BackupFile($tFile[$i], $tFileRead[$i], False, True) ;File, Text to write, Show Splash, IsArray?
 	Next
 	Local $tCount[2]
 	$tCount[0] = $tCountTotal
@@ -23087,7 +23118,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 		Local $t_Array = $t_Array1
 	EndIf
 	Local $t_Parameter, $t_Ext, $t_Txt, $t_Pos = -1, $tNoExt, $tTime, $t_OldParam = "None"
-	Local $t_XFound = False, $t_YFound = False, $t_Return = 0         ; (no error)
+	Local $t_XFound = False, $t_YFound = False, $t_Return = 0 ; (no error)
 	For $tC = 1 To StringLen($t_Param)
 		$t_Txt = StringRight($t_Param, $tC)
 		If StringInStr($t_Txt, "=") = 0 Then
@@ -23121,7 +23152,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 				For $t_i = 0 To (UBound($t_Array) - 1)
 					If StringInStr($t_Array[$t_i], $gParamTFSection[$t_ParamNum]) = 0 Then
 					Else
-						$t_Pos = $t_i + 1         ; Position of header
+						$t_Pos = $t_i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -23136,7 +23167,7 @@ Func _ReplaceParamInArray($t_Array1, $t_Param, $t_ParamNum = -1, $t_TForNum = "T
 				For $t_i = 0 To (UBound($t_Array) - 1)
 					If StringInStr($t_Array[$t_i], $gParamNumSection[$t_ParamNum]) = 0 Then
 					Else
-						$t_Pos = $t_i + 1         ; Position of header
+						$t_Pos = $t_i + 1 ; Position of header
 						ExitLoop
 					EndIf
 				Next
@@ -23217,42 +23248,42 @@ Func PurgeParamBackups($aKeep)
 EndFunc   ;==>PurgeParamBackups
 Func _CheckReadOnly($tFileAttrib, $tSplash = 0)
 	If StringInStr($tFileAttrib, "R") Then
-		If $aOverwriteReadOnly = 3 Then         ; Ask whether to overwrite Read-Only
+		If $aOverwriteReadOnly = 3 Then ; Ask whether to overwrite Read-Only
 			SplashOff()
 			$tMsg = "Warning! File is Read-Only.  Make changes to file?" & @CRLF & @CRLF & _
 					"Click (YES) to make changes." & @CRLF & _
 					"Click (NO) to NOT make changes. No changes will be made." & @CRLF & _
 					"Click (CANCEL) to change default: To ask or not when file is read-only."
 			$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $tMsg, 30)
-			If $tMB = 6 Then         ; YES
+			If $tMB = 6 Then ; YES
 				$tReturn = True
-			ElseIf $tMB = 7 Then         ; NO
+			ElseIf $tMB = 7 Then ; NO
 				_Splash("Cancelled." & @CRLF & @CRLF & "No changes were made to file.", 1500)
 				$tReturn = False
-			ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL
+			ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL
 				$tMsg = "If file is read-only, overwrite file, skip file, or ask." & @CRLF & @CRLF & _
 						"Click (YES) to ALWAYS overwrite file." & @CRLF & _
 						"Click (NO) to NEVER overwrite file." & @CRLF & _
 						"Click (CANCEL) ASK each time." & @CRLF & _
 						"(If no answer in 30 seconds, then file will be overwritten once)."
 				$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $tMsg, 30)
-				If $tMB = 6 Then         ; YES
+				If $tMB = 6 Then ; YES
 					IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", 1)
 					$aOverwriteReadOnly = 1
 					$tReturn = True
-				ElseIf $tMB = 7 Then         ; NO
+				ElseIf $tMB = 7 Then ; NO
 					IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", 2)
 					$aOverwriteReadOnly = 2
 					$tReturn = False
-				ElseIf $tMB = 2 Or $tMB = -1 Then         ; CANCEL or TimeOut
+				ElseIf $tMB = 2 Or $tMB = -1 Then ; CANCEL or TimeOut
 					IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", 3)
 					$aOverwriteReadOnly = 3
 					$tReturn = True
 				EndIf
 			EndIf
-		ElseIf $aOverwriteReadOnly = 2 Then         ; Do not overwrite Read-Only
+		ElseIf $aOverwriteReadOnly = 2 Then ; Do not overwrite Read-Only
 			$tReturn = False
-		ElseIf $aOverwriteReadOnly = 1 Then         ; Overwrite Read-Only
+		ElseIf $aOverwriteReadOnly = 1 Then ; Overwrite Read-Only
 			$tReturn = True
 		EndIf
 	Else
@@ -23798,7 +23829,7 @@ Func G_C_B_MoveDown()
 	Next
 	If ($tSkip = False) Or $tFail Then
 		_ParamSortReference()
-		_BackupFile($aParametersFile, "", False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($aParametersFile, "", False) ;File, Text to write, Show Splash, IsArray?
 		_ParamFileWrite()
 		Local $tTxt = "Parameter Moved Down. Refreshing Window."
 		Local $tSplash = _Splash($tTxt)
@@ -23891,7 +23922,7 @@ Func G_C_B_MoveUp()
 	Next
 	If ($tSkip = False) Or $tFail Then
 		_ParamSortReference()
-		_BackupFile($aParametersFile, "", False)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($aParametersFile, "", False) ;File, Text to write, Show Splash, IsArray?
 		_ParamFileWrite()
 		Local $tTxt = "Parameter Moved Up. Refreshing Window."
 		Local $tSplash = _Splash($tTxt)
@@ -23926,7 +23957,7 @@ Func _ParamDelete($i, $tUpdateParamFileTF = False, $tRefreshWindowTF = False, $t
 	EndIf
 	_ParamSortReference()
 	If $tUpdateParamFileTF Then
-		_BackupFile($aParametersFile, "", $tShowSplashTF)         ;File, Text to write, Show Splash, IsArray?
+		_BackupFile($aParametersFile, "", $tShowSplashTF) ;File, Text to write, Show Splash, IsArray?
 		_ParamFileWrite()
 	EndIf
 	If $tRefreshWindowTF Then
@@ -23962,7 +23993,7 @@ Func _ParamInsertNew($i)
 		_ArrayInsert($gParamNumDefaultValue, $x, 1)
 	EndIf
 	_ParamSortReference()
-	_BackupFile($aParametersFile, "", False)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aParametersFile, "", False) ;File, Text to write, Show Splash, IsArray?
 	_ParamFileWrite()
 	Local $tTxt = "Parameter Added. Refreshing Window."
 	Local $tSplash = _Splash($tTxt)
@@ -24007,7 +24038,7 @@ Func _ParamChangeTF_Num($i)
 		Local $tTxt = "Parameter changed from Value to True/False." & @CRLF & "Sorting and refreshing window."
 	EndIf
 	_ParamSortReference()
-	_BackupFile($aParametersFile, "", False)         ;File, Text to write, Show Splash, IsArray?
+	_BackupFile($aParametersFile, "", False) ;File, Text to write, Show Splash, IsArray?
 	_ParamFileWrite()
 	Local $tSplash = _Splash($tTxt)
 	$tOpenConfiguratorTF = False
@@ -24029,38 +24060,38 @@ Func _KeyPressed($tKeyPressed, $hWnd)
 		Local $bCtrl = False
 		$aRet_Ctrl = DllCall("user32.dll", "short", "GetAsyncKeyState", "int", "0x11")
 		If $aRet_Ctrl[0] Then $bCtrl = True
-		If $tKeyPressed = 0x21 Then         ; PageUp
+		If $tKeyPressed = 0x21 Then ; PageUp
 			If $bCtrl Then
 				_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGELEFT)
 			Else
 				_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEUP)
 			EndIf
-		ElseIf $tKeyPressed = 0x22 Then         ; PageDown
+		ElseIf $tKeyPressed = 0x22 Then ; PageDown
 			If $bCtrl Then
 				_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGERIGHT)
 			Else
 				_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEDOWN)
 			EndIf
-		ElseIf $tKeyPressed = 0x23 Then         ; End
+		ElseIf $tKeyPressed = 0x23 Then ; End
 			If $bCtrl Then
 				_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, $__g_aSB_WindowInfo[$iIndex][6])
 			Else
 				_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, $__g_aSB_WindowInfo[$iIndex][7])
 			EndIf
-		ElseIf $tKeyPressed = 0x24 Then         ; Home
+		ElseIf $tKeyPressed = 0x24 Then ; Home
 			If $bCtrl Then
 				_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, 0)
 			Else
 				_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, 0)
 			EndIf
 		ElseIf $tKeyPressed = 0x25 Then
-			_SendMessage($hWnd, $WM_HSCROLL, $SB_LINELEFT)         ; Left
+			_SendMessage($hWnd, $WM_HSCROLL, $SB_LINELEFT) ; Left
 		ElseIf $tKeyPressed = 0x26 Then
-			_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEUP)         ; Up
+			_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEUP) ; Up
 		ElseIf $tKeyPressed = 0x27 Then
-			_SendMessage($hWnd, $WM_HSCROLL, $SB_LINERIGHT)         ; Right
+			_SendMessage($hWnd, $WM_HSCROLL, $SB_LINERIGHT) ; Right
 		ElseIf $tKeyPressed = 0x28 Then
-			_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEDOWN)         ; Down
+			_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEDOWN) ; Down
 		EndIf
 	EndIf
 EndFunc   ;==>_KeyPressed
@@ -24505,7 +24536,7 @@ Func _GetMemArrayRawAvg($Pid)
 		For $objItem In $colItems
 			For $x = 0 To (UBound($Pid) - 1)
 ;~ 				If $pid[$x] = $objItem.IDProcess Then $tMem[$x] = (($objItem.WorkingSetPrivate + $objItem.WorkingSet) / 2) ; Average
-				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate)         ; Working Set Private
+				If $Pid[$x] = $objItem.IDProcess Then $tMem[$x] = ($objItem.WorkingSetPrivate) ; Working Set Private
 				If @error Then Return 0
 			Next
 		Next
@@ -24686,9 +24717,9 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 
 	; XP, XPe, 2000, or 2003? - Affects process access requirement
 	If StringRegExp(@OSVersion, "_(XP|200(0|3))") Then
-		$iAccess = 0x0400         ; PROCESS_QUERY_INFORMATION
+		$iAccess = 0x0400 ; PROCESS_QUERY_INFORMATION
 	Else
-		$iAccess = 0x1000         ; PROCESS_QUERY_LIMITED_INFORMATION
+		$iAccess = 0x1000 ; PROCESS_QUERY_LIMITED_INFORMATION
 	EndIf
 
 	; SYNCHRONIZE access - required to determine if process has terminated
@@ -24723,12 +24754,12 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		EndIf
 	EndIf
 
-	$aProcUsage[0][0] = 1         ; 1 Process Total (possible future expansion)
+	$aProcUsage[0][0] = 1 ; 1 Process Total (possible future expansion)
 
-	$aProcUsage[1][0] = $sProcess         ; Process Name
-	$aProcUsage[1][1] = $nPID         ; Process ID
-	$aProcUsage[1][2] = $hProcess         ; Process Handle
-	$aProcUsage[1][3] = $iAccess         ; Access Rights (useful to determine when process terminated)
+	$aProcUsage[1][0] = $sProcess ; Process Name
+	$aProcUsage[1][1] = $nPID ; Process ID
+	$aProcUsage[1][2] = $hProcess ; Process Handle
+	$aProcUsage[1][3] = $iAccess ; Access Rights (useful to determine when process terminated)
 
 	$aRet = DllCall("kernel32.dll", "bool", "GetProcessTimes", "handle", $hProcess, "uint64*", 0, "uint64*", 0, "uint64*", 0, "uint64*", 0)
 	If @error Or Not $aRet[0] Then
@@ -24737,8 +24768,8 @@ Func _ProcessUsageTracker_Create($sProcess, $nPID = 0)
 		Return SetError(-1, $iErr, "")
 	EndIf
 
-	$aProcUsage[1][4] = $aRet[4]         ; Process Kernel Time
-	$aProcUsage[1][5] = $aRet[5]         ; Process User Time
+	$aProcUsage[1][4] = $aRet[4] ; Process Kernel Time
+	$aProcUsage[1][5] = $aRet[5] ; Process User Time
 
 	Return $aProcUsage
 EndFunc   ;==>_ProcessUsageTracker_Create
@@ -24921,7 +24952,7 @@ Func _GUIListViewEx_Globals()
 	; #GLOBAL VARIABLES# =================================================================================================
 	; Array to hold registered ListView data
 	Global $aGLVEx_Data[1][26] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-			 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
+			 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
 	; [0][0]  = ListView Count      [n][0]  = ListView handle
 	; [0][1]  = Active Index        [n][1]  = Native ListView ControlID / 0
 	; [0][2]  = Active Column       [n][2]  = Shadow array
@@ -25190,7 +25221,7 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 
 	; If no drag/drop
 	If BitAND($iAdded, 512) Then
-		$aGLVEx_Data[$iLV_Index][12] += 8 + 2         ; Force no external drop
+		$aGLVEx_Data[$iLV_Index][12] += 8 + 2 ; Force no external drop
 	EndIf
 
 	; If single cell selection
@@ -25205,12 +25236,12 @@ Func _GUIListViewEx_Init($hLV, $aArray = "", $iStart = 0, $iColour = 0, $fImage 
 	EndIf
 
 	;  If checkbox extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then         ; $LVS_EX_CHECKBOXES
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 4) Then ; $LVS_EX_CHECKBOXES
 		$aGLVEx_Data[$iLV_Index][6] = 1
 	EndIf
 
 	;  If header drag extended style
-	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then         ; $LVS_EX_HEADERDRAGDROP
+	If BitAND(_GUICtrlListView_GetExtendedListViewStyle($hLV), 0x00000010) Then ; $LVS_EX_HEADERDRAGDROP
 		$aGLVEx_Data[$iLV_Index][13] = 1
 	EndIf
 
@@ -25255,7 +25286,7 @@ Func _GUIListViewEx_Close($iLV_Index = 0)
 		; Reinitialise data array - retaining selected edit key
 		$iEditKeyCode = $aGLVEx_Data[0][23]
 		Global $aGLVEx_Data[1][UBound($aGLVEx_Data, 2)] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-				 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
+				 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
 		; Note delimiter character reset when ListView next initialised
 	Else
 		; Reset all data for ListView
@@ -25431,10 +25462,10 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 
 	; Adjust array depending on mode required
 	Switch $iMode
-		Case 0, 3         ; Content
+		Case 0, 3 ; Content
 			; Array already filled
 
-		Case 1         ; Checkbox state
+		Case 1 ; Checkbox state
 			If $aGLVEx_Data[$iLV_Index][6] Then
 				For $i = 1 To $iDim_1 - 1
 					$aCheck[$i] = _GUICtrlListView_GetItemChecked($hLV, $i - 1)
@@ -25449,7 +25480,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(3, 0, "")
 			EndIf
 
-		Case 2         ; Colour values
+		Case 2 ; Colour values
 			If $aGLVEx_Data[$iLV_Index][19] Then
 				; Load colour array
 				$aData_Colour = $aGLVEx_Data[$iLV_Index][18]
@@ -25464,7 +25495,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Return SetError(4, 0, "")
 			EndIf
 
-		Case 4         ; Headers
+		Case 4 ; Headers
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -25480,7 +25511,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				Next
 			EndIf
 
-		Case 5         ; Header colours
+		Case 5 ; Header colours
 			If $aGLVEx_Data[$iLV_Index][24] Then
 				; Header colour enabled, so read from header data
 				$aHdrData = $aGLVEx_Data[$iLV_Index][25]
@@ -25498,7 +25529,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 	; Check if columns can be reordered
 	If $aGLVEx_Data[$iLV_Index][13] Then
 		Switch $iMode
-			Case 0, 2, 3         ; 2D data/colour array
+			Case 0, 2, 3 ; 2D data/colour array
 				; Create temp array
 				Local $aData_Colour_Ordered[$iDim_1][$iDim_2]
 				; Fill temp array in correct column order
@@ -25512,7 +25543,7 @@ Func _GUIListViewEx_ReturnArray($iLV_Index, $iMode = 0)
 				$aData_Colour = $aData_Colour_Ordered
 				$aData_Colour_Ordered = ""
 
-			Case 4, 5         ; 1D header array
+			Case 4, 5 ; 1D header array
 				; Create return array
 				Local $aHeader_Ordered[$iDim_2]
 				; Fill return array in correct column order
@@ -25611,7 +25642,7 @@ Func _GUIListViewEx_SaveListView($iLV_Index, $sFileName)
 	EndIf
 	$sHeader = StringTrimRight($sHeader, 1)
 	; Get data/check/colour content
-	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3)         ; Force 2D return
+	Local $aData = _GUIListViewEx_ReturnArray($iLV_Index, 3) ; Force 2D return
 	If $iStart Then
 		_ArrayDelete($aData, 0)
 	EndIf
@@ -26334,7 +26365,7 @@ Func _GUIListViewEx_DeleteSpec($iLV_Index, $vRange = "")
 
 	; Check for range
 	If String($vRange) <> "" Then
-		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0)         ; Rows not columns
+		$aIndex = __GUIListViewEx_ExpandRange($vRange, $iLV_Index, 0) ; Rows not columns
 		If @error Then Return SetError(4, 0, 0)
 	Else
 		; Check if colour or single cell selection enabled
@@ -26823,7 +26854,7 @@ Func _GUIListViewEx_SetEditStatus($iLV_Index, $vCol, $iMode = 1, $vParam1 = Defa
 	Local $aEditable = $aGLVEx_Data[$iLV_Index][7]
 
 	Switch $iMode
-		Case 0, 1         ; Not editable/editable
+		Case 0, 1 ; Not editable/editable
 			If $vParam1 = Default Then $vParam1 = 0
 			If $vParam2 = Default Then $vParam2 = ""
 			Switch $vParam1
@@ -26991,7 +27022,7 @@ Func _GUIListViewEx_EditItem($iLV_Index, $iRow, $iCol, $iEditMode = 0, $iDelta_X
 	EndIf
 	; Check edit mode parameter
 	Switch Abs($iEditMode)
-		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33         ; Single edit or both axes set to valid parameter
+		Case 0, 11, 12, 13, 21, 22, 23, 31, 32, 33 ; Single edit or both axes set to valid parameter
 			; Allow
 		Case Else
 			Return SetError(5, 0, "")
@@ -27292,14 +27323,14 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	Local $hCombo, $hTemp_Edit, $hTemp_List, $hTemp_Combo, $sCombo_Data
 
 	; Check edit mode
-	If $aHdrData[2][$iCol] Then         ; Combo
+	If $aHdrData[2][$iCol] Then ; Combo
 		$sCombo_Data = $aHdrData[2][$iCol]
 		; Create temporary combo
-		If StringLeft($sCombo_Data, 1) = @TAB Then         ; Read only combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043)         ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		If StringLeft($sCombo_Data, 1) = @TAB Then ; Read only combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 			$sCombo_Data = StringTrimLeft($sCombo_Data, 1)
-		Else         ; Normal combo
-			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042)         ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+		Else ; Normal combo
+			$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 		EndIf
 		GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 		; Get combo data
@@ -27308,11 +27339,11 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 				"struct;long BtnLeft;long BtnTop;long BtnRight;long BtnBottom;endstruct;dword BtnState;hwnd hCombo;hwnd hEdit;hwnd hList")
 		Local $iInfo = DllStructGetSize($tInfo)
 		DllStructSetData($tInfo, "Size", $iInfo)
-		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")         ; $CB_GETCOMBOBOXINFO
+		_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 		$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 		$hTemp_List = DllStructGetData($tInfo, "hList")
 		$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
-	Else         ; Edit
+	Else ; Edit
 		; Create temporary edit
 		$cGLVEx_EditID = GUICtrlCreateEdit($sHeaderOrgText, $aEdit_Coords[0], $aEdit_Coords[1], $aEdit_Coords[2], $aEdit_Coords[3], 0)
 		$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
@@ -27323,7 +27354,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 	_WinAPI_SetFocus($hTemp_Edit)
 	; Check "select all" flag state
 	If Not $aGLVEx_Data[$iLV_Index][11] Then
-		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)         ; $EM_SETSEL
+		GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 	EndIf
 
 	Local $tMouseClick = DllStructCreate($tagPOINT)
@@ -27376,7 +27407,7 @@ Func _GUIListViewEx_EditHeader($iLV_Index = Default, $iCol = Default, $iDelta_X 
 		EndIf
 		If $hCombo Then
 			; Check for dropdown open and close
-			Switch _SendMessage($hCombo, 0x157)         ; $CB_GETDROPPEDSTATE
+			Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 				Case 0
 					; If opened and closed
 					If $fCombo_State = True Then
@@ -27926,7 +27957,7 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 
 		; Check Type parameter
 		Switch Abs($iEditMode)
-			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33         ; Single edit or both axes set to valid parameter
+			Case 0, 01, 02, 03, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33 ; Single edit or both axes set to valid parameter
 				; Allow
 			Case Else
 				Return SetError(1, 0, "")
@@ -27953,10 +27984,10 @@ Func _GUIListViewEx_EventMonitor($iEditMode = 0, $iDelta_X = 0, $iDelta_Y = 0)
 		EndIf
 
 		Switch $aEditable[0][$aLocation[1]]
-			Case 0         ; Not editable
+			Case 0 ; Not editable
 				Return SetError(3, 0, "")
 
-			Case 9         ; User-defined function
+			Case 9 ; User-defined function
 				; Extract user function
 				Local $hUserFunction = $aEditable[1][$aLocation[1]]
 				; Pass function 4 parameters (LV handle, UDF LV index, row, col)
@@ -28127,10 +28158,10 @@ EndFunc   ;==>_GUIListViewEx_EventMonitor
 Func _GUIListViewEx_MsgRegister($fNOTIFY = True, $fMOUSEMOVE = True, $fLBUTTONUP = True, $fSYSCOMMAND = True)
 
 	; Register required messages
-	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler")         ; $WM_NOTIFY
-	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler")         ; $WM_MOUSEMOVE
-	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler")         ; $WM_LBUTTONUP
-	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler")         ; $WM_SYSCOMMAND
+	If $fNOTIFY Then GUIRegisterMsg(0x004E, "_GUIListViewEx_WM_NOTIFY_Handler") ; $WM_NOTIFY
+	If $fMOUSEMOVE Then GUIRegisterMsg(0x0200, "_GUIListViewEx_WM_MOUSEMOVE_Handler") ; $WM_MOUSEMOVE
+	If $fLBUTTONUP Then GUIRegisterMsg(0x0202, "_GUIListViewEx_WM_LBUTTONUP_Handler") ; $WM_LBUTTONUP
+	If $fSYSCOMMAND Then GUIRegisterMsg(0x0112, "_GUIListViewEx_WM_SYSCOMMAND_Handler") ; $WM_SYSCOMMAND
 
 EndFunc   ;==>_GUIListViewEx_MsgRegister
 
@@ -28161,7 +28192,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 	Local $iCode = BitAND(DllStructGetData($tStruct, 3), 0xFFFFFFFF)
 
 	; Deal with drawing quickly
-	If $iCode = -12 Then         ; $NM_CUSTOMDRAW
+	If $iCode = -12 Then ; $NM_CUSTOMDRAW
 
 		; Prevent redraw if still changing ListView arrays
 		If $aGLVEx_Data[0][12] Then Return
@@ -28193,19 +28224,19 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 			If $aGLVEx_Data[$iLV_Index][19] Or $aGLVEx_Data[$iLV_Index][22] Then
 				Local $tNMLVCUSTOMDRAW = DllStructCreate($tagNMLVCUSTOMDRAW, $lParam)
 				$dwDrawStage = DllStructGetData($tNMLVCUSTOMDRAW, "dwDrawStage")
-				Switch $dwDrawStage         ; Holds a value that specifies the drawing stage
-					Case 1         ; $CDDS_PREPAINT
+				Switch $dwDrawStage ; Holds a value that specifies the drawing stage
+					Case 1 ; $CDDS_PREPAINT
 						; Before the paint cycle begins
-						Return 32         ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
+						Return 32 ; $CDRF_NOTIFYITEMDRAW - Notify the parent window of any item-related drawing operations
 
-					Case 65537         ; $CDDS_ITEMPREPAINT
+					Case 65537 ; $CDDS_ITEMPREPAINT
 						; Before painting an item
-						Return 32         ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
+						Return 32 ; $CDRF_NOTIFYSUBITEMDRAW - Notify the parent window of any subitem-related drawing operations
 
-					Case 196609         ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
+					Case 196609 ; BitOR($CDDS_ITEMPREPAINT, $CDDS_SUBITEM)
 						; Before painting a subitem
-						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec")         ; Row index
-						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem")         ; Column index
+						$iItem = DllStructGetData($tNMLVCUSTOMDRAW, "dwItemSpec") ; Row index
+						Local $iSubItem = DllStructGetData($tNMLVCUSTOMDRAW, "iSubItem") ; Column index
 						; Check if selected row
 						Local $bSelColour = False
 						If $iItem = $aGLVEx_Data[$iLV_Index][20] Then
@@ -28242,7 +28273,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Set required colours
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrText", $iTextColour)
 						DllStructSetData($tNMLVCUSTOMDRAW, "ClrTextBk", $iBackColour)
-						Return 2         ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 
@@ -28265,7 +28296,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Store new handle
 					$aGLVEx_Data[0][20] = DllStructGetData($tStruct, 1)
 					; Get header font
-					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031)         ; $WM_GETFONT
+					Local $hFont = _SendMessage(DllStructGetData($tStruct, 1), 0x0031) ; $WM_GETFONT
 					Local $hObject = _WinAPI_SelectObject($hDC, $hFont)
 					Local $tLogFont = DllStructCreate($tagLOGFONT)
 					; Get header font
@@ -28273,7 +28304,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					_WinAPI_SelectObject($hDC, $hObject)
 					_WinAPI_ReleaseDC(DllStructGetData($tStruct, 1), $hDC)
 					; Set to medium weight
-					DllStructSetData($tLogFont, "Weight", 600)         ; $FW_SEMIBOLD
+					DllStructSetData($tLogFont, "Weight", 600) ; $FW_SEMIBOLD
 					; Store font handle
 					$aGLVEx_Data[0][21] = _WinAPI_CreateFontIndirect($tLogFont)
 				EndIf
@@ -28281,15 +28312,15 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 				; Check drawing stage
 				$dwDrawStage = DllStructGetData($tNMCustomDraw, "dwDrawStage")
 				Switch $dwDrawStage
-					Case 1         ; $CDDS_PREPAINT ; Before the paint cycle begins
-						Return 32         ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
+					Case 1 ; $CDDS_PREPAINT ; Before the paint cycle begins
+						Return 32 ; $CDRF_NOTIFYITEMDRAW ; Notify parent window of coming item related drawing operations
 
-					Case 65537         ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
-						Return 0x00000010         ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
+					Case 65537 ; $CDDS_ITEMPREPAINT ; Before an item is drawn: Default painting (frames and background)
+						Return 0x00000010 ; $CDRF_NOTIFYPOSTPAINT ; Notify parent window of coming post item related drawing operations
 
-					Case 0x00010002         ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
-						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec")         ; Column
-						$aHdrData = $aGLVEx_Data[$iLV_Index][25]         ; Header data
+					Case 0x00010002 ; $CDDS_ITEMPOSTPAINT ; After an item is drawn: Custom painting
+						Local $iColumnIndex = DllStructGetData($tNMCustomDraw, "dwItemSpec") ; Column
+						$aHdrData = $aGLVEx_Data[$iLV_Index][25] ; Header data
 						Local $aColSplit = StringSplit($aHdrData[1][$iColumnIndex], ";")
 						; Set default colours
 						Local $aHdrDefCols = $aGLVEx_Data[$iLV_Index][23]
@@ -28312,7 +28343,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						DllStructSetData($tRECT, 3, DllStructGetData($tNMCustomDraw, 8) - 2)
 						DllStructSetData($tRECT, 4, DllStructGetData($tNMCustomDraw, 9) - 2)
 						; Set transparent background
-						_WinAPI_SetBkMode($hDC, 1)         ; $TRANSPARENT
+						_WinAPI_SetBkMode($hDC, 1) ; $TRANSPARENT
 						; Set text font and colour
 						_WinAPI_SelectObject($hDC, $aGLVEx_Data[0][21])
 						_WinAPI_SetTextColor($hDC, $iHdrTextColour)
@@ -28326,12 +28357,12 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							Local $iColAlign = 2 * $aRet[0]
 							_WinAPI_DrawText($hDC, $aHdrData[0][$iColumnIndex], $tRECT, $iColAlign)
 						EndIf
-						Return 2         ; $CDRF_NEWFONT must be returned after changing font or colors
+						Return 2 ; $CDRF_NEWFONT must be returned after changing font or colors
 				EndSwitch
 			EndIf
 		EndIf
 
-	Else         ; Not a drawing message
+	Else ; Not a drawing message
 
 		; Flag to indicate use of Edit HotKey
 		Local $fEditHotKey = False
@@ -28396,13 +28427,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 						; Check if Native or UDF and set focus
 						If $cGLVEx_SrcID Then
-							GUICtrlSetState($cGLVEx_SrcID, 256)         ; $GUI_FOCUS
+							GUICtrlSetState($cGLVEx_SrcID, 256) ; $GUI_FOCUS
 						Else
 							_WinAPI_SetFocus($hGLVEx_SrcHandle)
 						EndIf
 
 						; Get dragged item index
-						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4)         ; Item
+						$iGLVEx_DraggedIndex = DllStructGetData($tStruct, 4) ; Item
 						; Set dragged item count
 						$iGLVEx_Dragging = 1
 
@@ -28424,7 +28455,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								If $aIndex[$i] = $iGLVEx_DraggedIndex Then ExitLoop
 							Next
 							; Now check for consecutive items
-							If $i <> 1 Then         ; Up
+							If $i <> 1 Then ; Up
 								For $j = $i - 1 To 1 Step -1
 									; Consecutive?
 									If $aIndex[$j] <> $aIndex[$j + 1] - 1 Then ExitLoop
@@ -28434,7 +28465,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-							If $i <> $aIndex[0] Then         ; Down
+							If $i <> $aIndex[0] Then ; Down
 								For $j = $i + 1 To $aIndex[0]
 									; Consecutive
 									If $aIndex[$j] <> $aIndex[$j - 1] + 1 Then ExitLoop
@@ -28442,7 +28473,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 									$iGLVEx_Dragging += 1
 								Next
 							EndIf
-						Else         ; Either no selection or only a single
+						Else ; Either no selection or only a single
 							; Set flag
 							$iGLVEx_Dragging = 1
 						EndIf
@@ -28459,7 +28490,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 
 					EndIf
 
-				Case $LVN_COLUMNCLICK, -2         ; $NM_CLICK
+				Case $LVN_COLUMNCLICK, -2 ; $NM_CLICK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -28489,7 +28520,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						; Get col width
 						Local $aLV_Pos = WinGetPos($hGLVEx_SrcHandle)
 						; Scroll to left edge if all column not in view
-						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then         ; Reduce by scrollbar width
+						If $aRect[0] < 0 Or $aRect[2] > $aLV_Pos[2] - $aGLVEx_Data[0][8] Then ; Reduce by scrollbar width
 							_GUICtrlListView_Scroll($hGLVEx_SrcHandle, $aRect[0], 0)
 						EndIf
 
@@ -28549,7 +28580,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						_GUICtrlListView_SetItemSelected($hLV, $aGLVEx_Data[0][17], False)
 						; Act on left/right keys
 						Switch $aGLVEx_Data[0][16]
-							Case 37         ; Left
+							Case 37 ; Left
 								; Adjust column and prevent overrun
 								If $aGLVEx_Data[0][18] > 0 Then $aGLVEx_Data[0][18] -= 1
 								; Store new column
@@ -28560,7 +28591,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 								$fGLVEx_UserSelFlag = 1
 								$fGLVEx_SelChangeFlag = $iLV_Index
 
-							Case 39         ; Right
+							Case 39 ; Right
 								If $aGLVEx_Data[0][18] < _GUICtrlListView_GetColumnCount($hLV) - 1 Then $aGLVEx_Data[0][18] += 1
 								$aGLVEx_Data[$iLV_Index][21] = $aGLVEx_Data[0][18]
 								_GUICtrlListView_RedrawItems($hLV, $aGLVEx_Data[0][17], $aGLVEx_Data[0][17])
@@ -28571,7 +28602,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 						EndSwitch
 					EndIf
 
-				Case -3         ; $NM_DBLCLK
+				Case -3 ; $NM_DBLCLK
 
 					; Set values for active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -28601,13 +28632,13 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					If $aGLVEx_Data[0][16] <> 0 Then
 						; Check key used
 						Switch $aGLVEx_Data[0][16]
-							Case 38         ; Up
+							Case 38 ; Up
 								If $aGLVEx_Data[0][17] > 0 Then $aGLVEx_Data[0][17] -= 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
 								$fGLVEx_UserSelFlag = 1
 
-							Case 40         ; Down
+							Case 40 ; Down
 								If $aGLVEx_Data[0][17] < _GUICtrlListView_GetItemCount($hLV) - 1 Then $aGLVEx_Data[0][17] += 1
 								$aGLVEx_Data[$iLV_Index][20] = $aGLVEx_Data[0][17]
 								; Set user selection flag
@@ -28651,7 +28682,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 					; Set selection change flag
 					$fGLVEx_SelChangeFlag = $iLV_Index
 
-				Case -5         ; $NM_RCLICK
+				Case -5 ; $NM_RCLICK
 
 					; Set active ListView
 					$aGLVEx_Data[0][1] = $iLV_Index
@@ -28691,7 +28722,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 							; Check header resizing status
 							Local $iHdrResize = $aHdrData[3][$iCol]
 							Switch $iCode
-								Case -306, -326         ; $HDN_BEGINTRACK(W)
+								Case -306, -326 ; $HDN_BEGINTRACK(W)
 									If $iHdrResize Then
 										; Prevent resizing
 										Return True
@@ -28699,7 +28730,7 @@ Func _GUIListViewEx_WM_NOTIFY_Handler($hWnd, $iMsg, $wParam, $lParam)
 										; Allow resizing
 										Return False
 									EndIf
-								Case -305, -325         ; $HDN_DIVIDERDBLCLICK(W)
+								Case -305, -325 ; $HDN_DIVIDERDBLCLICK(W)
 									If $iHdrResize Then
 										; Instant resize of column to fixed width
 										_GUICtrlListView_SetColumnWidth($aGLVEx_Data[$iLV_Index][0], $iCol, $iHdrResize)
@@ -28772,7 +28803,7 @@ Func _GUIListViewEx_WM_MOUSEMOVE_Handler($hWnd, $iMsg, $wParam, $lParam)
 					$cGLVEx_TgtID = $aGLVEx_Data[$i][1]
 					$iGLVEx_TgtIndex = $i
 					$aGLVEx_TgtArray = $aGLVEx_Data[$i][2]
-					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10]         ; Set item depth
+					$aGLVEx_Data[0][3] = $aGLVEx_Data[$i][10] ; Set item depth
 					; No point in looping further
 					ExitLoop
 				EndIf
@@ -28994,7 +29025,7 @@ Func _GUIListViewEx_WM_LBUTTONUP_Handler($hWnd, $iMsg, $wParam, $lParam)
 		$aGLVEx_Data[$aGLVEx_Data[0][1]][2] = $aGLVEx_SrcArray
 		$aGLVEx_Data[$iGLVEx_SrcIndex][18] = $aGLVEx_SrcColArray
 
-	Else         ; Dropping in another ListView
+	Else ; Dropping in another ListView
 
 		; Check checkbox status
 		Local $bCheckbox = (($aGLVEx_Data[$iGLVEx_SrcIndex][6] And $aGLVEx_Data[$iGLVEx_TgtIndex][6]) ? (True) : (False))
@@ -29152,7 +29183,7 @@ Func _GUIListViewEx_WM_SYSCOMMAND_Handler($hWnd, $iMsg, $wParam, $lParam)
 	#forceref $hWnd, $iMsg, $lParam, $lParam
 
 	; Check correct event from ListView GUI
-	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then         ; $SC_CLOSE
+	If $hWnd = _WinAPI_GetParent($hGLVEx_SrcHandle) And $wParam = 0xF060 Then ; $SC_CLOSE
 		$aGLVEx_Data[0][9] = True
 	EndIf
 
@@ -29245,7 +29276,7 @@ Func __GUIListViewEx_HighLight($hLVHandle, $cLV_CID, $iIndexA, $iIndexB = -1)
 
 	; Check if Native or UDF and set focus
 	If $cLV_CID Then
-		GUICtrlSetState($cLV_CID, 256)         ; $GUI_FOCUS
+		GUICtrlSetState($cLV_CID, 256) ; $GUI_FOCUS
 	Else
 		_WinAPI_SetFocus($hLVHandle)
 	EndIf
@@ -29274,7 +29305,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 	If Not IsHWnd($hLVHandle) Then
 		$iError = 1
 	Else
-		Local $hFont = _SendMessage($hLVHandle, 0x0031)         ; WM_GETFONT
+		Local $hFont = _SendMessage($hLVHandle, 0x0031) ; WM_GETFONT
 		If Not $hFont Then
 			$iError = 2
 		Else
@@ -29286,7 +29317,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				$iError = 3
 			Else
 				; Get font size
-				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1)         ; $LOGPIXELSY = 90 => DPI aware
+				$aFontDetails[0] = Round((-1 * DllStructGetData($tFONT, 'Height')) * 72 / _WinAPI_GetDeviceCaps($hDC, 90), 1) ; $LOGPIXELSY = 90 => DPI aware
 				; Now look for font name
 				$aRet = DllCall("gdi32.dll", "int", "GetTextFaceW", "handle", $hDC, "int", 0, "ptr", 0)
 				Local $iCount = $aRet[0]
@@ -29296,7 +29327,7 @@ Func __GUIListViewEx_GetLVFont($hLVHandle)
 				If @error Then
 					$iError = 4
 				Else
-					$aFontDetails[1] = DllStructGetData($tBuffer, 1)         ; FontFacename
+					$aFontDetails[1] = DllStructGetData($tBuffer, 1) ; FontFacename
 				EndIf
 			EndIf
 			_WinAPI_SelectObject($hDC, $hObjOrg)
@@ -29326,7 +29357,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 	_GUICtrlListView_SetItemSelected($hGLVEx_SrcHandle, $aLocation[0], False)
 
 	; Declare return array
-	Local $aEdited[1][4] = [[0]]         ; [[Number of edited items, blank, blank, blank]]
+	Local $aEdited[1][4] = [[0]] ; [[Number of edited items, blank, blank, blank]]
 
 	; Load active ListView details
 	$hGLVEx_SrcHandle = $aGLVEx_Data[$iLV_Index][0]
@@ -29403,19 +29434,19 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		; Determine type of control required for this cell and extract data if required
 		$iEditType = $aEditable[0][$aLocation[1]]
 		Switch $iEditType
-			Case 0, 1         ; Edit
+			Case 0, 1 ; Edit
 				$fEdit = True
 				If $iForce Then
-					$iEditType = 1         ; Force text edit if called by _GUIListViewEx_EditItem
+					$iEditType = 1 ; Force text edit if called by _GUIListViewEx_EditItem
 				EndIf
 
-			Case 2         ; Combo
+			Case 2 ; Combo
 				$fCombo = True
 				Local $sCombo_Data = $aEditable[1][$aLocation[1]]
 				$fRead_Only = (BitAND($aEditable[2][$aLocation[1]], 1) = 1)
 				$fAuto_Drop = (BitAND($aEditable[2][$aLocation[1]], 2) = 2)
 
-			Case 3         ; DTP
+			Case 3 ; DTP
 				$fDTP = True
 				Local $sDTP_Default = $aEditable[1][$aLocation[1]]
 				If StringRight($sDTP_Default, 1) = "#" Then
@@ -29439,30 +29470,30 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		$iWidth = Number($aWidth[$aLocation[1]])
 		; Alter edit/combo width if required value less than current width
 		If $iWidth > $aEdit_Pos[2] Then
-			If $fRead_Only Then         ; Only adjust read-only combo edit width if value is negative
+			If $fRead_Only Then ; Only adjust read-only combo edit width if value is negative
 				If $iWidth < 0 Then
 					$aEdit_Pos[2] = Abs($iWidth)
 				EndIf
-			Else         ; Always adjust for if manual input accepted
+			Else ; Always adjust for if manual input accepted
 				$aEdit_Pos[2] = Abs($iWidth)
 			EndIf
 		EndIf
 
 		; Create control
 		Switch $iEditType
-			Case 1         ; Edit
+			Case 1 ; Edit
 				; Create temporary edit - get handle, set font size, give keyboard focus and select all text
-				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128)         ; $ES_AUTOHSCROLL
+				$cGLVEx_EditID = GUICtrlCreateInput($sItemOrgText, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 128) ; $ES_AUTOHSCROLL
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Check if UpDown required
 				If $aEditable[1][$aLocation[1]] = 1 Then
-					Local $iWrap = -1         ; Default no wrap
+					Local $iWrap = -1 ; Default no wrap
 					; Check if limits to be applied
 					If $aEditable[2][$aLocation[1]] Then
 						$aSplit = StringSplit($aEditable[2][$aLocation[1]], "|")
 						; Check valid syntax
 						If UBound($aSplit) = 4 Then
-							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1))         ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
+							$iWrap = (($aSplit[3] = 1) ? (0x05) : (-1)) ; ($UDS_ALIGNRIGHT, $UDS_WRAP), (Default)
 						EndIf
 					EndIf
 					; Create UpDowm
@@ -29476,14 +29507,14 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					_WinAPI_RedrawWindow($hUpDown)
 				EndIf
 
-			Case 2         ; Combo
+			Case 2 ; Combo
 				; Create temporary combo - get handle, set font size, give keyboard focus
 				If $fRead_Only Then
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043)         ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200043) ; $CBS_DROPDOWNLIST, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Set existing content as default for read-only
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data, $sItemOrgText)
 				Else
-					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042)         ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
+					$cGLVEx_EditID = GUICtrlCreateCombo("", $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3], 0x00200042) ; $CBS_DROPDOWN, $CBS_AUTOHSCROLL, $WS_VSCROLL
 					; Do NOT set existing content as default only for editable
 					GUICtrlSetData($cGLVEx_EditID, $sCombo_Data)
 				EndIf
@@ -29495,21 +29526,21 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				Local $hCombo = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set readonly combo dropped width if required
 				If $fRead_Only And Abs($iWidth) > $aEdit_Pos[2] Then
-					_SendMessage($hCombo, 0x160, Abs($iWidth))         ; $CB_SETDROPPEDWIDTH
+					_SendMessage($hCombo, 0x160, Abs($iWidth)) ; $CB_SETDROPPEDWIDTH
 				EndIf
 				; Get combo data
-				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*")         ; $CB_GETCOMBOBOXINFO
+				_SendMessage($hCombo, 0x164, 0, $tInfo, 0, "wparam", "struct*") ; $CB_GETCOMBOBOXINFO
 				$hTemp_Edit = DllStructGetData($tInfo, "hEdit")
 				$hTemp_List = DllStructGetData($tInfo, "hList")
 				$hTemp_Combo = DllStructGetData($tInfo, "hCombo")
 
-			Case 3         ; DTP
+			Case 3 ; DTP
 				; Create temp date picker
 				$cGLVEx_EditID = GUICtrlCreateDate($sDTP_Default, $aEdit_Pos[0], $aEdit_Pos[1], $aEdit_Pos[2], $aEdit_Pos[3])
 				$hTemp_Edit = GUICtrlGetHandle($cGLVEx_EditID)
 				; Set format if required
 				If $sDTP_Format Then
-					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format)         ; $DTM_SETFORMATW
+					GUICtrlSendMsg($cGLVEx_EditID, 0x1032, 0, $sDTP_Format) ; $DTM_SETFORMATW
 				EndIf
 
 		EndSwitch
@@ -29521,15 +29552,15 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		_WinAPI_SetFocus($hTemp_Edit)
 		; Check "select all" flag state
 		If Not $aGLVEx_Data[$iLV_Index][11] Then
-			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1)         ; $EM_SETSEL
+			GUICtrlSendMsg($cGLVEx_EditID, 0xB1, 0, -1) ; $EM_SETSEL
 		EndIf
 		; Check for auto "drop-down" combo
 		If $fAuto_Drop Then
 			Switch $iEditType
 				Case 2
-					_SendMessage($hCombo, 0x14F, True)         ; $CB_SHOWDROPDOWN
+					_SendMessage($hCombo, 0x14F, True) ; $CB_SHOWDROPDOWN
 				Case 3
-					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10)         ; WM_LBUTTONDOWN
+					_SendMessage($hTemp_Edit, 0x0201, 1, $aEdit_Pos[2] - 10) ; WM_LBUTTONDOWN
 			EndSwitch
 		EndIf
 
@@ -29580,9 +29611,9 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 				If $fEdit Then
 					; Set appropriate behaviour
 					If $fClick_Move Then
-						$iKey_Code = 0x02         ; Confirm edit and move to next cell
+						$iKey_Code = 0x02 ; Confirm edit and move to next cell
 					Else
-						$iKey_Code = 0x01         ; Abandon editing process
+						$iKey_Code = 0x01 ; Abandon editing process
 					EndIf
 				EndIf
 				ExitLoop
@@ -29591,7 +29622,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			If $fCombo Then
 
 				; Check for dropdown open and close
-				Switch _SendMessage($hCombo, 0x157)         ; $CB_GETDROPPEDSTATE
+				Switch _SendMessage($hCombo, 0x157) ; $CB_GETDROPPEDSTATE
 
 					Case 0
 						; If opened and closed
@@ -29617,7 +29648,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 			EndIf
 
 			; Check for valid key pressed
-			For $i = 0 To 2         ; TAB, ENTER, ESC
+			For $i = 0 To 2 ; TAB, ENTER, ESC
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) Then
 					; Set key pressed flag
@@ -29625,7 +29656,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					ExitLoop 2
 				EndIf
 			Next
-			For $i = 3 To 6         ; l/r/u/d with ctrl pressed
+			For $i = 3 To 6 ; l/r/u/d with ctrl pressed
 				_WinAPI_GetAsyncKeyState($aKeys[$i])
 				If _WinAPI_GetAsyncKeyState($aKeys[$i]) And _WinAPI_GetAsyncKeyState(0x11) Then
 					; Set key pressed flag
@@ -29645,13 +29676,13 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 
 		; Check if edit to be confirmed
 		Switch $iKey_Code
-			Case 0x25, 0x26, 0x27, 0x28         ; arrow keys
+			Case 0x25, 0x26, 0x27, 0x28 ; arrow keys
 				; If not standard edit control then abandon edit
 				If $fEdit Then
 					ContinueCase
 				EndIf
 
-			Case 0x02, 0x09, 0x0D         ; Mouse (with Click_Move), TAB, ENTER
+			Case 0x02, 0x09, 0x0D ; Mouse (with Click_Move), TAB, ENTER
 				; Read edit content
 				Local $sItemNewText = GUICtrlRead($cGLVEx_EditID)
 				; Check replacement required
@@ -29681,7 +29712,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 		Opt("MouseCoordMode", $iOldMouseOpt)
 
 		; Check edit mode
-		If $iEditMode = 0 Then         ; Single edit
+		If $iEditMode = 0 Then ; Single edit
 			; Exit edit process
 			ExitLoop
 		Else
@@ -29690,7 +29721,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					$iKey_Code = 0x01
 					ContinueCase
 
-				Case 0x00, 0x01, 0x0D         ; Edit lost focus, mouse button outside edit, ENTER pressed
+				Case 0x00, 0x01, 0x0D ; Edit lost focus, mouse button outside edit, ENTER pressed
 					; Wait until key/button no longer pressed
 					_WinAPI_GetAsyncKeyState($iKey_Code)
 					While _WinAPI_GetAsyncKeyState($iKey_Code)
@@ -29699,7 +29730,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x1B         ; ESC pressed
+				Case 0x1B ; ESC pressed
 					; Check Reset-on-ESC mode
 					If $fReset_Edits Then
 						; Reset previous confirmed edits starting with most recent
@@ -29732,7 +29763,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 					; Exit Edit process
 					ExitLoop
 
-				Case 0x09, 0x27         ; TAB or right arrow
+				Case 0x09, 0x27 ; TAB or right arrow
 					While 1
 						If $iEditCol <> 0 Then
 							; Set next column
@@ -29767,7 +29798,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x25         ; Left arrow
+				Case 0x25 ; Left arrow
 					While 1
 						If $iEditCol <> 0 Then
 							$aLocation[1] -= 1
@@ -29794,7 +29825,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x28         ; Down key
+				Case 0x28 ; Down key
 					While 1
 						If $iEditRow <> 0 Then
 							; Set next row
@@ -29824,7 +29855,7 @@ Func __GUIListViewEx_EditProcess($iLV_Index, $aLocation, $iDelta_X, $iDelta_Y, $
 						EndIf
 					WEnd
 
-				Case 0x26         ; Up key
+				Case 0x26 ; Up key
 					While 1
 						If $iEditRow <> 0 Then
 							$aLocation[0] -= 1
@@ -30068,18 +30099,18 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1         ; Checkbox array
-			If UBound($vAdd, 0) = 2 Or $fMultiRow Then         ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vAdd, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim]
-			Else         ; 1D as columns
+			Else ; 1D as columns
 				ReDim $avArray[$iIndex_Max + 1]
 			EndIf
 
-		Case 2         ; Data array
+		Case 2 ; Data array
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vAdd, 0) = 2 Then         ; 2D add
+			If UBound($vAdd, 0) = 2 Then ; 2D add
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -30097,7 +30128,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					Next
 				Next
 
-			ElseIf $fMultiRow Then         ; 1D add as rows
+			ElseIf $fMultiRow Then ; 1D add as rows
 				; Redim the Array
 				$iAdd_Dim = UBound($vAdd, 1)
 				ReDim $avArray[$iIndex_Max + $iAdd_Dim][$iDim2]
@@ -30107,7 +30138,7 @@ Func __GUIListViewEx_Array_Add(ByRef $avArray, $vAdd, $fMultiRow = False, $bCoun
 					$avArray[$iIndex_Max + $i][0] = $vAdd[$i]
 				Next
 
-			Else         ; 1D add as columns
+			Else ; 1D add as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				If $bCount Then
@@ -30151,8 +30182,8 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1         ; Checkbox array
-			If UBound($vInsert, 0) = 2 Or $fMultiRow Then         ; 2D or 1D as rows
+		Case 1 ; Checkbox array
+			If UBound($vInsert, 0) = 2 Or $fMultiRow Then ; 2D or 1D as rows
 				; Resize array
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim]
 
@@ -30161,7 +30192,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$i] = $avArray[$i - 1]
 				Next
 
-			Else         ; 1D as columns
+			Else ; 1D as columns
 
 				; Resize array
 				ReDim $avArray[$iIndex_Max + 1]
@@ -30176,7 +30207,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 
 			EndIf
 
-		Case 2         ; Data array
+		Case 2 ; Data array
 			; If at end of array
 			If $iIndex > $iIndex_Max - 1 Then
 				__GUIListViewEx_Array_Add($avArray, $vInsert, $fMultiRow, $bCount)
@@ -30184,7 +30215,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 			EndIf
 			; Get column count of data array
 			Local $iDim2 = UBound($avArray, 2)
-			If UBound($vInsert, 0) = 2 Then         ; 2D insert
+			If UBound($vInsert, 0) = 2 Then ; 2D insert
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -30210,7 +30241,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					Next
 				Next
 
-			ElseIf $fMultiRow Then         ; 1D insert as rows
+			ElseIf $fMultiRow Then ; 1D insert as rows
 				; Redim the Array
 				$iInsert_Dim = UBound($vInsert, 1)
 				ReDim $avArray[$iIndex_Max + $iInsert_Dim][$iDim2]
@@ -30226,7 +30257,7 @@ Func __GUIListViewEx_Array_Insert(ByRef $avArray, $iIndex, $vInsert, $fMultiRow 
 					$avArray[$iIndex + $i][0] = $vInsert[$i]
 				Next
 
-			Else         ; 1D insert as columns
+			Else ; 1D insert as columns
 				; Redim the Array
 				ReDim $avArray[$iIndex_Max + 1][$iDim2]
 				$avArray[0][0] += 1
@@ -30274,7 +30305,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 
 	; Get type of array
 	Switch UBound($avArray, 0)
-		Case 1         ; Checkbox array
+		Case 1 ; Checkbox array
 			; Move up all elements below the new index
 			For $i = $iIndex To $iIndex_Max - 2
 				$avArray[$i] = $avArray[$i + 1]
@@ -30282,7 +30313,7 @@ Func __GUIListViewEx_Array_Delete(ByRef $avArray, $iIndex, $bDelCount = False)
 			; Redim the Array
 			ReDim $avArray[$iIndex_Max - 1]
 
-		Case 2         ; Data array
+		Case 2 ; Data array
 			; Get size of second dimension
 			Local $iDim2 = UBound($avArray, 2)
 			; Move up all elements below the new index
@@ -30504,8 +30535,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		EndIf
 
 		; Enter the sorted ListView data
-		For $i = 1 To $iItemCount         ; Rows
-			For $j = 0 To $iColumnCount - 1         ; Columns
+		For $i = 1 To $iItemCount ; Rows
+			For $j = 0 To $iColumnCount - 1 ; Columns
 				_GUICtrlListView_SetItemText($hLV, $i - 1, $aListViewContent[$i][$j], $j)
 				; Reset the colour array if colour enabled
 				If $fColourEnabled Then
@@ -30553,8 +30584,8 @@ Func __GUIListViewEx_ColSort($hLV, $iLV_Index, ByRef $vSortSense, $iCol, $hUserS
 		$aGLVEx_Data[$iLV_Index][18] = $aColourSettings
 
 		; Set flags using ListView index
-		$aGLVEx_Data[0][19] = $iLV_Index         ; SortEvent
-		$aGLVEx_Data[0][22] = 1         ; ColourEvent
+		$aGLVEx_Data[0][19] = $iLV_Index ; SortEvent
+		$aGLVEx_Data[0][22] = 1 ; ColourEvent
 
 	EndIf
 
@@ -30642,8 +30673,8 @@ Func _GUIScrollBars_Globals()
 	;                                   [n][7] = Vertical max setting
 	;                                   [n][8] = Vertical scrollbar position for minimize/restore
 	;                                   [n][9] = Horizontal scrollbar position for minimize/restore
-	$__g_aSB_WindowInfo[0][5] = _WinAPI_GetSystemMetrics(2)         ; Width of VScrollbar:  SM_CXVSCROLL
-	$__g_aSB_WindowInfo[0][6] = _WinAPI_GetSystemMetrics(3)         ; Height of HScrollbar: SM_CYHSCROLL
+	$__g_aSB_WindowInfo[0][5] = _WinAPI_GetSystemMetrics(2) ; Width of VScrollbar:  SM_CXVSCROLL
+	$__g_aSB_WindowInfo[0][6] = _WinAPI_GetSystemMetrics(3) ; Height of HScrollbar: SM_CYHSCROLL
 	Global $__g_aSB_WindowInfoEx[1][9]
 	; [n][0] = Horizontal scrollable size
 	; [n][1] = Vertical scrollable size
@@ -30888,7 +30919,7 @@ Func _GUIScrollbars_Generate($hWnd, $iH_Scroll = 0, $iV_Scroll = 0, $iH_Tight = 
 	$__g_aSB_WindowInfoEx[$iIndex][3] = $aRet[3]
 	$__g_aSB_WindowInfoEx[$iIndex][4] = $fBefore
 	$__g_aSB_WindowInfoEx[$iIndex][5] = $iRepeat
-	$__g_aSB_WindowInfoEx[$iIndex][6] = (($iRepeat) ? ($iRepeat) : (7))         ; Set default 7 for mousewheel if no keys registered
+	$__g_aSB_WindowInfoEx[$iIndex][6] = (($iRepeat) ? ($iRepeat) : (7)) ; Set default 7 for mousewheel if no keys registered
 
 	Local $fSuccess = True
 	If _GUIScrollBars_ShowScrollBar($hWnd, $SB_BOTH, False) = False Then $fSuccess = False
@@ -31308,20 +31339,20 @@ EndFunc   ;==>_Scrollbars_WM_HSCROLL
 Func _Scrollbars_WM_MOUSEWHEEL($hWnd, $iMsg, $wParam, $lParam)
 
 	#forceref $hWnd, $iMsg, $lParam
-	Local $iDirn, $iDelta = BitShift($wParam, 16)         ; Mouse wheel movement
+	Local $iDirn, $iDelta = BitShift($wParam, 16) ; Mouse wheel movement
 	; Find window index
 	Local $iIndex = -1
 	For $i = 0 To UBound($__g_aSB_WindowInfo) - 1
 		If $hWnd = $__g_aSB_WindowInfo[$i][0] Then $iIndex = $i
 	Next
 	If $iIndex <> -1 Then
-		If BitAND($wParam, 0x0000FFFF) Then         ; If Ctrl or Shft pressed move Horz scrollbar
+		If BitAND($wParam, 0x0000FFFF) Then ; If Ctrl or Shft pressed move Horz scrollbar
 			$iDirn = $SB_LINERIGHT
 			If $iDelta > 0 Then $iDirn = $SB_LINELEFT
 			For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][6]
 				_SendMessage($hWnd, $WM_HSCROLL, $iDirn)
 			Next
-		Else         ; Move Vert scrollbar
+		Else ; Move Vert scrollbar
 			$iDirn = $SB_LINEDOWN
 			If $iDelta > 0 Then $iDirn = $SB_LINEUP
 			For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][6]
@@ -31346,7 +31377,7 @@ Func _Scrollbars_WM_MOUSEHWHEEL($hWnd, $iMsg, $wParam, $lParam)
 
 	#forceref $hWnd, $iMsg, $lParam
 	Local $iDirn = $SB_LINERIGHT
-	If BitShift($wParam, 16) > 0 Then $iDirn = $SB_LINELEFT         ; Mouse wheel movement
+	If BitShift($wParam, 16) > 0 Then $iDirn = $SB_LINELEFT ; Mouse wheel movement
 	; Find window index
 	Local $iIndex = -1
 	For $i = 0 To UBound($__g_aSB_WindowInfo) - 1
@@ -31387,43 +31418,43 @@ Func _Scrollbars_WM_KEYUP($hWnd, $iMsg, $wParam, $lParam)
 		If $aRet_Ctrl[0] Then $bCtrl = True
 		; Check key pressed
 		Switch $wParam
-			Case 0x21         ; PageUp
+			Case 0x21 ; PageUp
 				If $bCtrl Then
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGELEFT)
 				Else
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEUP)
 				EndIf
-			Case 0x22         ; PageDown
+			Case 0x22 ; PageDown
 				If $bCtrl Then
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_PAGERIGHT)
 				Else
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_PAGEDOWN)
 				EndIf
-			Case 0x23         ; End
+			Case 0x23 ; End
 				If $bCtrl Then
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, $__g_aSB_WindowInfo[$iIndex][6])
 				Else
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, $__g_aSB_WindowInfo[$iIndex][7])
 				EndIf
-			Case 0x24         ; Home
+			Case 0x24 ; Home
 				If $bCtrl Then
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_HORZ, 0)
 				Else
 					_GUIScrollBars_SetScrollInfoPos($hWnd, $SB_VERT, 0)
 				EndIf
-			Case 0x25         ; Left
+			Case 0x25 ; Left
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_LINELEFT)
 				Next
-			Case 0x26         ; Up
+			Case 0x26 ; Up
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEUP)
 				Next
-			Case 0x27         ; Right
+			Case 0x27 ; Right
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_HSCROLL, $SB_LINERIGHT)
 				Next
-			Case 0x28         ; Down
+			Case 0x28 ; Down
 				For $i = 1 To $__g_aSB_WindowInfoEx[$iIndex][5]
 					_SendMessage($hWnd, $WM_VSCROLL, $SB_LINEDOWN)
 				Next
@@ -31488,11 +31519,11 @@ Func _Scrollbars_WM_EXITSIZEMOVE($hWnd, $iMsg, $wParam, $lParam)
 		For $i = 1 To 2
 			If $aClientSize[0] < $__g_aSB_WindowInfoEx[$iIndex][7] + $iH_Reduction Then
 				$iH_Aperture = $__g_aSB_WindowInfoEx[$iIndex][7] + $iH_Reduction
-				$iV_Reduction = $__g_aSB_WindowInfo[0][6]         ; Height of HScrollbar
+				$iV_Reduction = $__g_aSB_WindowInfo[0][6] ; Height of HScrollbar
 			EndIf
 			If $aClientSize[1] < $__g_aSB_WindowInfoEx[$iIndex][8] + $iV_Reduction Then
 				$iV_Aperture = $__g_aSB_WindowInfoEx[$iIndex][8] + $iV_Reduction
-				$iH_Reduction = $__g_aSB_WindowInfo[0][5]         ; Width of VScrollbar
+				$iH_Reduction = $__g_aSB_WindowInfo[0][5] ; Width of VScrollbar
 			EndIf
 		Next
 		; Generate required scrollbars

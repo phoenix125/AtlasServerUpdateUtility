@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.2.9 (2020-12-04)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.3 (2020-12-22)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,20 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.3 (2020-12-22) Bug Fixes
+- Fixed: Line Error if Restart message did not contain \m for minutes.
+- Fixed: When a grid crashed, ASUU would shut down the last grid(s) closed manually (from restart or close menu). (Thanks to @DiN for reporting)
+
+v2.3.2 (2020-12-18) Crash fix when getting "Authentication Error!" while polling online players 
+- Fixed: Line 46576 Error due to "Authentication Error!" with RCON "Players" command. (Thanks to @NightHaven @Mortyr1973 @Ghost for reporting)
+         I was finally able to reproduce the error and set ASUU to ignore it and not crash.
+
+v2.3.1 (2020-12-09) Bug fix. Fixed Online Player window and log not showing online players.
+- Fixed: Online Player window and log were not showing online players. (Thanks to @JustShootMe for reporting)
+
+v2.3.0 (2020-12-09) Bug fix.
+- Fixed: Line 46576 Error due to improper name or steamID response. Simply told ASUU to ignore errors. (Thanks to @NightHaven @Mortyr1973 @Ghost for reporting)
+
 v2.2.9 (2020-12-04) Bug fix.
 - Fixed: Line Error fix.
 
