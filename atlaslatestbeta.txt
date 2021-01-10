@@ -1,3 +1,3 @@
-v2.3.3^v2.3.3 Bug Fixes
-- Fixed: Line Error if Restart message did not contain \m for minutes.
-- Fixed: When a grid crashed, ASUU would shut down the last grid(s) closed manually (from restart or close menu). (Thanks to @DiN for reporting)
+v2.3.4^ Start ASUU minimized. Resized Online PLayer window.
+- Added: Start ASUU as minimized. Notice! Some startup errors may go unnoticed.
+- Changed: Online Player window now resizes according to number of local running grids.

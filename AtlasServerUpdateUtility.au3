@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.3.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.3_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.4.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.4_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.3.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.4.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.3
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.4
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.3" ; (2020-12-18)
-Local $aUtilVerBeta = "v2.3.3" ; (2020-12-18)
-Global $aUtilVerNumber = 49 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.3.4" ; (2020-12-26)
+Local $aUtilVerBeta = "v2.3.4" ; (2020-12-26)
+Global $aUtilVerNumber = 50 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -146,7 +146,8 @@ Global $aUtilVerNumber = 49 ; New number assigned for each config file change. U
 ;46 = v2.2.2/3
 ;47 = v2.2.4
 ;48 = v2.2.5
-;49 = v2.2.6/7/8/9/3.0/1/2
+;49 = v2.2.6/7/8/9/3.0/1/2/2
+;50 = v2.3.4
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -186,6 +187,7 @@ Global $aKeepAliveFileName = $aUtilName & "KeepAlive_" & $aKeepAliveFileVersion
 Global $aKeepAliveFileExe = $aUtilName & "KeepAlive_" & $aKeepAliveFileVersion & ".exe"
 Global $aKeepAliveFileZip = $aUtilName & "KeepAlive_" & $aKeepAliveFileVersion & ".zip"
 Global $aFirstModBoot = True
+Global $aFirstStartUpTF = True
 Global $iIniErrorCRLF = ""
 Global $aModMsgInGame[10]
 Global $aModMsgDiscord[10]
@@ -949,12 +951,13 @@ If @AutoItX64 = 1 Then
 Else
 	Global $aUtilExe = $aUtilName & "_" & $aUtilVersion & ".exe"
 EndIf
+Global $aStartUtilMinimizedYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Start " & $aUtilName & " minimized of " & $aUtilName & "? (yes/no) ###", "no")
 If FileExists($aFolderTemp) = 0 Then DirCreate($aFolderTemp)
 If FileExists($aFolderLog) = 0 Then DirCreate($aFolderLog)
 If FileExists($aExportDataFolder) = 0 Then DirCreate($aExportDataFolder)
 If FileExists($aConfigFolder) = 0 Then DirCreate($aConfigFolder)
 LogWrite(" ============================ " & $aUtilName & " " & $aUtilVersion & " Started ============================")
-_ShowLoginLogo()
+If $aStartUtilMinimizedYN <> "yes" Then _ShowLoginLogo()
 Global $aIniExist = False
 If FileExists($aIniFile) Then
 	_FileWriteToLine($aIniFile, 3, "Version  :  " & $aUtilityVer, True)
@@ -964,7 +967,11 @@ Else
 	If FileExists(@ScriptDir & "\Config\AtlasServerUpdateUtility.ini") Then $aIniExist = True
 EndIf
 Global $aStartText = $aUtilityVer & " started." & @CRLF & @CRLF
-Global $aSplashStartUp = _Splash($aStartText, 0, 475)
+If $aStartUtilMinimizedYN <> "yes" Then
+	Global $aSplashStartUp = _Splash($aStartText, 0, 475)
+Else
+	Global $aSplashStartUp = 0
+EndIf
 FileDelete($aServerBatchFile)
 FileWrite($aServerBatchFile, '@echo off' & @CRLF & 'START "' & $aUtilName & '" "' & @ScriptDir & '\' & $aUtilExe & '"' & @CRLF & "EXIT")
 Global $aUseKeepAliveYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", "yes")
@@ -982,7 +989,7 @@ If $aUseKeepAliveYN = "yes" Then
 	KeepUtilAliveCounter()
 	AdlibRegister("KeepUtilAliveCounter", 60000)
 EndIf
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aUtilName & "_cfg.ini")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aUtilName & "_cfg.ini")
 ReadCFG($aUtilCFGFile)
 ; ----------- Temporary until enough time has passed for most users to have updated
 If FileExists(@ScriptDir & "\" & $aUtilName & "_lastpidredis.tmp") Then FileMove(@ScriptDir & "\" & $aUtilName & "_lastpidredis.tmp", $aPIDRedisFile)
@@ -1503,6 +1510,10 @@ EndIf
 If $aCFGLastVerNumber < 49 And $aIniExist Then
 	FileDelete(@ScriptDir & "\AtlasModDownloader.exe")
 EndIf
+If $aCFGLastVerNumber < 50 And $aIniExist Then
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Start " & $aUtilName & " minimized of " & $aUtilName & "? (yes/no) ###", "no")
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -1511,7 +1522,7 @@ EndIf
 Local $tFileName = IniRead($aUtilCFGFile, "CFG", "aCFGPreviousVersionToArchive", "")
 If $tFileName <> "" Then
 	If FileExists(@ScriptDir & "\" & $tFileName & ".exe") Then
-		ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Archiving """ & $tFileName & "" & @CRLF & " to folder: """ & $aPreviousVersionsNameFolder & "\")
+		If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Archiving """ & $tFileName & "" & @CRLF & " to folder: """ & $aPreviousVersionsNameFolder & "\")
 		FileMove(@ScriptDir & "\" & $tFileName & ".*", $aPreviousVersionsFolder & "\" & $tFileName & ".*", $FC_CREATEPATH + $FC_OVERWRITE)
 		LogWrite(" [Util] Archived """ & $tFileName & """ to folder: """ & $aPreviousVersionsFolder & "\")
 	EndIf
@@ -1522,7 +1533,7 @@ If Not @Compiled Then FileCopy($aPreviousVersionsFolder & "\AtlasServerUpdateUti
 Global $aAllowMultipleUtilsYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", "no")
 $aUtilBetaYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", 0)
 If $aAllowMultipleUtilsYN = "no" Then
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for another instance of ASUU.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for another instance of ASUU.")
 	Local $tProcessList = ProcessList()
 	Local $tProcessName = "Temp123"
 	Local $tPID3 = 0
@@ -1551,7 +1562,7 @@ If $aAllowMultipleUtilsYN = "no" Then
 	EndIf
 	If $tPID > 0 Then
 		If $tPID <> @AutoItPID Then
-			ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Another instance of Util PID[" & $tPID & "] is running." & @CRLF & "Waiting 5 seconds for it to close.")
+			If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Another instance of Util PID[" & $tPID & "] is running." & @CRLF & "Waiting 5 seconds for it to close.")
 			Sleep(5000)
 			Local $tProcessList = ProcessList()
 			Local $tPID3 = 0
@@ -1586,8 +1597,10 @@ If $aAllowMultipleUtilsYN = "no" Then
 					LogWrite(" [Util] Closing the other instance and continue running this one.")
 					Local $tTmp1 = ProcessClose($tPID)
 					Local $tTmp2 = ProcessClose($tProcessName)
-					$aSplashStartUp = _Splash($aStartText & "Closing the other instance.", 0, 475)
-					Sleep(2000)
+					If $aStartUtilMinimizedYN <> "yes" Then
+						$aSplashStartUp = _Splash($aStartText & "Closing the other instance.", 0, 475)
+						Sleep(2000)
+					EndIf
 					If $tTmp1 = 0 And $tTmp2 = 0 Then
 						LogWrite(" [Util] WARNING! Error closing duplicate util instance.", " [Util] WARNING! Error closing duplicate util instance: " & $tProcessName & " PID(" & $tPID & ")")
 						Local $aMsg = "WARNING! Other instance " & " PID(" & $tPID & ") failed to close." & @CRLF & @CRLF & _
@@ -1597,13 +1610,17 @@ If $aAllowMultipleUtilsYN = "no" Then
 						If $tMB = 6 Then ; YES
 							KeepAliveSetToRun()
 							LogWrite(" [Util] Continuing to run this instance.")
-							$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
-							Sleep(2000)
+							If $aStartUtilMinimizedYN <> "yes" Then
+								$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
+								Sleep(2000)
+							EndIf
 						ElseIf $tMB = 7 Then ; NO
 							KeepAliveSetToRun()
 							LogWrite(" [Util] Continuing to run this instance.")
-							$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
-							Sleep(2000)
+							If $aStartUtilMinimizedYN <> "yes" Then
+								$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
+								Sleep(2000)
+							EndIf
 						ElseIf $tMB = 2 Then ; CANCEL
 							KeepAliveForceClose()
 							LogWrite(" [Util] Exiting utility.")
@@ -1619,8 +1636,10 @@ If $aAllowMultipleUtilsYN = "no" Then
 					KeepAliveSetToRun()
 				ElseIf $tMB = 7 Then ; NO
 					LogWrite(" [Util] Continuing to run this instance.")
-					$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
-					Sleep(2000)
+					If $aStartUtilMinimizedYN <> "yes" Then
+						$aSplashStartUp = _Splash($aStartText & "Continuing to run this instance.", 0, 475)
+						Sleep(2000)
+					EndIf
 					KeepAliveSetToRun()
 				ElseIf $tMB = 2 Then ; CANCEL
 					KeepAliveForceClose()
@@ -1637,7 +1656,7 @@ If $aAllowMultipleUtilsYN = "no" Then
 		EndIf
 	EndIf
 EndIf
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aUtilName & ".ini.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aUtilName & ".ini.")
 Local $tRunConfig = IniRead($aUtilCFGFile, "CFG", "aCFGRCONCustomShowConfig", "no")
 Local $aRunWizard = ReadUini($aIniFile, $aLogFile)
 If $tRunConfig = "yes" Then
@@ -1651,7 +1670,7 @@ EndIf
 If FileExists($aIniFailFileFull) Then
 	FileDelete($aIniFailFileFull)
 EndIf
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Identifying Number of Processors (CPUs).")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Identifying Number of Processors (CPUs).")
 Global $xCPUs = _NumberOfProcessors()
 Global $aCPUCoreCount = $xCPUs[0] * $xCPUs[2]
 
@@ -1693,16 +1712,18 @@ Else
 	$aServerUpdateLinkDLUse = $aServerUpdateLinkDLStable
 EndIf
 
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for " & $aUtilName & " updates.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for " & $aUtilName & " updates.")
 If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aUpdateCheckInterval) And $aUpdateUtil > 0 Then
 	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, $aSplashStartUp, "show")
-	If $tUtilUpdateAvailableTF Then $aSplashStartUp = _Splash($aStartText, 0, 475)
+	If $tUtilUpdateAvailableTF Then
+		If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText, 0, 475)
+	EndIf
 Else
 	UtilUpdate($aServerUpdateLinkVerUse, $aServerUpdateLinkDLUse, $aUtilVersion, $aUtilName, 0, "skip")
 EndIf
 
 ; Atlas
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aConfigFile & ".")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from " & $aConfigFile & ".")
 ImportConfig($aServerDirLocal, $aConfigFile, False, $aSplashStartUp)
 
 $aTelnetPass = $aServerAdminPass
@@ -1732,7 +1753,7 @@ If $aCFGLastVerNumber < 40 Then
 	Next
 EndIf
 
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from GridStartSelect.ini")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing settings from GridStartSelect.ini")
 GridStartSelect($aGridSelectFile, $aLogFile)
 For $i = 0 To ($aServerGridTotal - 1)
 	If $xFireWallUseYN[$i] = "yes" Then
@@ -1748,21 +1769,25 @@ For $i = 0 To ($aServerGridTotal - 1)
 			If $tMB = 6 Then ; YES
 				_RestartUtil(True, True) ; Quick=True, Admin=Yes
 			ElseIf $tMB = 7 Then ; NO
-				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
+				If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText, 0, 475, 110)
 				For $x = 0 To ($aServerGridTotal - 1)
 					$xFireWallUseYN[$x] = "no"
 					IniWrite($aGridSelectFile, $aGridIniTitle[5], "Firewall Block Use for Server (" & $xServergridx[$x] & "," & $xServergridy[$x] & ") (yes/no)", $xFireWallUseYN[$x])
 				Next
 				ExitLoop
 			ElseIf $tMB = 2 Then ; CANCEL
-				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
-				ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
-				Sleep(5000)
+				If $aStartUtilMinimizedYN <> "yes" Then
+					$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
+					ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
+					Sleep(5000)
+				EndIf
 				ExitLoop
 			ElseIf $tMB = -1 Then ; TIMEOUT
-				$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
-				ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
-				Sleep(2000)
+				If $aStartUtilMinimizedYN <> "yes" Then
+					$aSplashStartUp = _Splash($aStartText, 0, 475, 110)
+					ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "NOTICE!  Firewall changes will NOT WORK until run as administrator!")
+					Sleep(2000)
+				EndIf
 				ExitLoop
 			EndIf
 		EndIf
@@ -1780,10 +1805,10 @@ Else
 	$xServerRedis = """" & $aServerRedisFolder & "\" & $aServerRedisCmd & """ """ & $aServerRedisFolder & "\" & $aServerRedisConfig & """"
 EndIf
 
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for running server and redis processes.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for running server and redis processes.")
 If $aServerUseRedis = "yes" Then
 	$aServerPIDRedis = PIDReadRedis($aPIDRedisFile, $aSplashStartUp)
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Scanning for running servers.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Scanning for running servers.")
 	_CheckIfRedisRunning()
 Else
 	$aServerPIDRedis = ""
@@ -1809,14 +1834,14 @@ For $i = 0 To ($aServerGridTotal - 1)
 Next
 $aServerPID = PIDReadServer($aPIDServerFile, $aSplashStartUp)
 Global $xServerPlayerCount[$aServerGridTotal]
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Preparing server startup scripts.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Preparing server startup scripts.")
 
 If ($aServerRCONImport = "yes") Then
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing RCON Ports from GameUserSettings.ini files.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing RCON Ports from GameUserSettings.ini files.")
 	$xServerRCONPort = ImportRCON($aServerDirLocal, $xServerAltSaveDir, $aServerGridTotal, $xLocalGrid, $aSplashStartUp)
 EndIf
 
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing ServerPVE from GameUserSettings.ini files.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Importing ServerPVE from GameUserSettings.ini files.")
 Global $xServerPVE = ImportServerPVE($aServerDirLocal, $xServerAltSaveDir, $aServerGridTotal, $xLocalGrid)
 
 If ($sInGameAnnounce = "yes") Or ($aTelnetCheckYN = "yes") Or ($aEnableRCON = "yes") And ($aServerWorldFriendlyName <> "TempXY") Then ; "TempXY" indicates temp settings set to complete a fresh install of Atlas files.
@@ -1861,7 +1886,7 @@ Else
 	$aServerModCMD = ""
 EndIf
 $aFirstModBoot = False
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Preparing server start files.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Preparing server start files.")
 _UpdateCMD(True) ; True = Log cmd
 
 ; Generic (Not speciifc to Atlas)
@@ -1875,9 +1900,9 @@ Else
 EndIf
 
 If $aUtilReboot = "no" Then
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for existance of external files.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for existance of external files.")
 	FileExistsFunc($aSplashStartUp)
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for existance of external scripts (if enabled).")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Checking for existance of external scripts (if enabled).")
 EndIf
 ExternalScriptExist()
 If $aUseKeepAliveYN = "yes" Then
@@ -1897,7 +1922,7 @@ If $aUseKeepAliveYN = "yes" Then
 EndIf
 
 If $aRemoteRestartUse = "yes" Then
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Initializing Remote Restart.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Initializing Remote Restart.")
 	TCPStartup()
 	Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
 	If $aRemoteRestartSocket = -1 Then
@@ -1937,15 +1962,17 @@ If $aRemoteRestartUse = "yes" Then
 						LogWrite(" [Remote Restart] Program(" & $tProgPID & "), PID(" & $tPID[0] & ") terminated. Remote Restart initialized.")
 						ProcessClose($tPID[0])
 						Local $aRemoteRestartSocket = TCPListen($aRemoteRestartIP, $aRemoteRestartPort, 100)
-						$aSplashStartUp = _Splash($aStartText & "Program terminated." & @CRLF & "Initializing Remote Restart.", 0, 475)
-						Sleep(2000)
+						If $aStartUtilMinimizedYN <> "yes" Then
+							$aSplashStartUp = _Splash($aStartText & "Program terminated." & @CRLF & "Initializing Remote Restart.", 0, 475)
+							Sleep(2000)
+						EndIf
 					ElseIf $tMB = 7 Then ; NO
-						$aSplashStartUp = _Splash($aStartText & "Continuing startup.", 0, 475)
+						If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText & "Continuing startup.", 0, 475)
 					ElseIf $tMB = 2 Then ; CANCEL
 						_Splash($aUtilName & " exiting.", 2000)
 						_ExitUtil()
 					ElseIf $tMB = -1 Then ; Timeout
-						$aSplashStartUp = _Splash($aStartText & "No response. Continuing startup.", 0, 475)
+						If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText & "No response. Continuing startup.", 0, 475)
 					EndIf
 				EndIf
 			EndIf
@@ -1971,7 +1998,7 @@ If $aUtilReboot = "no" And ((_DateDiff('n', $aCFGLastUpdate, _NowCalc())) >= $aU
 	RunExternalScriptAfterSteam($aSplashStartUp)
 EndIf
 
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Setting default values.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Setting default values.")
 $aFirstBoot = False
 Global $xGridReadyTF[$aServerGridTotal]
 Global $xGridRestartCount[$aServerGridTotal]
@@ -1998,9 +2025,9 @@ Next
 ;~ Global $aServerWorldAtlasId = 21852184218 ; kim(redis)
 If $aOnlinePlayersUseRedisYN = "yes" Then
 	_DownloadAndExtractFile("redis-cli", "http://www.phoenix125.com/share/atlas/redis-cli.zip", "https://github.com/phoenix125/AtlasServerUpdateUtility/releases/download/Latest/7z.zip", $aSplashStartUp, $aFolderTemp, "7z.dll")
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "REDIS: Importing settings from ServerGrid.ServerOnly.json.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "REDIS: Importing settings from ServerGrid.ServerOnly.json.")
 	_Redis_ImportIPPort()
-	ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "REDIS: Gathering server list.")
+	If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "REDIS: Gathering server list.")
 	Global $xRedisCliServers = _Redis_GetServers($aSplashStartUp) ; 0=Grid, 1=ServerID
 EndIf
 
@@ -2061,8 +2088,8 @@ EndIf
 
 If $tStartedServersTF Then
 	If $aCrashPIDDisableYN = "yes" Then
-		ControlSetText($aSplashStartUp, "", "Static1", "The following servers will NOT be started:" & @CRLF & $tServersToStart & @CRLF & "because ALL CRASH WATCHDOG is disabled")
-		Sleep(5000)
+		If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", "The following servers will NOT be started:" & @CRLF & $tServersToStart & @CRLF & "because ALL CRASH WATCHDOG is disabled")
+		If $aStartUtilMinimizedYN <> "yes" Then Sleep(5000)
 	Else
 		Local $aMsg = "The following Server(s) need to be started:" & @CRLF & $tServersToStart & @CRLF & @CRLF & _
 				"Click (YES) to start servers (or wait 10 seconds)." & @CRLF & _
@@ -2072,9 +2099,9 @@ If $tStartedServersTF Then
 		$tMB = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg, 10)
 		; ----------------------------------------------------------
 		If $tMB = 6 Then ; YES
-			$aSplashStartUp = _Splash($aStartText, 0, 475)
+			If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText, 0, 475)
 		ElseIf $tMB = -1 Then ; Timeout
-			$aSplashStartUp = _Splash($aStartText, 0, 475)
+			If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText, 0, 475)
 		ElseIf $tMB = 7 Then ; NO
 			Local $aMsg = "Grids not started much be disabled. Are you sure you wish to disable all grids?" & @CRLF & @CRLF & _
 					"Click (YES) to DISABLE ALL SERVERS and continue utility." & @CRLF & _
@@ -2082,7 +2109,7 @@ If $tStartedServersTF Then
 			$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg)
 			If $tMB1 = 6 Then ; YES
 ;~ 				_Splash($aStartText & "Disabling grids.", 2000, 475)
-				$aSplashStartUp = _Splash($aStartText & "Disabling grids.", 0, 475)
+				If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText & "Disabling grids.", 0, 475)
 				For $i = 0 To ($aServerGridTotal - 1)
 					If $xStartGrid[$i] = "yes" Then
 						$xStartGrid[$i] = "no"
@@ -2112,7 +2139,7 @@ Func RotateGridStart($iMove)
 	$xGridStartTime[$iMove][0] = _NowCalc()
 	IniWrite($aUtilCFGFile, "GridLastStart", "LastStart(" & $i & ")", $xGridStartTime[$iMove][0])
 EndFunc   ;==>RotateGridStart
-ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Starting servers.")
+If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Starting servers.")
 Local $tFirstGrid = True
 StartGrids()
 Global $xServerCrashed[$aServerGridTotal]
@@ -2202,9 +2229,6 @@ TraySetState($TRAY_ICONSTATE_SHOW) ; Show the tray menu.
 #EndRegion ;**** Tray Menu ****
 
 Opt("GUIResizeMode", $GUI_DOCKAUTO)
-
-$aGUIH = 70 + $aServerGridTotal * 15 ;Create Show Online Players Window Frame
-If $aGUIH > 800 Then $aGUIH = 800
 
 ShowMainGUI($aSplashStartUp)
 GUIDelete($hGUI_LoginLogo)
@@ -4206,7 +4230,7 @@ EndFunc   ;==>StartGrids
 
 #Region ;**** INI Settings - User Variables ****
 
-Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
+Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	LogWrite(" [Util] Importing settings from " & $aUtilName & ".ini.")
 	Global $iIniError = ""
 	Global $iIniFail = 0
@@ -4218,83 +4242,83 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
-	;	Global $aServerName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $iniCheck)
-	Global $aServerDirLocal = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " DIR ###", $iniCheck)
-	;Global $aServerVer = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental) ###", $iniCheck)
-	Global $aServerExtraCMD = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $iniCheck)
-	;	Global $aServerIP = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $iniCheck)
-	Global $aServerMultiHomeIP = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $iniCheck)
-	;	Global $aSteamCMDDir = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $iniCheck)
-	Global $aSteamExtraCMD = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $iniCheck)
-	;Global $aServerSaveDir = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name ###", $iniCheck)
-	Global $aServerMinimizedYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $iniCheck)
-	Global $aServerAdminPass = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
-	Global $aServerMaxPlayers = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $iniCheck)
-	Global $aServerReservedSlots = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $iniCheck)
-	Global $aServerMapName = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $iniCheck)
-	Global $aStartWithWindowsYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $iniCheck)
-	Global $aServerRCONImport = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $iniCheck)
-	Global $aServerRCONIP = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $iniCheck)
-	Global $aServerRCONPort = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $iniCheck)
-	Global $aServerAltSaveSelect = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $iniCheck)
-	Global $aServerAltSaveDir = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $iniCheck)
-	Global $aServerModYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $iniCheck)
-	Global $aServerModTimeoutMin = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $iniCheck)
-	Global $aServerModDoNotInstallYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $iniCheck)
-	Global $aServerModDetectChangesYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $iniCheck)
-	;	Global $aServerModList = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $iniCheck)
-	Global $aServerOnlinePlayerYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $iniCheck)
-	Global $aServerOnlinePlayerSec = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players every _ seconds (30-600) ###", $iniCheck)
-	Global $aPollRemoteServersYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players on remote servers? (yes/no) ###", $iniCheck)
-	Global $aOnlinePlayersUseRedisYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", $iniCheck)
-	Global $aRedisCliUseFastYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use Fast Method for redis-cli? (if problems, disable)(yes/no) ###", $iniCheck)
-	Global $aIncludeSteamIDYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Include SteamID in Online Player Log and Window? (yes/no) ###", $iniCheck)
-	Global $aOnlinePlayersRetryAttempts = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of Online Player RCON retry attempts (0-9) ###", $iniCheck)
+	;	Global $aServerName = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $iniCheck)
+	Global $aServerDirLocal = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " DIR ###", $iniCheck)
+	;Global $aServerVer = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental) ###", $iniCheck)
+	Global $aServerExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $iniCheck)
+	;	Global $aServerIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $iniCheck)
+	Global $aServerMultiHomeIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $iniCheck)
+	;	Global $aSteamCMDDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $iniCheck)
+	Global $aSteamExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $iniCheck)
+	;Global $aServerSaveDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name ###", $iniCheck)
+	Global $aServerMinimizedYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $iniCheck)
+	Global $aServerAdminPass = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
+	Global $aServerMaxPlayers = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $iniCheck)
+	Global $aServerReservedSlots = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $iniCheck)
+	Global $aServerMapName = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $iniCheck)
+	Global $aStartWithWindowsYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $iniCheck)
+	Global $aServerRCONImport = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $iniCheck)
+	Global $aServerRCONIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $iniCheck)
+	Global $aServerRCONPort = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $iniCheck)
+	Global $aServerAltSaveSelect = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $iniCheck)
+	Global $aServerAltSaveDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $iniCheck)
+	Global $aServerModYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $iniCheck)
+	Global $aServerModTimeoutMin = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $iniCheck)
+	Global $aServerModDoNotInstallYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $iniCheck)
+	Global $aServerModDetectChangesYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $iniCheck)
+	;	Global $aServerModList = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $iniCheck)
+	Global $aServerOnlinePlayerYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $iniCheck)
+	Global $aServerOnlinePlayerSec = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players every _ seconds (30-600) ###", $iniCheck)
+	Global $aPollRemoteServersYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players on remote servers? (yes/no) ###", $iniCheck)
+	Global $aOnlinePlayersUseRedisYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", $iniCheck)
+	Global $aRedisCliUseFastYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use Fast Method for redis-cli? (if problems, disable)(yes/no) ###", $iniCheck)
+	Global $aIncludeSteamIDYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Include SteamID in Online Player Log and Window? (yes/no) ###", $iniCheck)
+	Global $aOnlinePlayersRetryAttempts = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of Online Player RCON retry attempts (0-9) ###", $iniCheck)
 
-	;	Global $aServerOnlinePlayerWidth = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Online Players window width (250-800) ###", $iniCheck)
-	Global $aServerUseRedis = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Autostart and keep-alive redis-server.exe? Use NO to manage redis-server.exe yourself (yes/no) ###", $iniCheck)
-	Global $aServerRedisConfig = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server config file (Not used if autostart is NO above) ###", $iniCheck)
-	Global $aServerRedisFolder = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server.exe and config DIR (Not used if autostart is NO above) Leave BLANK for default DIR ###", $iniCheck)
-	Global $aServerStartDelay = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server starts (0-600) ###", $iniCheck)
-	Global $aServerShutdownDelay = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server shutdowns (0-600) ###", $iniCheck)
-	Global $aShutDnCloseWait = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###", $iniCheck)
-	Global $aShutDnSaveWaitAttempts = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of 3 second attempts to ensure game save has completed (1-99) ###", $iniCheck)
-	Global $aShutDnTaskKillWait = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before taskkilling servers during reboots (10-600) ###", $iniCheck)
-	Global $aNamingScheme = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $iniCheck)
-	Global $aSetPriorityYN = IniRead($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Set Windows priority to Low/Idle on grids with no players? (yes/no) ###", $iniCheck)
+	;	Global $aServerOnlinePlayerWidth = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Online Players window width (250-800) ###", $iniCheck)
+	Global $aServerUseRedis = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Autostart and keep-alive redis-server.exe? Use NO to manage redis-server.exe yourself (yes/no) ###", $iniCheck)
+	Global $aServerRedisConfig = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server config file (Not used if autostart is NO above) ###", $iniCheck)
+	Global $aServerRedisFolder = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server.exe and config DIR (Not used if autostart is NO above) Leave BLANK for default DIR ###", $iniCheck)
+	Global $aServerStartDelay = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server starts (0-600) ###", $iniCheck)
+	Global $aServerShutdownDelay = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server shutdowns (0-600) ###", $iniCheck)
+	Global $aShutDnCloseWait = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###", $iniCheck)
+	Global $aShutDnSaveWaitAttempts = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of 3 second attempts to ensure game save has completed (1-99) ###", $iniCheck)
+	Global $aShutDnTaskKillWait = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before taskkilling servers during reboots (10-600) ###", $iniCheck)
+	Global $aNamingScheme = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $iniCheck)
+	Global $aSetPriorityYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Set Windows priority to Low/Idle on grids with no players? (yes/no) ###", $iniCheck)
 	;
-	Global $aCheckForUpdate = IniRead($sIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Check for server updates? (yes/no) ###", $iniCheck)
-	Global $aUpdateCheckInterval = IniRead($sIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Update check interval in Minutes (05-59) ###", $iniCheck)
+	Global $aCheckForUpdate = IniRead($aIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Check for server updates? (yes/no) ###", $iniCheck)
+	Global $aUpdateCheckInterval = IniRead($aIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Update check interval in Minutes (05-59) ###", $iniCheck)
 	;
-	Global $aCrashPIDDisableYN = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###", $iniCheck)
-	Global $aCrashRCONAttempts = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###", $iniCheck)
-	Global $aCrashRCONWaitMinutes = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###", $iniCheck)
-	Global $aCrashMaxCount = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###", $iniCheck)
-	Global $aCrashMinutes = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes the crashes have to occur within before disabling grid (5-720) ###", $iniCheck)
-	Global $aMinutesBeforeStartingRCONWarning = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###", $iniCheck)
-;~ 	Global $aCrashDelayAllGridsStart = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Additional minutes to delay RCON watchdog when starting/restarting ALL local grids at once (0-99) ###", $iniCheck)
-	Global $aCrashInGameYN = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
-	Global $aCrashInGameMessage = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
-	Global $aCrashDiscordYN = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
-	Global $aCrashDiscordWH = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $iniCheck)
-	Global $aCrashDiscordMessage = IniRead($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
+	Global $aCrashPIDDisableYN = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###", $iniCheck)
+	Global $aCrashRCONAttempts = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###", $iniCheck)
+	Global $aCrashRCONWaitMinutes = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###", $iniCheck)
+	Global $aCrashMaxCount = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###", $iniCheck)
+	Global $aCrashMinutes = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes the crashes have to occur within before disabling grid (5-720) ###", $iniCheck)
+	Global $aMinutesBeforeStartingRCONWarning = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###", $iniCheck)
+;~ 	Global $aCrashDelayAllGridsStart = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Additional minutes to delay RCON watchdog when starting/restarting ALL local grids at once (0-99) ###", $iniCheck)
+	Global $aCrashInGameYN = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
+	Global $aCrashInGameMessage = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
+	Global $aCrashDiscordYN = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $iniCheck)
+	Global $aCrashDiscordWH = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $iniCheck)
+	Global $aCrashDiscordMessage = IniRead($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $iniCheck)
 	;
-	Global $aBackupYN = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $iniCheck)
-	Global $aBackupDays = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
-	Global $aBackupHours = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Backup hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
-	Global $aBackupMin = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Backup minute (00-59) ###", $iniCheck)
-	Global $aBackupFull = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Full " & $aGameName & " and Util folder backup every __ backups (0 to disable)(0-99) ###", $iniCheck)
-	Global $aBackupAddedFolders = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Additional backup folders / files (comma separated. Folders add \ at end. ex. C:\Atlas\,D:\Atlas Server\) ###", $iniCheck)
-	Global $aBackupOutputFolder = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Output folder ###", $iniCheck)
-	Global $aBackupRedisFolder = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Redis folder (leave blank to use redis folder above or to disable) ###", $iniCheck)
-	Global $aBackupNumberToKeep = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Number of backups to keep (1-999) ###", $iniCheck)
-	Global $aBackupTimeoutSec = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Max time in seconds to wait for backup to complete (30-999) ###", $iniCheck)
-	Global $aBackupCommandLine = IniRead($sIniFile, " --------------- BACKUP --------------- ", "7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###", $iniCheck)
-	Global $aBackupInGame = IniRead($sIniFile, " --------------- BACKUP --------------- ", "In-Game announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
-	Global $aBackupDiscord = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Discord announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
-	Global $aBackupTwitch = IniRead($sIniFile, " --------------- BACKUP --------------- ", "Twitch announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
+	Global $aBackupYN = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $iniCheck)
+	Global $aBackupDays = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
+	Global $aBackupHours = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Backup hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+	Global $aBackupMin = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Backup minute (00-59) ###", $iniCheck)
+	Global $aBackupFull = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Full " & $aGameName & " and Util folder backup every __ backups (0 to disable)(0-99) ###", $iniCheck)
+	Global $aBackupAddedFolders = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Additional backup folders / files (comma separated. Folders add \ at end. ex. C:\Atlas\,D:\Atlas Server\) ###", $iniCheck)
+	Global $aBackupOutputFolder = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Output folder ###", $iniCheck)
+	Global $aBackupRedisFolder = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Redis folder (leave blank to use redis folder above or to disable) ###", $iniCheck)
+	Global $aBackupNumberToKeep = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Number of backups to keep (1-999) ###", $iniCheck)
+	Global $aBackupTimeoutSec = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Max time in seconds to wait for backup to complete (30-999) ###", $iniCheck)
+	Global $aBackupCommandLine = IniRead($aIniFile, " --------------- BACKUP --------------- ", "7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###", $iniCheck)
+	Global $aBackupInGame = IniRead($aIniFile, " --------------- BACKUP --------------- ", "In-Game announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
+	Global $aBackupDiscord = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Discord announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
+	Global $aBackupTwitch = IniRead($aIniFile, " --------------- BACKUP --------------- ", "Twitch announcement when backup initiated (Leave blank to disable) ###", $iniCheck)
 	;
-	Global $aEventCount = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND COUNT --------------- ", "Number of custom RCON Commands to schedule (If changed, util will restart and new custom entries will be added) ###", $iniCheck)
+	Global $aEventCount = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND COUNT --------------- ", "Number of custom RCON Commands to schedule (If changed, util will restart and new custom entries will be added) ###", $iniCheck)
 	If $iniCheck = $aEventCount Then
 		$aEventCount = 1
 		$aEventCntIniCheck = True
@@ -4308,219 +4332,220 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Global $xEventAnnounceMinutes[$aEventCount], $xEventAnnounceInGame[$aEventCount], $xEventAnnounceDiscord[$aEventCount]
 	Global $xEventMonthDate[$aEventCount], $xEventAnnounceTwitch[$aEventCount], $xEventMonths[$aEventCount], $xEventName[$aEventCount]
 	For $i = 0 To ($aEventCount - 1)
-		$xEventName[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Event Name ###", $iniCheck)
-		$xCustomRCONCmd[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command(s) to send (Separated by ~, leave BLANK to skip) ###", $iniCheck)
-		$xCustomRCONAllorLocal[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command send to (0) ALL grids or (1) Local Grids Only ###", $iniCheck)
-		$xEventFile[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-File to Execute (leave BLANK to skip) ###", $iniCheck)
-		$xEventMonths[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Months (comma separated 0-Monthly, 1-12) ###", $iniCheck)
-		$xEventMonthDate[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Days of Month (comma separated 0-Use Weekday Below, 1-31) ###", $iniCheck)
-		$xEventDays[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Weekdays (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
-		$xEventHours[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
-		$xEventMinute[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event minute (00-59) ###", $iniCheck)
-		$xCustomRCONRestartYN[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Restart servers afterward? (with announcements below) (yes/no) ###", $iniCheck)
-		$xEventAnnounceMinutes[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Announcement _ minutes before reboot (comma separated 1-60) ###", $iniCheck)
-		$xEventAnnounceInGame[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-In-Game Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
-		$xEventAnnounceDiscord[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Discord Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
-		$xEventAnnounceTwitch[$i] = IniRead($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Twitch Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
+		$xEventName[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Event Name ###", $iniCheck)
+		$xCustomRCONCmd[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command(s) to send (Separated by ~, leave BLANK to skip) ###", $iniCheck)
+		$xCustomRCONAllorLocal[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command send to (0) ALL grids or (1) Local Grids Only ###", $iniCheck)
+		$xEventFile[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-File to Execute (leave BLANK to skip) ###", $iniCheck)
+		$xEventMonths[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Months (comma separated 0-Monthly, 1-12) ###", $iniCheck)
+		$xEventMonthDate[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Days of Month (comma separated 0-Use Weekday Below, 1-31) ###", $iniCheck)
+		$xEventDays[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Weekdays (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
+		$xEventHours[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+		$xEventMinute[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event minute (00-59) ###", $iniCheck)
+		$xCustomRCONRestartYN[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Restart servers afterward? (with announcements below) (yes/no) ###", $iniCheck)
+		$xEventAnnounceMinutes[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Announcement _ minutes before reboot (comma separated 1-60) ###", $iniCheck)
+		$xEventAnnounceInGame[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-In-Game Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
+		$xEventAnnounceDiscord[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Discord Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
+		$xEventAnnounceTwitch[$i] = IniRead($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Twitch Message to send (\m - minutes)(leave BLANK to skip) ###", $iniCheck)
 	Next
 	;
-	Global $aDestroyWildDinosYN = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $iniCheck)
-	Global $aDestroyWildDinosDays = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
-	Global $aDestroyWildDinosHours = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
-	Global $aDestroyWildDinosMinute = IniRead($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $iniCheck)
+	Global $aDestroyWildDinosYN = IniRead($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $iniCheck)
+	Global $aDestroyWildDinosDays = IniRead($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
+	Global $aDestroyWildDinosHours = IniRead($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+	Global $aDestroyWildDinosMinute = IniRead($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $iniCheck)
 
-	;Global $aTelnetCheckYN = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "Use RCON/telnet to check if server is alive? (yes/no) ###", $iniCheck)
-	;Global $aTelnetCheckSec = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet check interval in seconds (30-900) ###", $iniCheck)
-	;Global $aTelnetPort = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet port ###", $iniCheck)
-	;Global $aTelnetPass = IniRead($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet password ###", $iniCheck)
+	;Global $aTelnetCheckYN = IniRead($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "Use RCON/telnet to check if server is alive? (yes/no) ###", $iniCheck)
+	;Global $aTelnetCheckSec = IniRead($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet check interval in seconds (30-900) ###", $iniCheck)
+	;Global $aTelnetPort = IniRead($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet port ###", $iniCheck)
+	;Global $aTelnetPass = IniRead($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet password ###", $iniCheck)
 	;
-	;	Global $aExMemRestart = IniRead($sIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Restart on excessive memory use? (yes/no) ###", $iniCheck)
-	;	Global $aExMemAmt = IniRead($sIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Excessive memory amount? ###", $iniCheck)
+	;	Global $aExMemRestart = IniRead($aIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Restart on excessive memory use? (yes/no) ###", $iniCheck)
+	;	Global $aExMemAmt = IniRead($aIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Excessive memory amount? ###", $iniCheck)
 	;
-	Global $aRemoteRestartUse = IniRead($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", $iniCheck)
-	Global $aRemoteRestartIP = IniRead($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Server Local IP (ex. 192.168.1.10) ###", $iniCheck)
-	Global $aRemoteRestartPort = IniRead($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Port ###", $iniCheck)
-	Global $aRemoteRestartKey = IniRead($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Key ###", $iniCheck)
-	Global $aRemoteRestartCode = IniRead($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Code ###", $iniCheck)
+	Global $aRemoteRestartUse = IniRead($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", $iniCheck)
+	Global $aRemoteRestartIP = IniRead($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Server Local IP (ex. 192.168.1.10) ###", $iniCheck)
+	Global $aRemoteRestartPort = IniRead($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Port ###", $iniCheck)
+	Global $aRemoteRestartKey = IniRead($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Key ###", $iniCheck)
+	Global $aRemoteRestartCode = IniRead($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Code ###", $iniCheck)
 	;
-	Global $aRestartDaily = IniRead($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Use scheduled restarts? (yes/no) ###", $iniCheck)
-	Global $aRestartDays = IniRead($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
-	Global $bRestartHours = IniRead($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
-	Global $bRestartMin = IniRead($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $iniCheck)
-	Global $aRestartSkipMin = IniRead($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $iniCheck)
+	Global $aRestartDaily = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Use scheduled restarts? (yes/no) ###", $iniCheck)
+	Global $aRestartDays = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
+	Global $bRestartHours = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+	Global $bRestartMin = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $iniCheck)
+	Global $aRestartSkipMin = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $iniCheck)
 	;
-	Global $sAnnounceNotifyDaily = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyUpdate = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyRemote = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyStopServer = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyRestartGrids = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyModUpdate = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNotifyModListUpdate = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $iniCheck)
-	Global $sAnnounceNamingScheme = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $iniCheck)
-	Global $sGridStatusMessage = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Grid Status (\g - server, \s - status, \f - folder name, \n - server name) ###", $iniCheck)
-	Global $sGridStatusLocalRemoteBoth = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###", $iniCheck)
-	Global $aSkipCountdownWhenNoOnlinePlayersYN = IniRead($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Skip Countdown Announcements When No One is Online? (yes/no) ###", $iniCheck)
+	Global $sAnnounceNotifyDaily = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyUpdate = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyRemote = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyStopServer = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyRestartGrids = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyModUpdate = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNotifyModListUpdate = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $iniCheck)
+	Global $sAnnounceNamingScheme = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $iniCheck)
+	Global $sGridStatusMessage = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Grid Status (\g - server, \s - status, \f - folder name, \n - server name) ###", $iniCheck)
+	Global $sGridStatusLocalRemoteBoth = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###", $iniCheck)
+	Global $aSkipCountdownWhenNoOnlinePlayersYN = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Skip Countdown Announcements When No One is Online? (yes/no) ###", $iniCheck)
 	;
-	Global $sInGameAnnounce = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires RCON) (yes/no) ###", $iniCheck)
-	Global $sInGameMessageDuration = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Approximate duration to display messages in-game (seconds)? (6-30) ###", $iniCheck)
-	Global $sInGameDailyMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
-	Global $sInGameUpdateMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
-	Global $sInGameRemoteRestartMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
-	Global $sInGameStopServerMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $iniCheck)
-	Global $sInGameRestartGridsMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
-	Global $sInGameModUpdateMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
-	Global $sInGameModListUpdateMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
-	Global $sInGameSendCrashYN = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce CRASHED GRID Status (notify when crash, restarting, and ready)(yes/no) ###", $iniCheck)
-	Global $sInGameSkipRestartMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
-	Global $sInGame10SecondMessage = IniRead($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $iniCheck)
+	Global $sInGameAnnounce = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires RCON) (yes/no) ###", $iniCheck)
+	Global $sInGameMessageDuration = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Approximate duration to display messages in-game (seconds)? (6-30) ###", $iniCheck)
+	Global $sInGameDailyMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
+	Global $sInGameUpdateMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
+	Global $sInGameRemoteRestartMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sInGameStopServerMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $iniCheck)
+	Global $sInGameRestartGridsMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
+	Global $sInGameModUpdateMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sInGameModListUpdateMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
+	Global $sInGameSendCrashYN = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce CRASHED GRID Status (notify when crash, restarting, and ready)(yes/no) ###", $iniCheck)
+	Global $sInGameSkipRestartMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
+	Global $sInGame10SecondMessage = IniRead($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $iniCheck)
 	;
-	Global $aDiscordUseFastMethodYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use Fast Method to send Discord messages? (if problems, disable)(yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotDaily = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotUpdate = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotRemoteRestart = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotStopServer = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotRestartGrids = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for RESTART GRIDS? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotModUpdate = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotServersUpYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotServersUpAllRebootYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online only when ALL servers rebooted (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotServersRemoteUpYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotFirstAnnouncement = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first ANNOUNCEMENT only? (reduces bot spam)(yes/no) ###", $iniCheck)
-	Global $sUseDiscordBotSkipYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $iniCheck)
-	Global $sDiscordReadyStatusDelay = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $iniCheck)
-	Global $sUseDiscordBotPlayersYN = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $iniCheck)
+	Global $aDiscordUseFastMethodYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use Fast Method to send Discord messages? (if problems, disable)(yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotDaily = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotUpdate = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotRemoteRestart = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotStopServer = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotRestartGrids = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for RESTART GRIDS? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotModUpdate = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotServersUpYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotServersUpAllRebootYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online only when ALL servers rebooted (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotServersRemoteUpYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotFirstAnnouncement = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first ANNOUNCEMENT only? (reduces bot spam)(yes/no) ###", $iniCheck)
+	Global $sUseDiscordBotSkipYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $iniCheck)
+	Global $sDiscordReadyStatusDelay = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $iniCheck)
+	Global $sUseDiscordBotPlayersYN = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $iniCheck)
 
-	;Global $sUseDiscordBotAppendServer - IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Append server name to beginning of messages? (yes/no) ###", $iniCheck)
-	Global $sDiscordDailyMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
-	Global $sDiscordDailyZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $iniCheck)
-	Global $sDiscordUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
-	Global $sDiscordUpdateZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $iniCheck)
-	Global $sDiscordRemoteRestartMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
-	Global $sDiscordRemoteRestartZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $iniCheck)
-	Global $sDiscordStopServerMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $iniCheck)
-	Global $sDiscordStopServerZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $iniCheck)
-	Global $sDiscordRestartGridsMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
-	Global $sDiscordRestartGridsZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $iniCheck)
-	Global $sDiscordModUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
-	Global $sDiscordModUpdateSubsequentMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
-	Global $sDiscordModUpdateZeroMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $iniCheck)
-	Global $sDiscordModListUpdateMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
-	Global $sDiscordServersUpMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $iniCheck)
-	Global $sDiscordSkipRestartMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
+	;Global $sUseDiscordBotAppendServer - IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Append server name to beginning of messages? (yes/no) ###", $iniCheck)
+	Global $sDiscordDailyMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
+	Global $sDiscordDailyZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $iniCheck)
+	Global $sDiscordUpdateMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
+	Global $sDiscordUpdateZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $iniCheck)
+	Global $sDiscordRemoteRestartMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sDiscordRemoteRestartZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $iniCheck)
+	Global $sDiscordStopServerMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $iniCheck)
+	Global $sDiscordStopServerZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $iniCheck)
+	Global $sDiscordRestartGridsMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
+	Global $sDiscordRestartGridsZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $iniCheck)
+	Global $sDiscordModUpdateMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sDiscordModUpdateSubsequentMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sDiscordModUpdateZeroMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $iniCheck)
+	Global $sDiscordModListUpdateMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
+	Global $sDiscordServersUpMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $iniCheck)
+	Global $sDiscordSkipRestartMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $iniCheck)
 
-;~ 	Global $sDiscordPlayersMessage = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $iniCheck)
-	Global $sDiscordPlayersMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $iniCheck)
-	Global $sDiscordPlayerJoinMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $iniCheck)
-	Global $sDiscordPlayerLeftMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $iniCheck)
-	Global $sDiscordPlayerOnlineMsg = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $iniCheck)
-	Global $aPlayerSeparator = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $iniCheck)
+;~ 	Global $sDiscordPlayersMessage = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $iniCheck)
+	Global $sDiscordPlayersMsg = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $iniCheck)
+	Global $sDiscordPlayerJoinMsg = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $iniCheck)
+	Global $sDiscordPlayerLeftMsg = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $iniCheck)
+	Global $sDiscordPlayerOnlineMsg = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $iniCheck)
+	Global $aPlayerSeparator = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $iniCheck)
 
-	Global $sDiscordWH1URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $iniCheck)
-	Global $sDiscordWH2URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $iniCheck)
-	Global $sDiscordWH3URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $iniCheck)
-	Global $sDiscordWH4URL = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $iniCheck)
-	Global $sDiscordMainWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $iniCheck)
-	Global $sDiscordStatusAllWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $iniCheck)
-	Global $sDiscordStatusCrashWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $iniCheck)
-	Global $sDiscordLogWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $iniCheck)
-	Global $sDiscordPlayersWHSel = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $iniCheck)
-	Global $sDiscordBot1Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $iniCheck)
-	Global $sDiscordBot2Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $iniCheck)
-	Global $sDiscordBot3Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $iniCheck)
-	Global $sDiscordBot4Name = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $iniCheck)
-	Global $bDiscordBotUseTTS = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $iniCheck)
-	Global $sDiscordBotAvatar = IniRead($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $iniCheck)
+	Global $sDiscordWH1URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $iniCheck)
+	Global $sDiscordWH2URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $iniCheck)
+	Global $sDiscordWH3URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $iniCheck)
+	Global $sDiscordWH4URL = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $iniCheck)
+	Global $sDiscordMainWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordStatusAllWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordStatusCrashWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordLogWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordPlayersWHSel = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $iniCheck)
+	Global $sDiscordBot1Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $iniCheck)
+	Global $sDiscordBot2Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $iniCheck)
+	Global $sDiscordBot3Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $iniCheck)
+	Global $sDiscordBot4Name = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $iniCheck)
+	Global $bDiscordBotUseTTS = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $iniCheck)
+	Global $sDiscordBotAvatar = IniRead($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $iniCheck)
 	;
-	Global $sUseTwitchBotDaily = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchBotUpdate = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchBotRemoteRestart = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchBotStopServer = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchBotRestartGrids = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for RESTART GRIDS? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchBotModUpdate = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
-	Global $sUseTwitchFirstAnnouncement = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $iniCheck)
-	Global $sTwitchDailyMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
-	Global $sTwitchDailyZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $iniCheck)
-	Global $sTwitchUpdateMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
-	Global $sTwitchUpdateZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $iniCheck)
-	Global $sTwitchRemoteRestartMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
-	Global $sTwitchRemoteRestartZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $iniCheck)
-	Global $sTwitchStopServerMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ####", $iniCheck)
-	Global $sTwitchStopServerZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $iniCheck)
-	Global $sTwitchRestartGridsMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
-	Global $sTwitchRestartGridsZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $iniCheck)
-	Global $sTwitchModUpdateMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
-	Global $sTwitchModUpdateZeroMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $iniCheck)
-	Global $sTwitchModListUpdateMessage = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
-	Global $sTwitchNick = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $iniCheck)
-	Global $sChatOAuth = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $iniCheck)
-	Global $sTwitchChannels = IniRead($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Channels ###", $iniCheck)
+	Global $sUseTwitchBotDaily = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotUpdate = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotRemoteRestart = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotStopServer = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotRestartGrids = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for RESTART GRIDS? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchBotModUpdate = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $iniCheck)
+	Global $sUseTwitchFirstAnnouncement = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $iniCheck)
+	Global $sTwitchDailyMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $iniCheck)
+	Global $sTwitchDailyZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $iniCheck)
+	Global $sTwitchUpdateMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $iniCheck)
+	Global $sTwitchUpdateZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $iniCheck)
+	Global $sTwitchRemoteRestartMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $iniCheck)
+	Global $sTwitchRemoteRestartZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $iniCheck)
+	Global $sTwitchStopServerMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ####", $iniCheck)
+	Global $sTwitchStopServerZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $iniCheck)
+	Global $sTwitchRestartGridsMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $iniCheck)
+	Global $sTwitchRestartGridsZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $iniCheck)
+	Global $sTwitchModUpdateMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $iniCheck)
+	Global $sTwitchModUpdateZeroMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $iniCheck)
+	Global $sTwitchModListUpdateMessage = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $iniCheck)
+	Global $sTwitchNick = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $iniCheck)
+	Global $sChatOAuth = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $iniCheck)
+	Global $sTwitchChannels = IniRead($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Channels ###", $iniCheck)
 	;
-	Global $aExecuteExternalScript = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Execute external script BEFORE update? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script directory ###", $iniCheck)
-	Global $aExternalScriptName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script filename ###", $iniCheck)
-	Global $aExternalScriptWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExecuteExternalScript = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Execute external script BEFORE update? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script directory ###", $iniCheck)
+	Global $aExternalScriptName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script filename ###", $iniCheck)
+	Global $aExternalScriptWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptValidateYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Execute external script AFTER update but BEFORE server start? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptValidateDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script directory ###", $iniCheck)
-	Global $aExternalScriptValidateName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script filename ###", $iniCheck)
-	Global $aExternalScriptValidateWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptValidateYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Execute external script AFTER update but BEFORE server start? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptValidateDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script directory ###", $iniCheck)
+	Global $aExternalScriptValidateName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script filename ###", $iniCheck)
+	Global $aExternalScriptValidateWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptUpdateYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Execute external script for server update restarts? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptUpdateDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script directory ###", $iniCheck)
-	Global $aExternalScriptUpdateFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script filename ###", $iniCheck)
-	Global $aExternalScriptUpdateWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptUpdateYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Execute external script for server update restarts? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptUpdateDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script directory ###", $iniCheck)
+	Global $aExternalScriptUpdateFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script filename ###", $iniCheck)
+	Global $aExternalScriptUpdateWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptDailyYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Execute external script for daily server restarts? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptDailyDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script directory ###", $iniCheck)
-	Global $aExternalScriptDailyFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script filename ###", $iniCheck)
-	Global $aExternalScriptDailyWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptDailyYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Execute external script for daily server restarts? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptDailyDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script directory ###", $iniCheck)
+	Global $aExternalScriptDailyFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script filename ###", $iniCheck)
+	Global $aExternalScriptDailyWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptAnnounceYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Execute external script when first restart announcement is made? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptAnnounceDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script directory ###", $iniCheck)
-	Global $aExternalScriptAnnounceFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script filename ###", $iniCheck)
-	Global $aExternalScriptAnnounceWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptAnnounceYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Execute external script when first restart announcement is made? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptAnnounceDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script directory ###", $iniCheck)
+	Global $aExternalScriptAnnounceFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script filename ###", $iniCheck)
+	Global $aExternalScriptAnnounceWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptRemoteYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Execute external script during restart when a remote restart request is made? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptRemoteDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script directory ###", $iniCheck)
-	Global $aExternalScriptRemoteFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script filename ###", $iniCheck)
-	Global $aExternalScriptRemoteWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptRemoteYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Execute external script during restart when a remote restart request is made? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptRemoteDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script directory ###", $iniCheck)
+	Global $aExternalScriptRemoteFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script filename ###", $iniCheck)
+	Global $aExternalScriptRemoteWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptModYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptModDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script directory ###", $iniCheck)
-	Global $aExternalScriptModFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script filename ###", $iniCheck)
-	Global $aExternalScriptModWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptModYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptModDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script directory ###", $iniCheck)
+	Global $aExternalScriptModFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script filename ###", $iniCheck)
+	Global $aExternalScriptModWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	Global $aExternalScriptBackUpYN = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptBackUpDir = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script directory ###", $iniCheck)
-	Global $aExternalScriptBackUpFileName = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script filename ###", $iniCheck)
-	Global $aExternalScriptBackUpWait = IniRead($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptBackUpYN = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptBackUpDir = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script directory ###", $iniCheck)
+	Global $aExternalScriptBackUpFileName = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script filename ###", $iniCheck)
+	Global $aExternalScriptBackUpWait = IniRead($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Wait for script to complete before continuing? (yes/no) ###", $iniCheck)
 	;
-	;	Global $aLogRotate = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $iniCheck)
-	Global $aLogQuantity = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $iniCheck)
-	Global $sObfuscatePass = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $iniCheck)
-	;	Global $aLogHoursBetweenRotate = IniRead($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $iniCheck)
+	;	Global $aLogRotate = IniRead($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $iniCheck)
+	Global $aLogQuantity = IniRead($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $iniCheck)
+	Global $sObfuscatePass = IniRead($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $iniCheck)
+	;	Global $aLogHoursBetweenRotate = IniRead($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $iniCheck)
 	;
-	Global $aEnableRCON = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable RCON? Required for clean shutdown (yes/no) ###", $iniCheck)
-	;	Global $aRCONSaveDelaySec = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $iniCheck)
-	Global $aValidate = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $iniCheck)
-	Global $aUpdateSource = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $iniCheck)
-	Global $aUpdateUtil = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $iniCheck)
-	Global $aUpdateAutoUtil = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $iniCheck)
-	Global $aUseKeepAliveYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", $iniCheck)
-	Global $aDisableMemCPUYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Disable Grid Memory and CPU monitoring? (yes/no) ###", $iniCheck)
-	Global $aAllowMultipleUtilsYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", $iniCheck)
-;~ 	Global $aConfigFolder = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Folder to place config files ###", $iniCheck)
-	Global $aOverwriteReadOnly = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", $iniCheck)
-	Global $aMaxNumberOfRunningGrids = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Max number of running grids allowed (0-400) ###", $iniCheck)
+	Global $aEnableRCON = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable RCON? Required for clean shutdown (yes/no) ###", $iniCheck)
+	;	Global $aRCONSaveDelaySec = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $iniCheck)
+	Global $aValidate = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $iniCheck)
+	Global $aUpdateSource = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $iniCheck)
+	Global $aUpdateUtil = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $iniCheck)
+	Global $aUpdateAutoUtil = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $iniCheck)
+	Global $aUseKeepAliveYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", $iniCheck)
+	Global $aDisableMemCPUYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Disable Grid Memory and CPU monitoring? (yes/no) ###", $iniCheck)
+	Global $aAllowMultipleUtilsYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", $iniCheck)
+	Global $aStartUtilMinimizedYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Start " & $aUtilName & " minimized of " & $aUtilName & "? (yes/no) ###", $iniCheck)
+;~ 	Global $aConfigFolder = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Folder to place config files ###", $iniCheck)
+	Global $aOverwriteReadOnly = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", $iniCheck)
+	Global $aMaxNumberOfRunningGrids = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Max number of running grids allowed (0-400) ###", $iniCheck)
 
-	Global $aUtilBetaYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $iniCheck)
-;~ 	Global $aUsePuttytel = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no) ###", $iniCheck)
-	Global $aExternalScriptHideYN = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $iniCheck)
-	Global $aServerStatusLabelsMain = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Main Window (Comma separated. Default:Starting,Running,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $iniCheck)
-	Global $aServerStatusLabelsAnnounce = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $iniCheck)
-	;	Global $aDebug = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $iniCheck)
-	Global $aRCONResponseWaitms = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $iniCheck)
-	Global $aOnlinePlayerWaitms = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $iniCheck)
-	Global $aMainGUIRefreshTime = IniRead($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $iniCheck)
+	Global $aUtilBetaYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $iniCheck)
+;~ 	Global $aUsePuttytel = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no) ###", $iniCheck)
+	Global $aExternalScriptHideYN = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $iniCheck)
+	Global $aServerStatusLabelsMain = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Main Window (Comma separated. Default:Starting,Running,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $iniCheck)
+	Global $aServerStatusLabelsAnnounce = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $iniCheck)
+	;	Global $aDebug = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $iniCheck)
+	Global $aRCONResponseWaitms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $iniCheck)
+	Global $aOnlinePlayerWaitms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $iniCheck)
+	Global $aMainGUIRefreshTime = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $iniCheck)
 
 	If $iniCheck = $aServerDirLocal Then
 		$aServerDirLocal = "D:\Game Servers\" & $aGameName & " Dedicated Server"
@@ -4971,12 +4996,12 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	If $aCFGRCONCustomLastCount <> $aEventCount Then
 		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomLastCount", $aEventCount)
 		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomShowConfig", "yes")
-		If FileExists($sIniFile) Then
+		If FileExists($aIniFile) Then
 			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
-			Local $tFile = $sIniFile & "_" & $tTime & ".bak"
-			FileMove($sIniFile, $tFile, 1)
+			Local $tFile = $aIniFile & "_" & $tTime & ".bak"
+			FileMove($aIniFile, $tFile, 1)
 		EndIf
-		UpdateIni($sIniFile)
+		UpdateIni($aIniFile)
 		If FileExists($aIniFailFileBasic) Then
 			FileDelete($aIniFailFileBasic)
 		EndIf
@@ -5911,6 +5936,11 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "AllowMultipleUtilsYN, "
 	EndIf
+	If $iniCheck = $aStartUtilMinimizedYN Then
+		$aStartUtilMinimizedYN = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "StartUtilMinimizedYN, "
+	EndIf
 	If $aAllowMultipleUtilsYN = "yes" And $aUseKeepAliveYN = "yes" Then
 		$aUseKeepAliveYN = "no"
 		LogWrite(" [Util] NOTICE! Use Keep Alive is disabled when Allow Multiple Instances of util = yes")
@@ -5973,16 +6003,16 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 		$iIniError = $iIniError & "NOTICE: SteamDB will ban your IP if you check too often. Update check interval set to 30 minutes, "
 	EndIf
 	If $aIniForceWrite Then
-		If FileExists($sIniFile) Then
+		If FileExists($aIniFile) Then
 			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
-			Local $tFile = $sIniFile & "_" & $tTime & ".bak"
-			FileMove($sIniFile, $tFile, 1)
+			Local $tFile = $aIniFile & "_" & $tTime & ".bak"
+			FileMove($aIniFile, $tFile, 1)
 		EndIf
-		UpdateIni($sIniFile)
+		UpdateIni($aIniFile)
 		Local $tIniFail = True
 	Else
 		If $iIniFail > 0 Then
-			iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
+			iniFileCheck($aIniFile, $iIniFail, $iIniError, $tUseWizard)
 			Local $tIniFail = True
 		Else
 			Local $tIniFail = False
@@ -5999,31 +6029,31 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	EndIf
 
 	$tTxt = _SortString($sAnnounceNotifyDaily)
-	If $tTxt <> $sAnnounceNotifyDaily Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyDaily Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyDaily = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyUpdate)
-	If $tTxt <> $sAnnounceNotifyUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyUpdate Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyUpdate = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyRemote)
-	If $tTxt <> $sAnnounceNotifyRemote Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyRemote Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyRemote = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyStopServer)
-	If $tTxt <> $sAnnounceNotifyStopServer Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyStopServer Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyStopServer = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyRestartGrids)
-	If $tTxt <> $sAnnounceNotifyRestartGrids Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyRestartGrids Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyRestartGrids = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyModUpdate)
-	If $tTxt <> $sAnnounceNotifyModUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyModUpdate Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyModUpdate = $tTxt
 
 	$tTxt = _SortString($sAnnounceNotifyModListUpdate)
-	If $tTxt <> $sAnnounceNotifyModListUpdate Then IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $tTxt)
+	If $tTxt <> $sAnnounceNotifyModListUpdate Then IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $tTxt)
 	$sAnnounceNotifyModListUpdate = $tTxt
 
 	$aServerRCONPort = StringReplace($aServerRCONPort, ".", ",")
@@ -6162,12 +6192,12 @@ Func ReadUini($sIniFile, $sLogFile, $tUseWizard = False)
 	Return $tIniFail
 EndFunc   ;==>ReadUini
 
-Func iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
-	If FileExists($sIniFile) Then
+Func iniFileCheck($aIniFile, $iIniFail, $iIniError, $tUseWizard)
+	If FileExists($aIniFile) Then
 		Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
 		Local $tFile = $aIniFile & "_" & $tTime & ".bak"
-		FileMove($sIniFile, $tFile, 1)
-		UpdateIni($sIniFile)
+		FileMove($aIniFile, $tFile, 1)
+		UpdateIni($aIniFile)
 		;		FileWriteLine($aIniFailFileFull, _NowCalc() & " INI MISMATCH: Found " & $iIniFail & " missing variable(s) in " & $aUtilName & ".ini. Backup created and all existing settings transfered to new INI. Please modify INI and restart.")
 		$iIniErrorCRLF = StringRegExpReplace($iIniError, ", ", @CRLF & @TAB)
 		FileWriteLine($aIniFailFileFull, _NowCalc() & @CRLF & " ---------- Parameters missing or changed ----------" & @CRLF & @CRLF & @TAB & $iIniErrorCRLF)
@@ -6187,370 +6217,371 @@ Func iniFileCheck($sIniFile, $iIniFail, $iIniError, $tUseWizard)
 			ConfigEdit()
 		EndIf
 	Else
-		UpdateIni($sIniFile)
+		UpdateIni($aIniFile)
 	EndIf
 EndFunc   ;==>iniFileCheck
 
-Func UpdateIni($sIniFile)
-	FileWriteLine($sIniFile, "[ --------------- " & StringUpper($aUtilName) & " INFORMATION --------------- ]")
-	FileWriteLine($sIniFile, "Author   :  Phoenix125")
-	FileWriteLine($sIniFile, "Version  :  " & $aUtilityVer)
-	FileWriteLine($sIniFile, "Website  :  http://www.Phoenix125.com")
-	FileWriteLine($sIniFile, "Discord  :  http://discord.gg/EU7pzPs")
-	FileWriteLine($sIniFile, "Forum    :  https://phoenix125.createaforum.com/index.php")
-	FileWriteLine($sIniFile, @CRLF)
-	FileWriteLine($sIniFile, "[ --------------- GAME SERVER CONFIGURATION --------------- ]")
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $aServerName)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " DIR ###", $aServerDirLocal)
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $aSteamCMDDir)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $aServerAltSaveSelect)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $aServerAltSaveDir)
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental)", $aServerVer)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $aServerMultiHomeIP)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $aStartWithWindowsYN)
-	FileWriteLine($sIniFile, @CRLF)
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $aServerIP)
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name", $aServerSaveDir)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $aServerAdminPass)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $aServerMaxPlayers)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $aServerReservedSlots)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $aNamingScheme)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $aServerRCONIP)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $aServerRCONImport)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $aServerRCONPort)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server starts (0-600) ###", $aServerStartDelay)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server shutdowns (0-600) ###", $aServerShutdownDelay)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of 3 second attempts to ensure game save has completed (1-99) ###", $aShutDnSaveWaitAttempts)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###", $aShutDnCloseWait)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before taskkilling servers during reboots (10-600) ###", $aShutDnTaskKillWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $aServerModYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $aServerModTimeoutMin)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $aServerModDoNotInstallYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $aServerModDetectChangesYN)
-	;	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $aServerModList)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $aServerOnlinePlayerYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players every _ seconds (30-600) ###", $aServerOnlinePlayerSec)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players on remote servers? (yes/no) ###", $aPollRemoteServersYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", $aOnlinePlayersUseRedisYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use Fast Method for redis-cli? (if problems, disable)(yes/no) ###", $aRedisCliUseFastYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Include SteamID in Online Player Log and Window? (yes/no) ###", $aIncludeSteamIDYN)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of Online Player RCON retry attempts (0-9) ###", $aOnlinePlayersRetryAttempts)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Autostart and keep-alive redis-server.exe? Use NO to manage redis-server.exe yourself (yes/no) ###", $aServerUseRedis)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server config file (Not used if autostart is NO above) ###", $aServerRedisConfig)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server.exe and config DIR (Not used if autostart is NO above) Leave BLANK for default DIR ###", $aServerRedisFolder)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Set Windows priority to Low/Idle on grids with no players? (yes/no) ###", $aSetPriorityYN)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Check for server updates? (yes/no) ###", $aCheckForUpdate)
-	IniWrite($sIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Update check interval in minutes (05-59) ###", $aUpdateCheckInterval)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Use scheduled restarts? (yes/no) ###", $aRestartDaily)
-	IniWrite($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aRestartDays)
-	IniWrite($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $bRestartHours)
-	IniWrite($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $bRestartMin)
-	IniWrite($sIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $aRestartSkipMin)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###", $aCrashPIDDisableYN)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###", $aCrashRCONAttempts)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###", $aCrashRCONWaitMinutes)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###", $aCrashMaxCount)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes the crashes have to occur within before disabling grid (5-720) ###", $aCrashMinutes)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###", $aMinutesBeforeStartingRCONWarning)
-;~ 	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Additional minutes to delay RCON watchdog when starting/restarting ALL local grids at once (0-99) ###", $aCrashDelayAllGridsStart)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $aCrashInGameYN)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashInGameMessage)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $aCrashDiscordYN)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $aCrashDiscordWH)
-	IniWrite($sIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashDiscordMessage)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $aBackupYN)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aBackupDays)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Backup hours (comma separated 00-23 ex.04,16) ###", $aBackupHours)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Backup minute (00-59) ###", $aBackupMin)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Full " & $aGameName & " and Util folder backup every __ backups (0 to disable)(0-99) ###", $aBackupFull)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Additional backup folders / files (comma separated. Folders add \ at end. ex. C:\Atlas\,D:\Atlas Server\) ###", $aBackupAddedFolders)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Output folder ###", $aBackupOutputFolder)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Redis folder (leave blank to use redis folder above or to disable) ###", $aBackupRedisFolder)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Number of backups to keep (1-999) ###", $aBackupNumberToKeep)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Max time in seconds to wait for backup to complete (30-999) ###", $aBackupTimeoutSec)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###", $aBackupCommandLine)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "In-Game announcement when backup initiated (Leave blank to disable) ###", $aBackupInGame)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Discord announcement when backup initiated (Leave blank to disable) ###", $aBackupDiscord)
-	IniWrite($sIniFile, " --------------- BACKUP --------------- ", "Twitch announcement when backup initiated (Leave blank to disable) ###", $aBackupTwitch)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND COUNT --------------- ", "Number of custom RCON Commands to schedule (If changed, util will restart and new custom entries will be added) ###", $aEventCount)
+Func UpdateIni($aIniFile)
+	FileWriteLine($aIniFile, "[ --------------- " & StringUpper($aUtilName) & " INFORMATION --------------- ]")
+	FileWriteLine($aIniFile, "Author   :  Phoenix125")
+	FileWriteLine($aIniFile, "Version  :  " & $aUtilityVer)
+	FileWriteLine($aIniFile, "Website  :  http://www.Phoenix125.com")
+	FileWriteLine($aIniFile, "Discord  :  http://discord.gg/EU7pzPs")
+	FileWriteLine($aIniFile, "Forum    :  https://phoenix125.createaforum.com/index.php")
+	FileWriteLine($aIniFile, @CRLF)
+	FileWriteLine($aIniFile, "[ --------------- GAME SERVER CONFIGURATION --------------- ]")
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $aServerName)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " DIR ###", $aServerDirLocal)
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $aSteamCMDDir)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $aServerAltSaveSelect)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $aServerAltSaveDir)
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental)", $aServerVer)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $aServerMultiHomeIP)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $aStartWithWindowsYN)
+	FileWriteLine($aIniFile, @CRLF)
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $aServerIP)
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name", $aServerSaveDir)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $aServerAdminPass)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $aServerMaxPlayers)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $aServerReservedSlots)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $aNamingScheme)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $aServerRCONIP)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Import RCON ports from GameUserSettings.ini files? (yes/no) ###", $aServerRCONImport)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server RCON Port(s) (comma separated, grid order as in " & $aConfigFile & ", ignore if importing RCON ports) ###", $aServerRCONPort)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server starts (0-600) ###", $aServerStartDelay)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Delay in seconds between grid server shutdowns (0-600) ###", $aServerShutdownDelay)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of 3 second attempts to ensure game save has completed (1-99) ###", $aShutDnSaveWaitAttempts)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before sending Alt-F4 (Close Window) to servers during reboots (10-600) ###", $aShutDnCloseWait)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Seconds allowed for GameSave before taskkilling servers during reboots (10-600) ###", $aShutDnTaskKillWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use this util to install mods and check for mod updates (as listed in " & $aConfigFile & ")? (yes/no) ###", $aServerModYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max time (minutes) to wait for each mod to download (0-180) (0-No Timeout) ###", $aServerModTimeoutMin)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod updates but DO NOT automatically install them? (yes/no) ###", $aServerModDoNotInstallYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Detect mod list changes in ServerGrid.json and automatically install/remove them? (yes/no) ###", $aServerModDetectChangesYN)
+	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Mod number(s) (comma separated) ###", $aServerModList)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for, and log, online players? (yes/no) ###", $aServerOnlinePlayerYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players every _ seconds (30-600) ###", $aServerOnlinePlayerSec)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Check for online players on remote servers? (yes/no) ###", $aPollRemoteServersYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", $aOnlinePlayersUseRedisYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use Fast Method for redis-cli? (if problems, disable)(yes/no) ###", $aRedisCliUseFastYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Include SteamID in Online Player Log and Window? (yes/no) ###", $aIncludeSteamIDYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Number of Online Player RCON retry attempts (0-9) ###", $aOnlinePlayersRetryAttempts)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Autostart and keep-alive redis-server.exe? Use NO to manage redis-server.exe yourself (yes/no) ###", $aServerUseRedis)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server config file (Not used if autostart is NO above) ###", $aServerRedisConfig)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Redis-server.exe and config DIR (Not used if autostart is NO above) Leave BLANK for default DIR ###", $aServerRedisFolder)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Set Windows priority to Low/Idle on grids with no players? (yes/no) ###", $aSetPriorityYN)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Check for server updates? (yes/no) ###", $aCheckForUpdate)
+	IniWrite($aIniFile, " --------------- CHECK FOR UPDATE --------------- ", "Update check interval in minutes (05-59) ###", $aUpdateCheckInterval)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Use scheduled restarts? (yes/no) ###", $aRestartDaily)
+	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aRestartDays)
+	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $bRestartHours)
+	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $bRestartMin)
+	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $aRestartSkipMin)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###", $aCrashPIDDisableYN)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###", $aCrashRCONAttempts)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###", $aCrashRCONWaitMinutes)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of crashes before disabling grid (0-Disable, 0-5) (Default is 3) ###", $aCrashMaxCount)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes the crashes have to occur within before disabling grid (5-720) ###", $aCrashMinutes)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before displaying __STUCK_GRIDS_NOTICE__.txt (0-Disable, 0-99)(Default is 7) ###", $aMinutesBeforeStartingRCONWarning)
+;~ 	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Additional minutes to delay RCON watchdog when starting/restarting ALL local grids at once (0-99) ###", $aCrashDelayAllGridsStart)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send In-Game announcement to ALL grids when grid is disabled due to too many crashes (yes/no) ###", $aCrashInGameYN)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "In-Game announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashInGameMessage)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Send Discord announcement when grid is disabled due to too many crashes (yes/no) ###", $aCrashDiscordYN)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "WebHook number(s) to send Discord announcement to (Comma separated. Blank for none) (1-4) ###", $aCrashDiscordWH)
+	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Discord announcement when grid is disabled due to too many crashes (\g - grids) ###", $aCrashDiscordMessage)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Use scheduled backups? (yes/no) ###", $aBackupYN)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Backup days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aBackupDays)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Backup hours (comma separated 00-23 ex.04,16) ###", $aBackupHours)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Backup minute (00-59) ###", $aBackupMin)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Full " & $aGameName & " and Util folder backup every __ backups (0 to disable)(0-99) ###", $aBackupFull)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Additional backup folders / files (comma separated. Folders add \ at end. ex. C:\Atlas\,D:\Atlas Server\) ###", $aBackupAddedFolders)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Output folder ###", $aBackupOutputFolder)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Redis folder (leave blank to use redis folder above or to disable) ###", $aBackupRedisFolder)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Number of backups to keep (1-999) ###", $aBackupNumberToKeep)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Max time in seconds to wait for backup to complete (30-999) ###", $aBackupTimeoutSec)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "7zip backup additional command line parameters (Default: a -spf -r -tzip -ssw) ###", $aBackupCommandLine)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "In-Game announcement when backup initiated (Leave blank to disable) ###", $aBackupInGame)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Discord announcement when backup initiated (Leave blank to disable) ###", $aBackupDiscord)
+	IniWrite($aIniFile, " --------------- BACKUP --------------- ", "Twitch announcement when backup initiated (Leave blank to disable) ###", $aBackupTwitch)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND COUNT --------------- ", "Number of custom RCON Commands to schedule (If changed, util will restart and new custom entries will be added) ###", $aEventCount)
 	For $i = 0 To ($aEventCount - 1)
-		FileWriteLine($sIniFile, @CRLF)
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Event Name ###", $xEventName[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command(s) to send (Separated by ~, leave BLANK to skip) ###", $xCustomRCONCmd[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command send to (0) ALL grids or (1) Local Grids Only ###", $xCustomRCONAllorLocal[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-File to Execute (leave BLANK to skip) ###", $xEventFile[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Months (comma separated 0-Monthly, 1-12) ###", $xEventMonths[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Days of Month (comma separated 0-Use Weekday Below, 1-31) ###", $xEventMonthDate[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Weekdays (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $xEventDays[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event hours (comma separated 00-23 ex.04,16) ###", $xEventHours[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event minute (00-59) ###", $xEventMinute[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Restart servers afterward? (with announcements below) (yes/no) ###", $xCustomRCONRestartYN[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Announcement _ minutes before reboot (comma separated 1-60) ###", $xEventAnnounceMinutes[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-In-Game Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceInGame[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Discord Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceDiscord[$i])
-		IniWrite($sIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Twitch Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceTwitch[$i])
+		FileWriteLine($aIniFile, @CRLF)
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Event Name ###", $xEventName[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command(s) to send (Separated by ~, leave BLANK to skip) ###", $xCustomRCONCmd[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-RCON Command send to (0) ALL grids or (1) Local Grids Only ###", $xCustomRCONAllorLocal[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-File to Execute (leave BLANK to skip) ###", $xEventFile[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Months (comma separated 0-Monthly, 1-12) ###", $xEventMonths[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Days of Month (comma separated 0-Use Weekday Below, 1-31) ###", $xEventMonthDate[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event Weekdays (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $xEventDays[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event hours (comma separated 00-23 ex.04,16) ###", $xEventHours[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Scheduled Event minute (00-59) ###", $xEventMinute[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Restart servers afterward? (with announcements below) (yes/no) ###", $xCustomRCONRestartYN[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Announcement _ minutes before reboot (comma separated 1-60) ###", $xEventAnnounceMinutes[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-In-Game Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceInGame[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Discord Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceDiscord[$i])
+		IniWrite($aIniFile, " --------------- SCHEDULED EVENT OR RCON COMMAND " & ($i + 1) & " --------------- ", ($i + 1) & "-Twitch Message to send (\m - minutes)(leave BLANK to skip) ###", $xEventAnnounceTwitch[$i])
 	Next
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $aDestroyWildDinosYN)
-	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aDestroyWildDinosDays)
-	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $aDestroyWildDinosHours)
-	IniWrite($sIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $aDestroyWildDinosMinute)
-	;	FileWriteLine($sIniFile, "( - !!! - Other server information imported from ServerGrid.json - !!! - )")
-	;	FileWriteLine($sIniFile, "(If ServerGrid.json is not found, Atlas can still be downloaded and installed)")
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos? (yes/no) ###", $aDestroyWildDinosYN)
+	IniWrite($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aDestroyWildDinosDays)
+	IniWrite($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos hours (comma separated 00-23 ex.04,16) ###", $aDestroyWildDinosHours)
+	IniWrite($aIniFile, " --------------- SCHEDULED DESTROYWILDDINOS --------------- ", "Send DestroyWildDinos minute (0-59) ###", $aDestroyWildDinosMinute)
+	;	FileWriteLine($aIniFile, "( - !!! - Other server information imported from ServerGrid.json - !!! - )")
+	;	FileWriteLine($aIniFile, "(If ServerGrid.json is not found, Atlas can still be downloaded and installed)")
 
-	;	IniWrite($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "Use RCON/telnet to check if server is alive? (yes/no)", $aTelnetCheck)
-	;	IniWrite($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet check interval in seconds (30-900)", $aTelnetCheckSec)
-	;	IniWrite($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet port", $aTelnetPort)
-	;	IniWrite($sIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet password", $aTelnetPass)
-	FileWriteLine($sIniFile, @CRLF)
-	;	IniWrite($sIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Restart on excessive memory use? (yes/no) ###", $aExMemRestart)
-	;	IniWrite($sIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Excessive memory amount? ###", $aExMemAmt)
-	;	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", $aRemoteRestartUse)
-	IniWrite($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Server Local IP (ex. 192.168.1.10) ###", $aRemoteRestartIP)
-	IniWrite($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Port ###", $aRemoteRestartPort)
-	IniWrite($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Key ###", $aRemoteRestartKey)
-	IniWrite($sIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Code ###", $aRemoteRestartCode)
-	FileWriteLine($sIniFile, "(Usage example: http://192.168.1.10:57520/?restart=password)")
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $sAnnounceNotifyDaily)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $sAnnounceNotifyUpdate)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $sAnnounceNotifyRemote)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $sAnnounceNotifyStopServer)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $sAnnounceNotifyRestartGrids)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $sAnnounceNotifyModUpdate)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $sAnnounceNotifyModListUpdate)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $sAnnounceNamingScheme)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Grid Status (\g - server, \s - status, \f - folder name, \n - server name) ###", $sGridStatusMessage)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###", $sGridStatusLocalRemoteBoth)
-	IniWrite($sIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Skip Countdown Announcements When No One is Online? (yes/no) ###", $aSkipCountdownWhenNoOnlinePlayersYN)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires RCON) (yes/no) ###", $sInGameAnnounce)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Approximate duration to display messages in-game (seconds)? (6-30) ###", $sInGameMessageDuration)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sInGameDailyMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sInGameUpdateMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sInGameRemoteRestartMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sInGameStopServerMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sInGameRestartGridsMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sInGameModUpdateMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sInGameModListUpdateMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce CRASHED GRID Status (notify when crash, restarting, and ready)(yes/no) ###", $sInGameSendCrashYN)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sInGameSkipRestartMessage)
-	IniWrite($sIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $sInGame10SecondMessage)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use Fast Method to send Discord messages? (if problems, disable)(yes/no) ###", $aDiscordUseFastMethodYN)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $sUseDiscordBotDaily)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $sUseDiscordBotUpdate)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $sUseDiscordBotRemoteRestart)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $sUseDiscordBotStopServer)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for RESTART GRIDS? (yes/no) ###", $sUseDiscordBotRestartGrids)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $sUseDiscordBotModUpdate)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $sUseDiscordBotServersUpYN)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online only when ALL servers rebooted (yes/no) ###", $sUseDiscordBotServersUpAllRebootYN)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###", $sUseDiscordBotServersRemoteUpYN)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseDiscordBotFirstAnnouncement)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $sUseDiscordBotSkipYN)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $sDiscordReadyStatusDelay)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $sUseDiscordBotPlayersYN)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sDiscordDailyMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $sDiscordDailyZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sDiscordUpdateMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $sDiscordUpdateZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sDiscordRemoteRestartMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $sDiscordRemoteRestartZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sDiscordStopServerMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $sDiscordStopServerZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sDiscordRestartGridsMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $sDiscordRestartGridsZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateSubsequentMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $sDiscordModUpdateZeroMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sDiscordModListUpdateMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $sDiscordServersUpMessage)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sDiscordSkipRestartMessage)
-;~ 	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $sDiscordPlayersMessage)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "__ Online Player message substitutions (\o Online Player Count, \m Max Players, \j Joined Sub-Msg, \l Left Sub-Msn, \a Online Players Sub-Msg) \n Next Line) __", "")
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $sDiscordPlayersMsg)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $sDiscordPlayerJoinMsg)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $sDiscordPlayerLeftMsg)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $sDiscordPlayerOnlineMsg)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $aPlayerSeparator)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $sDiscordWH1URL)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $sDiscordWH2URL)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $sDiscordWH3URL)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $sDiscordWH4URL)
-	FileWriteLine($sIniFile, " For WebHook to send Messages, Enter WH number(2) or blank for none.  ie. For WH 1&3, use 1,3.  For WH1, use 1. For Wh 1&2&3, use 1,2,3")
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $sDiscordMainWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $sDiscordStatusAllWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $sDiscordStatusCrashWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $sDiscordLogWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $sDiscordPlayersWHSel)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $sDiscordBot1Name)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $sDiscordBot2Name)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $sDiscordBot3Name)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $sDiscordBot4Name)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $bDiscordBotUseTTS)
-	IniWrite($sIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $sDiscordBotAvatar)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $sUseTwitchBotDaily)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $sUseTwitchBotUpdate)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $sUseTwitchBotRemoteRestart)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $sUseTwitchBotStopServer)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for RESTART GRIDS? (yes/no) ###", $sUseTwitchBotRestartGrids)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $sUseTwitchBotModUpdate)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseTwitchFirstAnnouncement)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sTwitchDailyMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $sTwitchDailyZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sTwitchUpdateMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $sTwitchUpdateZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sTwitchRemoteRestartMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $sTwitchRemoteRestartZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sTwitchStopServerMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $sTwitchStopServerZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sTwitchRestartGridsMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $sTwitchRestartGridsZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sTwitchModUpdateMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $sTwitchModUpdateZeroMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sTwitchModListUpdateMessage)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $sTwitchNick)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $sChatOAuth)
-	IniWrite($sIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Channels ###", $sTwitchChannels)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Execute external script BEFORE update? (yes/no) ###", $aExecuteExternalScript)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script directory ###", $aExternalScriptDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script filename ###", $aExternalScriptName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Execute external script AFTER update but BEFORE server start? (yes/no) ###", $aExternalScriptValidateYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script directory ###", $aExternalScriptValidateDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script filename ###", $aExternalScriptValidateName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptValidateWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Execute external script for server update restarts? (yes/no) ###", $aExternalScriptUpdateYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script directory ###", $aExternalScriptUpdateDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script filename ###", $aExternalScriptUpdateFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptUpdateWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Execute external script for daily server restarts? (yes/no) ###", $aExternalScriptDailyYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script directory ###", $aExternalScriptDailyDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script filename ###", $aExternalScriptDailyFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptDailyWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Execute external script when first restart announcement is made? (yes/no) ###", $aExternalScriptAnnounceYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script directory ###", $aExternalScriptAnnounceDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script filename ###", $aExternalScriptAnnounceFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptAnnounceWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Execute external script during restart when a remote restart request is made? (yes/no) ###", $aExternalScriptRemoteYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script directory ###", $aExternalScriptRemoteDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script filename ###", $aExternalScriptRemoteFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptRemoteWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $aExternalScriptModYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script directory ###", $aExternalScriptModDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script filename ###", $aExternalScriptModFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptModWait)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $aExternalScriptBackUpYN)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script directory ###", $aExternalScriptBackUpDir)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script filename ###", $aExternalScriptBackUpFileName)
-	IniWrite($sIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptBackUpWait)
-	FileWriteLine($sIniFile, @CRLF)
-	;	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $aLogRotate)
-	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $aLogQuantity)
-	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $sObfuscatePass)
-	;	IniWrite($sIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $aLogHoursBetweenRotate)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $aValidate)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable RCON? Required for clean shutdown (yes/no) ###", $aEnableRCON)
-	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $aRCONSaveDelaySec)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $aUpdateSource)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $aUpdateUtil)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $aUpdateAutoUtil)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $aUtilBetaYN)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", $aUseKeepAliveYN)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Disable Grid Memory and CPU monitoring? (yes/no) ###", $aDisableMemCPUYN)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", $aAllowMultipleUtilsYN)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", $aOverwriteReadOnly)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Max number of running grids allowed (0-400) ###", $aMaxNumberOfRunningGrids)
-	FileWriteLine($sIniFile, @CRLF)
-	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no)", $aUsePuttytel)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $aExternalScriptHideYN)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Main Window (Comma separated. Default:Starting,Running,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $aServerStatusLabelsMain)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $aServerStatusLabelsAnnounce)
-;~ 	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Folder to place config files ###", $aConfigFolder)
-	;	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $aDebug)
-	FileWriteLine($sIniFile, @CRLF)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $aRCONResponseWaitms)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $aOnlinePlayerWaitms)
-	IniWrite($sIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $aMainGUIRefreshTime)
+	;	IniWrite($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "Use RCON/telnet to check if server is alive? (yes/no)", $aTelnetCheck)
+	;	IniWrite($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet check interval in seconds (30-900)", $aTelnetCheckSec)
+	;	IniWrite($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet port", $aTelnetPort)
+	;	IniWrite($aIniFile, " --------------- USE RCON/TELNET TO CHECK IF SERVER IS ALIVE --------------- ", "RCON/Telnet password", $aTelnetPass)
+	FileWriteLine($aIniFile, @CRLF)
+	;	IniWrite($aIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Restart on excessive memory use? (yes/no) ###", $aExMemRestart)
+	;	IniWrite($aIniFile, " --------------- RESTART ON EXCESSIVE MEMORY USE --------------- ", "Excessive memory amount? ###", $aExMemAmt)
+	;	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Use Remote Restart? (yes/no) ###", $aRemoteRestartUse)
+	IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Server Local IP (ex. 192.168.1.10) ###", $aRemoteRestartIP)
+	IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Port ###", $aRemoteRestartPort)
+	IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Key ###", $aRemoteRestartKey)
+	IniWrite($aIniFile, " --------------- REMOTE RESTART OPTIONS --------------- ", "Restart Code ###", $aRemoteRestartCode)
+	FileWriteLine($aIniFile, "(Usage example: http://192.168.1.10:57520/?restart=password)")
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $sAnnounceNotifyDaily)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $sAnnounceNotifyUpdate)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $sAnnounceNotifyRemote)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before STOP SERVER (comma separated 0-60) ###", $sAnnounceNotifyStopServer)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before RESTART GRIDS (comma separated 0-60) ###", $sAnnounceNotifyRestartGrids)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD UPDATE reboot (comma separated 0-60) ###", $sAnnounceNotifyModUpdate)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before MOD LIST UPDATE reboot (comma separated 0-60) ###", $sAnnounceNotifyModListUpdate)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $sAnnounceNamingScheme)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Grid Status (\g - server, \s - status, \f - folder name, \n - server name) ###", $sGridStatusMessage)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Send Grid Status for grids: Local, Remote, or Both? (local, remote, both) ###", $sGridStatusLocalRemoteBoth)
+	IniWrite($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Skip Countdown Announcements When No One is Online? (yes/no) ###", $aSkipCountdownWhenNoOnlinePlayersYN)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce messages in-game? (Requires RCON) (yes/no) ###", $sInGameAnnounce)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Approximate duration to display messages in-game (seconds)? (6-30) ###", $sInGameMessageDuration)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sInGameDailyMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sInGameUpdateMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sInGameRemoteRestartMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sInGameStopServerMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sInGameRestartGridsMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sInGameModUpdateMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sInGameModListUpdateMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announce CRASHED GRID Status (notify when crash, restarting, and ready)(yes/no) ###", $sInGameSendCrashYN)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sInGameSkipRestartMessage)
+	IniWrite($aIniFile, " --------------- IN-GAME ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement 10 seconds before reboot ###", $sInGame10SecondMessage)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use Fast Method to send Discord messages? (if problems, disable)(yes/no) ###", $aDiscordUseFastMethodYN)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for DAILY reboot? (yes/no) ###", $sUseDiscordBotDaily)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for UPDATE reboot? (yes/no) ###", $sUseDiscordBotUpdate)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for REMOTE RESTART reboot? (yes/no) ###", $sUseDiscordBotRemoteRestart)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for STOP SERVER? (yes/no) ###", $sUseDiscordBotStopServer)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for RESTART GRIDS? (yes/no) ###", $sUseDiscordBotRestartGrids)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for MOD UPDATE reboot? (yes/no) ###", $sUseDiscordBotModUpdate)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online (yes/no) ###", $sUseDiscordBotServersUpYN)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when all servers are back online only when ALL servers rebooted (yes/no) ###", $sUseDiscordBotServersUpAllRebootYN)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message: Wait for REMOTE grids to be online before [All servers are back online] announcement? (yes/no) ###", $sUseDiscordBotServersRemoteUpYN)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseDiscordBotFirstAnnouncement)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message for Skip scheduled restart if servers restarted recently? (yes/no) ###", $sUseDiscordBotSkipYN)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Discord announcement delay after grid reaches Ready status (seconds)(0-999) ###", $sDiscordReadyStatusDelay)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Send Discord message when players join or leave? (yes/no) ###", $sUseDiscordBotPlayersYN)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sDiscordDailyMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $sDiscordDailyZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sDiscordUpdateMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $sDiscordUpdateZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sDiscordRemoteRestartMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $sDiscordRemoteRestartZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sDiscordStopServerMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $sDiscordStopServerZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sDiscordRestartGridsMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $sDiscordRestartGridsZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE 1st Message (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE Subsequent (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sDiscordModUpdateSubsequentMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $sDiscordModUpdateZeroMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sDiscordModListUpdateMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Servers back online ###", $sDiscordServersUpMessage)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Skip scheduled restart if servers restarted recently ###", $sDiscordSkipRestartMessage)
+;~ 	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Players join or leave (\o - Online Player Count, \m - Max Players) ###", $sDiscordPlayersMessage)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "__ Online Player message substitutions (\o Online Player Count, \m Max Players, \j Joined Sub-Msg, \l Left Sub-Msn, \a Online Players Sub-Msg) \n Next Line) __", "")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Message (see above for substitutions) ###", $sDiscordPlayersMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Join Player Sub-Message (\p - Player Name(s) of player(s) that joined server, \n Next Line) ###", $sDiscordPlayerJoinMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Left Player Sub-Message (\p - Player Name(s) of player(s) that left server, \n Next Line) ###", $sDiscordPlayerLeftMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Online Player Sub-Message (\p - Player Name(s) of player(s) online, \n Next Line) ###", $sDiscordPlayerOnlineMsg)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Announcement Online Player separator (Use ; for [space]) ###", $aPlayerSeparator)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 1 URL ###", $sDiscordWH1URL)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 2 URL ###", $sDiscordWH2URL)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 3 URL ###", $sDiscordWH3URL)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "WebHook 4 URL ###", $sDiscordWH4URL)
+	FileWriteLine($aIniFile, " For WebHook to send Messages, Enter WH number(2) or blank for none.  ie. For WH 1&3, use 1,3.  For WH1, use 1. For Wh 1&2&3, use 1,2,3")
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "GENERAL message WebHook(s) (1-4) ###", $sDiscordMainWHSel)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL GRID STATUS message WebHook(s) (1-4) ###", $sDiscordStatusAllWHSel)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "CRASHED GRID STATUS Message WebHook(s) (1-4) ###", $sDiscordStatusCrashWHSel)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "ALL LOG TRAFFIC message WebHook(s) (1-4) ###", $sDiscordLogWHSel)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "PLAYERS JOIN OR LEAVE message WebHook(s) (1-4) ###", $sDiscordPlayersWHSel)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 1 Name ###", $sDiscordBot1Name)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 2 Name ###", $sDiscordBot2Name)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 3 Name ###", $sDiscordBot3Name)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot 4 Name ###", $sDiscordBot4Name)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Use TTS? (yes/no) ###", $bDiscordBotUseTTS)
+	IniWrite($aIniFile, " --------------- DISCORD INTEGRATION --------------- ", "Bot Avatar Link ###", $sDiscordBotAvatar)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for DAILY reboot? (yes/no) ###", $sUseTwitchBotDaily)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for UPDATE reboot? (yes/no) ###", $sUseTwitchBotUpdate)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for REMOTE RESTART reboot? (yes/no) ###", $sUseTwitchBotRemoteRestart)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for STOP SERVER? (yes/no) ###", $sUseTwitchBotStopServer)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for RESTART GRIDS? (yes/no) ###", $sUseTwitchBotRestartGrids)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for MOD UPDATE reboot? (yes/no) ###", $sUseTwitchBotModUpdate)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Send Twitch message for first announcement only? (reduces bot spam)(yes/no) ###", $sUseTwitchFirstAnnouncement)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY (\m - minutes) ###", $sTwitchDailyMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement DAILY when No Online Players ###", $sTwitchDailyZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES (\m - minutes) ###", $sTwitchUpdateMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement UPDATES when No Online Players ###", $sTwitchUpdateZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART (\m - minutes) ###", $sTwitchRemoteRestartMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement REMOTE RESTART when No Online Players ###", $sTwitchRemoteRestartZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER (\m - minutes, \g - grids) ###", $sTwitchStopServerMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement STOP SERVER when No Online Players  (\g - grids) ###", $sTwitchStopServerZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS (\m - minutes, \g - grids) ###", $sTwitchRestartGridsMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement RESTART GRIDS when No Online Players (\g - grids) ###", $sTwitchRestartGridsZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description, \m Minutes) ###", $sTwitchModUpdateMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD UPDATE when No Online Players (\l New Line, \i ModID, \n Mod Name, \t Date & Time, \d Description) ###", $sTwitchModUpdateZeroMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Announcement MOD LIST CHANGE (\m - minutes, \i - Mod ID) ###", $sTwitchModListUpdateMessage)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Nick ###", $sTwitchNick)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "ChatOAuth ###", $sChatOAuth)
+	IniWrite($aIniFile, " --------------- TWITCH INTEGRATION --------------- ", "Channels ###", $sTwitchChannels)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Execute external script BEFORE update? (yes/no) ###", $aExecuteExternalScript)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script directory ###", $aExternalScriptDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Script filename ###", $aExternalScriptName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE SteamCMD UPDATE AND SERVER START --------------- ", "1-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Execute external script AFTER update but BEFORE server start? (yes/no) ###", $aExternalScriptValidateYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script directory ###", $aExternalScriptValidateDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Script filename ###", $aExternalScriptValidateName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT AFTER SteamCMD BUT BEFORE SERVER START --------------- ", "2-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptValidateWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Execute external script for server update restarts? (yes/no) ###", $aExternalScriptUpdateYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script directory ###", $aExternalScriptUpdateDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Script filename ###", $aExternalScriptUpdateFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR SERVER *UPDATE* --------------- ", "3-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptUpdateWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Execute external script for daily server restarts? (yes/no) ###", $aExternalScriptDailyYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script directory ###", $aExternalScriptDailyDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Script filename ###", $aExternalScriptDailyFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *DAILY* SERVER RESTART --------------- ", "4-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptDailyWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Execute external script when first restart announcement is made? (yes/no) ###", $aExternalScriptAnnounceYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script directory ###", $aExternalScriptAnnounceDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Script filename ###", $aExternalScriptAnnounceFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN FIRST RESTART ANNOUNCEMENT IS MADE --------------- ", "5-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptAnnounceWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Execute external script during restart when a remote restart request is made? (yes/no) ###", $aExternalScriptRemoteYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script directory ###", $aExternalScriptRemoteDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Script filename ###", $aExternalScriptRemoteFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT DURING RESTART WHEN REMOTE RESTART REQUEST IS MADE --------------- ", "6-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptRemoteWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $aExternalScriptModYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script directory ###", $aExternalScriptModDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Script filename ###", $aExternalScriptModFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT WHEN RESTARTING FOR *MOD UPDATE* SERVER RESTART --------------- ", "7-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptModWait)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Execute external script when mod update required (prior to server shutdown)? (yes/no) ###", $aExternalScriptBackUpYN)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script directory ###", $aExternalScriptBackUpDir)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Script filename ###", $aExternalScriptBackUpFileName)
+	IniWrite($aIniFile, " --------------- EXECUTE EXTERNAL SCRIPT BEFORE *BACK UP* --------------- ", "8-Wait for script to complete before continuing? (yes/no) ###", $aExternalScriptBackUpWait)
+	FileWriteLine($aIniFile, @CRLF)
+	;	IniWrite($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Rotate log files? (yes/no) ###", $aLogRotate)
+	IniWrite($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Delete util log files older than __ days ###", $aLogQuantity)
+	IniWrite($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hide passwords in log files? (yes/no) ###", $sObfuscatePass)
+	;	IniWrite($aIniFile, " --------------- LOG FILE OPTIONS --------------- ", "Hours between log rotations ###", $aLogHoursBetweenRotate)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Validate files with SteamCMD update? (yes/no) ###", $aValidate)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable RCON? Required for clean shutdown (yes/no) ###", $aEnableRCON)
+	;	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Delay between saveworld and quit commands during shutdown in seconds (5-120) ###", $aRCONSaveDelaySec)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "For update checks, use (0)SteamCMD or (1)SteamDB.com ###", $aUpdateSource)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $aUpdateUtil)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $aUpdateAutoUtil)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $aUtilBetaYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", $aUseKeepAliveYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Disable Grid Memory and CPU monitoring? (yes/no) ###", $aDisableMemCPUYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", $aAllowMultipleUtilsYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Start " & $aUtilName & " minimized of " & $aUtilName & "? (yes/no) ###", $aStartUtilMinimizedYN)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "If GUS, Game, Engine, ServerGrid,json file is read-only, 1-Overwrite file, 2-Skip file, or 3-Ask every time (1-3) ###", $aOverwriteReadOnly)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Max number of running grids allowed (0-400) ###", $aMaxNumberOfRunningGrids)
+	FileWriteLine($aIniFile, @CRLF)
+	;	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Use puttytel for telnet client? (yes/no)", $aUsePuttytel)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Hide external scripts when executed? (if yes, scripts may not execute properly) (yes/no) ###", $aExternalScriptHideYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Main Window (Comma separated. Default:Starting,Running,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $aServerStatusLabelsMain)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $aServerStatusLabelsAnnounce)
+;~ 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Folder to place config files ###", $aConfigFolder)
+	;	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $aDebug)
+	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $aRCONResponseWaitms)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $aOnlinePlayerWaitms)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $aMainGUIRefreshTime)
 EndFunc   ;==>UpdateIni
 #EndRegion ;**** INI Settings - User Variables ****
 
-Func ReadCFG($sIniFile)
+Func ReadCFG($aUtilCFGFile)
 	Local $iIniFail = 0
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
-	Global $aUtilReboot = IniRead($sIniFile, "CFG", "aUtilReboot", $iniCheck)
-	Global $aUtilLastClose = IniRead($sIniFile, "CFG", "aUtilLastClose", $iniCheck)
-	Global $aCFGLastUpdate = IniRead($sIniFile, "CFG", "aCFGLastUpdate", $iniCheck)
-	Global $aCFGLastVersion = IniRead($sIniFile, "CFG", "aCFGLastVersion", $iniCheck)
-	Global $aCFGLastVerNumber = IniRead($sIniFile, "CFG", "aCFGLastVerNumber", $iniCheck)
-	Global $aCFGRCONCustomLastCount = IniRead($sIniFile, "CFG", "aCFGRCONCustomLastCount", $iniCheck)
+	Global $aUtilReboot = IniRead($aUtilCFGFile, "CFG", "aUtilReboot", $iniCheck)
+	Global $aUtilLastClose = IniRead($aUtilCFGFile, "CFG", "aUtilLastClose", $iniCheck)
+	Global $aCFGLastUpdate = IniRead($aUtilCFGFile, "CFG", "aCFGLastUpdate", $iniCheck)
+	Global $aCFGLastVersion = IniRead($aUtilCFGFile, "CFG", "aCFGLastVersion", $iniCheck)
+	Global $aCFGLastVerNumber = IniRead($aUtilCFGFile, "CFG", "aCFGLastVerNumber", $iniCheck)
+	Global $aCFGRCONCustomLastCount = IniRead($aUtilCFGFile, "CFG", "aCFGRCONCustomLastCount", $iniCheck)
 	If $iniCheck = $aUtilReboot Then
 		$aUtilReboot = "no"
-		IniWrite($sIniFile, "CFG", "aUtilReboot", $aUtilReboot)
+		IniWrite($aUtilCFGFile, "CFG", "aUtilReboot", $aUtilReboot)
 	EndIf
 	If $iniCheck = $aUtilLastClose Then
 		$aUtilLastClose = _NowCalc()
-		IniWrite($sIniFile, "CFG", "aUtilLastClose", $aUtilLastClose)
+		IniWrite($aUtilCFGFile, "CFG", "aUtilLastClose", $aUtilLastClose)
 	EndIf
 	If $iniCheck = $aCFGLastUpdate Then
 		$aCFGLastUpdate = _NowCalc()
-		IniWrite($sIniFile, "CFG", "aCFGLastUpdate", $aCFGLastUpdate)
+		IniWrite($aUtilCFGFile, "CFG", "aCFGLastUpdate", $aCFGLastUpdate)
 	EndIf
 	If $iniCheck = $aCFGLastVersion Then
 		$aCFGLastVersion = $aUtilVersion
-		IniWrite($sIniFile, "CFG", "aCFGLastVersion", $aCFGLastVersion)
+		IniWrite($aUtilCFGFile, "CFG", "aCFGLastVersion", $aCFGLastVersion)
 	EndIf
 	If $iniCheck = $aCFGLastVerNumber Then
 		$aCFGLastVerNumber = $aUtilVerNumber
-		IniWrite($sIniFile, "CFG", "aCFGRCONCustomLastCount", $aCFGLastVerNumber)
+		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomLastCount", $aCFGLastVerNumber)
 	EndIf
 	If $iniCheck = $aCFGRCONCustomLastCount Then
 		$aCFGRCONCustomLastCount = 1
-		IniWrite($sIniFile, "CFG", "aCFGRCONCustomLastCount", $aCFGRCONCustomLastCount)
+		IniWrite($aUtilCFGFile, "CFG", "aCFGRCONCustomLastCount", $aCFGRCONCustomLastCount)
 	EndIf
-	IniWrite($sIniFile, "CFG", "aCFGLastVersion", $aUtilVersion)
-	IniWrite($sIniFile, "CFG", "aCFGLastVerNumber", $aUtilVerNumber)
+	IniWrite($aUtilCFGFile, "CFG", "aCFGLastVersion", $aUtilVersion)
+	IniWrite($aUtilCFGFile, "CFG", "aCFGLastVerNumber", $aUtilVerNumber)
 EndFunc   ;==>ReadCFG
 
 Func AddZero($tString)
@@ -8607,7 +8638,7 @@ Func GetInstalledVersion($sGameDir)
 		$aReturn[0] = True
 		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
-
+		
 			If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '"buildid"', 1)
 			EndIf
@@ -8621,7 +8652,7 @@ Func GetInstalledVersion($sGameDir)
 			$aReturn[0] = True
 			$aReturn[1] = $aAppInfo[2]
 			EndIf
-
+		
 			If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
 			EndIf
@@ -13720,9 +13751,13 @@ Func TrayUpdateServUnPause()
 EndFunc   ;==>TrayUpdateServUnPause
 
 Func ShowPlayerCount()
-	$aServerOnlinePlayerYN = "yes"
-	ShowOnlinePlayersGUI()
-	WinActivate($gOnlinePlayerWindow)
+	If $aStartUtilMinimizedYN = "yes" And $aFirstStartUpTF Then
+	Else
+		$aServerOnlinePlayerYN = "yes"
+		ShowOnlinePlayersGUI()
+		WinActivate($gOnlinePlayerWindow)
+	EndIf
+	$aFirstStartUpTF = False
 EndFunc   ;==>ShowPlayerCount
 
 Func _WM_SIZE($hWndGUI, $Msg1, $wParam1, $lParam1)
@@ -13742,6 +13777,12 @@ Func ShowOnlinePlayersGUI()
 	If $aServerOnlinePlayerYN = "yes" Then
 		If $aPlayerCountShowTF Then
 			If $aPlayerCountWindowTF = False Then
+				$aGUIH = 70
+				For $i = 0 To ($aServerGridTotal - 1)
+					If $xStartGrid[$i] = "yes" Then $aGUIH += 15 ;Create Show Online Players Window Frame
+				Next
+				If $aGUIH > 800 Then $aGUIH = 800
+
 				$gOnlinePlayerWindow = GUICreate($aUtilName & " Online Players", $aGUIW, $aGUIH, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX))
 				GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_OnlinePlayers_Close", $gOnlinePlayerWindow)
 				$wOnlinePlayers = GUICtrlCreateEdit("", 0, 0, _WinAPI_GetClientWidth($gOnlinePlayerWindow), _WinAPI_GetClientHeight($gOnlinePlayerWindow), BitOR($ES_AUTOHSCROLL, $ES_NOHIDESEL, $ES_WANTRETURN, $WS_HSCROLL, $WS_VSCROLL, $ES_READONLY)) ; Horizontal Scroll, NO wrap text)
@@ -14437,10 +14478,14 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetTip(-1, "Total Players Online")
 	#EndRegion ### END Koda GUI section ###
 	GUIUpdateQuick()
-	If $aShowGUI Then
-		GUISetState(@SW_SHOWNORMAL, $wGUIMainWindow)
-	Else
+	If $aFirstStartUpTF And $aStartUtilMinimizedYN = "yes" Then
 		GUISetState(@SW_HIDE, $wGUIMainWindow)
+	Else
+		If $aShowGUI Then
+			GUISetState(@SW_SHOWNORMAL, $wGUIMainWindow)
+		Else
+			GUISetState(@SW_HIDE, $wGUIMainWindow)
+		EndIf
 	EndIf
 ;~ 	If $aServerOnlinePlayerYN = "yes" Then ShowPlayerCount()
 
@@ -24952,7 +24997,7 @@ Func _GUIListViewEx_Globals()
 	; #GLOBAL VARIABLES# =================================================================================================
 	; Array to hold registered ListView data
 	Global $aGLVEx_Data[1][26] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-			 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
+			 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
 	; [0][0]  = ListView Count      [n][0]  = ListView handle
 	; [0][1]  = Active Index        [n][1]  = Native ListView ControlID / 0
 	; [0][2]  = Active Column       [n][2]  = Shadow array
@@ -25286,7 +25331,7 @@ Func _GUIListViewEx_Close($iLV_Index = 0)
 		; Reinitialise data array - retaining selected edit key
 		$iEditKeyCode = $aGLVEx_Data[0][23]
 		Global $aGLVEx_Data[1][UBound($aGLVEx_Data, 2)] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-				 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
+				 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
 		; Note delimiter character reset when ListView next initialised
 	Else
 		; Reset all data for ListView

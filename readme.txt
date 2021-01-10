@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.3 (2020-12-22)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.4 (2020-12-26)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,16 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.4 (2020-12-26) Start ASUU minimized. Resized Online PLayer window.
+- Added: Start ASUU as minimized. Notice! Some startup errors may go unnoticed. (Thanks to @Sǥŧ.Ɍøȼ fro requesting)
+- Tip! You can also start ASUU minimized by adding -min extension (example: AtlasServerUpdateUtility.exe -min) or use the new Minimized batch file that auto-updates.
+- Changed: Online Player window now resizes according to number of local running grids.
+
+[ New Config Parameters/Changes ]
+Added:
+	[--------------- ATLASSERVERUPDATEUTILITY MISC OPTIONS ---------------]
+	Start AtlasServerUpdateUtility minimized of AtlasServerUpdateUtility? (yes/no) ###=no
+
 v2.3.3 (2020-12-22) Bug Fixes
 - Fixed: Line Error if Restart message did not contain \m for minutes.
 - Fixed: When a grid crashed, ASUU would shut down the last grid(s) closed manually (from restart or close menu). (Thanks to @DiN for reporting)
