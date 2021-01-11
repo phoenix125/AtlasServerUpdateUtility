@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.4.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.4_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.5.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.5_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.4.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.5.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.4
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.5
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,8 +94,8 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.4" ; (2020-12-26)
-Local $aUtilVerBeta = "v2.3.4" ; (2020-12-26)
+Local $aUtilVerStable = "v2.3.5" ; (2020-01-10)
+Local $aUtilVerBeta = "v2.3.5" ; (2020-01-10)
 Global $aUtilVerNumber = 50 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
@@ -147,7 +147,7 @@ Global $aUtilVerNumber = 50 ; New number assigned for each config file change. U
 ;47 = v2.2.4
 ;48 = v2.2.5
 ;49 = v2.2.6/7/8/9/3.0/1/2/2
-;50 = v2.3.4
+;50 = v2.3.4/5
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -6546,8 +6546,8 @@ Func ReadCFG($aUtilCFGFile)
 	Local $iniCheck = ""
 	Local $aChar[3]
 	For $i = 1 To 13
-		$aChar[0] = Chr(Random(97, 122, 1))     ;a-z
-		$aChar[1] = Chr(Random(48, 57, 1))     ;0-9
+		$aChar[0] = Chr(Random(97, 122, 1)) ;a-z
+		$aChar[1] = Chr(Random(48, 57, 1)) ;0-9
 		$iniCheck &= $aChar[Random(0, 1, 1)]
 	Next
 	Global $aUtilReboot = IniRead($aUtilCFGFile, "CFG", "aUtilReboot", $iniCheck)
@@ -8638,7 +8638,7 @@ Func GetInstalledVersion($sGameDir)
 		$aReturn[0] = True
 		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
-		
+
 			If UBound($aAppInfo) >= 3 Then
 			$aAppInfo = StringSplit($aAppInfo[2], '"buildid"', 1)
 			EndIf
@@ -8652,7 +8652,7 @@ Func GetInstalledVersion($sGameDir)
 			$aReturn[0] = True
 			$aReturn[1] = $aAppInfo[2]
 			EndIf
-		
+
 			If FileExists($sFilePath) Then
 			FileClose($hFileOpen)
 			EndIf
@@ -13318,6 +13318,12 @@ Func _ArraySum(ByRef $a_array, $i_lbound1 = 0, $i_lbound2 = 0)
 
 	Return $i_add
 EndFunc   ;==>_ArraySum
+Func _RemoveSpecialCharsSteam($aString)
+	Return StringRegExpReplace($aString, "(?i)([^a-z0-9-_ ])", "")
+EndFunc   ;==>_RemoveSpecialCharsSteam
+Func _StringtoArray($tTxtt, $tDelim = @CRLF)
+	Return StringSplit(StringReplace($tTxtt, $tDelim, Chr(182)), Chr(182), 2)
+EndFunc   ;==>_StringtoArray
 
 Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSplash = Splash handle, 0 = Do not show splash , ;$tStartup = If True, uses startup splash text. If False, uses standard text.
 	Local $tTimer2 = _Timer_Init()
@@ -13373,21 +13379,59 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 						$xServerPlayerCount[$i] = -2
 					Else
 						$mMsg = StringReplace($mMsg, " ", "")
-						Local $tUserAll = _StringBetween($mMsg, ".", ",")
-						Local $tSteamAll = _StringBetween($mMsg, ",", @CRLF)
+						Local $tUserAll[0]
+						Local $tSteamAll[0]
+						Local $xMsg = _StringtoArray($mMsg)
+						If UBound($xMsg) > 0 Then
+							For $x = 0 To UBound($xMsg) - 1
+								For $x1 = StringLen($xMsg[$x]) To 0 Step -1
+									If StringMid($xMsg[$x], $x1, 1) = "," Then
+										Local $tName = StringLeft($xMsg[$x], $x1 - 1)
+										For $x2 = 0 To (StringLen($tName) - 1)
+											If StringMid($tName, $x2, 1) = "." Then
+												$tName = _RemoveSpecialCharsSteam(StringTrimLeft($tName, $x2))
+												ExitLoop
+											EndIf
+										Next
+										_ArrayAdd($tSteamAll, _RemoveSpecialCharsSteam(StringRight($xMsg[$x], StringLen($xMsg[$x]) - $x1)))
+										_ArrayAdd($tUserAll, $tName)
+										ExitLoop
+									EndIf
+								Next
+							Next
+						EndIf
 						$xServerPlayerSteamNames[$i] = $tUserAll
 						$xServerPlayerSteamID[$i] = $tSteamAll
-						If UBound($tSteamAll) <> UBound($tUserAll) Then ReDim $tSteamAll[$tUserAll]
 						If UBound($tSteamAll) > 0 Then
-							For $x = 0 To (UBound($tUserAll) - 1)
-								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
-								_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
+							For $x = 0 To (UBound($tSteamAll) - 1)
+								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x]) ;kim125er!
 							Next
 						Else
 							Local $tSteamAll[1]
-							Local $tUserAll[1]
 							$tSteamAll[0] = "1234567890"
+						EndIf
+						If UBound($tUserAll) > 0 Then
+							For $x = 0 To (UBound($tUserAll) - 1)
+								_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
+							Next
+						Else
+							Local $tUserAll[1]
 							$tUserAll[0] = "User"
+						EndIf
+						If UBound($xPlayeRawOnlineSteamName) = UBound($xPlayeRawOnlineSteamID) Then
+							Local $tMax = UBound($xPlayeRawOnlineSteamName)
+						ElseIf UBound($xPlayeRawOnlineSteamName) > UBound($xPlayeRawOnlineSteamID) Then
+							Local $tMax = UBound($xPlayeRawOnlineSteamName)
+							Global $xPlayeRawOnlineSteamID[$tMax]
+							For $x = 0 To ($tMax - 1)
+								$xPlayeRawOnlineSteamID[$x] = "[Error]"
+							Next
+						Else
+							Local $tMax = UBound($xPlayeRawOnlineSteamID)
+							Global $xPlayeRawOnlineSteamName[$tMax]
+							For $x = 0 To ($tMax - 1)
+								$xPlayeRawOnlineSteamName[$x] = "[Error]"
+							Next
 						EndIf
 						Local $tUsers = RemoveSpecialChars(_ArrayToString($tUserAll))
 						If $tUsers < 0 Then
@@ -24997,7 +25041,7 @@ Func _GUIListViewEx_Globals()
 	; #GLOBAL VARIABLES# =================================================================================================
 	; Array to hold registered ListView data
 	Global $aGLVEx_Data[1][26] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-			 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
+			 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
 	; [0][0]  = ListView Count      [n][0]  = ListView handle
 	; [0][1]  = Active Index        [n][1]  = Native ListView ControlID / 0
 	; [0][2]  = Active Column       [n][2]  = Shadow array
@@ -25331,7 +25375,7 @@ Func _GUIListViewEx_Close($iLV_Index = 0)
 		; Reinitialise data array - retaining selected edit key
 		$iEditKeyCode = $aGLVEx_Data[0][23]
 		Global $aGLVEx_Data[1][UBound($aGLVEx_Data, 2)] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-				 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
+				 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
 		; Note delimiter character reset when ListView next initialised
 	Else
 		; Reset all data for ListView

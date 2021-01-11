@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.4 (2020-12-26)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.5 (2021-01-10)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,9 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.5 (2021-01-10) Bug Fix when Steam Player names contained a comma or period
+- Fixed: Line 46597 (or similar) errors when player Steam names contained a comma or period. (Thanks to Revy for reporting)
+
 v2.3.4 (2020-12-26) Start ASUU minimized. Resized Online PLayer window.
 - Added: Start ASUU as minimized. Notice! Some startup errors may go unnoticed. (Thanks to @Sǥŧ.Ɍøȼ fro requesting)
 - Tip! You can also start ASUU minimized by adding -min extension (example: AtlasServerUpdateUtility.exe -min) or use the new Minimized batch file that auto-updates.

@@ -1,3 +1,2 @@
-v2.3.4^ Start ASUU minimized. Resized Online PLayer window.
-- Added: Start ASUU as minimized. Notice! Some startup errors may go unnoticed.
-- Changed: Online Player window now resizes according to number of local running grids.
+v2.3.5^v2.3.5 Bug Fix when Steam Player names contained a comma or period
+- Fixed: Line 46597 (or similar) errors when player Steam names contained a comma or period.
