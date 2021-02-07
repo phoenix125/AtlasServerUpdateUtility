@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.5 (2021-01-10)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.6 (2021-02-07)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,15 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.6 (2021-02-07) Bug Fixes. Added RCON delay and steamcmd credentials.
+- Fixed: Line 46569 Error (due to issues with getting player name & ID). (Thanks to @Revy & @AceMan for reporting)
+- Fixed: Line 46779 Variable incorrect number of subscripts or subscripts dimention range exceeded (Thanks to @Claw22000 for reporting)
+- Fixed: Multiple restarts after a mod update. (Thanks to @Revy for reporting)
+- Fixed: (Maybe!) mod updates failing for some users. (Thanks to @infiniti, @Revy, @Kasjo, @Joew, and others for reporting)
+- Added: Delay between mcrcon.exe commands.  (Thanks to @AceMan for requesting)
+- Added: Custom SteamCMD login and password. FYI: SteamCMD reports "App not found" when using app_info for update checking using credentials... works great with anonymous, so I added anon option for update checks. (Thanks to @Kasjo for requesting)
+- Added: !!StuckGridsNotice(Starting...).txt file now shows which grid(s) were stuck. (Thanks to @AceMan for reporting)
+
 v2.3.5 (2021-01-10) Bug Fix when Steam Player names contained a comma or period
 - Fixed: Line 46597 (or similar) errors when player Steam names contained a comma or period. (Thanks to Revy for reporting)
 

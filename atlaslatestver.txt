@@ -1,2 +1,6 @@
-v2.3.5^v2.3.5 Bug Fix when Steam Player names contained a comma or period
-- Fixed: Line 46597 (or similar) errors when player Steam names contained a comma or period.
+v2.3.6^v2.3.6 Bug Fixes. Added RCON delay and steamcmd credentials.
+- Fixed: Line 46569 & 46779 Errors.
+- Fixed: Multiple restarts after a mod update.
+- Fixed: (Maybe!) mod updates failing for some users.
+- Added: Delay between mcrcon.exe commands.
+- Added: Custom SteamCMD login and password.

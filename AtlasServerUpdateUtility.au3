@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.5.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.5_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.6.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.6_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.5.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.6.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.5
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.6
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.5" ; (2020-01-10)
-Local $aUtilVerBeta = "v2.3.5" ; (2020-01-10)
-Global $aUtilVerNumber = 50 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.3.6(b1)" ; (2020-01-10)
+Local $aUtilVerBeta = "v2.3.6(b1)" ; (2020-01-10)
+Global $aUtilVerNumber = 51 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -148,6 +148,7 @@ Global $aUtilVerNumber = 50 ; New number assigned for each config file change. U
 ;48 = v2.2.5
 ;49 = v2.2.6/7/8/9/3.0/1/2/2
 ;50 = v2.3.4/5
+;51 = v2.3.6
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -1514,6 +1515,17 @@ If $aCFGLastVerNumber < 50 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Start " & $aUtilName & " minimized of " & $aUtilName & "? (yes/no) ###", "no")
 	$aIniForceWrite = True
 EndIf
+If $aCFGLastVerNumber < 51 And $aIniExist Then
+	$aRCONDelayms = 50
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Delay between sending RCON commands in milliseconds (to prevent memory errors due to multiple mcrcon.exe instances) (0-1000) ###", $aRCONDelayms)
+	$aSteamCMDLogin = "anonymous"
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD login (user name) ###", $aSteamCMDLogin)
+	$aSteamCMDPassword = ""
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $aSteamCMDPassword)
+	$aSteamCMDUseAnonForUpdateCheck = "yes"
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $aSteamCMDUseAnonForUpdateCheck)
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -2103,7 +2115,7 @@ If $tStartedServersTF Then
 		ElseIf $tMB = -1 Then ; Timeout
 			If $aStartUtilMinimizedYN <> "yes" Then $aSplashStartUp = _Splash($aStartText, 0, 475)
 		ElseIf $tMB = 7 Then ; NO
-			Local $aMsg = "Grids not started much be disabled. Are you sure you wish to disable all grids?" & @CRLF & @CRLF & _
+			Local $aMsg = "Grids not started must be disabled. Are you sure you wish to disable all grids?" & @CRLF & @CRLF & _
 					"Click (YES) to DISABLE ALL SERVERS and continue utility." & @CRLF & _
 					"Click (NO) or (CANCEL) to exit utility."
 			$tMB1 = MsgBox($MB_YESNOCANCEL, $aUtilName, $aMsg)
@@ -2294,6 +2306,7 @@ If IniRead($aUtilCFGFile, "CFG", "aCFGOpenWindowAtStartup", "") = "BlackwoodWiza
 	WizardBlackwood()
 EndIf
 While True ;**** Loop Until Closed ****
+	$aBeginDelayedShutdown = IniRead($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 	$aSliderNow = GUICtrlRead($UpdateIntervalSlider)
 	If $aSliderNow <> $aSliderPrev Then
 		GUICtrlSetData($UpdateIntervalEdit, $aSliderNow)
@@ -2575,9 +2588,12 @@ While True ;**** Loop Until Closed ****
 					If $aBeginDelayedShutdown = 0 Then
 						LogWrite(" [" & $aServerName & "] " & $sRestart)
 						If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
-							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart")
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart,")
 ;~ 							$aRebootReason = "remoterestart"
-							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+							If $aBeginDelayedShutdown = 0 Then
+								$aBeginDelayedShutdown = 1
+								IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+							EndIf
 							$aTimeCheck0 = _NowCalc()
 						Else
 							RunExternalRemoteRestart()
@@ -2604,7 +2620,7 @@ While True ;**** Loop Until Closed ****
 				Next
 				If $tStuckGrids <> "" Then
 					$tStuckGrids = StringTrimRight($tStuckGrids, 1)
-					WriteRCONStartingStuck()
+					WriteRCONStartingStuck($tStuckGrids, $aMinutesBeforeStartingRCONWarning)
 					LogWrite(" [RCON] NOTICE!!! Grids (" & $tStuckGrids & ") had No RCON response in " & $aMinutesBeforeStartingRCONWarning & " minutes. See !!StuckGridsNotice(Starting...).txt")
 					$tStuckGridNoticeSent = True
 					MsgBox($MB_OK, $aUtilName, "NOTICE!!! Grids (" & $tStuckGrids & ") had No RCON response in " & $aMinutesBeforeStartingRCONWarning & " minutes. " & @CRLF & "See __STUCK_GRIDS_NOTICE__.txt for details.", 60)
@@ -2787,43 +2803,43 @@ While True ;**** Loop Until Closed ****
 							If $sUseDiscordBotServersUpYN = "yes" Then
 								Local $aAnnounceCount3 = 0
 								$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
-								If $aRebootReason = "remoterestart" And $sUseDiscordBotRemoteRestart = "yes" Then
+								If StringInStr($aRebootReason, "remoterestart") And $sUseDiscordBotRemoteRestart = "yes" Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "stopservers" And $sUseDiscordBotStopServer = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "stopservers") And $sUseDiscordBotStopServer = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "restartgrids" And $sUseDiscordBotStopServer = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "restartgrids") And $sUseDiscordBotStopServer = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "update" And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "update") And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "mod" And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "mods") And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "modlist" And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "modlist") And $sUseDiscordBotUpdate = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
-								If $aRebootReason = "daily" And $sUseDiscordBotDaily = "yes" And ($aAnnounceCount3 = 0) Then
+								If StringInStr($aRebootReason, "daily") And $sUseDiscordBotDaily = "yes" And ($aAnnounceCount3 = 0) Then
 									_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aAnnounceCount3 = $aAnnounceCount3 + 1
 								EndIf
 								If $xCustomRCONRebootNumber > -1 Then
-									If $aRebootReason = "custom" And $xEventAnnounceInGame[$xCustomRCONRebootNumber] <> "" And ($aAnnounceCount3 = 0) Then
+									If StringInStr($aRebootReason, "custom") And $xEventAnnounceInGame[$xCustomRCONRebootNumber] <> "" And ($aAnnounceCount3 = 0) Then
 										_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement sent . . .")
 										SendDiscordGeneralMsg($sDiscordServersUpMessage)
 										$aAnnounceCount3 = $aAnnounceCount3 + 1
@@ -2840,6 +2856,7 @@ While True ;**** Loop Until Closed ****
 									SendDiscordGeneralMsg($sDiscordServersUpMessage)
 									$aFirstStartDiscordAnnounce = False
 								EndIf
+								IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "NA")
 ;~ 								$aRebootReason = ""
 							Else
 								_Splash(" All servers online and ready for connection." & @CRLF & @CRLF & "Discord announcement NOT sent. Enable first announcement and/or daily, mod, update, remote restart annoucements in config if desired.", 0, 400, 200)
@@ -2894,8 +2911,12 @@ While True ;**** Loop Until Closed ****
 						SetStatusBusy("Server process check in progress...", "Check: Daily Restart")
 						LogWrite(" [" & $aServerName & "] Daily restart requested by " & $aUtilName & ".")
 						If $aDelayShutdownTime Not = 0 Then
-							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "daily")
+							If $aBeginDelayedShutdown = 0 Then
+								$aBeginDelayedShutdown = 1
+								IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+							EndIf
+
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "daily,")
 ;~ 							$aRebootReason = "daily"
 							;$aTimeCheck0 = _NowCalc()
 							$aTimeCheck2 = _NowCalc()
@@ -2968,9 +2989,12 @@ While True ;**** Loop Until Closed ****
 							Run($xEventFile[$i])
 						EndIf
 						If $xCustomRCONRestartYN[$i] = "yes" Then
-							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "Custom")
+							IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "Custom,")
 ;~ 							$aRebootReason = "Custom"
-							If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+							If $aBeginDelayedShutdown = 0 Then
+								$aBeginDelayedShutdown = 1
+								IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+							EndIf
 							$aTimeCheck0 = _NowCalc()
 							$xCustomRCONRebootNumber = $i
 						EndIf
@@ -3020,13 +3044,14 @@ While True ;**** Loop Until Closed ****
 				If $aBeginDelayedShutdown = 1 Then
 					SetStatusBusy("Server process check in progress...", "Check: Restart Due")
 					RunExternalScriptAnnounce()
-					If $aRebootReason = "daily" Then
+					If StringInStr($aRebootReason, "daily") Then
 						$aAnnounceCount0 = $aDailyCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						If $aAnnounceCount1 = 0 Then
 							;					$aDelayShutdownTime = $aDailyTime[$aAnnounceCount0]
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aDailyTime[$aAnnounceCount0] - $aDailyTime[$aAnnounceCount1]
 						EndIf
@@ -3034,7 +3059,7 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotDaily = "yes" Then SendDiscordGeneralMsg($aDailyMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotDaily = "yes" Then TwitchMsgLog($aDailyMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "remoterestart" Then
+					If StringInStr($aRebootReason, "remoterestart") Then
 						$aAnnounceCount0 = $aRemoteCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount0] - $aRemoteTime[$aAnnounceCount1] + 1
@@ -3042,6 +3067,7 @@ While True ;**** Loop Until Closed ****
 							;					$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount0]
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount0] - $aRemoteTime[$aAnnounceCount1]
 						EndIf
@@ -3049,13 +3075,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotRemoteRestart = "yes" Then SendDiscordGeneralMsg($aRemoteMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotRemoteRestart = "yes" Then TwitchMsgLog($aRemoteMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "stopservers" Then
+					If StringInStr($aRebootReason, "stopservers") Then
 						$aAnnounceCount0 = $aStopServerCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount0] - $aStopServerTime[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount0] - $aStopServerTime[$aAnnounceCount1]
 						EndIf
@@ -3063,13 +3090,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotStopServer = "yes" Then SendDiscordGeneralMsg($aStopServerMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotStopServer = "yes" Then TwitchMsgLog($aStopServerMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "restartgrids" Then
+					If StringInStr($aRebootReason, "restartgrids") Then
 						$aAnnounceCount0 = $aRestartGridsCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aRestartGridsTime[$aAnnounceCount0] - $aRestartGridsTime[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aRestartGridsTime[$aAnnounceCount0] - $aRestartGridsTime[$aAnnounceCount1]
 						EndIf
@@ -3077,13 +3105,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotRestartGrids = "yes" Then SendDiscordGeneralMsg($aRestartGridsMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotRestartGrids = "yes" Then TwitchMsgLog($aRestartGridsMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "update" Then
+					If StringInStr($aRebootReason, "update") Then
 						$aAnnounceCount0 = $aUpdateCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aUpdateTime[$aAnnounceCount0] - $aUpdateTime[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aUpdateTime[$aAnnounceCount0] - $aUpdateTime[$aAnnounceCount1]
 						EndIf
@@ -3091,13 +3120,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aUpdateMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aUpdateMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "mod" Then
+					If StringInStr($aRebootReason, "mods") Then
 						$aAnnounceCount0 = $aModCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aModTime[$aAnnounceCount0] - $aModTime[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aModTime[$aAnnounceCount0] - $aModTime[$aAnnounceCount1]
 						EndIf
@@ -3105,13 +3135,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "modlist" Then
+					If StringInStr($aRebootReason, "modlist") Then
 						$aAnnounceCount0 = $aModListCnt
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = $aModListTime[$aAnnounceCount0] - $aModListTime[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = $aModListTime[$aAnnounceCount0] - $aModListTime[$aAnnounceCount1]
 						EndIf
@@ -3119,13 +3150,14 @@ While True ;**** Loop Until Closed ****
 						If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModListMsgDiscord[$aAnnounceCount0])
 						If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModListMsgTwitch[$aAnnounceCount0])
 					EndIf
-					If $aRebootReason = "Custom" Then
+					If StringInStr($aRebootReason, "Custom") Then
 						$aAnnounceCount0 = $aCustomCnt[$xCustomRCONRebootNumber]
 						$aAnnounceCount1 = $aAnnounceCount0 - 1
 						$aDelayShutdownTime = ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount0] - ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount1] + 1
 						If $aAnnounceCount1 = 0 Then
 							$aDelayShutdownTime = 0
 							$aBeginDelayedShutdown = 3
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 						Else
 							$aDelayShutdownTime = ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount0] - ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount1]
 						EndIf
@@ -3134,27 +3166,29 @@ While True ;**** Loop Until Closed ****
 						If $xEventAnnounceTwitch[$xCustomRCONRebootNumber] <> "" Then TwitchMsgLog(($sCustomMsgTwitch[$xCustomRCONRebootNumber])[$aAnnounceCount0])
 					EndIf
 					$aBeginDelayedShutdown = 2
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 2)
 					$aTimeCheck0 = _NowCalc()
 
 				ElseIf ($aBeginDelayedShutdown > 2 And ((_DateDiff('n', $aTimeCheck0, _NowCalc())) >= $aDelayShutdownTime)) Then ; **** REBOOT SERVER ****
 					$aBeginDelayedShutdown = 0
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 					$aTimeCheck0 = _NowCalc()
-					If $aRebootReason = "daily" Then
+					If StringInStr($aRebootReason, "daily") Then
 						SplashTextOn($aUtilName & ": " & $aServerName, "Daily server requested. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
 						RunExternalScriptDaily()
 					EndIf
-					If $aRebootReason = "update" Then
+					If StringInStr($aRebootReason, "update") Then
 						SplashTextOn($aUtilName & ": " & $aServerName, "New server update. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
 						RunExternalScriptUpdate()
 					EndIf
-					If $aRebootReason = "remoterestart" Then
+					If StringInStr($aRebootReason, "remoterestart") Then
 						SplashTextOn($aUtilName & ": " & $aServerName, "Remote Restart requested. Restarting server . . .", 350, 50, -1, -1, $DLG_MOVEABLE, "")
 						RunExternalRemoteRestart()
 					EndIf
-					If $aRebootReason = "stopservers" Then
+					If StringInStr($aRebootReason, "stopservers") Then
 						SplashTextOn($aUtilName & ": " & $aServerName, "Stop Servers requested. " & @CRLF & "Shutting down " & $tSelectServersTxt & " servers.", 600, 80, -1, -1, $DLG_MOVEABLE, "")
 					EndIf
-					If $aRebootReason = "restartgrids" Then
+					If StringInStr($aRebootReason, "restartgrids") Then
 						SplashTextOn($aUtilName & ": " & $aServerName, "Restart grids requested. " & @CRLF & "Restarting grids " & $tSelectServersTxt & ".", 600, 80, -1, -1, $DLG_MOVEABLE, "")
 					EndIf
 					If $sInGameAnnounce = "yes" Then
@@ -3165,7 +3199,7 @@ While True ;**** Loop Until Closed ****
 					CloseServer()
 
 				ElseIf ($aBeginDelayedShutdown = 2) And (_DateDiff('n', $aTimeCheck0, _NowCalc()) >= $aDelayShutdownTime) Then ; **** REPEAT ANNOUNCEMENTS UNTIL LAST COUNT ***
-					If $aRebootReason = "daily" Then
+					If StringInStr($aRebootReason, "daily") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aDailyTime[$aAnnounceCount1] - $aDailyTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3181,7 +3215,7 @@ While True ;**** Loop Until Closed ****
 							If $aDailyTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aDailyMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "remoterestart" Then
+					If StringInStr($aRebootReason, "remoterestart") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aRemoteTime[$aAnnounceCount1] - $aRemoteTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3197,7 +3231,7 @@ While True ;**** Loop Until Closed ****
 							If $aRemoteTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aRemoteMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "stopservers" Then
+					If StringInStr($aRebootReason, "stopservers") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aStopServerTime[$aAnnounceCount1] - $aStopServerTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3213,7 +3247,7 @@ While True ;**** Loop Until Closed ****
 							If $aStopServerTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aStopServerMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "restartgrids" Then
+					If StringInStr($aRebootReason, "restartgrids") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aRestartGridsTime[$aAnnounceCount1] - $aRestartGridsTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3229,7 +3263,7 @@ While True ;**** Loop Until Closed ****
 							If $aRestartGridsTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aRestartGridsMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "update" Then
+					If StringInStr($aRebootReason, "update") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aUpdateTime[$aAnnounceCount1] - $aUpdateTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3245,7 +3279,7 @@ While True ;**** Loop Until Closed ****
 							If $aUpdateTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aUpdateMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "mod" Then
+					If StringInStr($aRebootReason, "mods") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aModTime[$aAnnounceCount1] - $aModTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3261,7 +3295,7 @@ While True ;**** Loop Until Closed ****
 							If $aModTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aModMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "modlist" Then
+					If StringInStr($aRebootReason, "modlist") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = $aModListTime[$aAnnounceCount1] - $aModListTime[($aAnnounceCount1 - 1)]
 						Else
@@ -3277,7 +3311,7 @@ While True ;**** Loop Until Closed ****
 							If $aModTime[($aAnnounceCount1)] > 0 Then TwitchMsgLog($aModListMsgTwitch[$aAnnounceCount1])
 						EndIf
 					EndIf
-					If $aRebootReason = "Custom" Then
+					If StringInStr($aRebootReason, "Custom") Then
 						If $aAnnounceCount1 > 1 Then
 							$aDelayShutdownTime = ($aCustomTime[$xCustomRCONRebootNumber])[$aAnnounceCount1] - ($aCustomTime[$xCustomRCONRebootNumber])[($aAnnounceCount1 - 1)]
 						Else
@@ -3297,49 +3331,50 @@ While True ;**** Loop Until Closed ****
 					$aAnnounceCount1 = $aAnnounceCount1 - 1
 					If $aAnnounceCount1 = 0 Then
 						$aBeginDelayedShutdown = 3
+						IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 3)
 					EndIf
 					$aTimeCheck0 = _NowCalc()
 				EndIf
 			ElseIf $aBeginDelayedShutdown > 0 Then ; No Online players restart requested
 				_Splash($aGameName & " server shut down or reboot requested." & @CRLF & @CRLF & "No players on LOCAL grids, so skipping countdown announcements.", 4000)
-				If $aRebootReason = "daily" Then
+				If StringInStr($aRebootReason, "daily") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting for Daily Restart. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotDaily = "yes" Then SendDiscordGeneralMsg($sDiscordDailyZeroMessage)
 					If $sUseTwitchBotDaily = "yes" Then TwitchMsgLog($sTwitchDailyZeroMessage)
 				EndIf
-				If $aRebootReason = "remoterestart" Then
+				If StringInStr($aRebootReason, "remoterestart") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting for Remote Restart. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotRemoteRestart = "yes" Then SendDiscordGeneralMsg($sDiscordRemoteRestartZeroMessage)
 					If $sUseTwitchBotRemoteRestart = "yes" Then TwitchMsgLog($sTwitchRemoteRestartZeroMessage)
 				EndIf
-				If $aRebootReason = "stopservers" Then
+				If StringInStr($aRebootReason, "stopservers") Then
 					LogWrite(" [" & $aServerName & "] Server(s) stopping due to Stop Servers request. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotStopServer = "yes" Then SendDiscordGeneralMsg($aDiscordStopGridsZeroMessage)
 					If $sUseTwitchBotStopServer = "yes" Then TwitchMsgLog($tSelectServersTxt & " " & $sTwitchStopServerZeroMessage)
 				EndIf
-				If $aRebootReason = "restartgrids" Then
+				If StringInStr($aRebootReason, "restartgrids") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting die to Restart Grid request. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotRestartGrids = "yes" Then SendDiscordGeneralMsg($aDiscordRestartGridsZeroMessage)
 					If $sUseTwitchBotRestartGrids = "yes" Then TwitchMsgLog($aTwitchRestartGridsZeroMessage)
 				EndIf
-				If $aRebootReason = "update" Then
+				If StringInStr($aRebootReason, "update") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting for game update. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($sDiscordUpdateZeroMessage)
 					If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($sTwitchUpdateZeroMessage)
 				EndIf
-				If $aRebootReason = "mod" Then
+				If StringInStr($aRebootReason, "mods") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting for Mod Update. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModZeroMsgDiscord)
 					If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModZeroMsgTwitch)
-					LogWrite(" [Mod] Mods are Up to Date.")
+;~ 					LogWrite(" [Mod] Mods are Up to Date.")
 					IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "no")
 				EndIf
-				If $aRebootReason = "modlist" Then
+				If StringInStr($aRebootReason, "modlist") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting due to Mod List update. No players on LOCAL grids, so skipping countdown announcements.")
 					If $sUseDiscordBotUpdate = "yes" Then SendDiscordGeneralMsg($aModListZeroMsgDiscord)
 					If $sUseTwitchBotUpdate = "yes" Then TwitchMsgLog($aModListZeroMsgTwitch)
 				EndIf
-				If $aRebootReason = "Custom" Then
+				If StringInStr($aRebootReason, "Custom") Then
 					LogWrite(" [" & $aServerName & "] Server(s) restarting for Custom reason. No players on LOCAL grids, so skipping countdown announcements.")
 					If $xEventAnnounceDiscord[$xCustomRCONRebootNumber] <> "" And ($sUseDiscordBotFirstAnnouncement = "no") Then SendDiscordGeneralMsg(AnnounceReplaceTime(0, $sCustomMsgDiscord, True))
 					If $xEventAnnounceTwitch[$xCustomRCONRebootNumber] <> "" And ($sUseTwitchFirstAnnouncement = "no") Then TwitchMsgLog(AnnounceReplaceTime(0, $sCustomMsgTwitch, True))
@@ -3347,9 +3382,11 @@ While True ;**** Loop Until Closed ****
 ;~ 				IniWrite($aUtilCFGFile, "CFG", "aCFGLastRestartTime", _NowCalc())
 				CloseServer()
 				$aBeginDelayedShutdown = 0
+				IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 			EndIf
 		Else
 			$aBeginDelayedShutdown = 0
+			IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 		EndIf
 		#EndRegion ;**** Announce to Twitch, In Game, Discord ****
 		If WinExists("AtlasGame", "stopped working") Then
@@ -3727,11 +3764,13 @@ Func GUI_Main_B_CancelRestart()
 				$tResponse = _SendInGameMessage($tMsg, "local")
 				SendDiscordGeneralMsg($tMsg)
 				$aBeginDelayedShutdown = 0
+				IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 				$aTimeCheck0 = _NowCalc()
 				_Splash("Server Restart Cancelled.", 2000)
 			ElseIf $tMB = 7 Then ; NO
 				$tResponse = _SendInGameMessage($tMsg, "local")
 				$aBeginDelayedShutdown = 0
+				IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 				$aTimeCheck0 = _NowCalc()
 				_Splash("Server Restart Cancelled.", 2000)
 			Else
@@ -3739,6 +3778,7 @@ Func GUI_Main_B_CancelRestart()
 			EndIf
 		ElseIf $tMB = 7 Then ; NO
 			$aBeginDelayedShutdown = 0
+			IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 0)
 			$aTimeCheck0 = _NowCalc()
 			_Splash("Server Restart Cancelled.", 2000)
 		Else
@@ -4250,6 +4290,9 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $aServerMultiHomeIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $iniCheck)
 	;	Global $aSteamCMDDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $iniCheck)
 	Global $aSteamExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $iniCheck)
+	Global $aSteamCMDLogin = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD login (user name) ###", $iniCheck)
+	Global $aSteamCMDPassword = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $iniCheck)
+	Global $aSteamCMDUseAnonForUpdateCheck = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $iniCheck)
 	;Global $aServerSaveDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name ###", $iniCheck)
 	Global $aServerMinimizedYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $iniCheck)
 	Global $aServerAdminPass = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
@@ -4544,6 +4587,7 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $aServerStatusLabelsAnnounce = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Server status labels Announcements (Comma separated. Default:Starting,Ready,CRASHED,Offline,Disabled,Poll Off,No Response) ###", $iniCheck)
 	;	Global $aDebug = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $iniCheck)
 	Global $aRCONResponseWaitms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $iniCheck)
+	Global $aRCONDelayms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Delay between sending RCON commands in milliseconds (to prevent memory errors due to multiple mcrcon.exe instances) (0-1000) ###", $iniCheck)
 	Global $aOnlinePlayerWaitms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $iniCheck)
 	Global $aMainGUIRefreshTime = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $iniCheck)
 
@@ -4571,6 +4615,21 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$aSteamExtraCMD = ""
 		$iIniFail += 1
 		$iIniError = $iIniError & "SteamExtraCMD, "
+	EndIf
+	If $iniCheck = $aSteamCMDLogin Then
+		$aSteamCMDLogin = "anonymous"
+		$iIniFail += 1
+		$iIniError = $iIniError & "SteamCMDLogin, "
+	EndIf
+	If $iniCheck = $aSteamCMDPassword Then
+		$aSteamCMDPassword = ""
+		$iIniFail += 1
+		$iIniError = $iIniError & "SteamCMDPassword, "
+	EndIf
+	If $iniCheck = $aSteamCMDUseAnonForUpdateCheck Then
+		$aSteamCMDUseAnonForUpdateCheck = "yes"
+		$iIniFail += 1
+		$iIniError = $iIniError & "SteamCMDUseAnonForUpdateCheck, "
 	EndIf
 	;	If $iniCheck = $aSteamCMDDir Then
 	;		$aSteamCMDDir = "D:\Game Servers\" & $aGameName & " Dedicated Server\SteamCMD"
@@ -5978,6 +6037,15 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	ElseIf $aRCONResponseWaitms > 3000 Then
 		$aRCONResponseWaitms = 3000
 	EndIf
+	If $iniCheck = $aRCONDelayms Then
+		$aRCONDelayms = 50
+		$iIniFail += 1
+		$iIniError = $iIniError & "RCONDelayms, "
+	ElseIf $aRCONDelayms < 0 Then
+		$aRCONDelayms = 0
+	ElseIf $aRCONDelayms > 1000 Then
+		$aRCONDelayms = 1000
+	EndIf
 	If $iniCheck = $aOnlinePlayerWaitms Then
 		$aOnlinePlayerWaitms = 1500
 		$iIniFail += 1
@@ -6238,6 +6306,9 @@ Func UpdateIni($aIniFile)
 	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental)", $aServerVer)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD login (user name) ###", $aSteamCMDLogin)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $aSteamCMDPassword)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $aSteamCMDUseAnonForUpdateCheck)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $aServerMultiHomeIP)
 	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start " & $aUtilName & " with Windows? (yes/no) ###", $aStartWithWindowsYN)
@@ -6536,6 +6607,7 @@ Func UpdateIni($aIniFile)
 	;	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Enable debug to output more log detail? (yes/no) ###", $aDebug)
 	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for RCON response in milliseconds (100-3000) ###", $aRCONResponseWaitms)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Delay between sending RCON commands in milliseconds (to prevent memory errors due to multiple mcrcon.exe instances) (0-1000) ###", $aRCONDelayms)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $aOnlinePlayerWaitms)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $aMainGUIRefreshTime)
 EndFunc   ;==>UpdateIni
@@ -7002,11 +7074,11 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 	Else
 		If $aServerMapName = "Blackwood" Then $tServNo = 0
 		$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
-		If $aRebootReason = "stopservers" Then
+		If StringInStr($aRebootReason, "stopservers") Then
 			$tDisableServer = True
 			If $aSelectServers Then $tServNo = $xGridsToClose
 		EndIf
-		If $aRebootReason = "restartgrids" Then $tServNo = $xGridsToRestart
+		If StringInStr($aRebootReason, "restartgrids") Then $tServNo = $xGridsToRestart
 	EndIf
 	Local $aErrorShutdownTF = False
 	If $tSkipServerReadyAnnouncement = True Then
@@ -7154,7 +7226,7 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 	Next
 	If $aSteamUpdateNow Then SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $aValidate)
 	$aRebootReason = IniRead($aUtilCFGFile, "CFG", "aRebootReason", "NA")
-	If $aRebootReason = "mod" Then
+	If StringInStr($aRebootReason, "mods") Then
 		Local $tModIDsToUpdate = IniRead($aUtilCFGFile, "CFG", "xModIDsToUpdate", "Mods To Update")
 		Local $tModNamesToUpdate = IniRead($aUtilCFGFile, "CFG", "xModNamesToUpdate", "Mods To Update")
 		Local $xModIDsToUpdate = StringSplit($tModIDsToUpdate, "|", 2)
@@ -7162,11 +7234,13 @@ Func CloseServer($tCloseRedisTF = False, $tDisableServer = False, $tSkipServerRe
 		For $i = 1 To (UBound($xModIDsToUpdate) - 1)
 			UpdateMod($xModIDsToUpdate[$i], $xModNamesToUpdate[$i])
 		Next
+		IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "no")
 		IniWrite($aUtilCFGFile, "CFG", "xModsToUpdate", "Mods To Update")
 		IniWrite($aUtilCFGFile, "CFG", "xModIDsToUpdate", "Mods To Update")
 		IniWrite($aUtilCFGFile, "CFG", "xModNamesToUpdate", "Mods To Update")
 	EndIf
 	$aSelectServers = False
+	IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "NA")
 ;~ 	$aRebootReason = ""
 	SplashOff()
 ;~ 	GUIUpdateQuick()
@@ -7564,9 +7638,12 @@ Func CheckModList($tSplash = 0)
 				$aModListZeroMsgInGame = StringReplace($aModListZeroMsgInGame, "\m", "0")
 				$aModListZeroMsgTwitch = StringReplace($sTwitchModListUpdateMessage, "\i", $tModsUpdated)
 				$aModListZeroMsgTwitch = StringReplace($aModListZeroMsgTwitch, "\m", "0")
-				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "modlist")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "modlist,")
 ;~ 				$aRebootReason = "modlist"
-				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+				If $aBeginDelayedShutdown = 0 Then
+					$aBeginDelayedShutdown = 1
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+				EndIf
 				RunExternalScriptMod()
 				LogWrite(" [Mod] ModID list changed in " & $aConfigFile & " file. " & $tModsUpdated & ". Restarting " & $aGameName & " Servers to implement changes." & $tTxt1)
 				If $tSplash = 0 Then
@@ -8275,7 +8352,9 @@ Func SendInGame($mMessage)
 				Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xRCONIP[$ti] & ' -P ' & $xServerRCONPort[$ti + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 			EndIf
 			LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($ti, $aNamingScheme) & ") " & $aMCRCONcmd)
+			Sleep($aRCONDelayms)
 			Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
+;~ 			MsgBox(0,"Kim",$aRCONDelayms) ;kim125er!
 		Next
 	Else
 		For $i = 0 To ($aServerGridTotal - 1)
@@ -8286,7 +8365,9 @@ Func SendInGame($mMessage)
 					Local $aMCRCONcmd = @ScriptDir & '\mcrcon.exe -c -s -H ' & $xRCONIP[$i] & ' -P ' & $xServerRCONPort[$i + 1] & ' -p ' & $aTelnetPass & " """ & $aRCONBroadcastCMD & " " & $mMessage & """"
 				EndIf
 				LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") " & $aMCRCONcmd)
+				Sleep($aRCONDelayms)
 				Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
+;~ 				MsgBox(0,"Kim",$aRCONDelayms) ;kim125er!
 			EndIf
 		Next
 	EndIf
@@ -8306,6 +8387,7 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 	EndIf
 	Local $aMCRCONcmd = '"' & @ScriptDir & '\mcrcon.exe" -c -H ' & $mIP & ' -P ' & $mPort & ' -p ' & $mPass & ' "' & $mCommand & '"'
 	If $mWaitms > 0 Then
+		Sleep($aRCONDelayms)
 		Local $mOut = Run($aMCRCONcmd, @ScriptDir, @SW_HIDE, $STDOUT_CHILD)
 		Local $tTimer1 = TimerInit()
 		Local $tExit = False
@@ -8328,7 +8410,6 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 		Else
 			LogWrite("", " [RCON] " & $aMCRCONcmd & ", Response:" & ReplaceCRLF($tcrcatch))
 		EndIf
-;~ 		EndIf
 		Return $tcrcatch
 	Else
 		Local $mOut = Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
@@ -8343,6 +8424,7 @@ Func SendRCON($mIP, $mPort, $mPass, $mCommand, $mLogYN = "yes", $mWaitms = 1500)
 		EndIf
 		Return "Did not wait for response."
 	EndIf
+	Sleep($aRCONDelayms)
 EndFunc   ;==>SendRCON
 #EndRegion ;**** Send RCON Command via MCRCON ****
 
@@ -8437,8 +8519,11 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 						$aUpdateVerify = "yes"
 						RunExternalScriptUpdate()
 						$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
-						If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update")
+						If $aBeginDelayedShutdown = 0 Then
+							$aBeginDelayedShutdown = 1
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+						EndIf
+						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update,")
 ;~ 						$aRebootReason = "update"
 					Else
 						_Splash("Utility update check canceled by user." & @CRLF & "Resuming utility . . .")
@@ -8459,8 +8544,11 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 					RunExternalScriptUpdate()
 					$TimeStamp = StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_")
 					If ($sUseDiscordBotDaily = "yes") Or ($sUseDiscordBotUpdate = "yes") Or ($sUseTwitchBotDaily = "yes") Or ($sUseTwitchBotUpdate = "yes") Or ($sInGameAnnounce = "yes") Then
-						If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
-						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update")
+						If $aBeginDelayedShutdown = 0 Then
+							$aBeginDelayedShutdown = 1
+							IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+						EndIf
+						IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "update,")
 ;~ 						$aRebootReason = "update"
 					Else
 						SteamcmdDelete($aSteamCMDDir)
@@ -8552,7 +8640,21 @@ Func GetLatestVerSteamDB($bSteamAppID, $bServerVer)
 	$aReturn[1] = $hBuildID
 	Return $aReturn
 EndFunc   ;==>GetLatestVerSteamDB
+Func SteamCMDScriptCreate($tType = "app_info_print")
+	$tSteamScript = $aFolderTemp & "SteamCMDScript.txt"
+	If $tType = "app_info_print" Then
+		Local $tCMDLine = "login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & @CRLF & _
+				"app_info_update 1" & @CRLF & _
+				"app_info_print " & $aSteamAppID & @CRLF & _
+				"app_info_print " & $aSteamAppID & @CRLF & _
+				"app_info_print " & $aSteamAppID & @CRLF & _
+				"exit"
+	ElseIf $tType = "" Then
 
+	EndIf
+	If FileExists($tSteamScript) Then FileDelete($tSteamScript)
+	FileWrite($tSteamScript, $tCMDLine)
+EndFunc   ;==>SteamCMDScriptCreate
 Func GetLatestVersion($sCmdDir)
 	$hBuildID = "0"
 	Local $aReturn[2] = [False, ""]
@@ -8562,7 +8664,12 @@ Func GetLatestVersion($sCmdDir)
 		FileDelete($tLastSteamCMDAppInfoFile)
 	EndIf
 	Local $sAppInfoTemp = "app_info_" & StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_") & ".tmp"
-	$aSteamUpdateCheck = '"' & @ComSpec & '" /c "' & $sCmdDir & "\steamcmd.exe"" +login anonymous +app_info_update 1 +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +exit > " & $sAppInfoTemp
+	If $aSteamCMDUseAnonForUpdateCheck = "yes" Or $aSteamCMDLogin = "anonymous" Then
+		$aSteamUpdateCheck = '"' & @ComSpec & '" /c "' & $sCmdDir & "\steamcmd.exe"" +login anonymous +app_info_update 1 +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +exit > " & $sAppInfoTemp
+	Else
+		$aSteamUpdateCheck = '"' & @ComSpec & '" /c "' & $sCmdDir & "\steamcmd.exe"" +login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & _
+				" +app_info_update 1 +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +exit > " & $sAppInfoTemp
+	EndIf
 	$Timer = TimerInit()
 	; -------------------
 	LogWrite("", " [Update] Getting latest buildID: " & $aSteamUpdateCheck)
@@ -9098,7 +9205,7 @@ Func ExternalScriptExist()
 	Local $sFileExists = FileExists($aBatFolder & "\" & $aBatUpdateGame)
 	If $sFileExists = 0 Then
 		Local $tTxt = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
-				"+login anonymous ^" & @CRLF & _
+				"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 				"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 				"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 				"+quit"
@@ -10010,7 +10117,7 @@ EndFunc   ;==>_DownloadAndExtractFile
 ;EndFunc
 
 #Region ;**** Functions to Check for Mod Updates ****
-Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False, $tForceModUpdateInstallTF = False, $tFirstRunTF = False)
+Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False, $tForceModUpdateInstallTF = False, $tFirstRunTF = False) ;kim125er!
 	If $sMods <> "" Then
 		Global $aModsShowUpToDateLogYN = "yes"
 		Local $xError = False
@@ -10078,11 +10185,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 ;~ 				ElseIf Not $aInstalledTime[0] Then
 						If Not $aInstalledTime[0] Then
 							IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
+							$xError = True
+							$tError = 2
 							If $aServerModDoNotInstallYN = "yes" And $tForceModUpdateInstallTF = False Then
 								ModUpdateNotInstall($aMods[$i], $aModName[$i])
 							Else
-								$xError = True
-								$tError = 2
 ;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest. Download First Mod
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
@@ -10091,11 +10198,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 							EndIf
 						ElseIf Not $aInstalledTime[1] Then
 							IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
+							$xError = True
+							$tError = 3
 							If $aServerModDoNotInstallYN = "yes" And $tForceModUpdateInstallTF = False Then
 								ModUpdateNotInstall($aMods[$i], $aModName[$i])
 							Else
-								$xError = True
-								$tError = 3
 ;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod does not exists. Download
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
@@ -10104,11 +10211,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 							EndIf
 						ElseIf $aInstalledTime[1] And (StringCompare($aLatestTime[2], $aInstalledTime[2]) <> 0) Then
 							IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
+							$xError = True
+							$tError = 4
 							If $aServerModDoNotInstallYN = "yes" And $tForceModUpdateInstallTF = False Then
 								ModUpdateNotInstall($aMods[$i], $aModName[$i])
 							Else
-								$tError = 4
-								$xError = True
 ;~ 								$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;Mod Out of Date. Update.
 								$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 								_ArrayAdd($xModsToUpdate, $i)
@@ -10118,11 +10225,11 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 						EndIf
 					Else
 						IniWrite($aUtilCFGFile, "CFG", "aModUpdateAvailableYN", "yes")
+						$xError = True
+						$tError = 2
 						If $aServerModDoNotInstallYN = "yes" And $tForceModUpdateInstallTF = False Then
 							ModUpdateNotInstall($aMods[$i], $aModName[$i])
 						Else
-							$xError = True
-							$tError = 2
 ;~ 							$bStopUpdate = UpdateMod($aMods[$i], $aModName[$i], $sSteamCmdDir, $sServerDir, $tError, $i)     ;No Manifest exist in Atlas Mods folder. Download First Mod
 							$tModsUpdated &= $aMods[$i] & " " & $aModName[$i] & ", "
 							_ArrayAdd($xModsToUpdate, $i)
@@ -10152,10 +10259,13 @@ Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = F
 ;~ 				LogWrite(" [Mod] " & $aErrorMsg)
 			ElseIf $aServerModDoNotInstallYN <> "yes" Or $tForceModUpdateInstallTF Then
 				LogWrite(" [Mod] New Mod(s) Update. Preparing for server restart.")
-				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "mod")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "mods,")
 ;~ 				$aRebootReason = "mod"
 				$aTimeCheck0 = _NowCalc()
-				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+				If $aBeginDelayedShutdown = 0 Then
+					$aBeginDelayedShutdown = 1
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+				EndIf
 				RunExternalScriptMod()
 			EndIf
 			If $tShow And $xError Then
@@ -11233,9 +11343,12 @@ Func F_RemoteRestart()
 			If $aBeginDelayedShutdown = 0 Then
 				LogWrite(" [Remote Restart] Remote Restart request initiated by user.")
 				If ($sUseDiscordBotRemoteRestart = "yes") Or ($sUseTwitchBotRemoteRestart = "yes") Or ($sInGameAnnounce = "yes") Then
-					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart"
+					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "remoterestart,")
 ;~ 					$aRebootReason = "remoterestart"
-					If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+					If $aBeginDelayedShutdown = 0 Then
+						$aBeginDelayedShutdown = 1
+						IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+					EndIf
 					$aTimeCheck0 = _NowCalc()
 				Else
 					RunExternalRemoteRestart()
@@ -11666,19 +11779,14 @@ Func R1_B_RestartGrids()
 		$sTwitchRestartGridsMessage = GUICtrlRead($R1_I1_MsgLaterCustom)
 		$aRestartGridsTime = StringSplit($sAnnounceNotifyRestartGrids, ",")
 		$aRestartGridsCnt = Int($aRestartGridsTime[0])
-;~ 		MsgBox(0,"Kima", "[" & $sInGameRestartGridsMessage & "]" & @CRLF & "[" & $sAnnounceNotifyRestartGrids & "]") ;kim125er!
 	ElseIf (GUICtrlRead($R1_R4_MsgNowCustom) = $GUI_CHECKED) And (GUICtrlRead($R1_R1_RestartNow) = $GUI_CHECKED) Then
 		$sDiscordRestartGridsZeroMessage = GUICtrlRead($R1_I2_MsgNowCustom)
 		$sTwitchRestartGridsZeroMessage = GUICtrlRead($R1_I2_MsgNowCustom)
 	EndIf
 	$aRestartGridsMsgInGame = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sInGameRestartGridsMessage)
-;~ 	_ArrayDisplay($aRestartGridsMsgInGame) ;kim125er!
-;~ 	MsgBox(0,"Kimb", "[" & _ArrayToString($aRestartGridsMsgInGame) & "]") ;kim125er!
 	$aRestartGridsMsgDiscord = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sDiscordRestartGridsMessage)
 	$aRestartGridsMsgTwitch = AnnounceReplaceTime($sAnnounceNotifyRestartGrids, $sTwitchRestartGridsMessage)
 	$aRestartGridsMsgInGame = AnnounceReplaceG_Grid($aRestartGridsMsgInGame, $tSelectServersTxt)
-;~ 	_ArrayDisplay($aRestartGridsMsgInGame) ;kim125er!
-;~ 	MsgBox(0,"Kimc", "[" & _ArrayToString($aRestartGridsMsgInGame) & "]") ;kim125er!
 	$aRestartGridsMsgDiscord = AnnounceReplaceG_Grid($aRestartGridsMsgDiscord, $tSelectServersTxt)
 	$aRestartGridsMsgTwitch = AnnounceReplaceG_Grid($aRestartGridsMsgTwitch, $tSelectServersTxt)
 	$aDiscordRestartGridsZeroMessage = StringRegExpReplace($sDiscordRestartGridsZeroMessage, "\\g", $tSelectServersTxt)
@@ -11693,9 +11801,12 @@ Func R1_B_RestartGrids()
 			If ($sUseDiscordBotRestartGrids = "yes") Or ($sUseTwitchBotRestartGrids = "yes") Or ($sInGameAnnounce = "yes") Then
 				If GUICtrlRead($R1_R2_SendToAll) = $GUI_CHECKED Then $aAnnounceAllorSelect = "all"
 				If GUICtrlRead($R1_R2_SendToAll) = $GUI_UNCHECKED Then $aAnnounceAllorSelect = "select"
-				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids,")
 ;~ 				$aRebootReason = "restartgrids"
-				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+				If $aBeginDelayedShutdown = 0 Then
+					$aBeginDelayedShutdown = 1
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+				EndIf
 				$aTimeCheck0 = _NowCalc()
 				GUI_R1_RestartGrids_Close()
 				_Splash("Restart grid(s) (" & $tSelectServersTxt & ")" & @CRLF & "with announcements initiated.", 2000)
@@ -11712,7 +11823,7 @@ Func R1_B_RestartGrids()
 		EndIf
 	ElseIf GUICtrlRead($R1_R1_RestartNow) = $GUI_CHECKED Then
 		LogWrite(" [" & $aServerName & "] Restart grid(s) NOW with announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids,")
 ;~ 		$aRebootReason = "restartgrids"
 		If GUICtrlRead($R1_R2_SendToAll) = $GUI_CHECKED Then
 			$aAnnounceAllorSelect = "all"
@@ -11736,7 +11847,7 @@ Func R1_B_RestartGrids()
 		GUIUpdateQuick()
 	Else
 		LogWrite(" [" & $aServerName & "] Restart grid(s) NOW with NO announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids")
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "restartgrids,")
 ;~ 		$aRebootReason = "restartgrids"
 		GUI_R1_RestartGrids_Close()
 		CloseServer()
@@ -12058,10 +12169,13 @@ Func S1_B_StopGrids()
 			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
 				If GUICtrlRead($S1_R2_SendToAll) = $GUI_CHECKED Then $aAnnounceAllorSelect = "all"
 				If GUICtrlRead($S1_R2_SendToAll) = $GUI_UNCHECKED Then $aAnnounceAllorSelect = "select"
-				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers,")
 ;~ 				$aRebootReason = "stopservers"
 				$aSelectServers = True
-				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+				If $aBeginDelayedShutdown = 0 Then
+					$aBeginDelayedShutdown = 1
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+				EndIf
 				$aTimeCheck0 = _NowCalc()
 				GUI_S1_StopGrids_Close()
 				_Splash("Stop grid(s) (" & $tSelectServersTxt & ")" & @CRLF & "with announcements initiated.", 2000)
@@ -12077,7 +12191,7 @@ Func S1_B_StopGrids()
 		EndIf
 	ElseIf GUICtrlRead($S1_S1_StopNow) = $GUI_CHECKED Then
 		LogWrite(" [" & $aServerName & "] Stop grid(s) NOW with announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers,")
 ;~ 		$aRebootReason = "stopservers"
 		If GUICtrlRead($S1_R2_SendToAll) = $GUI_CHECKED Then
 			$aAnnounceAllorSelect = "all"
@@ -12101,7 +12215,7 @@ Func S1_B_StopGrids()
 		GUIUpdateQuick()
 	Else
 		LogWrite(" [" & $aServerName & "] Stop grid(s) NOW with NO announcement initiated by user. Grids: (" & $tSelectServersTxt & ")")
-		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+		IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers,")
 ;~ 		$aRebootReason = "stopservers"
 		GUI_S1_StopGrids_Close()
 		CloseServer(False, True, False, $xGridsToClose) ; TF Close redis | TF Disable servers | TF Skip "All Servers Online" Announcement | Grids to close
@@ -12172,9 +12286,12 @@ Func F_StopServer()
 				EndIf
 			EndIf
 			If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
-				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+				IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers,")
 ;~ 				$aRebootReason = "stopservers"
-				If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+				If $aBeginDelayedShutdown = 0 Then
+					$aBeginDelayedShutdown = 1
+					IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+				EndIf
 				$aTimeCheck0 = _NowCalc()
 				_Splash("Stop Server with announcements initiated.", 2000)
 			Else
@@ -12677,10 +12794,13 @@ Func SelectServersStop($tServNo = -1, $tAskTF = True, $tDisableGridTF = True)
 					EndIf
 				EndIf
 				If ($sUseDiscordBotStopServer = "yes") Or ($sUseTwitchBotStopServer = "yes") Or ($sInGameAnnounce = "yes") Then
-					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers")
+					IniWrite($aUtilCFGFile, "CFG", "aRebootReason", "stopservers,")
 ;~ 					$aRebootReason = "stopservers"
 					$aSelectServers = True
-					If $aBeginDelayedShutdown = 0 Then $aBeginDelayedShutdown = 1
+					If $aBeginDelayedShutdown = 0 Then
+						$aBeginDelayedShutdown = 1
+						IniWrite($aUtilCFGFile, "CFG", "aBeginDelayedShutdown", 1)
+					EndIf
 					$aTimeCheck0 = _NowCalc()
 					_Splash("Stop Server with announcements initiated.", 2000)
 				Else
@@ -13223,12 +13343,12 @@ Func BatchFilesCreate($tSplash = 0, $tFolder = "0")
 ;~ 	DirRemove($tFolder, 1)
 	DirCreate($tFolder)
 	Local $tTxtValY = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login anonymous ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 			"+quit"
 	Local $tTxtValN = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login anonymous ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " ^" & @CRLF & _
 			"+quit"
@@ -13257,7 +13377,7 @@ EndFunc   ;==>BatchFilesCreate
 
 Func SteamInstallGame($tSplash)
 	Local $tTxt = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login anonymous ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 			"+quit"
@@ -13289,7 +13409,8 @@ EndFunc   ;==>SteamInstallGame
 Func SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $tValidateINI, $tSplash = 0)
 	If $tSplash = 0 Then SplashOff()
 	$aSteamUpdateNow = False
-	$aSteamEXE = $aSteamCMDDir & "\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 " & $aSteamExtraCMD & "+login anonymous +force_install_dir """ & $aServerDirLocal & """ +app_update " & $aSteamAppID
+	$aSteamEXE = $aSteamCMDDir & "\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 " & $aSteamExtraCMD & "+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & _
+			" +force_install_dir """ & $aServerDirLocal & """ +app_update " & $aSteamAppID
 	If ($tValidateINI = "yes") Or ($aUpdateVerify = "yes") Then
 		$aSteamEXE = $aSteamEXE & " validate"
 	EndIf
@@ -13488,10 +13609,26 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 							$xServerPlayerSteamNames[$i] = $tUserAll
 							$xServerPlayerSteamID[$i] = $tSteamAll
 							If UBound($tSteamAll) <> UBound($tUserAll) Then ReDim $tSteamAll[$tUserAll]
-							For $x = 0 To (UBound($tUserAll) - 1)
-								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
-								_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
-							Next
+							If UBound($tSteamAll) > 0 Then
+								For $x = 0 To (UBound($tSteamAll) - 1)
+									_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x]) ;kim125er!
+								Next
+							Else
+								Local $tSteamAll[1]
+								$tSteamAll[0] = "1234567890"
+							EndIf
+							If UBound($tUserAll) > 0 Then
+								For $x = 0 To (UBound($tUserAll) - 1)
+									_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
+								Next
+							Else
+								Local $tUserAll[1]
+								$tUserAll[0] = "User"
+							EndIf
+;~ 							For $x = 0 To (UBound($tUserAll) - 1)
+;~ 								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
+;~ 								_ArrayAdd($xPlayeRawOnlineSteamName, $tUserAll[$x])
+;~ 							Next
 							Local $tUsers = RemoveSpecialChars(_ArrayToString($tUserAll))
 							If $tUsers < 0 Then
 								$xServerPlayerCount[$i] = -2
@@ -13729,7 +13866,11 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 	EndIf
 	Local $tTimer2Diff = TimerDiff($tTimer2)
 	For $i = 0 To ($aServerGridTotal - 1)
-		$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i])
+		If UBound($xGridRCONLastReply) >= $i + 1 Then
+			$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i]) ;kim125er!
+		Else
+			_ArrayAdd($xGridRCONLastReply, _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i]))
+		EndIf
 		Local $tDiff = _DateDiff('s', $xGridRCONLastReply[$i], _NowCalc())
 		If $tDiff < 0 Then $xGridRCONLastReply[$i] = _NowCalc()
 	Next
@@ -23021,7 +23162,7 @@ Func _BlackwoodDefaultGUS($tCopyToGUSTF = True, $tOnlyCopyIfDoesNotExistTF = Fal
 	_FileWriteFromArray($tFile, $xArray)
 EndFunc   ;==>_BlackwoodDefaultGUS
 
-Func WriteRCONStartingStuck()
+Func WriteRCONStartingStuck($tGrd, $tMin)
 	Local $xArray[34]
 	$xArray[0] = _NowCalc & ' AtlasServerUpdateUtility ATTENTION!'
 	$xArray[1] = ''
@@ -25041,7 +25182,7 @@ Func _GUIListViewEx_Globals()
 	; #GLOBAL VARIABLES# =================================================================================================
 	; Array to hold registered ListView data
 	Global $aGLVEx_Data[1][26] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-			 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
+			 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, "08"]]
 	; [0][0]  = ListView Count      [n][0]  = ListView handle
 	; [0][1]  = Active Index        [n][1]  = Native ListView ControlID / 0
 	; [0][2]  = Active Column       [n][2]  = Shadow array
@@ -25375,7 +25516,7 @@ Func _GUIListViewEx_Close($iLV_Index = 0)
 		; Reinitialise data array - retaining selected edit key
 		$iEditKeyCode = $aGLVEx_Data[0][23]
 		Global $aGLVEx_Data[1][UBound($aGLVEx_Data, 2)] = [[0, 0, -1, "", -1, -1, -1, -1, _WinAPI_GetSystemMetrics(2), False, _
-				 - 1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
+				 -1, -1, False, "", 0, True, 0, -1, -1, 0, 0, 0, 0, $iEditKeyCode]]
 		; Note delimiter character reset when ListView next initialised
 	Else
 		; Reset all data for ListView
