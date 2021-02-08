@@ -1,4 +1,6 @@
-v2.3.6^v2.3.6 Bug Fixes. Added RCON delay and steamcmd credentials.
+v2.3.7^v2.3.7 Fixed Wrong Filename
+
+v2.3.6 Bug Fixes. Added RCON delay and steamcmd credentials.
 - Fixed: Line 46569 & 46779 Errors.
 - Fixed: Multiple restarts after a mod update.
 - Fixed: (Maybe!) mod updates failing for some users.

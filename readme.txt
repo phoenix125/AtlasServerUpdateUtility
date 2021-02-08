@@ -282,6 +282,8 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.7 (2021-02-07) Fixed the AtlasServerUpdateUtility_v2.3.6(b1) filename issue. (Thanks to @Kasjo for reporting)
+
 v2.3.6 (2021-02-07) Bug Fixes. Added RCON delay and steamcmd credentials.
 - Fixed: Line 46569 Error (due to issues with getting player name & ID). (Thanks to @Revy & @AceMan for reporting)
 - Fixed: Line 46779 Variable incorrect number of subscripts or subscripts dimention range exceeded (Thanks to @Claw22000 for reporting)
