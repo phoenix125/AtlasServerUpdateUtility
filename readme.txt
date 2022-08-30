@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.6 (2021-02-07)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.8 (2022-08-29)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,13 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.8 (2022-08-29) Added Vlad's server update fix
+- Fixed: Server update looping and failing. (A big thanks to Vlad for fixing the issue and supporting the community in my absence.)
+- Added: Restart ASUU schedule → located in CONFIG after the Scheduled Restarts section → Labelled "SCHEDULED ASUU RESTARTS". (Thank to Infiniti for requesting)
+- Fixed: Line 46813 Error (Thanks to GvP | Alex for reporting)
+- Fixed: Line 46909 Error (Thanks to @Black Beard and @Johny11 for reporting)
+- Fixed: Line 46813 Error (Thanks to @zuigo for reporting)
+
 v2.3.7 (2021-02-07) Fixed the AtlasServerUpdateUtility_v2.3.6(b1) filename issue. (Thanks to @Kasjo for reporting)
 
 v2.3.6 (2021-02-07) Bug Fixes. Added RCON delay and steamcmd credentials.

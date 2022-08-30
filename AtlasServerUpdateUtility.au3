@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.7.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.7_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.8.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.8_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.7.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.8.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.7
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.8
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.7" ; (2021-02-07)
-Local $aUtilVerBeta = "v2.3.7" ; (2021-02-07)
-Global $aUtilVerNumber = 51 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.3.8" ; (2021-02-07)
+Local $aUtilVerBeta = "v2.3.8" ; (2021-02-07)
+Global $aUtilVerNumber = 52 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -149,6 +149,7 @@ Global $aUtilVerNumber = 51 ; New number assigned for each config file change. U
 ;49 = v2.2.6/7/8/9/3.0/1/2/2
 ;50 = v2.3.4/5
 ;51 = v2.3.6/7
+;52 = v2.3.8
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -433,8 +434,8 @@ Global $aLogFile = $aFolderLog & $aUtilName & "_Log_" & @YEAR & "-" & @MON & "-"
 Global $aLogDebugFile = $aFolderLog & $aUtilName & "_LogFull_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt"
 Global $aOnlinePlayerFile = $aFolderLog & $aUtilName & "_OnlineUserLog_" & @YEAR & "-" & @MON & "-" & @MDAY & ".txt"
 Global $aTimeCheck0 = _NowCalc() ; Update Check
-Global $aTimeCheck1 = _NowCalc() ; Not Used
-Global $aTimeCheck2 = _NowCalc() ; Daily Restart Server
+Global $aTimeCheck1 = _NowCalc() ; Scheduled Restart ASUU
+Global $aTimeCheck2 = _NowCalc() ; Scheduled Restart Server
 Global $aTimeCheck3 = _NowCalc() ; Not Used
 Global $aTimeCheck4 = _NowCalc() ; Backup Scheduler
 Global $aTimeCheck5 = _NowCalc() ; Check for RCON custom commands scheduler every minute timer
@@ -1524,6 +1525,17 @@ If $aCFGLastVerNumber < 51 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $aSteamCMDPassword)
 	$aSteamCMDUseAnonForUpdateCheck = "yes"
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $aSteamCMDUseAnonForUpdateCheck)
+	$aIniForceWrite = True
+EndIf
+If $aCFGLastVerNumber < 52 And $aIniExist Then
+	Global $aRestartASUUDaily = "no"
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Use scheduled ASUU restarts? (May improve stability. Note! Make sure day/time does not overlap with other scheduled events)(yes/no) ###", $aRestartASUUDaily)
+	Global $aRestartASUUDays = "0"
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aRestartASUUDays)
+	Global $aRestartASUUHours = "04"
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $aRestartASUUHours)
+	Global $aRestartASUUMin = "45"
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart minute (00-59) ###", $aRestartASUUMin)
 	$aIniForceWrite = True
 EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
@@ -2949,6 +2961,14 @@ While True ;**** Loop Until Closed ****
 		EndIf
 ;~ 		EndIf
 		#EndRegion ;**** Restart Server Every X Days and X Hours & Min****
+
+		#Region ;**** Scheduled Restart Utility ****
+		If (($aRestartASUUDaily = "yes") And ((_DateDiff('n', $aTimeCheck1, _NowCalc())) >= 1) And (DailyRestartCheck($aRestartASUUDays, $aRestartASUUHours, $aRestartASUUMin))) Then
+			LogWrite("[Util] ------ Scheduled ASUU utility restart started -----")
+			_Splash("Scheduled ASUU restart beginning . . ." & @CRLF & @CRLF & "Don't worry!  Your server will not shut down :)", 3000)
+			_RestartUtil()
+		EndIf
+		#EndRegion ;**** Scheduled Restart Utility ****
 
 		#Region ;**** Backup Every X Days and X Hours & Min****
 		If ($aBackupYN = "yes") And ((_DateDiff('n', $aTimeCheck4, _NowCalc())) >= 1) And (BackupCheck($aBackupDays, $aBackupHours, $aBackupMin)) Then
@@ -4416,6 +4436,11 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $bRestartMin = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $iniCheck)
 	Global $aRestartSkipMin = IniRead($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $iniCheck)
 	;
+	Global $aRestartASUUDaily = IniRead($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Use scheduled ASUU restarts? (May improve stability. Note! Make sure day/time does not overlap with other scheduled events)(yes/no) ###", $iniCheck)
+	Global $aRestartASUUDays = IniRead($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $iniCheck)
+	Global $aRestartASUUHours = IniRead($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $iniCheck)
+	Global $aRestartASUUMin = IniRead($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart minute (00-59) ###", $iniCheck)
+	;
 	Global $sAnnounceNotifyDaily = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before DAILY reboot (comma separated 0-60) ###", $iniCheck)
 	Global $sAnnounceNotifyUpdate = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before UPDATES reboot (comma separated 0-60) ###", $iniCheck)
 	Global $sAnnounceNotifyRemote = IniRead($aIniFile, " --------------- ANNOUNCEMENT CONFIGURATION --------------- ", "Announcement _ minutes before REMOTE RESTART reboot (comma separated 0-60) ###", $iniCheck)
@@ -5100,6 +5125,26 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$aRestartSkipMin = "60"
 		$iIniFail += 1
 		$iIniError = $iIniError & "RestartSkipMin, "
+	EndIf
+	If $iniCheck = $aRestartASUUDaily Then
+		$aRestartASUUDaily = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "RestartASUUDaily, "
+	EndIf
+	If $iniCheck = $aRestartASUUDays Then
+		$aRestartASUUDays = "0"
+		$iIniFail += 1
+		$iIniError = $iIniError & "RestartASUUDays, "
+	EndIf
+	If $iniCheck = $aRestartASUUHours Then
+		$aRestartASUUHours = "04"
+		$iIniFail += 1
+		$iIniError = $iIniError & "RestartASUUHours, "
+	EndIf
+	If $iniCheck = $aRestartASUUMin Then
+		$aRestartASUUMin = "45"
+		$iIniFail += 1
+		$iIniError = $iIniError & "RestartASUUMin, "
 	EndIf
 	If $iniCheck = $aCrashMaxCount Then
 		$aCrashMaxCount = 0
@@ -6362,6 +6407,11 @@ Func UpdateIni($aIniFile)
 	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Restart minute (00-59) ###", $bRestartMin)
 	IniWrite($aIniFile, " --------------- SCHEDULED RESTARTS --------------- ", "Skip scheduled restart if servers restarted within _ minutes (0-720) ###", $aRestartSkipMin)
 	FileWriteLine($aIniFile, @CRLF)
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Use scheduled ASUU restarts? (May improve stability. Note! Make sure day/time does not overlap with other scheduled events)(yes/no) ###", $aRestartASUUDaily)
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart days (comma separated 0-Everyday 1-Sunday 7-Saturday 0-7 ex.2,4,6) ###", $aRestartASUUDays)
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart hours (comma separated 00-23 ex.04,16) ###", $aRestartASUUHours)
+	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart minute (00-59) ###", $aRestartASUUMin)
+	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Disable ALL CRASH WATCHDOG including grid process (ShooterGameServer.exe) crash detection? (yes/no) ###", $aCrashPIDDisableYN)
 	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Number of failed RCON attempts (after grid had responded at least once) before restarting grid (0-Disable, 0-5) (Default is 2) ###", $aCrashRCONAttempts)
 	IniWrite($aIniFile, " --------------- CRASH WATCHDOG --------------- ", "Minutes to wait for RCON response before restarting grid (0-Disable, 0-99)(Default is 5) ###", $aCrashRCONWaitMinutes)
@@ -6591,6 +6641,7 @@ Func UpdateIni($aIniFile)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Check for " & $aUtilName & " updates every __ hours (0 to disable) (0-24) ###", $aUpdateUtil)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Automatically install " & $aUtilName & " updates? (yes/no) ###", $aUpdateAutoUtil)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", $aUtilName & " version: (0)Stable, (1)Beta ###", $aUtilBetaYN)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Restart " & $aUtilName & " daily:  version: (0)Stable, (1)Beta ###", $aUtilBetaYN)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Run KeepAlive program to detect util crashes and restart it? (yes/no) ###", $aUseKeepAliveYN)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Disable Grid Memory and CPU monitoring? (yes/no) ###", $aDisableMemCPUYN)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " MISC OPTIONS --------------- ", "Allow multiple instances of " & $aUtilName & "? (yes/no) ###", $aAllowMultipleUtilsYN)
@@ -8354,7 +8405,6 @@ Func SendInGame($mMessage)
 			LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($ti, $aNamingScheme) & ") " & $aMCRCONcmd)
 			Sleep($aRCONDelayms)
 			Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
-;~ 			MsgBox(0,"Kim",$aRCONDelayms) ;kim125er!
 		Next
 	Else
 		For $i = 0 To ($aServerGridTotal - 1)
@@ -8367,7 +8417,6 @@ Func SendInGame($mMessage)
 				LogWrite("", " [RCON In-Game Message] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") " & $aMCRCONcmd)
 				Sleep($aRCONDelayms)
 				Run($aMCRCONcmd, @ScriptDir, @SW_HIDE)
-;~ 				MsgBox(0,"Kim",$aRCONDelayms) ;kim125er!
 			EndIf
 		Next
 	EndIf
@@ -8743,7 +8792,7 @@ Func GetInstalledVersion($sGameDir)
 	Else
 		Local $sFileRead = FileRead($hFileOpen, 100000000)
 		$aReturn[0] = True
-		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, "buildid""" & @TAB & @TAB & """", """"))
+		$aReturn[1] = _ArrayToString(_StringBetween($sFileRead, '"buildid"' & @TAB & @TAB & '"', '"')) ; Changed by Vlad
 		#cs		Local $aAppInfo = StringSplit($sFileRead, '"buildid"', 1)
 
 			If UBound($aAppInfo) >= 3 Then
@@ -10117,7 +10166,7 @@ EndFunc   ;==>_DownloadAndExtractFile
 ;EndFunc
 
 #Region ;**** Functions to Check for Mod Updates ****
-Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False, $tForceModUpdateInstallTF = False, $tFirstRunTF = False) ;kim125er!
+Func CheckModUpdate($sMods, $sSteamCmdDir, $sServerDir, $tSplash = 0, $tShow = False, $tForceModUpdateInstallTF = False, $tFirstRunTF = False)
 	If $sMods <> "" Then
 		Global $aModsShowUpToDateLogYN = "yes"
 		Local $xError = False
@@ -13525,7 +13574,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 						$xServerPlayerSteamID[$i] = $tSteamAll
 						If UBound($tSteamAll) > 0 Then
 							For $x = 0 To (UBound($tSteamAll) - 1)
-								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x]) ;kim125er!
+								_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
 							Next
 						Else
 							Local $tSteamAll[1]
@@ -13611,7 +13660,7 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 							If UBound($tSteamAll) <> UBound($tUserAll) Then ReDim $tSteamAll[$tUserAll]
 							If UBound($tSteamAll) > 0 Then
 								For $x = 0 To (UBound($tSteamAll) - 1)
-									_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x]) ;kim125er!
+									_ArrayAdd($xPlayeRawOnlineSteamID, $tSteamAll[$x])
 								Next
 							Else
 								Local $tSteamAll[1]
@@ -13755,11 +13804,33 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 			$aOnlinePlayersPerGrid[$i] = _ServerNamingScheme($i, $aNamingScheme) & " Online Players: 0"
 		Else
 			$aOnlinePlayersPerGrid[$i] = _ServerNamingScheme($i, $aNamingScheme) & " Online Players: " & $xServerPlayerCount[$i] & @CRLF
-
-			Local $tSteamID1 = $xServerPlayerSteamID[$i]
-			Local $tSteamName1 = $xServerPlayerSteamNames[$i]
+			If UBound($xServerPlayerSteamID) > $i Then
+				Local $tSteamID1 = $xServerPlayerSteamID[$i]
+			Else
+				Local $tSteamID1 = "Error"
+			EndIf
+			If UBound($xServerPlayerSteamNames) > $i Then
+				Local $tSteamName1 = $xServerPlayerSteamNames[$i]
+			Else
+				Local $tSteamName1 = "Error"
+			EndIf
 			For $x = 0 To ($xServerPlayerCount[$i] - 1)
-				$aOnlinePlayersPerGrid[$i] &= $tSteamID1[$x] & "   " & $tSteamName1[$x] & @CRLF
+				Local $tSteamID2, $tSteamName2, $tOnlinePLayersPerGrid
+				If UBound($tSteamID1) > $x Then
+					$tSteamID2 = $tSteamID1[$x]
+				Else
+					$tSteamID2 = "[Error]"
+				EndIf
+				If UBound($tSteamName1) > $x Then
+					$tSteamName2 = $tSteamName1[$x]
+				Else
+					$tSteamName2 = "[Error]"
+				EndIf
+				If UBound($aOnlinePlayersPerGrid) > $x Then
+					$aOnlinePlayersPerGrid[$i] &= $tSteamID2 & "   " & $tSteamName2 & @CRLF
+				Else
+					_ArrayAdd($aOnlinePlayersPerGrid, $tSteamID2 & "   " & $tSteamName2 & @CRLF)
+				EndIf
 			Next
 ;~
 ;~ 			If UBound($xServerPlayerSteamID[$i]) > 1 Then
@@ -13866,8 +13937,9 @@ Func GetPlayerCount($tSplash = 0, $tStartup = True, $aWriteLog = False) ; $tSpla
 	EndIf
 	Local $tTimer2Diff = TimerDiff($tTimer2)
 	For $i = 0 To ($aServerGridTotal - 1)
-		If UBound($xGridRCONLastReply) >= $i + 1 Then
-			$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i]) ;kim125er!
+;~ 		If UBound($xGridRCONLastReply) >= $i + 1 Then  ; Changed Line 46909 Error v2.3.7
+		If UBound($xGridRCONLastReply) > $i Then
+			$xGridRCONLastReply[$i] = _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i])
 		Else
 			_ArrayAdd($xGridRCONLastReply, _DateAdd('s', (Int($tTimer2Diff / 1000)), $xGridRCONLastReply[$i]))
 		EndIf
@@ -18409,9 +18481,9 @@ Func G_T1_B_CPUCalculator()
 		_WinAPI_SetWindowPos($wCPUAffinity, $HWND_TOPMOST, 0, 0, 0, 0, BitOR($SWP_NOACTIVATE, $SWP_NOMOVE, $SWP_NOSIZE))
 		_WinAPI_SetWindowPos($wCPUAffinity, $HWND_NOTOPMOST, 0, 0, 0, 0, BitOR($SWP_NOACTIVATE, $SWP_NOMOVE, $SWP_NOSIZE))
 	Else
-;~ 		$aCPUCoreCount = 80
+;~ 		$aCPUCoreCount = 88
 ;~ 		$xCPUs[0] = 4
-;~ 		$xCPUs[2] = 20 ; kim125er!
+;~ 		$xCPUs[2] = 22 ; kim125er!
 
 		Local $gCPUX = 8, $gCPUY = 8, $gCPUYMove
 		Local $gCPUW = 27, $gCPUH = 25, $gCPUGapX = 1, $gCPUGapY = 5, $gCPUinaRow = 14, $gCPUXstart = 8 ; Grid Tab Button Width, Height, and gaps between buttons
@@ -22716,7 +22788,7 @@ Func _ParamFileWrite()
 	_ArrayAdd($xFile, "------------------------------------------")
 	_ArrayAdd($xFile, " AtlasServerUpdateUtility Grid Parameters")
 	_ArrayAdd($xFile, "------------------------------------------")
-	_ArrayAdd($xFile, "[Highlight/Active] [ParamName] [Value] [File] [HeadingInFile] [Description]")
+	_ArrayAdd($xFile, "[Highlight/Active],[ParamName],[Value],[File],[HeadingInFile],[Description]")
 	_ArrayAdd($xFile, "    [ParamName] Name of Parameter")
 	_ArrayAdd($xFile, "        [Value] Value assigned to parameter")
 	_ArrayAdd($xFile, "         [File] (0) Command line entry  (1) ServerGrid  (2) GameUserSettings.ini  (3) Game.ini  (4) Engine.ini")
@@ -22759,7 +22831,7 @@ Func _ParamFileDefault()
 	$xArray[0] = '------------------------------------------,,,,,'
 	$xArray[1] = ' AtlasServerUpdateUtility Grid Parameters,,,,,'
 	$xArray[2] = '------------------------------------------,,,,,'
-	$xArray[3] = '[Highlight/Active] [ParamName] [Value] [File] [HeadingInFile] [Description],,,,,'
+	$xArray[3] = '[Highlight/Active],[ParamName],[Value],[File],[HeadingInFile],[Description]'
 	$xArray[4] = '    [ParamName] Name of Parameter,,,,,'
 	$xArray[5] = '        [Value] Value assigned to parameter,,,,,'
 	$xArray[6] = '         [File] (0) Command line entry  (1) ServerGrid  (2) GameUserSettings.ini  (3) Game.ini  (4) Engine.ini,,,,,'
@@ -22769,7 +22841,7 @@ Func _ParamFileDefault()
 	$xArray[10] = '------------------------------------------,,,,,'
 	$xArray[11] = '[Begin Parameters],,,,,'
 	$xArray[12] = 'FALSE,AdminLogging,TRUE,2,[ServerSettings],logs all admin commands to ingame chat'
-	$xArray[13] = 'FALSE,AllowAnyoneBabyImprintCuddle,FALSE,2,[ServerSettings],"Use this if you want ANYONE to be able to ""take care"" of a Baby Dino (cuddle etc.) not just whomever Imprinted on it."'
+	$xArray[13] = 'FALSE,AllowAnyoneBabyImprintCuddle,FALSE,2,[ServerSettings],Use this if you want ANYONE to be able to take care of a Baby Dino (cuddle etc.) not just whomever Imprinted on it.'
 	$xArray[14] = 'FALSE,AllowedCombatPhaseStartAdjustmentInterval,604800,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is how often (in seconds) players are allowed to adjust the combat schedule for a settlement (edited)  '
 	$xArray[15] = 'FALSE,AllowFlyerCarryPvE,FALSE,2,[ServerSettings],Permit flying dinosaurs to pick up other dinosaurs and players when mounted by a player in PvE'
 	$xArray[16] = 'FALSE,AllowHideDamageSourceFromLogs,FALSE,2,[ServerSettings],Allows the hiding of damage sources in tribe logs.'
@@ -22777,12 +22849,12 @@ Func _ParamFileDefault()
 	$xArray[18] = 'FALSE,AllowThirdPersonPlayer,TRUE,2,[ServerSettings],Enables 3rd Person view'
 	$xArray[19] = 'FALSE,alwaysNotifyPlayerJoined,FALSE,2,[ServerSettings],Players will always get notified if someone joins the server'
 	$xArray[20] = 'FALSE,alwaysNotifyPlayerLeft,FALSE,2,[ServerSettings],Players will always get notified if someone leaves the server'
-	$xArray[21] = 'FALSE,AutoDestroyOldStructuresMultiplier,1,2,[ServerSettings],"This value is based on PvEStructureDecayPeriodMultiplier! these values are rounded, so not really exact to the second - neither here nor ingame."'
+	$xArray[21] = 'FALSE,AutoDestroyOldStructuresMultiplier,1,2,[ServerSettings],This value is based on PvEStructureDecayPeriodMultiplier! These values are rounded, so not really exact to the second - neither here nor ingame.'
 	$xArray[22] = 'FALSE,AutoDestroyWildDinosInterval,259200,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero wild dinos will be automatically destroyed and respawned at this interval if the server has been live this long to help keep wild dino populations correct. Only recommend using this if bAllowSavingWildDinos=false from the ServerSettings section '
 	$xArray[23] = 'FALSE,AutoGenerateIslandSpawnRegions,TRUE,2,[ServerSettings],When true players will be automatically given the option to select any of the islands on a homeserver as a spawn point'
 	$xArray[24] = 'FALSE,AutoIslandPointSizePower,0.6f,3,[/Script/ShooterGame.ShooterGameMode],a power to apply to this calculation'
 	$xArray[25] = 'FALSE,AutoIslandPointSizeScale,0.000015f,3,[/Script/ShooterGame.ShooterGameMode],a scale to this calculation'
-	$xArray[26] = 'FALSE,AutoIslandPointsMax,100,3,[/Script/ShooterGame.ShooterGameMode],a maximum clamp on this calculation '
+	$xArray[26] = 'FALSE,AutoIslandPointsMax,100,3,[/Script/ShooterGame.ShooterGameMode],a maximum clamp on this calculation'
 	$xArray[27] = 'FALSE,AutoIslandPointsMin,1,3,[/Script/ShooterGame.ShooterGameMode],a minimum clamp on this calculation'
 	$xArray[28] = 'FALSE,AutoSavePeriodMinutes,10,2,[ServerSettings],Set interval for automatic saves'
 	$xArray[29] = 'FALSE,BabyMatureSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for baby dino to mature'
@@ -22792,9 +22864,9 @@ Func _ParamFileDefault()
 	$xArray[33] = 'FALSE,bAutoCalculateIslandPoints,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true for settlement mode the island points will automatically be calculated by the island`s size on the map for any islands that are set to 1 point '
 	$xArray[34] = 'FALSE,bClampHomeServerXP,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Remove Level cap on Freeport / Home servers'
 	$xArray[35] = 'FALSE,bDestroyInvalidSettlementClaimFlags,FALSE,3,[/Script/ShooterGame.ShooterGameMode],This can be used to destroy all invalid claim flags please be advised that this cannot be reversed once done.'
-	$xArray[36] = 'FALSE,bDisableFogOfWar,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true the fog & shrowd of war will be disabled '
+	$xArray[36] = 'FALSE,bDisableFogOfWar,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true the fog & shrowd of war will be disabled'
 	$xArray[37] = 'FALSE,bDisableStructureDecayPvE,FALSE,2,[ServerSettings],Disable the gradual (7 days) decay of player structures'
-	$xArray[38] = 'FALSE,bDisableStructurePlacementCollision,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If `true` allows for structures to clip into the terrain.'
+	$xArray[38] = 'FALSE,bDisableStructurePlacementCollision,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true allows for structures to clip into the terrain.'
 	$xArray[39] = 'FALSE,bDisplayTopCompanies,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true and NOT playing settlement mode the list of top 10 companies will be displayed on the map '
 	$xArray[40] = 'FALSE,bDontRequireClaimFlagsForBuilding, False,3,[/Script/ShooterGame.ShooterGameMode],If true you can place all structures without claim flags. We strongly recommend setting this to true if you`re using the settlement mode'
 	$xArray[41] = 'FALSE,bDontRequireLargeCannonsToSnapOnShips,TRUE,3,[/Script/ShooterGame.ShooterGameMode],This allows large cannons to not require a snap on the ship'
@@ -22802,12 +22874,12 @@ Func _ParamFileDefault()
 	$xArray[43] = 'FALSE,bForceRequireClaimFlagsForBuildingCannons,TRUE,3,[/Script/ShooterGame.ShooterGameMode],If true you are still required to have a claim flag to place cannons even if bDontRequireClaimFlagsForBuilding is true. We strongly recommend setting this to true if you`re using the settlement mode '
 	$xArray[44] = 'FALSE,bHomeServerDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true player characters on homeservers will disappear when logged out '
 	$xArray[45] = 'FALSE,bIsLawlessHomeServer,FALSE,3,[/Script/ShooterGame.ShooterGameMode],'
-	$xArray[46] = 'FALSE,bPvEAllowNonAlignedShipBasing,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true `enemies` will be allowed to stand on your ship in PvE '
+	$xArray[46] = 'FALSE,bPvEAllowNonAlignedShipBasing,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true enemies will be allowed to stand on your ship in PvE'
 	$xArray[47] = 'FALSE,bPvEDontReplicateLoggedOutPlayers,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If true and the server is in PvE configuration player characters will disappear when logged out '
 	$xArray[48] = 'FALSE,bSeatedNPCIgnoreGunDamage,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Stationed NPCs (on boats and land) no longer take damage from guns on Official Servers.'
-	$xArray[49] = 'FALSE,bUseCorpseLocator,FALSE,2,[ServerSettings],"if set to true, you will see a green lightbeam at the location of your death"'
+	$xArray[49] = 'FALSE,bUseCorpseLocator,FALSE,2,[ServerSettings],If set to true you will see a green lightbeam at the location of your death.'
 	$xArray[50] = 'FALSE,bUseNewStructureFoundationSupportChecks,FALSE,3,[/Script/ShooterGame.ShooterGameMode],If you set this to true foundation/supports will be more correctly required for horizontal structure building improving server performance but consequently limiting certain kinds of architectural builds. '
-	$xArray[51] = 'FALSE,bUseSettlementClaims,TRUE,3,[/Script/ShooterGame.ShooterGameMode],"Set this to true to use the new ""Colonies"" island settlement system "'
+	$xArray[51] = 'FALSE,bUseSettlementClaims,TRUE,3,[/Script/ShooterGame.ShooterGameMode],Set this to true to use the new ""Colonies"" island settlement system.'
 	$xArray[52] = 'FALSE,bUseStaticCharacterAge,FALSE,3,[/Script/ShooterGame.ShooterGameMode],Supposed to freeze your current age. You need to die if you want the setting to take effect.'
 	$xArray[53] = 'FALSE,ClampHomeServerXPLevel,8,3,[/Script/ShooterGame.ShooterGameMode],Level cap on Freeport / Home servers'
 	$xArray[54] = 'FALSE,ClampResourceHarvestDamage,FALSE,2,[ServerSettings],Limit the damage caused by a dino to a resource for harvesting.'
@@ -22817,24 +22889,24 @@ Func _ParamFileDefault()
 	$xArray[58] = 'FALSE,CompanyMinIslandPointsPlayers,1,3,[/Script/ShooterGame.ShooterGameMode],A company with only 1 player will have the minimum number of points.'
 	$xArray[59] = 'FALSE,CompanySoloIslandPointsAmount,30,3,[/Script/ShooterGame.ShooterGameMode],A Solo company will have this many points.'
 	$xArray[60] = 'FALSE,CraftXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for crafting'
-	$xArray[61] = 'FALSE,DayCycleSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK, controlling how often day changes to night and night changes to day. The default value 1 provides the same cycle speed as the singleplayer experience (and the official public servers). Values lower than 1 slow down the cycle; higher values accelerate it. Base time when value is 1 appears to be 1 minute real time equals approx. 28 minutes game time. Thus, for an approximate 24 hour day/night cycle in game, use .035 for the value."'
-	$xArray[62] = 'FALSE,DayTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during the day. This value determines the length of each day, relative to the length of each night (as specified by NightTimeSpeedScale. Lowering this value increases the length of each day."'
+	$xArray[61] = 'FALSE,DayCycleSpeedScale,1,2,[ServerSettings],Specifies the scaling factor for the passage of time in the ARK, controlling how often day changes to night and night changes to day. The default value 1 provides the same cycle speed as the singleplayer experience (and the official public servers). Values lower than 1 slow down the cycle; higher values accelerate it. Base time when value is 1 appears to be 1 minute real time equals approx. 28 minutes game time. Thus, for an approximate 24 hour day/night cycle in game, use .035 for the value.'
+	$xArray[62] = 'FALSE,DayTimeSpeedScale,1,2,[ServerSettings],Specifies the scaling factor for the passage of time in the ARK during the day. This value determines the length of each day, relative to the length of each night (as specified by NightTimeSpeedScale. Lowering this value increases the length of each day.'
 	$xArray[63] = 'FALSE,DestroyDeadShipsIntervalTime,0,3,[/Script/ShooterGame.ShooterGameMode],Sunken ships will always destroy after 5 days on Official Servers. This will clear the icon from your maps too as long the area where the boats were sunk have been revisited.'
 	$xArray[64] = 'FALSE,DestroyUntaggedShipsInterval,0,3,[/Script/ShooterGame.ShooterGameMode],If greater than zero ships that have not had any of that team logged-in nearby will be destroyed after that amount of time '
 	$xArray[65] = 'FALSE,DifficultyOffset,0,2,[ServerSettings],Specifies the difficulty level.'
-	$xArray[66] = 'FALSE,DinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` food consumption. Higher values increase food consumption (dinosaurs get hungry faster). It also affects the taming-times.'
+	$xArray[66] = 'FALSE,DinoCharacterFoodDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs food consumption. Higher values increase food consumption (dinosaurs get hungry faster). It also affects the taming-times.'
 	$xArray[67] = 'FALSE,DinoCharacterHealthRecoveryMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` health recovery. Higher values increase the recovery rate (dinosaurs heal faster).'
 	$xArray[68] = 'FALSE,DinoCharacterStaminaDrainMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaurs` stamina consumption. Higher values increase stamina consumption (dinosaurs get tired faster).'
 	$xArray[69] = 'FALSE,DinoCountMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur spawns. Higher values increase the number of dinosaurs spawned throughout the ARK.'
 	$xArray[70] = 'FALSE,DinoDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage dinosaurs deal with their attacks. The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
-	$xArray[71] = 'FALSE,DinoResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage dinosaurs receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a dino taking half damage while a value of 2.0 would result in a dino taking double normal damage."'
+	$xArray[71] = 'FALSE,DinoResistanceMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the resistance to damage dinosaurs receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a dino taking half damage while a value of 2.0 would result in a dino taking double normal damage.'
 	$xArray[72] = 'FALSE,DisableDinoDecayPvE,FALSE,2,[ServerSettings],"Disable the gradual (7 days) decay of dinosaur ownership. Without this set to true, every dinosaur can be claimed by any player."'
-	$xArray[73] = 'FALSE,DisablePvEGamma,FALSE,2,[ServerSettings],"Prevents use of console command ""gamma"" in PvE mode"'
+	$xArray[73] = 'FALSE,DisablePvEGamma,FALSE,2,[ServerSettings],Prevents use of console command gamma in PvE mode'
 	$xArray[74] = 'FALSE,DisableStructurePreventionVolumes,FALSE,2,[ServerSettings],This setting disables Structure Prevention Volumes (ie the Ice Cave island blocks building without this enabled)'
 	$xArray[75] = 'FALSE,EggHatchSpeedMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Higher number decreases (by percentage) time needed for fertilized egg to hatch'
 	$xArray[76] = 'FALSE,EnableHealthbars,TRUE,2,[ServerSettings],No description.'
-	$xArray[77] = 'FALSE,EnablePvPGamma,FALSE,2,[ServerSettings],"Allow use of console command ""gamma"" in PvP mode"'
-	$xArray[78] = 'FALSE,EnemyBuildPreventionRadiusMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales the enemy build prevention radius '
+	$xArray[77] = 'FALSE,EnablePvPGamma,FALSE,2,[ServerSettings],Allow use of console command gamma in PvP mode'
+	$xArray[78] = 'FALSE,EnemyBuildPreventionRadiusMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales the enemy build prevention radius'
 	$xArray[79] = 'FALSE,ForceAllStructureLocking,FALSE,2,[ServerSettings],Enabling this will default lock all structures'
 	$xArray[80] = 'FALSE,GenericXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for generic XP (automatic over time)'
 	$xArray[81] = 'FALSE,globalVoiceChat,FALSE,2,[ServerSettings],Voice chat turns global'
@@ -22845,20 +22917,20 @@ Func _ParamFileDefault()
 	$xArray[86] = 'FALSE,ListenServerTetherDistanceMultiplier,1,2,[ServerSettings],No description.'
 	$xArray[87] = 'FALSE,MaximumCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config option is used to cap the crafting skill bonus at 60%'
 	$xArray[88] = 'FALSE,MaxPlatformSaddleStructureLimit,,2,[ServerSettings],Changes the maximum number of platformed-creatures/rafts allowed on the ARK (a potential performance cost)'
-	$xArray[89] = 'FALSE,MaxPlayers,,2, [/script/engine.gamesession],Specifies the maximum number of players that can play on the server simultaneously. Must be placed under [/script/engine.gamesession] in GameUserSettings.ini to function when not used in the command line.'
+	$xArray[89] = 'FALSE,MaxPlayers,,2,[/Script/engine.gamesession],Specifies the maximum number of players that can play on the server simultaneously. Must be placed under [/script/engine.gamesession] in GameUserSettings.ini to function when not used in the command line.'
 	$xArray[90] = 'FALSE,MaxSettlementFlagZ,999999,3,[/Script/ShooterGame.ShooterGameMode],Islands on the Official Network now have a maximum z-value for how high Claim Flags can be placed unique to the island. These are based on the highest terrain points before considering mountains large rock formations or steep pillars.'
-	$xArray[91] = 'FALSE,MaxSettlementWarTimeOffset,345600,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the maximum amount of time in the future that a war can be scheduled '
-	$xArray[92] = 'FALSE,MaxTamedDinos,4000,2,[ServerSettings],"Sets the maximum number of tamed Dinos on a Server, this is a global cap."'
+	$xArray[91] = 'FALSE,MaxSettlementWarTimeOffset,345600,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the maximum amount of time in the future that a war can be scheduled'
+	$xArray[92] = 'FALSE,MaxTamedDinos,4000,2,[ServerSettings],Sets the maximum number of tamed Dinos on a Server, this is a global cap.'
 	$xArray[93] = 'FALSE,Message,Welcome to your favorite Atlas server!,3,[MessageOfTheDay],Set message of the day (MOTD)'
-	$xArray[94] = 'FALSE,MinimumSettlementWarCooldownInterval,432000,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the amount of time after a war ends before a new war can be declared '
-	$xArray[95] = 'FALSE,MinPointsPerDiscoveryZone,3,3,[/Script/ShooterGame.ShooterGameMode],Acts as a minimum value for how many points you`ll get from any single discovery zone '
-	$xArray[96] = 'FALSE,MinSettlementWarTimeOffset,172800,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the minimum amount of time in the future that a war can be scheduled '
+	$xArray[94] = 'FALSE,MinimumSettlementWarCooldownInterval,432000,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the amount of time after a war ends before a new war can be declared'
+	$xArray[95] = 'FALSE,MinPointsPerDiscoveryZone,3,3,[/Script/ShooterGame.ShooterGameMode],Acts as a minimum value for how many points you`ll get from any single discovery zone'
+	$xArray[96] = 'FALSE,MinSettlementWarTimeOffset,172800,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is the minimum amount of time in the future that a war can be scheduled'
 	$xArray[97] = 'FALSE,NetServerMaxTickRate,15,4,[/script/onlinesubsystemutils.ipnetdriver],Frequency with which the server updates the game state (in Hertz).'
-	$xArray[98] = 'FALSE,NightTimeSpeedScale,1,2,[ServerSettings],"Specifies the scaling factor for the passage of time in the ARK during night time. This value determines the length of each night, relative to the length of each day (as specified by DayTimeSpeedScale. Lowering this value increases the length of each night."'
+	$xArray[98] = 'FALSE,NightTimeSpeedScale,1,2,[ServerSettings],Specifies the scaling factor for the passage of time in the ARK during night time. This value determines the length of each night, relative to the length of each day (as specified by DayTimeSpeedScale. Lowering this value increases the length of each night.'
 	$xArray[99] = 'FALSE,NoBattlEye,TRUE,0,n/a,Run server without BattleEye'
 	$xArray[100] = 'FALSE,NoClaimFlagDecayPeriodMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Set this value to scale-up the auto decay of any structures not within a claim flag'
 	$xArray[101] = 'FALSE,NoCrashDialog,TRUE,0,n/a,Prevents the big white error windows and allows the utility to restart crashed servers.'
-	$xArray[102] = 'FALSE,NonShipTurretInitializationTimeScale,0,3,[/Script/ShooterGame.ShooterGameMode],Scales how long before newly-placed land cannons are allowed to fire. set it to zero to remove this feature. '
+	$xArray[102] = 'FALSE,NonShipTurretInitializationTimeScale,0,3,[/Script/ShooterGame.ShooterGameMode],Scales how long before newly-placed land cannons are allowed to fire. set it to zero to remove this feature.'
 	$xArray[103] = 'FALSE,NoSeamlessServer,FALSE,0,n/a,Use this if running a DLC map (ie. Blackwood) or other NonSeamless server.'
 	$xArray[104] = 'FALSE,noTributeDownloads,FALSE,2,[ServerSettings],Disables downloading characters from other servers'
 	$xArray[105] = 'FALSE,OldPlayerDataMaxXP,2956920,3,[/Script/ShooterGame.ShooterGameMode],This config is to reduce player max experience on load'
@@ -22886,27 +22958,27 @@ Func _ParamFileDefault()
 	$xArray[127] = 'FALSE,RCONServerGameLogBuffer,600,2,[ServerSettings],Determines how many lines of gamelogs are send over RCON'
 	$xArray[128] = 'FALSE,RemoveItemsOverCraftingSkillBonus,0.6,3,[/Script/ShooterGame.ShooterGameMode],This config is used to destroy any items over the crafting skill bonus.'
 	$xArray[129] = 'FALSE,ResourcesRespawnPeriodMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the respawn rate for resource nodes (trees, rocks, bushes, etc.). Lower values cause nodes to respawn more frequently."'
-	$xArray[130] = 'FALSE,ServerAdminPassword,None,2,[ServerSettings],"If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server."'
+	$xArray[130] = 'FALSE,ServerAdminPassword,None,2,[ServerSettings],If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server.'
 	$xArray[131] = 'FALSE,ServerCrosshair,TRUE,2,[ServerSettings],Use this to disable the Crosshair on your Server'
 	$xArray[132] = 'FALSE,serverForceNoHud,FALSE,2,[ServerSettings],HUD always disabled'
 	$xArray[133] = 'FALSE,ServerGameLog,TRUE,0,n/a,Enable Server Admin Logs (including RCON support) use RCON command ?getgamelog? to print 100 entries at a time also outputs to dated file in in ?\Logs? adjust max length of RCON buffer with commandline: ??RCONServerGameLogBuffer=600?'
 	$xArray[134] = 'FALSE,serverHardcore,FALSE,2,[ServerSettings],Enables hardcore mode (player characters revert to level 1 upon death)'
-	$xArray[135] = 'FALSE,ServerPassword,None,2,[ServerSettings],"If specified, players must provide this password to join the server. Only use this setting on Blackwood maps - Ocean puts the password in the .json"'
+	$xArray[135] = 'FALSE,ServerPassword,None,2,[ServerSettings],If specified players must provide this password to join the server. Only use this setting on Blackwood maps - Ocean puts the password in the .json'
 	$xArray[136] = 'FALSE,serverPVE,FALSE,2,[ServerSettings],"Disables PvP, enables PvE"'
-	$xArray[137] = 'FALSE,SettlementCombatPhaseLengthSeconds,32400,3,[/Script/ShooterGame.ShooterGameMode],The length of the settlement mode`s combat phase '
+	$xArray[137] = 'FALSE,SettlementCombatPhaseLengthSeconds,32400,3,[/Script/ShooterGame.ShooterGameMode],The length of the settlement mode`s combat phase'
 	$xArray[138] = 'FALSE,SettlementFlagResourceUpkeepMultiplier,2,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this will scale the amount of upkeep resources necessary in the claim flags. you can set it to 0 to remove the upkeep entirely. '
 	$xArray[139] = 'FALSE,SettlementOwnerAllowForceDemolishStructureInterval,8640,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode the period of time that a settlement owner is able to instantly demolish any other settler team`s structures during peacetime '
-	$xArray[140] = 'FALSE,SettlementWarInterval,86400,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is how long a war lasts '
+	$xArray[140] = 'FALSE,SettlementWarInterval,86400,3,[/Script/ShooterGame.ShooterGameMode],For settlement mode this is how long a war lasts'
 	$xArray[141] = 'FALSE,ShowFloatingDamageText,TRUE,2,[ServerSettings],Use this to enable RPG-style popup text stat mode.'
 	$xArray[142] = 'FALSE,ShowMapPlayerLocation,TRUE,2,[ServerSettings],Show each player their own precise position when they view their map'
 	$xArray[143] = 'FALSE,SpecialXPMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],A multiplier to scale the amount of XP earned for SpecialEvents'
 	$xArray[144] = 'FALSE,SpectatorPassword,None,2,[ServerSettings],"To use non-admin spectator, the server must specify a spectator password. Then any client can use these console commands: requestspectator <password> and stopspectating. See patch 191.0 for more information and hotkeys."'
 	$xArray[145] = 'FALSE,StructureDamageMultiplier,1,2,[ServerSettings],Specifies the scaling factor for the damage structures deal with their attacks (i.e. spiked walls). The default value 1 provides normal damage. Higher values increase damage. Lower values decrease it.'
-	$xArray[146] = 'FALSE,StructurePreventResourceRadiusMultiplier,1,2,[ServerSettings],How close or far things respawn from a structure '
+	$xArray[146] = 'FALSE,StructurePreventResourceRadiusMultiplier,1,2,[ServerSettings],How close or far things respawn from a structure'
 	$xArray[147] = 'FALSE,StructureResistanceMultiplier,1,2,[ServerSettings],"Specifies the scaling factor for the resistance to damage structures receive when attacked. The default value 1 provides normal damage. Higher values decrease resistance, increasing damage per attack. Lower values increase it, reducing damage per attack. A value of 0.5 results in a structure taking half damage while a value of 2.0 would result in a structure taking double normal damage."'
 	$xArray[148] = 'FALSE,TamingSpeedMultiplier,1,2,[ServerSettings],Specifies the scaling factor for dinosaur taming speed. Higher values make taming faster.'
 	$xArray[149] = 'FALSE,TheMaxStructuresInRange,10500,2,[ServerSettings],Specifies the maximum number of structures that can be constructed within a certain (currently hard-coded) range.'
-	$xArray[150] = 'FALSE,TreasureGoldMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales how much gold you get from treasure maps '
+	$xArray[150] = 'FALSE,TreasureGoldMultiplier,1,3,[/Script/ShooterGame.ShooterGameMode],Scales how much gold you get from treasure maps'
 	$xArray[151] = 'FALSE,TribeJoinInterval,10,2,[ServerSettings],No description.'
 	$xArray[152] = 'FALSE,TribeNameChangeCooldown,300,2,[ServerSettings],Cooldown in minutes in between tribe name changes'
 	$xArray[153] = 'FALSE,WaterClaimsMaximumDistanceFromShore,0,3,[/Script/ShooterGame.ShooterGameMode],For non-settlement mode the distance away from shore that water claims are allowed to be placed (0 means no limit) '
@@ -23162,7 +23234,7 @@ Func _BlackwoodDefaultGUS($tCopyToGUSTF = True, $tOnlyCopyIfDoesNotExistTF = Fal
 	_FileWriteFromArray($tFile, $xArray)
 EndFunc   ;==>_BlackwoodDefaultGUS
 
-Func WriteRCONStartingStuck($tGrd, $tMin)
+Func WriteRCONStartingStuck() ; Changed by Vlad
 	Local $xArray[34]
 	$xArray[0] = _NowCalc & ' AtlasServerUpdateUtility ATTENTION!'
 	$xArray[1] = ''

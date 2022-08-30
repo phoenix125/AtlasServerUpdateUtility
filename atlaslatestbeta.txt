@@ -1,8 +1,6 @@
-v2.3.7^v2.3.7 Fixed Wrong Filename
-
-v2.3.6 Bug Fixes. Added RCON delay and steamcmd credentials.
-- Fixed: Line 46569 & 46779 Errors.
-- Fixed: Multiple restarts after a mod update.
-- Fixed: (Maybe!) mod updates failing for some users.
-- Added: Delay between mcrcon.exe commands.
-- Added: Custom SteamCMD login and password.
+v2.3.8^v2.3.8 Added Vlad's server update fix
+- Fixed: Server update looping and failing. (A big thanks to Vlad for fixing the issue and supporting the community in my absence.)
+- Added: Restart ASUU schedule → located in CONFIG after the Scheduled Restarts section → Labelled "SCHEDULED ASUU RESTARTS". (Thank to Infiniti for requesting)
+- Fixed: Line 46813 Error (Thanks to GvP | Alex for reporting)
+- Fixed: Line 46909 Error (Thanks to @Black Beard and @Johny11 for reporting)
+- Fixed: Line 46813 Error (Thanks to @zuigo for reporting)
