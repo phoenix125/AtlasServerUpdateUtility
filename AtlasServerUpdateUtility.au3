@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.8.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.8_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.9.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.9_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.8.0
+#AutoIt3Wrapper_Res_Fileversion=2.3.9.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.8
+#AutoIt3Wrapper_Res_ProductVersion=v2.3.9
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.8" ; (2021-02-07)
-Local $aUtilVerBeta = "v2.3.8" ; (2021-02-07)
-Global $aUtilVerNumber = 52 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.3.9" ; (2022-09-26)
+Local $aUtilVerBeta = "v2.3.9" ; (2022-09-26)
+Global $aUtilVerNumber = 53 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -150,6 +150,7 @@ Global $aUtilVerNumber = 52 ; New number assigned for each config file change. U
 ;50 = v2.3.4/5
 ;51 = v2.3.6/7
 ;52 = v2.3.8
+;53 = v2.3.9
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -1538,6 +1539,15 @@ If $aCFGLastVerNumber < 52 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- SCHEDULED ASUU RESTARTS --------------- ", "Restart minute (00-59) ###", $aRestartASUUMin)
 	$aIniForceWrite = True
 EndIf
+If $aCFGLastVerNumber < 53 And $aIniExist Then
+	Global $aAdvancedCPUProcessorsPhysical = 0
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical processors (1-4) (Leave blank to autodetect) ###", $aAdvancedCPUProcessorsPhysical)
+	Global $aAdvancedCPUPhysicalCores = 0
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical CPU Cores (NOT logical cores: Leave blank to autodetect) ###", $aAdvancedCPUPhysicalCores)
+	Global $aAdvancedCPULogicalCores = 0
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of logical CPU Cores (Leave blank to autodetect) ###", $aAdvancedCPULogicalCores)
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -1695,9 +1705,15 @@ If FileExists($aIniFailFileFull) Then
 	FileDelete($aIniFailFileFull)
 EndIf
 If $aStartUtilMinimizedYN <> "yes" Then ControlSetText($aSplashStartUp, "", "Static1", $aStartText & "Identifying Number of Processors (CPUs).")
-Global $xCPUs = _NumberOfProcessors()
+If $aAdvancedCPUProcessorsPhysical = 0 And $aAdvancedCPUPhysicalCores = 0 And $aAdvancedCPULogicalCores = 0 Then
+	Global $xCPUs = _NumberOfProcessors()
+Else
+	Global $xCPUs[3]
+	$xCPUs[0] = $aAdvancedCPUProcessorsPhysical
+	$xCPUs[1] = $aAdvancedCPUPhysicalCores
+	$xCPUs[2] = $aAdvancedCPULogicalCores
+EndIf
 Global $aCPUCoreCount = $xCPUs[0] * $xCPUs[2]
-
 Global $aConfigFull = $aServerDirLocal & "\ShooterGame\" & $aConfigFile
 Global $aConfigServerOnly = $aServerDirLocal & "\ShooterGame\ServerGrid.ServerOnly.json"
 Global $aDefaultGame = $aServerDirLocal & "\ShooterGame\Config\DefaultGame.ini"
@@ -4615,6 +4631,9 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $aRCONDelayms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Delay between sending RCON commands in milliseconds (to prevent memory errors due to multiple mcrcon.exe instances) (0-1000) ###", $iniCheck)
 	Global $aOnlinePlayerWaitms = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $iniCheck)
 	Global $aMainGUIRefreshTime = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $iniCheck)
+	Global $aAdvancedCPUProcessorsPhysical = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical processors (1-4) (Leave blank to autodetect) ###", $iniCheck)
+	Global $aAdvancedCPUPhysicalCores = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical CPU Cores (NOT logical cores: Leave blank to autodetect) ###", $iniCheck)
+	Global $aAdvancedCPULogicalCores = IniRead($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of logical CPU Cores (Leave blank to autodetect) ###", $iniCheck)
 
 	If $iniCheck = $aServerDirLocal Then
 		$aServerDirLocal = "D:\Game Servers\" & $aGameName & " Dedicated Server"
@@ -4725,7 +4744,7 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$iIniError = $iIniError & "ServerMapName, "
 	EndIf
 	If $iniCheck = $aServerRCONIP Then
-		$aServerRCONIP = ""
+		$aServerRCONIP = "127.0.0.1"
 		$iIniFail += 1
 		$iIniError = $iIniError & "ServerRCONIP, "
 	EndIf
@@ -6115,6 +6134,33 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "NOTICE: SteamDB will ban your IP if you check too often. Update check interval set to 30 minutes, "
 	EndIf
+	If $iniCheck = $aAdvancedCPUProcessorsPhysical Then
+		$aAdvancedCPUProcessorsPhysical = 0
+		$iIniFail += 1
+		$iIniError = $iIniError & "AdvancedCPUProcessorsPhysical, "
+	ElseIf $aAdvancedCPUProcessorsPhysical < 1 Then
+		$aAdvancedCPUProcessorsPhysical = 0
+	ElseIf $aAdvancedCPUProcessorsPhysical > 4 Then
+		$aAdvancedCPUProcessorsPhysical = 0
+	EndIf
+	If $iniCheck = $aAdvancedCPUPhysicalCores Then
+		$aAdvancedCPUPhysicalCores = 0
+		$iIniFail += 1
+		$iIniError = $iIniError & "AdvancedCPUPhysicalCores, "
+	ElseIf $aAdvancedCPUPhysicalCores < 1 Then
+		$aAdvancedCPUPhysicalCores = 0
+	ElseIf $aAdvancedCPUPhysicalCores > 99 Then
+		$aAdvancedCPUPhysicalCores = 0
+	EndIf
+	If $iniCheck = $aAdvancedCPULogicalCores Then
+		$aAdvancedCPULogicalCores = 0
+		$iIniFail += 1
+		$iIniError = $iIniError & "AdvancedCPULogicalCores, "
+	ElseIf $aAdvancedCPULogicalCores < 1 Then
+		$aAdvancedCPULogicalCores = 0
+	ElseIf $aAdvancedCPULogicalCores > 199 Then
+		$aAdvancedCPULogicalCores = 0
+	EndIf
 	If $aIniForceWrite Then
 		If FileExists($aIniFile) Then
 			Local $tTime = @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN
@@ -6661,6 +6707,9 @@ Func UpdateIni($aIniFile)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Delay between sending RCON commands in milliseconds (to prevent memory errors due to multiple mcrcon.exe instances) (0-1000) ###", $aRCONDelayms)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Time to wait for Online Players RCON response in milliseconds (100-3000) ###", $aOnlinePlayerWaitms)
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Update the Main Window data every __ seconds (2-60) ###", $aMainGUIRefreshTime)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical processors (1-4) (Leave blank to autodetect) ###", $aAdvancedCPUProcessorsPhysical)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of physical CPU Cores (NOT logical cores: Leave blank to autodetect) ###", $aAdvancedCPUPhysicalCores)
+	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of logical CPU Cores (Leave blank to autodetect) ###", $aAdvancedCPULogicalCores)
 EndFunc   ;==>UpdateIni
 #EndRegion ;**** INI Settings - User Variables ****
 
@@ -9254,8 +9303,8 @@ Func ExternalScriptExist()
 	Local $sFileExists = FileExists($aBatFolder & "\" & $aBatUpdateGame)
 	If $sFileExists = 0 Then
 		Local $tTxt = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
-				"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 				"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
+				"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 				"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 				"+quit"
 	EndIf
@@ -13392,13 +13441,13 @@ Func BatchFilesCreate($tSplash = 0, $tFolder = "0")
 ;~ 	DirRemove($tFolder, 1)
 	DirCreate($tFolder)
 	Local $tTxtValY = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 			"+quit"
 	Local $tTxtValN = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " ^" & @CRLF & _
 			"+quit"
 	FileDelete($tFolder & "\Install_Atlas.bat")
@@ -13426,8 +13475,8 @@ EndFunc   ;==>BatchFilesCreate
 
 Func SteamInstallGame($tSplash)
 	Local $tTxt = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
-			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
 			"+quit"
 	DirCreate($aBatFolder)
@@ -13458,8 +13507,7 @@ EndFunc   ;==>SteamInstallGame
 Func SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $tValidateINI, $tSplash = 0)
 	If $tSplash = 0 Then SplashOff()
 	$aSteamUpdateNow = False
-	$aSteamEXE = $aSteamCMDDir & "\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 " & $aSteamExtraCMD & "+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & _
-			" +force_install_dir """ & $aServerDirLocal & """ +app_update " & $aSteamAppID
+	$aSteamEXE = $aSteamCMDDir & '\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 ' & $aSteamExtraCMD & ' +force_install_dir "' & $aServerDirLocal & '" +login ' & $aSteamCMDLogin & ' ' & $aSteamCMDPassword & ' +app_update ' & $aSteamAppID
 	If ($tValidateINI = "yes") Or ($aUpdateVerify = "yes") Then
 		$aSteamEXE = $aSteamEXE & " validate"
 	EndIf
@@ -14788,7 +14836,6 @@ EndFunc   ;==>GUI_Main_L_Column
 ; ------------------------------------------------------------------------------------------------------------
 
 Func GUIUpdateQuick()
-	;	SetStatusBusy("Server process check in progress...", "Updating Main Window")
 	SetStatusBusy("Server process check in progress...", "Updating: Mem & CPU")
 	Local $aUpdateBatchFiles = False
 	$tStatusUpdateText1 = ""
@@ -14829,25 +14876,17 @@ Func GUIUpdateQuick()
 		For $i = 0 To ($aServerGridTotal - 1)
 			If $aServerPID[$i] = 999999 And $xStartGrid[$i] = "yes" Then
 				Local $tNodeInfo = _CPUAffinityNodeSplit(_CPUAffinityHexToBin($i), 0, $i)
-;~ 				$tPID = ProcessExists($aServerPID[$i])
-;~ 				If $tPID = 0 Then
 				Local $tPID = _CheckIfGridAlreadyRunning($i)
-				If $tPID > 0 Then
-					LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
-					$aServerPID[$i] = $tPID
-				EndIf
-;~ 				EndIf
+				If $tPID > 0 Then $aServerPID[$i] = $tPID
 				If $aServerPID[$i] = 999999 Then
 					Sleep(4000)
 					$tPID = ProcessExists($aServerPID[$i])
 					If $tPID = 0 Then
 						Local $tPID = _CheckIfGridAlreadyRunning($i)
-						If $tPID > 0 Then
-							LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
-							$aServerPID[$i] = $tPID
-						EndIf
+						If $tPID > 0 Then $aServerPID[$i] = $tPID
 					EndIf
 				EndIf
+				LogWrite(" [Server] Server (" & _ServerNamingScheme($i, $aNamingScheme) & ") PID (" & $aServerPID[$i] & ") assigned affinity:" & _RemoveLeadingZeros($tNodeInfo[7]))
 				$hProc = _WinAPI_OpenProcess($PROCESS_ALL_ACCESS, False, $aServerPID[$i])
 				_WinAPI_SetProcessAffinityMask($hProc, "0x" & _RemoveLeadingZeros($tNodeInfo[7]))
 			EndIf
@@ -18602,7 +18641,11 @@ Func G_T1_B_CPUCalculator()
 					GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 					$gCPUYnow += $gCPUH + $gCPUGapY - 10 ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
-					$tNode += 2
+					If $xCPUs[0] = 4 Then
+						$tNode += 2
+					Else
+						$tNode += 1
+					EndIf
 					$tCol = 1
 					$tCPU = 0
 				EndIf
@@ -18620,7 +18663,8 @@ Func G_T1_B_CPUCalculator()
 					$tCol += 1
 				EndIf
 			Next
-			$tNode = $tNode - 3
+;~ 			$tNode = $tNode - 3
+			If $tNode > 2 Then $tNode = $tNode - 3
 			Local $gCPUXnow = $gCPUX, $tCol = 1, $tCPU = 0
 			$gCPUYnow += $gCPUH + $gCPUGapY + 20
 			Local $G_CPU_L_Group2Header = GUICtrlCreateLabel("Process Group: 1", $gCPUXstart, $gCPUYnow, 400, 24)
@@ -18642,7 +18686,11 @@ Func G_T1_B_CPUCalculator()
 					GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKTOP + $GUI_DOCKWIDTH + $GUI_DOCKHEIGHT)
 					$gCPUYnow += $gCPUH + $gCPUGapY - 10 ; Lowers tab window by number of grid tab rows.
 					$gCPUXnow = $gCPUXstart
-					$tNode += 2
+					If $xCPUs[0] = 4 Then
+						$tNode += 2
+					Else
+						$tNode += 1
+					EndIf
 					$tCol = 1
 					$tCPU = 0
 				EndIf
@@ -18985,7 +19033,11 @@ Func _CPUAffinityNodeSplit($tBin4, $tCPUSelected, $tGridSelected = -1) ; Returns
 		$tReturn[10] = $tString & $tString & $tTemp[1] & $tTemp[0]
 	ElseIf $tNodeInOrder = 1 Then
 		$tReturn[2] = $tTemp[1]
-		$tReturn[4] = 2
+		If $xCPUs[0] = 2 Then
+			$tReturn[4] = 0
+		Else
+			$tReturn[4] = 2
+		EndIf
 		$tReturn[5] = _BinToHex($tTemp[1])
 		$tReturn[6] = $tTemp[1]
 		$tReturn[7] = _BinToHex($tTemp[1] & $tTemp[0])
@@ -18994,7 +19046,12 @@ Func _CPUAffinityNodeSplit($tBin4, $tCPUSelected, $tGridSelected = -1) ; Returns
 		$tReturn[10] = $tString & $tString & $tTemp[1] & $tTemp[0]
 	ElseIf $tNodeInOrder = 2 Then
 		$tReturn[1] = $tTemp[2]
-		$tReturn[4] = 1
+		If $xCPUs[0] = 2 Then
+			$tReturn[4] = 1
+		Else
+			$tReturn[4] = 1
+		EndIf
+;~ 		$tReturn[4] = 1
 		$tReturn[5] = _BinToHex($tTemp[2])
 		$tReturn[6] = $tTemp[2]
 		$tReturn[7] = _BinToHex($tTemp[3] & $tTemp[2])
@@ -19003,7 +19060,12 @@ Func _CPUAffinityNodeSplit($tBin4, $tCPUSelected, $tGridSelected = -1) ; Returns
 		$tReturn[10] = $tTemp[3] & $tTemp[2] & $tString & $tString
 	ElseIf $tNodeInOrder = 3 Then
 		$tReturn[3] = $tTemp[3]
-		$tReturn[4] = 3
+		If $xCPUs[0] = 2 Then
+			$tReturn[4] = 1
+		Else
+			$tReturn[4] = 3
+		EndIf
+;~ 		$tReturn[4] = 3
 		$tReturn[5] = _BinToHex($tTemp[3])
 		$tReturn[6] = $tTemp[3]
 		$tReturn[7] = _BinToHex($tTemp[3] & $tTemp[2])

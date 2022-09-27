@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.8 (2022-08-29)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.3.9 (2022-09-26)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,12 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.3.9 (2022-09-26) Moved force_install_dir ahead of login in Steam updater
+- Fixed: Moved the "force_install_dir" command in SteamCMD ahead of login command. (Thanks to @KingStreetMaccas for reporting)
+- Fixed: CPU Affinity Calculator when >64 cores and 2 CPUs was displaying incorrectly and not functional. (Thanks to @Infiniti for reporting)
+- Added: Number of CPUs and Cores can now be manually entered in the config under "Advanced" section.
+- Changed: The default RCON port for new installations is now 127.0.0.1.  Too many people were struggling with RCON when making WAN IP the default.  I am unable to reliably assign local IP.
+
 v2.3.8 (2022-08-29) Added Vlad's server update fix
 - Fixed: Server update looping and failing. (A big thanks to Vlad for fixing the issue and supporting the community in my absence.)
 - Added: Restart ASUU schedule → located in CONFIG after the Scheduled Restarts section → Labelled "SCHEDULED ASUU RESTARTS". (Thank to Infiniti for requesting)
