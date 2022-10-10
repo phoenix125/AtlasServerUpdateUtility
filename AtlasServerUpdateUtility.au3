@@ -2919,6 +2919,18 @@ While True ;**** Loop Until Closed ****
 				EndIf
 			EndIf
 		EndIf
+
+		#Region ;**** Hide Server Windows ****
+		If $aServerMinimizedYN = "hide" Then
+			For $i = 0 To ($aServerGridTotal - 1)
+				If ProcessExists($aServerPID[$i]) Then
+					Local $hWnd = _GetServerHWNDFromPID($aServerPID[$i])
+					_WinAPI_ShowWindow($hWnd, @SW_HIDE)
+				EndIf
+			Next
+		EndIf
+		#EndRegion ;**** Hide Server Windows ****
+
 		#Region ;**** Restart Server Every X Days and X Hours & Min****
 ;~ 		If $aCrashPIDDisableYN <> "yes" Then
 		If (($aRestartDaily = "yes") And ((_DateDiff('n', $aTimeCheck2, _NowCalc())) >= 1) And (DailyRestartCheck($aRestartDays, $aRestartHours, $aRestartMin))) Then
@@ -4330,7 +4342,7 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $aSteamCMDPassword = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $iniCheck)
 	Global $aSteamCMDUseAnonForUpdateCheck = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $iniCheck)
 	;Global $aServerSaveDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name ###", $iniCheck)
-	Global $aServerMinimizedYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $iniCheck)
+	Global $aServerMinimizedYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no/hide) ###", $iniCheck)
 	Global $aServerAdminPass = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
 	Global $aServerMaxPlayers = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $iniCheck)
 	Global $aServerReservedSlots = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $iniCheck)
@@ -6411,7 +6423,7 @@ Func UpdateIni($aIniFile)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $aServerReservedSlots)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
 	FileWriteLine($aIniFile, @CRLF)
-	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no/hide) ###", $aServerMinimizedYN)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $aNamingScheme)
 	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $aServerRCONIP)
@@ -13126,7 +13138,7 @@ Func _CheckIfGridAlreadyRunning($i)
 	Local $tProcess = ProcessList($aServerEXE)
 	For $x = 1 To $tProcess[0][0]
 		Local $tTmpPID = Number($tProcess[$x][1])
-		Local $tProcessName = WinGetTitle(_WinGetByPID($tTmpPID))
+		Local $tProcessName = WinGetTitle(_GetServerHWNDFromPID($tTmpPID))
 		Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
 		If $tGrid = $xServerAltSaveDir[$i] Then
 			Local $tProcessFolder = _WinAPI_GetProcessFileName($tTmpPID)
@@ -13376,11 +13388,13 @@ Func PIDReadServer($tFile, $tSplash = 0)
 EndFunc   ;==>PIDReadServer
 
 Func SendCTRLC($tPID)
-	Local $hWnd = _WinGetByPID($tPID, 1)
+	Local $hWnd = _GetServerHWNDFromPID($tPID)
+	If $aServerMinimizedYN = "hide" Then _WinAPI_ShowWindow($hWnd, @SW_SHOWNA) ; Uncertain if needed, but re-show to ensure we can set control focus
 	ControlSend($hWnd, "", "", "^C" & @CR)
 EndFunc   ;==>SendCTRLC
 Func SendAltF4($tPID, $tGrid)
-	Local $hWnd = _WinGetByPID($tPID, 1)
+	Local $hWnd = _GetServerHWNDFromPID($tPID)
+	If $aServerMinimizedYN = "hide" Then _WinAPI_ShowWindow($hWnd, @SW_SHOWNA) ; Uncertain if needed, but re-show to ensure we can set control focus
 	ControlFocus($hWnd, "", "")
 	ControlSend($hWnd, "", "", "!+{F4}")
 	LogWrite("", " [Server] Grid (" & _ServerNamingScheme($tGrid, $aNamingScheme) & ") PID (" & $tPID & "): Sending Alt-F4 to close server.")
@@ -13406,6 +13420,18 @@ Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Retu
 	EndIf
 	Return SetError(1, 0, $aError)
 EndFunc   ;==>_WinGetByPID
+
+Func _GetServerHWNDFromPID($iPID)
+	$aWinList = WinList()
+	For $A = 1 To $aWinList[0][0]
+		Local $hWnd = $aWinList[$A][1]
+		If WinGetProcess($hWnd) = $iPID And _WinAPI_GetClassName($hWnd) = "ConsoleWindowClass" Then
+			Return $hWnd
+		EndIf
+	Next
+
+	Return 0
+EndFunc
 
 Func RespawnDinosCheck($sWDays, $sHours, $sMin)
 	Local $iDay = -1
@@ -14158,7 +14184,7 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	TrayItemSetState($iTrayShowGUI, $TRAY_DISABLE)
 	For $i = 0 To ($aServerGridTotal - 1)
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-			Local $tAtlasProcessName = WinGetTitle(_WinGetByPID($aServerPID[$i]))
+			Local $tAtlasProcessName = WinGetTitle(_GetServerHWNDFromPID($aServerPID[$i]))
 			ExitLoop
 		Else
 			Local $tAtlasProcessName = "ShooterGameServer.exe v0.0 ("
@@ -15120,7 +15146,7 @@ Func GUIUpdateQuick()
 	SetStatusBusy("Server process check in progress...", "Updating: " & $aGameName & " Version")
 	For $i = 0 To ($aServerGridTotal - 1)
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-			Local $tAtlasProcessName = WinGetTitle(_WinGetByPID($aServerPID[$i]))
+			Local $tAtlasProcessName = WinGetTitle(_GetServerHWNDFromPID($aServerPID[$i]))
 			ExitLoop
 		Else
 			Local $tAtlasProcessName = "ShooterGameServer.exe v0.0 ("
