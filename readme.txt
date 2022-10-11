@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.3.9 (2022-09-26)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.4.0 (2022-10-10)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,10 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.4.0 (2022-10-10) Added Show/Hide Atlas servers from the task bar
+- Added: Show/Hide Atlas servers from the task bar (Thanks to @bahstrike for writing the code)
+- Fixed: Line 36822 Error: Occurred when "stuck grids notification" sent.  (Thanks to @Yet for reporting)
+
 v2.3.9 (2022-09-26) Moved force_install_dir ahead of login in Steam updater
 - Fixed: Moved the "force_install_dir" command in SteamCMD ahead of login command. (Thanks to @KingStreetMaccas for reporting)
 - Fixed: CPU Affinity Calculator when >64 cores and 2 CPUs was displaying incorrectly and not functional. (Thanks to @Infiniti for reporting)

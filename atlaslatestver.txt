@@ -1,12 +1,3 @@
-v2.3.9^v2.3.9
-- Fixed: Moved the "force_install_dir" command in SteamCMD ahead of login command.
-- Fixed: CPU Affinity Calculator when >64 cores and 2 CPUs was displaying incorrectly and not functional.
-- Added: Number of CPUs and Cores can now be manually entered in the config under "Advanced" section.
-- Changed: The default RCON port for new installations is now 127.0.0.1.
-
-v2.3.8 Added Vlad's server update fix
-- Fixed: Server update looping and failing. (A big thanks to Vlad for fixing the issue and supporting the community in my absence.)
-- Added: Restart ASUU schedule → located in CONFIG after the Scheduled Restarts section → Labelled "SCHEDULED ASUU RESTARTS". (Thank to Infiniti for requesting)
-- Fixed: Line 46813 Error (Thanks to GvP | Alex for reporting)
-- Fixed: Line 46909 Error (Thanks to @Black Beard and @Johny11 for reporting)
-- Fixed: Line 46813 Error (Thanks to @zuigo for reporting)
+v2.4.0^v2.4.0 Added Show/Hide Atlas servers from the task bar
+- Added: Show/Hide Atlas servers from the task bar
+- Fixed: Line 36822 Error: Occurred when "stuck grids notification" sent

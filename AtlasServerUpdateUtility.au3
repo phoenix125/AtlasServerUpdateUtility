@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.3.9.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.3.9_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.4.0.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.4.0_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.3.9.0
+#AutoIt3Wrapper_Res_Fileversion=2.4.0.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.3.9
+#AutoIt3Wrapper_Res_ProductVersion=v2.4.0
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.3.9" ; (2022-09-26)
-Local $aUtilVerBeta = "v2.3.9" ; (2022-09-26)
-Global $aUtilVerNumber = 53 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.4.0" ; (2022-10-10)
+Local $aUtilVerBeta = "v2.4.0" ; (2022-10-10)
+Global $aUtilVerNumber = 54 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -151,6 +151,7 @@ Global $aUtilVerNumber = 53 ; New number assigned for each config file change. U
 ;51 = v2.3.6/7
 ;52 = v2.3.8
 ;53 = v2.3.9
+;54 = v2.4.0
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
@@ -322,7 +323,6 @@ Global $tLastSteamCMDAppInfoFile = ""
 Global $aRedisCliIP = "127.0.0.1"
 Global $aRedisCliPort = "6379"
 Global $aRedisCliPwd = "foobared"
-
 
 ;Atlas Only
 Global $aServerRedisCmd = "redis-server.exe"
@@ -1548,6 +1548,11 @@ If $aCFGLastVerNumber < 53 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- " & StringUpper($aUtilName) & " ADVANCED OPTIONS --------------- ", "Number of logical CPU Cores (Leave blank to autodetect) ###", $aAdvancedCPULogicalCores)
 	$aIniForceWrite = True
 EndIf
+If $aCFGLastVerNumber < 54 And $aIniExist Then
+	Global $aHideServersYN = "yes"
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $aHideServersYN)
+	$aIniForceWrite = True
+EndIf
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -2403,7 +2408,7 @@ While True ;**** Loop Until Closed ****
 ;~ 			For $i = 0 To ($aServerGridTotal - 1)
 ;~ 			_GUICtrlListView_SetItemState($wMainListViewWindow, $i, 0, $LVIS_FOCUSED)
 ;~ 			Next
-;~ 			GUICtrlSetState﻿($tBlankLabel﻿,$GUI_FOCUS﻿﻿﻿)
+;~ 			GUICtrlSetState?($tBlankLabel?,$GUI_FOCUS???) ; Editted by bahstrike
 			If $vRet[2] > 3 Then
 				GridConfiguratorGUI($vRet[1])
 			EndIf
@@ -2648,7 +2653,8 @@ While True ;**** Loop Until Closed ****
 				Next
 				If $tStuckGrids <> "" Then
 					$tStuckGrids = StringTrimRight($tStuckGrids, 1)
-					WriteRCONStartingStuck($tStuckGrids, $aMinutesBeforeStartingRCONWarning)
+;~ 					WriteRCONStartingStuck($tStuckGrids, $aMinutesBeforeStartingRCONWarning)
+					WriteRCONStartingStuck()
 					LogWrite(" [RCON] NOTICE!!! Grids (" & $tStuckGrids & ") had No RCON response in " & $aMinutesBeforeStartingRCONWarning & " minutes. See !!StuckGridsNotice(Starting...).txt")
 					$tStuckGridNoticeSent = True
 					MsgBox($MB_OK, $aUtilName, "NOTICE!!! Grids (" & $tStuckGrids & ") had No RCON response in " & $aMinutesBeforeStartingRCONWarning & " minutes. " & @CRLF & "See __STUCK_GRIDS_NOTICE__.txt for details.", 60)
@@ -2919,6 +2925,7 @@ While True ;**** Loop Until Closed ****
 				EndIf
 			EndIf
 		EndIf
+
 		#Region ;**** Restart Server Every X Days and X Hours & Min****
 ;~ 		If $aCrashPIDDisableYN <> "yes" Then
 		If (($aRestartDaily = "yes") And ((_DateDiff('n', $aTimeCheck2, _NowCalc())) >= 1) And (DailyRestartCheck($aRestartDays, $aRestartHours, $aRestartMin))) Then
@@ -3934,6 +3941,33 @@ Func GUI_Main_I_IconRefreshPlayers()
 EndFunc   ;==>GUI_Main_I_IconRefreshPlayers
 Func GUI_Main_CB_PollRemoteServers()
 EndFunc   ;==>GUI_Main_CB_PollRemoteServers
+Func GUI_Main_CB_HideServers()
+	If GUICtrlRead($gHideServersCB) = $GUI_CHECKED Then
+		$aHideServersYN = "yes"
+	Else
+		$aHideServersYN = "no"
+	EndIf
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $aHideServersYN)
+	If $aHideServersYN = "yes" Then
+		For $i = 0 To ($aServerGridTotal - 1)
+			If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
+				If ProcessExists($aServerPID[$i]) Then ; Code contribted by bahstrike
+					Local $hWnd = _GetServerHWNDFromPID($aServerPID[$i])
+					_WinAPI_ShowWindow($hWnd, @SW_HIDE)
+				EndIf
+			EndIf
+		Next
+	Else
+		For $i = 0 To ($aServerGridTotal - 1)
+			If $xStartGrid[$i] = "yes" And $xLocalGrid[$i] = "yes" Then
+				If ProcessExists($aServerPID[$i]) Then ; Code contribted by bahstrike
+					Local $hWnd = _GetServerHWNDFromPID($aServerPID[$i])
+					_WinAPI_ShowWindow($hWnd, @SW_SHOWNA)
+				EndIf
+			EndIf
+		Next
+	EndIf
+EndFunc   ;==>GUI_Main_CB_HideServers
 Func GUI_Main_CB_PollOnlinePlayers()
 EndFunc   ;==>GUI_Main_CB_PollOnlinePlayers
 Func GUI_Main_CB_IncludeSteamID()
@@ -4331,6 +4365,7 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Global $aSteamCMDUseAnonForUpdateCheck = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $iniCheck)
 	;Global $aServerSaveDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Gamesave directory name ###", $iniCheck)
 	Global $aServerMinimizedYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $iniCheck)
+	Global $aHideServersYN = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $iniCheck)
 	Global $aServerAdminPass = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Admin password ###", $iniCheck)
 	Global $aServerMaxPlayers = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Max players ###", $iniCheck)
 	Global $aServerReservedSlots = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Reserved slots ###", $iniCheck)
@@ -4704,6 +4739,11 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$aServerMinimizedYN = "yes"
 		$iIniFail += 1
 		$iIniError = $iIniError & "ServerMinimizedYN, "
+	EndIf
+	If $iniCheck = $aHideServersYN Then
+		$aHideServersYN = "no"
+		$iIniFail += 1
+		$iIniError = $iIniError & "HideServersYN, "
 	EndIf
 	;	If $iniCheck = $aServerName Then
 	;		$aServerName = $aGameName
@@ -6412,6 +6452,7 @@ Func UpdateIni($aIniFile)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Map Name (ex. ocean, blackwood) ###", $aServerMapName)
 	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers minimized (for a cleaner look)? (yes/no) ###", $aServerMinimizedYN)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $aHideServersYN)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Grid naming scheme: Use (1) 00 01 (2) A1 A2 (3) 0,0 0,1 ###", $aNamingScheme)
 	FileWriteLine($aIniFile, @CRLF)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "RCON IP (ex. 127.0.0.1 - Leave BLANK for server IP) ###", $aServerRCONIP)
@@ -10464,7 +10505,7 @@ Func _ModUpdateTextReplace($tTxt7)
 					$tReturn7 = StringTrimLeft($tTmp[3], 1) ; Update Notes
 					$tReturn7 = StringLeft($tReturn7, 1750)
 					$tReturn7 = StringReplace($tReturn7, "<br>", @CRLF)
-					$tReturn7 = StringReplace($tReturn7, "<li>", "• ")
+					$tReturn7 = StringReplace($tReturn7, "<li>", "� ")
 					$tReturn7 = StringReplace($tReturn7, "<ul class=", "")
 					$tReturn7 = StringRegExpReplace($tReturn7, "(?U)(<.*>)", "")
 					If $tReturn7 = "" Then $tReturn7 = "[No Update Notes]"
@@ -13126,7 +13167,7 @@ Func _CheckIfGridAlreadyRunning($i)
 	Local $tProcess = ProcessList($aServerEXE)
 	For $x = 1 To $tProcess[0][0]
 		Local $tTmpPID = Number($tProcess[$x][1])
-		Local $tProcessName = WinGetTitle(_WinGetByPID($tTmpPID))
+		Local $tProcessName = WinGetTitle(_GetServerHWNDFromPID($tTmpPID))
 		Local $tGrid = _ArrayToString(_StringBetween($tProcessName, "[AltSaveDir=", "]"))
 		If $tGrid = $xServerAltSaveDir[$i] Then
 			Local $tProcessFolder = _WinAPI_GetProcessFileName($tTmpPID)
@@ -13376,11 +13417,13 @@ Func PIDReadServer($tFile, $tSplash = 0)
 EndFunc   ;==>PIDReadServer
 
 Func SendCTRLC($tPID)
-	Local $hWnd = _WinGetByPID($tPID, 1)
+	Local $hWnd = _GetServerHWNDFromPID($tPID)
+	If $aHideServersYN = "yes" Then _WinAPI_ShowWindow($hWnd, @SW_SHOWNA) ; Uncertain if needed, but re-show to ensure we can set control focus ; Code contribted by bahstrike
 	ControlSend($hWnd, "", "", "^C" & @CR)
 EndFunc   ;==>SendCTRLC
 Func SendAltF4($tPID, $tGrid)
-	Local $hWnd = _WinGetByPID($tPID, 1)
+	Local $hWnd = _GetServerHWNDFromPID($tPID)
+	If $aHideServersYN = "yes" Then _WinAPI_ShowWindow($hWnd, @SW_SHOWNA) ; Uncertain if needed, but re-show to ensure we can set control focus ; Code contribted by bahstrike
 	ControlFocus($hWnd, "", "")
 	ControlSend($hWnd, "", "", "!+{F4}")
 	LogWrite("", " [Server] Grid (" & _ServerNamingScheme($tGrid, $aNamingScheme) & ") PID (" & $tPID & "): Sending Alt-F4 to close server.")
@@ -13406,6 +13449,18 @@ Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Retu
 	EndIf
 	Return SetError(1, 0, $aError)
 EndFunc   ;==>_WinGetByPID
+
+Func _GetServerHWNDFromPID($iPID)
+	$aWinList = WinList()
+	For $A = 1 To $aWinList[0][0]
+		Local $hWnd = $aWinList[$A][1]
+		If WinGetProcess($hWnd) = $iPID And _WinAPI_GetClassName($hWnd) = "ConsoleWindowClass" Then
+			Return $hWnd
+		EndIf
+	Next
+
+	Return 0
+EndFunc   ;==>_GetServerHWNDFromPID
 
 Func RespawnDinosCheck($sWDays, $sHours, $sMin)
 	Local $iDay = -1
@@ -14158,7 +14213,7 @@ Func ShowMainGUI($tSplash = 0)
 ;~ 	TrayItemSetState($iTrayShowGUI, $TRAY_DISABLE)
 	For $i = 0 To ($aServerGridTotal - 1)
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-			Local $tAtlasProcessName = WinGetTitle(_WinGetByPID($aServerPID[$i]))
+			Local $tAtlasProcessName = WinGetTitle(_GetServerHWNDFromPID($aServerPID[$i]))
 			ExitLoop
 		Else
 			Local $tAtlasProcessName = "ShooterGameServer.exe v0.0 ("
@@ -14760,16 +14815,25 @@ Func ShowMainGUI($tSplash = 0)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	Global $LabelUtilReadyStatus = GUICtrlCreateLabel("Idle", 144, 568, 130, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
-	Global $gPollRemoteServersCB = GUICtrlCreateCheckbox("Poll Remote Grids", 305, 564)
+	Global $gPollRemoteServersCB = GUICtrlCreateCheckbox("Poll Remote Grids", 315, 557)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
-	GUICtrlSetOnEvent($aPollRemoteServersYN, "GUI_Main_CB_PollRemoteServers")
+	GUICtrlSetOnEvent(-1, "GUI_Main_CB_PollRemoteServers")
 	If $aPollRemoteServersYN = "yes" Then
 		GUICtrlSetState($gPollRemoteServersCB, $GUI_CHECKED)
 	Else
 		GUICtrlSetState($gPollRemoteServersCB, $GUI_UNCHECKED)
 	EndIf
-	Global $gPollRemoteServersLabel = GUICtrlCreateLabel("Poll Remote Servers", 320, 568, -1, -1)
+
+	Global $gHideServersCB = GUICtrlCreateCheckbox("Hide Servers", 315, 575)
 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
+	GUICtrlSetOnEvent(-1, "GUI_Main_CB_HideServers")
+	If $aHideServersYN = "yes" Then
+		GUICtrlSetState($gHideServersCB, $GUI_CHECKED)
+	Else
+		GUICtrlSetState($gHideServersCB, $GUI_UNCHECKED)
+	EndIf
+;~ 	Global $gPollRemoteServersLabel = GUICtrlCreateLabel("Poll Remote Servers", 320, 568, -1, -1)
+;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 	Global $LabelTotalPlayers = GUICtrlCreateLabel("Total Players: ", 432, 568, 71, 17)
 	GUICtrlSetResizing(-1, $GUI_DOCKHCENTER + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
 ;~ 	GUICtrlSetResizing(-1, $GUI_DOCKLEFT + $GUI_DOCKBOTTOM + $GUI_DOCKSIZE)
@@ -15120,7 +15184,7 @@ Func GUIUpdateQuick()
 	SetStatusBusy("Server process check in progress...", "Updating: " & $aGameName & " Version")
 	For $i = 0 To ($aServerGridTotal - 1)
 		If ProcessExists($aServerPID[$i]) And $xLocalGrid[$i] = "yes" Then
-			Local $tAtlasProcessName = WinGetTitle(_WinGetByPID($aServerPID[$i]))
+			Local $tAtlasProcessName = WinGetTitle(_GetServerHWNDFromPID($aServerPID[$i]))
 			ExitLoop
 		Else
 			Local $tAtlasProcessName = "ShooterGameServer.exe v0.0 ("
@@ -31901,31 +31965,3 @@ Func _Scrollbars_WM_EXITSIZEMOVE($hWnd, $iMsg, $wParam, $lParam)
 	EndIf
 
 EndFunc   ;==>_Scrollbars_WM_EXITSIZEMOVE
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
