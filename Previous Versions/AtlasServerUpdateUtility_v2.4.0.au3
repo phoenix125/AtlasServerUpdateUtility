@@ -1549,7 +1549,7 @@ If $aCFGLastVerNumber < 53 And $aIniExist Then
 	$aIniForceWrite = True
 EndIf
 If $aCFGLastVerNumber < 54 And $aIniExist Then
-	Global $aHideServersYN = "yes"
+	Global $aHideServersYN = "no"
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $aHideServersYN)
 	$aIniForceWrite = True
 EndIf
