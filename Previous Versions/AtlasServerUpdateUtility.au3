@@ -1,14 +1,14 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Resources\phoenix.ico
-#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.4.0.exe
-#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.4.0_64-bit(x64).exe
+#AutoIt3Wrapper_Outfile=Builds\AtlasServerUpdateUtility_v2.4.1.exe
+#AutoIt3Wrapper_Outfile_x64=Builds\AtlasServerUpdateUtility_v2.4.1_64-bit(x64).exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Comment=By Phoenix125 based on Dateranoth's ConanServerUtility v3.3.0-Beta.3
 #AutoIt3Wrapper_Res_Description=Atlas Dedicated Server Update Utility
-#AutoIt3Wrapper_Res_Fileversion=2.4.0.0
+#AutoIt3Wrapper_Res_Fileversion=2.4.1.0
 #AutoIt3Wrapper_Res_ProductName=AtlasServerUpdateUtility
-#AutoIt3Wrapper_Res_ProductVersion=v2.4.0
+#AutoIt3Wrapper_Res_ProductVersion=v2.4.1
 #AutoIt3Wrapper_Res_CompanyName=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_LegalCopyright=http://www.Phoenix125.com
 #AutoIt3Wrapper_Res_SaveSource=y
@@ -94,9 +94,9 @@ FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFile
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_Blackwood.jpg", $aFolderTemp, 0)
 FileInstall("K:\AutoIT\_MyProgs\AtlasServerUpdateUtility\Resources\AtlasUtilFiles\i_blackwoodlogosm.jpg", $aFolderTemp, 0)
 
-Local $aUtilVerStable = "v2.4.0" ; (2022-10-10)
-Local $aUtilVerBeta = "v2.4.0" ; (2022-10-10)
-Global $aUtilVerNumber = 54 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
+Local $aUtilVerStable = "v2.4.1" ; (2023-02-03)
+Local $aUtilVerBeta = "v2.4.1" ; (2022-02-03)
+Global $aUtilVerNumber = 55 ; New number assigned for each config file change. Used to write temp update script so that users are not forced to update config.
 ; 0 = v1.5.0(beta19/20)
 ; 1 = v1.5.0(beta21/22/23)
 ; 2 = v1.5.0(beta24)
@@ -152,14 +152,14 @@ Global $aUtilVerNumber = 54 ; New number assigned for each config file change. U
 ;52 = v2.3.8
 ;53 = v2.3.9
 ;54 = v2.4.0
+;55 = v2.4.1
 
 Global $aUtilName = "AtlasServerUpdateUtility"
 Global $aServerEXE = "ShooterGameServer.exe"
 Global $aConfigFile = "ServerGrid.json"
-Global $aExperimentalString = "latest_experimental"
-Local $aServerVer = 0
 Global $aDuplicateErrorFile = @ScriptDir & "\!DuplicatePortsIn" & $aConfigFile & ".txt"
 Global $aSteamAppID = "1006030"
+Global $aSteamDBURL = "https://steamdb.info/app/" & $aSteamAppID & "/depots/?branch="
 Global $aSteamDBURLPublic = "https://steamdb.info/app/" & $aSteamAppID & "/depots/?branch=public"
 Global $aSteamDBURLExperimental = "https://steamdb.info/app/" & $aSteamAppID & "/depots/?branch=public"
 Global $aRCONBroadcastCMD = "broadcast"
@@ -427,7 +427,6 @@ $aTelnetCheckYN = "no"
 $aTelnetCheckSec = "300"
 $aTelnetPort = "27520"
 $aTelnetPass = "TeLneT_PaSsWoRd"
-$aServerVer = "0"
 $aServerIP = "127.0.0.1"
 
 #Region ;**** Global Variables ****
@@ -1553,6 +1552,16 @@ If $aCFGLastVerNumber < 54 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Start servers hidden (not in task bar) (for a cleaner look)? (yes/no) ###", $aHideServersYN)
 	$aIniForceWrite = True
 EndIf
+If $aCFGLastVerNumber < 55 And $aIniExist Then
+	Global $aSteamBranch = "public"
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch (ex. publictestrealm - Leave blank for public) ###", $aSteamBranch)
+	Global $aSteamBrancPwd = ""
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch password (if required) ###", $aSteamBrancPwd)
+	Global $aSteamExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", "")
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (inserted before +app_update) ###", $aSteamExtraCMD)
+	$aIniForceWrite = True
+EndIf
+
 If $aCFGLastVerNumber < 100 And $aIniExist Then
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Use redis-cli for improved accuracy of online players? (yes/no) ###", "[Disabled in v2.0.4 until stable]")
 	$aIniForceWrite = True
@@ -4354,12 +4363,13 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	Next
 	;	Global $aServerName = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server name (for announcements and logs only) ###", $iniCheck)
 	Global $aServerDirLocal = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " DIR ###", $iniCheck)
-	;Global $aServerVer = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental) ###", $iniCheck)
 	Global $aServerExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $iniCheck)
 	;	Global $aServerIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server IP ###", $iniCheck)
 	Global $aServerMultiHomeIP = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server multi-home IP (Leave blank to disable) ###", $iniCheck)
 	;	Global $aSteamCMDDir = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $iniCheck)
-	Global $aSteamExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $iniCheck)
+	Global $aSteamExtraCMD = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (inserted before +app_update) ###", $iniCheck)
+	Global $aSteamBranch = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch (ex. publictestrealm - Leave blank for public) ###", $iniCheck)
+	Global $aSteamBrancPwd = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch password (if required) ###", $iniCheck)
 	Global $aSteamCMDLogin = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD login (user name) ###", $iniCheck)
 	Global $aSteamCMDPassword = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $iniCheck)
 	Global $aSteamCMDUseAnonForUpdateCheck = IniRead($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $iniCheck)
@@ -4695,6 +4705,16 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 		$iIniFail += 1
 		$iIniError = $iIniError & "SteamExtraCMD, "
 	EndIf
+	If $iniCheck = $aSteamBranch Then
+		$aSteamBranch = "public"
+		$iIniFail += 1
+		$iIniError = $iIniError & "SteamBranch, "
+	EndIf
+	If $iniCheck = $aSteamBrancPwd Then
+		$aSteamBrancPwd = ""
+		$iIniFail += 1
+		$iIniError = $iIniError & "SteamBrancPassword, "
+	EndIf
 	If $iniCheck = $aSteamCMDLogin Then
 		$aSteamCMDLogin = "anonymous"
 		$iIniFail += 1
@@ -4714,11 +4734,6 @@ Func ReadUini($aIniFile, $sLogFile, $tUseWizard = False)
 	;		$aSteamCMDDir = "D:\Game Servers\" & $aGameName & " Dedicated Server\SteamCMD"
 	;		$iIniFail += 1
 	;		$iIniError = $iIniError & "SteamCMDDir, "
-	;	EndIf
-	;	If $iniCheck = $aServerVer Then
-	;		$aServerVer = "0"
-	;		$iIniFail += 1
-	;	$iIniError = $iIniError & "aServerVer, "
 	;	EndIf
 	;	If $iniCheck = $aServerIP Then
 	;		$aServerIP = "192.168.1.10"
@@ -6434,9 +6449,10 @@ Func UpdateIni($aIniFile)
 	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD DIR ###", $aSteamCMDDir)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames Pattern: (1) for 00,01,10,11 (2) for A1,A2,B1,B2 (3) Custom (Enter below) ###", $aServerAltSaveSelect)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server AltSaveDirectoryNames (Use same order as listed in " & $aConfigFile & ". Comma separated) ###", $aServerAltSaveDir)
-	;	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Version (0-Stable,1-Experimental)", $aServerVer)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", $aGameName & " extra commandline parameters (ex.?serverpve-pve -NoCrashDialog) ###", $aServerExtraCMD)
-	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (inserted before +app_update) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch (ex. publictestrealm - Leave blank for public) ###", $aSteamBranch)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch password (if required) ###", $aSteamBrancPwd)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD login (user name) ###", $aSteamCMDLogin)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD password ###", $aSteamCMDPassword)
 	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD Use anonymous for update check (use if getting errors during update checks) (yes/no) ###", $aSteamCMDUseAnonForUpdateCheck)
@@ -8593,7 +8609,7 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 					_Splash($tTxt)
 				EndIf
 			EndIf
-			Local $aLatestVersion = GetLatestVerSteamDB($aSteamAppID, $aServerVer)
+			Local $aLatestVersion = GetLatestVerSteamDB($aSteamAppID)
 		Else
 			If ($aFirstBoot Or $tAsk) And $tShow Then
 				Local $tTxt = $aStartText & "Acquiring latest buildid from SteamCMD." & @CRLF & "Please wait up to 2 minutes."
@@ -8740,15 +8756,9 @@ Func UpdateCheck($tAsk, $tSplash = 0, $tShow = True)
 EndFunc   ;==>UpdateCheck
 
 ;**** Retreive latest build ID from SteamDB ****
-Func GetLatestVerSteamDB($bSteamAppID, $bServerVer)
+Func GetLatestVerSteamDB($bSteamAppID)
 	Local $aReturn[2] = [False, ""]
-	If $bServerVer = 0 Then
-		Local $aURL = $aSteamDBURLPublic
-		Local $aBranch = "stable"
-	Else
-		Local $aURL = $aSteamDBURLExperimental
-		Local $aBranch = "experimental"
-	EndIf
+	Local $aURL = $aSteamDBURL & $aSteamBranch
 	$aSteamDB1 = _IECreate($aURL, 0, 0)
 	$aSteamDB = _IEDocReadHTML($aSteamDB1)
 	_IEQuit($aSteamDB1)
@@ -8762,7 +8772,7 @@ Func GetLatestVerSteamDB($bSteamAppID, $bServerVer)
 	Else
 		Local $xBuildID = _ArrayToString(_StringBetween($hFileRead1, "buildid:</i> <b>", "</b></li><li><i>timeupdated"))
 		Local $hBuildID = Int($xBuildID)
-		LogWrite("", " [Update] Using SteamDB " & $aBranch & " branch. Latest version: " & $hBuildID)
+		LogWrite("", " [Update] Using SteamDB " & $aSteamBranch & " branch. Latest version: " & $hBuildID)
 	EndIf
 	FileClose($hFileOpen)
 	If $hBuildID < 100000 Then
@@ -8794,81 +8804,58 @@ Func SteamCMDScriptCreate($tType = "app_info_print")
 	If FileExists($tSteamScript) Then FileDelete($tSteamScript)
 	FileWrite($tSteamScript, $tCMDLine)
 EndFunc   ;==>SteamCMDScriptCreate
-Func GetLatestVersion($sCmdDir)
-	$hBuildID = "0"
-	Local $aReturn[2] = [False, ""]
-	DirRemove($sCmdDir & "\appcache", 1)
-	DirRemove($sCmdDir & "\depotcache", 1)
-	If FileExists($tLastSteamCMDAppInfoFile) Then
-		FileDelete($tLastSteamCMDAppInfoFile)
-	EndIf
-	Local $sAppInfoTemp = "app_info_" & StringRegExpReplace(_NowCalc(), "[\\\/\: ]", "_") & ".tmp"
-	If $aSteamCMDUseAnonForUpdateCheck = "yes" Or $aSteamCMDLogin = "anonymous" Then
-		$aSteamUpdateCheck = '"' & @ComSpec & '" /c "' & $sCmdDir & "\steamcmd.exe"" +login anonymous +app_info_update 1 +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +exit > " & $sAppInfoTemp
-	Else
-		$aSteamUpdateCheck = '"' & @ComSpec & '" /c "' & $sCmdDir & "\steamcmd.exe"" +login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & _
-				" +app_info_update 1 +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +app_info_print " & $aSteamAppID & " +exit > " & $sAppInfoTemp
-	EndIf
-	$Timer = TimerInit()
-	; -------------------
-	LogWrite("", " [Update] Getting latest buildID: " & $aSteamUpdateCheck)
-	Local $tPID = Run($aSteamUpdateCheck, $aSteamCMDDir, @SW_MINIMIZE)
-	Do
-		If Not ProcessExists($tPID) Then ExitLoop
-		Sleep(500)
-	Until TimerDiff($Timer) > 20000
-	If ProcessExists($tPID) Then
-		ProcessClose($tPID)
-	EndIf
-	; -------------------
-	Local Const $sFilePath = $sCmdDir & "\" & $sAppInfoTemp
+Func _getHTTPOutput($hURL)
+	Local $sFilePath = $aFolderTemp & "GetHTTP.tmp"
+	Local $tInet = InetGet($hURL, $sFilePath, 1)
+	$tErr = _InetGetErrorText(@error, 3)
+	Sleep(100)
 	Local $hFileOpen = FileOpen($sFilePath, 0)
 	Local $hFileRead1 = FileRead($hFileOpen, 100000000)
-	If $hFileOpen = -1 Then
-		;		$aSteamRunCount = $aSteamRunCount + 1
-		;		If $aSteamRunCount = 3 Then
-		$aReturn[0] = False
-		;		Else
-		;			$aReturn[0] = True
-		LogWrite(" [Update] SteamCMD update check FAILED to create update file. Deleting \SteamCMD\ folder and skipping this update check.")
-		DirRemove($sCmdDir)
-		;		EndIf
-	Else
-		;	Local $aString = _ArrayToString($hFileOpen)
-		If StringInStr($hFileRead1, "buildid") > 0 Then
-			Local $hFileReadArray = _StringBetween($hFileRead1, "branches", "AppID")
-			Local $hFileRead = _ArrayToString($hFileReadArray)
-			If $aServerVer = 0 Then
-				Local $hString1 = _StringBetween($hFileRead, "public", "timeupdated")
-			Else
-				Local $hString1 = _StringBetween($hFileRead, $aExperimentalString, "timeupdated")
-			EndIf
-			Local $hString2 = StringSplit($hString1[0], '"', 2)
-			$hString3 = _ArrayToString($hString2)
-			Local $hString4 = StringRegExpReplace($hString3, "\t", "")
-			Local $hString5 = StringRegExpReplace($hString4, @CR & @LF, ".")
-			Local $hString6 = StringRegExpReplace($hString5, "{", "")
-			Local $hBuildIDArray = _StringBetween($hString6, "buildid||", "|.")
-			Local $hBuildID = _ArrayToString($hBuildIDArray)
-			If $aServerVer = 0 Then
-				LogWrite("", " [Update] Update Check via Stable Branch. Latest version: " & $hBuildID)
-			EndIf
-			If $aServerVer = 1 Then
-				LogWrite("", " [Update] Update Check via Experimental Branch. Latest version: " & $hBuildID)
-			EndIf
-			$tLastSteamCMDAppInfoFile = $sFilePath
-			$aReturn[0] = True
-		Else
-			;			$aSteamRunCount = $aSteamRunCount + 1
-			;			If $aSteamRunCount = 3 Then
-			$aReturn[0] = False
-			;			Else
-			LogWrite(" [Update] SteamCMD update check returned a FAILURE response. Skipping this update check.")
-			;				$aReturn[0] = True
-			;			EndIf
-		EndIf
-	EndIf
 	FileClose($hFileOpen)
+	FileDelete($sFilePath)
+	Return $hFileRead1
+EndFunc   ;==>_getDOSOutput
+Func GetLatestVersion($sCmdDir)
+	Local $hBuildID = "0"
+	Local $aReturn[2] = [False, ""]
+	Local $aSteamUpdateCheck = 'https://api.steamcmd.net/v1/info/' & $aSteamAppID
+	LogWrite("", " [Update] Getting latest buildID: " & $aSteamUpdateCheck)
+	Local $hFileRead1 = _getHTTPOutput($aSteamUpdateCheck)
+	$hFileRead1 = StringReplace($hFileRead1, @CRLF, "")
+	$hFileRead1 = StringReplace($hFileRead1, @TAB, "")
+	$hFileRead1 = StringReplace($hFileRead1, " ", "")
+	If StringInStr($hFileRead1, "buildid") > 0 Then
+		Local $tLoc = StringInStr($hFileRead1, '"Branches"') + 10
+		Local $hString1 = StringTrimLeft($hFileRead1, $tLoc)
+		Local $tTxt = StringReplace($hString1, '{"', '') / 2
+		Local $tCount = @extended - 1
+		Local $hString2 = $hString1
+		For $ti = 0 To $tCount
+			Local $tLoc = StringInStr($hString2, '"')
+			If $tLoc > 1 Then $hString2 = StringTrimLeft($hString2, $tLoc - 1)
+			If StringLeft($hString2, 1) = '"' Then
+				$hString2 = StringTrimLeft($hString2, 1)
+				Local $hBranch = StringLeft($hString2, StringInStr($hString2, '"') - 1)
+				$hString2 = StringTrimLeft($hString2, StringLen($hBranch) + 3)
+				Local $hString3 = StringLeft($hString2, StringInStr($hString2, '"}') + 1)
+				$hString3 = StringTrimLeft($hString3, StringInStr($hString3, '"Buildid":"') + 10)
+				Local $hBuildID1 = StringLeft($hString3, StringInStr($hString3, '"') - 1)
+				$hString2 = StringTrimLeft($hString2, StringInStr($hString2, '"}') + 1)
+				If $tLoc > 1 Then $hString2 = StringTrimLeft($hString2, StringInStr($hString2, '"') - 1)
+				If $hBranch = $aSteamBranch Then
+					$hBuildID = $hBuildID1
+					ExitLoop
+				EndIf
+			EndIf
+		Next
+	EndIf
+	If $hBuildID = 0 Then
+		$aReturn[0] = False
+		LogWrite(" [Update] Update Check via " & $aSteamBranch & " branch returned a FAILURE response. Skipping this update check [" & $hBuildID & "]")
+	Else
+		LogWrite("", " [Update] Update Check via " & $aSteamBranch & " branch. Latest version: " & $hBuildID)
+		$aReturn[0] = True
+	EndIf
 	$aReturn[1] = $hBuildID
 	Return $aReturn
 EndFunc   ;==>GetLatestVersion
@@ -9343,11 +9330,22 @@ EndFunc   ;==>RunExternalScriptBackUp
 Func ExternalScriptExist()
 	Local $sFileExists = FileExists($aBatFolder & "\" & $aBatUpdateGame)
 	If $sFileExists = 0 Then
+		Local $tTxBranch = ""
+		Local $tTxExtraCMD = ""
+		If $aSteamExtraCMD <> "" Then $tTxExtraCMD = $aSteamExtraCMD & " ^" & @CRLF
+		If $aSteamBranch <> "public" Then
+			$tTxBranch &= "-beta " & $aSteamBranch
+			If $aSteamBrancPwd <> "" Then $tTxBranch &= "-betapassword " & $aSteamBrancPwd
+			$tTxBranch &= " ^" & @CRLF
+		EndIf
 		Local $tTxt = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
 				"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 				"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
+				$tTxExtraCMD & _
 				"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
+				$tTxBranch & _
 				"+quit"
+		FileWrite($aBatFolder & "\" & $aBatUpdateGame, $tTxt)
 	EndIf
 	If $aExecuteExternalScript = "yes" Then
 		Local $sFileExists = FileExists($aExternalScriptDir & "\" & $aExternalScriptName)
@@ -10180,7 +10178,7 @@ Func FileExistsFunc($tSplash = 0)
 	If $aUseKeepAliveYN = "yes" Then _DownloadAndExtractFile($aKeepAliveFileName, "http://www.phoenix125.com/share/atlas/" & $aKeepAliveFileZip, "https://github.com/phoenix125/AtlasServerUpdateUtilityKeepAlive/releases/download/LatestVersion/" & $aKeepAliveFileZip, $tSplash)
 	_DownloadAndExtractFile("wget", "http://www.phoenix125.com/share/atlas/wget.zip", "https://github.com/phoenix125/AtlasServerUpdateUtility/releases/download/Latest/wget.zip", $tSplash, $aFolderTemp)
 	_DownloadAndExtractFile("7z", "http://www.phoenix125.com/share/atlas/7z.zip", "https://github.com/phoenix125/AtlasServerUpdateUtility/releases/download/Latest/7z.zip", $tSplash, $aFolderTemp, "7z.dll")
-	_DownloadAndExtractFile("redis-cli", "http://www.phoenix125.com/share/atlas/redis-cli.zip", "https://github.com/phoenix125/AtlasServerUpdateUtility/releases/download/Latest/7z.zip", $tSplash, $aFolderTemp, "7z.dll")
+;~ 	_DownloadAndExtractFile("redis-cli", "http://www.phoenix125.com/share/atlas/redis-cli.zip", "https://github.com/phoenix125/AtlasServerUpdateUtility/releases/download/Latest/7z.zip", $tSplash, $aFolderTemp, "7z.dll")
 EndFunc   ;==>FileExistsFunc
 #EndRegion ;**** Check for Files Exist ****
 
@@ -13495,15 +13493,27 @@ Func BatchFilesCreate($tSplash = 0, $tFolder = "0")
 	If $tSplash <> 0 Then ControlSetText($tSplash, "", "Static1", $aStartText & "Creating backup batch files.")
 ;~ 	DirRemove($tFolder, 1)
 	DirCreate($tFolder)
-	Local $tTxtValY = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
+	Local $tTxBranch = ""
+	Local $tTxExtraCMD = ""
+	If $aSteamExtraCMD <> "" Then $tTxExtraCMD = $aSteamExtraCMD & " ^" & @CRLF
+	If $aSteamBranch <> "public" Then
+		$tTxBranch &= "-beta " & $aSteamBranch
+		If $aSteamBrancPwd <> "" Then $tTxBranch &= "-betapassword " & $aSteamBrancPwd
+		$tTxBranch &= " ^" & @CRLF
+	EndIf
+	Local $tTxtValY = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
+			$tTxExtraCMD & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
+			$tTxBranch & _
 			"+quit"
-	Local $tTxtValN = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
+	Local $tTxtValN = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
+			$tTxExtraCMD & _
 			"+app_update " & $aSteamAppID & " ^" & @CRLF & _
+			$tTxBranch & _
 			"+quit"
 	FileDelete($tFolder & "\Install_Atlas.bat")
 	FileWrite($tFolder & "\Install_Atlas.bat", $tTxtValY)
@@ -13529,10 +13539,27 @@ Func BatchFilesCreate($tSplash = 0, $tFolder = "0")
 EndFunc   ;==>BatchFilesCreate
 
 Func SteamInstallGame($tSplash)
+	Local $tTxBranch = ""
+	Local $tTxExtraCMD = ""
+	If $aSteamExtraCMD <> "" Then $tTxExtraCMD = $aSteamExtraCMD & " ^" & @CRLF
+	If $aSteamBranch <> "public" Then
+		$tTxBranch &= "-beta " & $aSteamBranch
+		If $aSteamBrancPwd <> "" Then $tTxBranch &= "-betapassword " & $aSteamBrancPwd
+		$tTxBranch &= " ^" & @CRLF
+	EndIf
+	Local $tTxt = "start /wait /high """ & $aSteamCMDDir & "\steamcmd.exe ^" & @CRLF & _
+			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
+			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
+			$tTxExtraCMD & _
+			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
+			$tTxBranch & _
+			"+quit"
 	Local $tTxt = "start """ & $aUtilName & """ /wait /high """ & $aSteamCMDDir & "\steamcmd.exe"" ^" & @CRLF & _
 			"+force_install_dir """ & $aServerDirLocal & """ ^" & @CRLF & _
 			"+login " & $aSteamCMDLogin & " " & $aSteamCMDPassword & " ^" & @CRLF & _
+			$tTxExtraCMD & _
 			"+app_update " & $aSteamAppID & " validate ^" & @CRLF & _
+			$tTxBranch & _
 			"+quit"
 	DirCreate($aBatFolder)
 	FileDelete($aBatFolder & "\" & $aBatUpdateGame)
@@ -13562,11 +13589,17 @@ EndFunc   ;==>SteamInstallGame
 Func SteamUpdate($aSteamExtraCMD, $aSteamCMDDir, $tValidateINI, $tSplash = 0)
 	If $tSplash = 0 Then SplashOff()
 	$aSteamUpdateNow = False
-	$aSteamEXE = $aSteamCMDDir & '\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 ' & $aSteamExtraCMD & ' +force_install_dir "' & $aServerDirLocal & '" +login ' & $aSteamCMDLogin & ' ' & $aSteamCMDPassword & ' +app_update ' & $aSteamAppID
-	If ($tValidateINI = "yes") Or ($aUpdateVerify = "yes") Then
-		$aSteamEXE = $aSteamEXE & " validate"
+	Local $tTxBranch = ""
+	Local $tTxExtraCMD = ""
+	If $aSteamExtraCMD <> "" Then $tTxExtraCMD = $aSteamExtraCMD & " ^" & @CRLF
+	If $aSteamBranch <> "public" Then
+		$tTxBranch &= " -beta " & $aSteamBranch
+		If $aSteamBrancPwd <> "" Then $tTxBranch &= " -betapassword " & $aSteamBrancPwd
+		$tTxBranch &= " ^" & @CRLF
 	EndIf
-	$aSteamEXE = $aSteamEXE & " +quit"
+	Local $tTxValidate = ""
+	If ($tValidateINI = "yes") Or ($aUpdateVerify = "yes") Then $tTxValidate = " validate"
+	$aSteamEXE = $aSteamCMDDir & '\steamcmd.exe +@ShutdownOnFailedCommand 1 +@NoPromptForPassword 1 ' & $aSteamExtraCMD & ' +force_install_dir "' & $aServerDirLocal & '" +login ' & $aSteamCMDLogin & ' ' & $aSteamCMDPassword & $tTxExtraCMD & ' +app_update ' & $aSteamAppID & $tTxValidate & $tTxBranch & " +quit"
 	LogWrite(" [Running SteamCMD update]", " [Running SteamCMD update] " & $aSteamEXE)
 	RunWait($aSteamEXE)
 	If $tSplash = 0 Then SplashOff()
@@ -16188,7 +16221,7 @@ Func WizardExisting($wDefaultTabNo = 1)
 		;----------
 		$Tab5 = GUICtrlCreateTabItem("5 Priority Settings")
 		If $wDefaultTabNo = 5 Then GUICtrlSetState(-1, $GUI_SHOW)
-		$Group3 = GUICtrlCreateGroup("Atlas Server", 72, 112, 753, 177)
+		$Group3 = GUICtrlCreateGroup("Atlas Server", 72, 114, 753, 245)
 		$Label14 = GUICtrlCreateLabel("Admin Password", 88, 136, 82, 17, $SS_RIGHT)
 		$Label15 = GUICtrlCreateLabel("Max Players", 352, 136, 61, 17, $SS_RIGHT)
 		$Label16 = GUICtrlCreateLabel("Reserved Slots", 488, 136, 76, 17, $SS_RIGHT)
@@ -16199,20 +16232,26 @@ Func WizardExisting($wDefaultTabNo = 1)
 		Global $W2_T5_I_ReservedSlots = GUICtrlCreateInput($aServerReservedSlots, 568, 136, 25, 21)
 		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_ReservedSlots")
 		$Label17 = GUICtrlCreateLabel("Atlas extra commandline parameters", 136, 184, 173, 17, $SS_RIGHT)
-		$Label18 = GUICtrlCreateLabel("SteamCMD extra commandline parameters", 104, 216, 204, 17, $SS_RIGHT)
+		$Label18 = GUICtrlCreateLabel("SteamCMD extra commandline parameters", 104, 216, 205, 17, $SS_RIGHT)
+		Global $W2_T5_I_SteamCMDExtraCMD = GUICtrlCreateInput($aSteamExtraCMD, 320, 216, 205, 21)
+		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_SteamCMDExtraCMD")
+		$Label34 = GUICtrlCreateLabel("Branch", 264, 251, 48, 17, $SS_RIGHT)
+		Global $W2_T5_I_SteamBranch = GUICtrlCreateInput($aSteamBranch, 320, 249, 369, 21)
+		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_SteamBranch")
+		$Label18SteamBrancPassword = GUICtrlCreateLabel("Password (if needed)", 210, 281, 103, 17, $SS_RIGHT)
+		Global $W2_T5_I_SteamBrancPassword = GUICtrlCreateInput($aSteamBrancPwd, 320, 279, 369, 21)
+		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_SteamBrancPassword")
 		Global $W2_T5_I_AtlasExtraCMD = GUICtrlCreateInput($aServerExtraCMD, 320, 184, 369, 21)
 		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_AtlasExtraCMD")
-		Global $W2_T5_I_SteamCMDExtraCMD = GUICtrlCreateInput($aSteamExtraCMD, 320, 216, 369, 21)
-		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_SteamCMDExtraCMD")
-		$Label19 = GUICtrlCreateLabel("Atlas server and mod update check interval", 96, 248, 209, 17, $SS_RIGHT)
-		Global $W2_T5_I_UpdateInterval = GUICtrlCreateInput($aUpdateCheckInterval, 320, 248, 25, 21)
+		$Label19 = GUICtrlCreateLabel("Atlas server and mod update check interval", 104, 310, 209, 17, $SS_RIGHT)
+		Global $W2_T5_I_UpdateInterval = GUICtrlCreateInput($aUpdateCheckInterval, 320, 308, 25, 21)
 		GUICtrlSetOnEvent(-1, "GUI_W2_T5_I_UpdateInterval")
-		$Label20 = GUICtrlCreateLabel("minutes (05-59)", 352, 248, 76, 17)
+		$Label20 = GUICtrlCreateLabel("minutes (05-59)", 350, 310, 76, 17)
 		GUICtrlCreateGroup("", -99, -99, 1, 1)
 		$Label25 = GUICtrlCreateLabel("Step 6", 36, 49, 51, 24)
 		GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 
-		Global $W2_T4_B_StartWithWindows = GUICtrlCreateCheckbox("Start with Windows", 72, 300, 150, 25)
+		Global $W2_T4_B_StartWithWindows = GUICtrlCreateCheckbox("Start with Windows", 72, 375, 150, 25)
 		GUICtrlSetTip(-1, "Add a batch file to Windows Startup Folder that runs _start_" & $aUtilName & ".bat file")
 		GUICtrlSetOnEvent(-1, "GUI_W2_T4_B_StartWithWindows")
 		If $aStartWithWindowsYN = "yes" Then GUICtrlSetState(-1, $GUI_CHECKED)
@@ -16647,8 +16686,16 @@ Func GUI_W2_T5_I_AtlasExtraCMD()
 EndFunc   ;==>GUI_W2_T5_I_AtlasExtraCMD
 Func GUI_W2_T5_I_SteamCMDExtraCMD()
 	$aSteamExtraCMD = GUICtrlRead($W2_T5_I_SteamCMDExtraCMD)
-	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (inserted before +app_update) ###", $aSteamExtraCMD)
 EndFunc   ;==>GUI_W2_T5_I_SteamCMDExtraCMD
+Func GUI_W2_T5_I_SteamBranch()
+	$aSteamBranch = GUICtrlRead($W2_T5_I_SteamBranch)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch (ex. publictestrealm - Leave blank for public) ###", $aSteamBranch)
+EndFunc   ;==>GUI_W2_T5_I_SteamBranch
+Func GUI_W2_T5_I_SteamBrancPassword()
+	$aSteamBrancPwd = GUICtrlRead($W2_T5_I_SteamBrancPassword)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch password (if required) ###", $aSteamBrancPwd)
+EndFunc   ;==>GUI_W2_T5_I_SteamBrancPassword
 Func GUI_W2_T5_I_UpdateInterval()
 	$aUpdateCheckInterval = GUICtrlRead($W2_T5_I_UpdateInterval)
 	If $aUpdateCheckInterval < 5 Then $aUpdateCheckInterval = 5
@@ -16798,7 +16845,7 @@ Func WizardNew()
 		GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 		$W3_Label2 = GUICtrlCreateLabel("Please select the Atlas Dedicated Server installation folder: ", 126, 106, 358, 20)
 		GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-		Global $W3_I_AtlasDIR = GUICtrlCreateInput("D:\Game Servers\" & $aGameName & " Dedicated Server", 126, 130, 569, 21)
+		Global $W3_I_AtlasDIR = GUICtrlCreateInput($aServerDirLocal, 126, 130, 569, 21)
 		GUICtrlSetOnEvent(-1, "W3_I_AtlasDIR")
 		$W3_Label32 = GUICtrlCreateLabel("Install new Atlas server.", 522, 97, 198, 28)
 		GUICtrlSetFont(-1, 14, 400, 0, "MS Sans Serif")
@@ -16806,10 +16853,18 @@ Func WizardNew()
 		GUICtrlSetOnEvent(-1, "W3_B_SelectFolder")
 		$W3_Label5 = GUICtrlCreateLabel("Step 2", 78, 162, 51, 24)
 		GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
-		$W3_Label8 = GUICtrlCreateLabel("SteamCMD extra commandline parameters", 126, 186, 261, 20, $SS_RIGHT)
+		$W3_Label8 = GUICtrlCreateLabel("SteamCMD extra commandline parameters", 136, 186, 300, 20)
 		GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
-		Global $W3_I_SteamCMDExtraCMD = GUICtrlCreateInput("", 126, 210, 369, 21)
+		Global $W3_I_SteamCMDExtraCMD = GUICtrlCreateInput($aSteamExtraCMD, 126, 210, 300, 21)
 		GUICtrlSetOnEvent(-1, "W3_I_SteamCMDExtraCMD")
+		$W3_Label8 = GUICtrlCreateLabel("Branch", 455, 186, 80, 20) ;kim125er!
+		GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
+		Global $W3_I_SteamBranch = GUICtrlCreateInput($aSteamBranch, 440, 210, 100, 21)
+		GUICtrlSetOnEvent(-1, "W3_I_SteamBranch")
+		$W3_Label8 = GUICtrlCreateLabel("Password (if required)", 570, 186, 135, 20) ;kim125er!
+		GUICtrlSetFont(-1, 10, 400, 0, "MS Sans Serif")
+		Global $W3_I_SteamBrancPassword = GUICtrlCreateInput($aSteamBrancPwd, 560, 210, 150, 21)
+		GUICtrlSetOnEvent(-1, "W3_I_SteamBrancPassword")
 		$W3_Label7 = GUICtrlCreateLabel("Step 3", 78, 242, 51, 24)
 		GUICtrlSetFont(-1, 12, 400, 0, "MS Sans Serif")
 		$W3_Label3 = GUICtrlCreateLabel("Click below to install Atlas Server (using SteamCMD)", 122, 265, 314, 20)
@@ -16878,8 +16933,16 @@ Func W3_B_SelectFolder()
 EndFunc   ;==>W3_B_SelectFolder
 Func W3_I_SteamCMDExtraCMD()
 	$aSteamExtraCMD = GUICtrlRead($W3_I_SteamCMDExtraCMD)
-	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (ex. -latest_experimental) ###", $aSteamExtraCMD)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "SteamCMD extra commandline parameters (inserted before +app_update) ###", $aSteamExtraCMD)
 EndFunc   ;==>W3_I_SteamCMDExtraCMD
+Func W3_I_SteamBranch()
+	$aSteamBranch = GUICtrlRead($W3_I_SteamBranch)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch (ex. publictestrealm - Leave blank for public) ###", $aSteamBranch)
+EndFunc   ;==>W3_I_SteamBranch
+Func W3_I_SteamBrancPassword()
+	$aSteamBrancPwd = GUICtrlRead($W3_I_SteamBrancPassword)
+	IniWrite($aIniFile, " --------------- GAME SERVER CONFIGURATION --------------- ", "Server Branch password (if required) ###", $aSteamBrancPwd)
+EndFunc   ;==>W3_I_SteamBrancPassword
 Func W3_B_InstallServer()
 	$tSplash = _Splash("Downloading and installing " & @CRLF & "SteamCMD and mcrcon.exe (if needed).", 0, 475)
 	FileExistsFunc($tSplash)
@@ -22398,7 +22461,7 @@ Func _ReplaceCommandLine($tGrid, $tCmd, $tAddTF)
 EndFunc   ;==>_ReplaceCommandLine
 Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, $tIgnoreReadOnly = False) ;File, Text to write, Show Splash, IsArray?
 	; Creates backup with timstamp
-	Local $tTxt, $tPos, $tExt, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly, $tBefore, $tDiff = False
+	Local $tTxt, $tPos, $text, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly, $tBefore, $tDiff = False
 	If $tNewTxt <> "" Then
 		If $tIsArrayTF Then
 			Local $tError = _FileReadToArray($tFile, $tBefore, $FRTA_NOCOUNT)
@@ -22424,7 +22487,7 @@ Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, 
 				If StringInStr($tTxt, ".") = 0 Then
 				Else
 					$tNoExt = StringTrimRight($tFile, $tC)
-					$tExt = StringTrimLeft($tTxt, 1)
+					$text = StringTrimLeft($tTxt, 1)
 					ExitLoop
 				EndIf
 			Next
@@ -22463,8 +22526,8 @@ Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, 
 ;~ 					If FileExists($tFile) Then FileCopy($tFile, $tFileSave)
 ;~ 					If Not FileExists($tFile) Then _FileCreate($tFile)
 ;~ 				EndIf
-				LogWrite("", " [FILE] " & $tFileOnly & " updated. Backup created:" & $tFileOnly & "." & $tExt & "_" & $tTime & ".bak")
-				If $tSplashTF Then _Splash($tFileOnly & " updated." & @CRLF & @CRLF & "Backup created:" & @CRLF & $tFileOnly & "." & $tExt & "_" & $tTime & ".bak", 1500)
+				LogWrite("", " [FILE] " & $tFileOnly & " updated. Backup created:" & $tFileOnly & "." & $text & "_" & $tTime & ".bak")
+				If $tSplashTF Then _Splash($tFileOnly & " updated." & @CRLF & @CRLF & "Backup created:" & @CRLF & $tFileOnly & "." & $text & "_" & $tTime & ".bak", 1500)
 			EndIf
 		EndIf
 	Else
@@ -22478,7 +22541,7 @@ Func _BackupFile($tFile, $tNewTxt = "", $tSplashTF = True, $tIsArrayTF = False, 
 EndFunc   ;==>_BackupFile
 Func _ReplaceStringFile($tFile, $tTxtToReplace, $tTxtToReplaceWith, $tParamNum = -1, $tTForNum = "TF", $tSplashTF = True, $trGrid = $tGridActive) ; $tSplashTF = Show Splash screen during _BackupFile function.
 	; Takes $tTxtToReplace (RCON=5710) and changes it to $tTxtToReplaceWith (1234) to be RCON=1234
-	Local $tTxt, $tPos = -1, $tExt, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly
+	Local $tTxt, $tPos = -1, $text, $tNoExt, $tTime, $tFileSave, $tFolderOnly, $tFileOnly
 	Local $xFile, $tXFound = False, $tYFound = False, $tReturn = 0, $tFoundTF = False, $tFoundTFPar = False ; (no error)
 	For $tC = 1 To StringLen($tTxtToReplace)
 		$tTxt = StringRight($tTxtToReplace, $tC)

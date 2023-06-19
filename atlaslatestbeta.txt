@@ -1,3 +1,4 @@
-v2.4.0^v2.4.0 Added Show/Hide Atlas servers from the task bar
-- Added: Show/Hide Atlas servers from the task bar
-- Fixed: Line 36822 Error: Occurred when "stuck grids notification" sent
+v2.4.1^v2.4.1 Added Show/Hide Atlas servers from the task bar
+- Fixed: Atlas update checker.  Due to changes in how Steam reports latest version, I re-wrote the entire update-checker code.  It should be compatible with most any future changes. (Thanks to Infiniti for reporting)
+- Added: User-definable server branch which will allow for beta version downloads. Default branch is public.  (Thanks to Infiniti for requesting)
+- Fixed: ASUU sometimes tried to download redis-cli using 7z.dll, causing error.

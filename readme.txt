@@ -1,5 +1,5 @@
 AtlasServerUpdateUtility - A Utility to Keep Your Atlas Dedicated Server updated (and schedule server restarts, download and install new server files, and more!)
-- Latest version: Stable: AtlasServerUpdateUtility_v2.4.0 (2022-10-10)
+- Latest version: Stable: AtlasServerUpdateUtility_v2.4.0 (2023-06-18)
 - By Phoenix125 | http://www.Phoenix125.com | http://discord.gg/EU7pzPs | kim@kim125.com
 - Based on Dateranoth's ConanExilesServerUtility-3.3.0 | https://gamercide.org/
 
@@ -282,6 +282,13 @@ For update checks:
 ---------
  STABLE VERSION HISTORY  (To download beta version, see LINKS section above)
 ---------
+v2.4.1 (2023-06-18) Added Show/Hide Atlas servers from the task bar
+- Fixed: Atlas update checker.  Due to changes in how Steam reports latest version, I re-wrote the entire update-checker code.  It should be compatible with most any future changes. (Thanks to Infiniti for reporting)
+- Added: User-definable server branch which will allow for beta version downloads. Default branch is public.  (Thanks to Infiniti for requesting)
+- Fixed: ASUU sometimes tried to download redis-cli using 7z.dll, causing error.
+	[ New Config Parameters/Changes ]
+	GAME SERVER CONFIGURATION → Server Branch (ex. publictestrealm) Leave blank for public ###
+
 v2.4.0 (2022-10-10) Added Show/Hide Atlas servers from the task bar
 - Added: Show/Hide Atlas servers from the task bar (Thanks to @bahstrike for writing the code)
 - Fixed: Line 36822 Error: Occurred when "stuck grids notification" sent.  (Thanks to @Yet for reporting)
